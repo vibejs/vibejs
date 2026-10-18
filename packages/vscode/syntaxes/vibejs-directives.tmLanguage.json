@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "fileTypes": [],
+  "injectionSelector": "L:source.vibejs meta.tag -meta.attribute -attribute_value, L:source.vibejs meta.element -meta.attribute",
+  "patterns": [
+    {
+      "include": "source.vibejs#vibejs-directives"
+    }
+  ],
+  "scopeName": "vibejs.directives"
+}

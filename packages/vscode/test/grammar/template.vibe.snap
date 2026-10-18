@@ -1,0 +1,213 @@
+><template>
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^^^^ source.vibejs entity.name.tag.template.html.vibejs
+#         ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>  <section class="todo" id="main">
+#^^ source.vibejs text.html.derivative
+#  ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html punctuation.definition.tag.begin.html
+#   ^^^^^^^ source.vibejs text.html.derivative meta.tag.structure.section.start.html entity.name.tag.html
+#          ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html
+#           ^^^^^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.class.html entity.other.attribute-name.html
+#                ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.class.html punctuation.separator.key-value.html
+#                 ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.class.html string.quoted.double.html punctuation.definition.string.begin.html
+#                  ^^^^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.class.html string.quoted.double.html
+#                      ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.class.html string.quoted.double.html punctuation.definition.string.end.html
+#                       ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html
+#                        ^^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.id.html entity.other.attribute-name.html
+#                          ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.id.html punctuation.separator.key-value.html
+#                           ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.id.html string.quoted.double.html punctuation.definition.string.begin.html
+#                            ^^^^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.id.html string.quoted.double.html
+#                                ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html meta.attribute.id.html string.quoted.double.html punctuation.definition.string.end.html
+#                                 ^ source.vibejs text.html.derivative meta.tag.structure.section.start.html punctuation.definition.tag.end.html
+>    <h1>{{ props.title.toUpperCase() }}</h1>
+#^^^^ source.vibejs text.html.derivative
+#    ^ source.vibejs text.html.derivative meta.tag.structure.h1.start.html punctuation.definition.tag.begin.html
+#     ^^ source.vibejs text.html.derivative meta.tag.structure.h1.start.html entity.name.tag.html
+#       ^ source.vibejs text.html.derivative meta.tag.structure.h1.start.html punctuation.definition.tag.end.html
+#        ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.begin.html.vibejs
+#          ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#           ^^^^^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.function-call.ts variable.other.object.ts
+#                ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.function-call.ts punctuation.accessor.ts
+#                 ^^^^^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.function-call.ts support.variable.property.dom.ts
+#                      ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.function-call.ts punctuation.accessor.ts
+#                       ^^^^^^^^^^^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.function-call.ts support.function.ts
+#                                  ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.brace.round.ts
+#                                   ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs meta.brace.round.ts
+#                                    ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                     ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.end.html.vibejs
+#                                       ^^ source.vibejs text.html.derivative meta.tag.structure.h1.end.html punctuation.definition.tag.begin.html
+#                                         ^^ source.vibejs text.html.derivative meta.tag.structure.h1.end.html entity.name.tag.html
+#                                           ^ source.vibejs text.html.derivative meta.tag.structure.h1.end.html punctuation.definition.tag.end.html
+>    <p v-if="count > 0">{{ count }} items</p>
+#^^^^ source.vibejs text.html.derivative
+#    ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html punctuation.definition.tag.begin.html
+#     ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html entity.name.tag.html
+#      ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html
+#       ^^^^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs keyword.control.conditional.vibejs
+#           ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs punctuation.separator.key-value.html.vibejs
+#            ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs punctuation.definition.string.begin.html.vibejs
+#             ^^^^^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                  ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs
+#                   ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs keyword.operator.relational.ts
+#                    ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs
+#                     ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs constant.numeric.decimal.ts
+#                      ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs punctuation.definition.string.end.html.vibejs
+#                       ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html punctuation.definition.tag.end.html
+#                        ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.begin.html.vibejs
+#                          ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                           ^^^^^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                                ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                 ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.end.html.vibejs
+#                                   ^^^^^^ source.vibejs text.html.derivative
+#                                         ^^ source.vibejs text.html.derivative meta.tag.structure.p.end.html punctuation.definition.tag.begin.html
+#                                           ^ source.vibejs text.html.derivative meta.tag.structure.p.end.html entity.name.tag.html
+#                                            ^ source.vibejs text.html.derivative meta.tag.structure.p.end.html punctuation.definition.tag.end.html
+>    <p v-else>Empty</p>
+#^^^^ source.vibejs text.html.derivative
+#    ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html punctuation.definition.tag.begin.html
+#     ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html entity.name.tag.html
+#      ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html
+#       ^^^^^^ source.vibejs text.html.derivative meta.tag.structure.p.start.html meta.attribute.directive.control.vibejs keyword.control.conditional.vibejs
+#             ^ source.vibejs text.html.derivative meta.tag.structure.p.start.html punctuation.definition.tag.end.html
+#              ^^^^^ source.vibejs text.html.derivative
+#                   ^^ source.vibejs text.html.derivative meta.tag.structure.p.end.html punctuation.definition.tag.begin.html
+#                     ^ source.vibejs text.html.derivative meta.tag.structure.p.end.html entity.name.tag.html
+#                      ^ source.vibejs text.html.derivative meta.tag.structure.p.end.html punctuation.definition.tag.end.html
+>    <ul>
+#^^^^ source.vibejs text.html.derivative
+#    ^ source.vibejs text.html.derivative meta.tag.structure.ul.start.html punctuation.definition.tag.begin.html
+#     ^^ source.vibejs text.html.derivative meta.tag.structure.ul.start.html entity.name.tag.html
+#       ^ source.vibejs text.html.derivative meta.tag.structure.ul.start.html punctuation.definition.tag.end.html
+>      <li v-for="(item, i) in items" :key="item.id">{{ i + 1 }}. {{ item.text }}</li>
+#^^^^^^ source.vibejs text.html.derivative
+#      ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html punctuation.definition.tag.begin.html
+#       ^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html entity.name.tag.html
+#         ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html
+#          ^^^^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs keyword.control.loop.vibejs
+#               ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs punctuation.separator.key-value.html.vibejs
+#                ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs punctuation.definition.string.begin.html.vibejs
+#                 ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs meta.brace.round.ts
+#                  ^^^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                      ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs punctuation.separator.comma.ts
+#                       ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs
+#                        ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                         ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs meta.brace.round.ts
+#                          ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs
+#                           ^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs keyword.operator.expression.in.ts
+#                             ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs
+#                              ^^^^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                                   ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.control.vibejs punctuation.definition.string.end.html.vibejs
+#                                    ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html
+#                                     ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs punctuation.attribute-shorthand.bind.html.vibejs
+#                                      ^^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                                         ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs punctuation.separator.key-value.html.vibejs
+#                                          ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs punctuation.definition.string.begin.html.vibejs
+#                                           ^^^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs source.ts.embedded.html.vibejs variable.other.object.ts
+#                                               ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs source.ts.embedded.html.vibejs punctuation.accessor.ts
+#                                                ^^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs source.ts.embedded.html.vibejs support.variable.property.dom.ts
+#                                                  ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html meta.attribute.directive.vibejs punctuation.definition.string.end.html.vibejs
+#                                                   ^ source.vibejs text.html.derivative meta.tag.structure.li.start.html punctuation.definition.tag.end.html
+#                                                    ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.begin.html.vibejs
+#                                                      ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                                       ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                                                        ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                                         ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs keyword.operator.arithmetic.ts
+#                                                          ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                                           ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs constant.numeric.decimal.ts
+#                                                            ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                                             ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.end.html.vibejs
+#                                                               ^^ source.vibejs text.html.derivative
+#                                                                 ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.begin.html.vibejs
+#                                                                   ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                                                    ^^^^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs variable.other.object.ts
+#                                                                        ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs punctuation.accessor.ts
+#                                                                         ^^^^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs support.variable.property.dom.ts
+#                                                                             ^ source.vibejs text.html.derivative expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                                                              ^^ source.vibejs text.html.derivative expression.embedded.vibejs punctuation.definition.interpolation.end.html.vibejs
+#                                                                                ^^ source.vibejs text.html.derivative meta.tag.structure.li.end.html punctuation.definition.tag.begin.html
+#                                                                                  ^^ source.vibejs text.html.derivative meta.tag.structure.li.end.html entity.name.tag.html
+#                                                                                    ^ source.vibejs text.html.derivative meta.tag.structure.li.end.html punctuation.definition.tag.end.html
+>    </ul>
+#^^^^ source.vibejs text.html.derivative
+#    ^^ source.vibejs text.html.derivative meta.tag.structure.ul.end.html punctuation.definition.tag.begin.html
+#      ^^ source.vibejs text.html.derivative meta.tag.structure.ul.end.html entity.name.tag.html
+#        ^ source.vibejs text.html.derivative meta.tag.structure.ul.end.html punctuation.definition.tag.end.html
+>    <Item :label="props.title" @click="increment(2)" @update:done.once="onDone">
+#^^^^ source.vibejs text.html.derivative
+#    ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs punctuation.definition.tag.begin.html.vibejs
+#     ^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs entity.name.tag.html.vibejs
+#         ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs
+#          ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.attribute-shorthand.bind.html.vibejs
+#           ^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.separator.key-value.html.vibejs
+#                 ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.definition.string.begin.html.vibejs
+#                  ^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs variable.other.object.ts
+#                       ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs punctuation.accessor.ts
+#                        ^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs support.variable.property.dom.ts
+#                             ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.definition.string.end.html.vibejs
+#                              ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs
+#                               ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.attribute-shorthand.event.html.vibejs
+#                                ^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                                     ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.separator.key-value.html.vibejs
+#                                      ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.definition.string.begin.html.vibejs
+#                                       ^^^^^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.function-call.ts entity.name.function.ts
+#                                                ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.brace.round.ts
+#                                                 ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs constant.numeric.decimal.ts
+#                                                  ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.brace.round.ts
+#                                                   ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.definition.string.end.html.vibejs
+#                                                    ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs
+#                                                     ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.attribute-shorthand.event.html.vibejs
+#                                                      ^^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                                                            ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.attribute-shorthand.bind.html.vibejs
+#                                                             ^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                                                                 ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.attribute-shorthand.bind.html.vibejs
+#                                                                  ^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                                                                      ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.separator.key-value.html.vibejs
+#                                                                       ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.definition.string.begin.html.vibejs
+#                                                                        ^^^^^^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                                                                              ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs meta.attribute.directive.vibejs punctuation.definition.string.end.html.vibejs
+#                                                                               ^ source.vibejs text.html.derivative meta.tag.structure.Item.start.html.vibejs punctuation.definition.tag.end.html.vibejs
+>      <template #footer="{ total }">{{ total }}</template>
+#^^^^^^ source.vibejs text.html.derivative
+#      ^ source.vibejs text.html.derivative meta.template-tag.start punctuation.definition.tag.begin.html.vibejs
+#       ^^^^^^^^ source.vibejs text.html.derivative meta.template-tag.start entity.name.tag.template.html.vibejs
+#               ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff
+#                ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs punctuation.attribute-shorthand.slot.html.vibejs
+#                 ^^^^^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs entity.other.attribute-name.html.vibejs
+#                       ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs punctuation.separator.key-value.html.vibejs
+#                        ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs punctuation.definition.string.begin.html.vibejs
+#                         ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.objectliteral.ts punctuation.definition.block.ts
+#                          ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.objectliteral.ts
+#                           ^^^^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.objectliteral.ts meta.object.member.ts variable.other.readwrite.ts
+#                                ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.objectliteral.ts meta.object.member.ts
+#                                 ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs source.ts.embedded.html.vibejs meta.objectliteral.ts punctuation.definition.block.ts
+#                                  ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff meta.attribute.directive.vibejs punctuation.definition.string.end.html.vibejs
+#                                   ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+#                                    ^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end expression.embedded.vibejs punctuation.definition.interpolation.begin.html.vibejs
+#                                      ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                       ^^^^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end expression.embedded.vibejs source.ts.embedded.html.vibejs variable.other.readwrite.ts
+#                                            ^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end expression.embedded.vibejs source.ts.embedded.html.vibejs
+#                                             ^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end expression.embedded.vibejs punctuation.definition.interpolation.end.html.vibejs
+#                                               ^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end punctuation.definition.tag.begin.html.vibejs
+#                                                 ^^^^^^^^ source.vibejs text.html.derivative meta.template-tag.start meta.template-tag.end entity.name.tag.template.html.vibejs
+#                                                         ^ source.vibejs text.html.derivative meta.template-tag.start punctuation.definition.tag.end.html.vibejs
+>    </Item>
+#^^^^ source.vibejs text.html.derivative
+#    ^^ source.vibejs text.html.derivative meta.tag.other.Item.html punctuation.definition.tag.begin.html
+#      ^^^^ source.vibejs text.html.derivative meta.tag.other.Item.html entity.name.tag.html invalid.illegal.unrecognized-tag.html
+#          ^ source.vibejs text.html.derivative meta.tag.other.Item.html punctuation.definition.tag.end.html
+>    <!-- a comment {{ not interpolated }} -->
+#^^^^ source.vibejs text.html.derivative
+#    ^^^^ source.vibejs text.html.derivative comment.block.html punctuation.definition.comment.html
+#        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.vibejs text.html.derivative comment.block.html
+#                                          ^^^ source.vibejs text.html.derivative comment.block.html punctuation.definition.comment.html
+>  </section>
+#^^ source.vibejs text.html.derivative
+#  ^^ source.vibejs text.html.derivative meta.tag.structure.section.end.html punctuation.definition.tag.begin.html
+#    ^^^^^^^ source.vibejs text.html.derivative meta.tag.structure.section.end.html entity.name.tag.html
+#           ^ source.vibejs text.html.derivative meta.tag.structure.section.end.html punctuation.definition.tag.end.html
+></template>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^^^^ source.vibejs entity.name.tag.template.html.vibejs
+#          ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>

@@ -422,6 +422,9 @@ export function main(root: string): number {
     }
     for (const match of text.matchAll(EMAIL)) {
       if (ALLOWED_EMAIL.test(match[0])) continue;
+      // The lockfile copies registry deprecation notices verbatim, maintainer addresses included.
+      const line = text.slice(text.lastIndexOf('\n', match.index) + 1, match.index);
+      if (file === 'pnpm-lock.yaml' && /^\s+deprecated: /.test(line)) continue;
       report(file, text, match.index, 'email', 'no email addresses; link a GitHub page instead');
     }
     if (POSITIONING_FILES.test(file)) continue;

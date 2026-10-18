@@ -7,7 +7,8 @@ minimumReleaseAgeExclude:
   - '@vibejs-org/*'
   - create-vibejs
 trustPolicy: no-downgrade
-allowBuilds: {}
+allowBuilds:
+  '@vscode/vsce-sign': false
 
 catalog:
   typescript: 7.0.2
@@ -31,6 +32,9 @@ catalog:
   zod: 4.6.7
   valibot: 1.5.0
   arktype: 2.2.8
+  '@types/vscode': 1.125.0
+  '@vscode/vsce': 4.0.0
+  vscode-tmgrammar-test: 0.1.3
 
 catalogs:
   ts-next:
