@@ -1,0 +1,13 @@
+<style scoped>
+.todo { color: red; }
+</style>
+
+<style lang="scss">
+$gap: 4px;
+.todo { margin: $gap; }
+</style>
+
+<style lang="less">
+@gap: 4px;
+.todo { margin: @gap; }
+</style>

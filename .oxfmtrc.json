@@ -1,5 +1,5 @@
 {
   "singleQuote": true,
   "printWidth": 100,
-  "ignorePatterns": ["CONTRACTS.md", "**/*.gen.ts"]
+  "ignorePatterns": ["CONTRACTS.md", "**/*.gen.ts", "packages/vscode/test/grammars/**"]
 }

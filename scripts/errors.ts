@@ -57,6 +57,7 @@ export interface Entry {
 interface Manifest {
   version?: string;
   dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   bin?: Record<string, string>;
 }
 
@@ -282,9 +283,10 @@ export function main(root: string, argv: string[]): number {
   ]);
   for (const pkg of dirs) {
     const entries = byPackage.get(pkg);
+    // A devDependency counts too: the private VS Code extension bundles @vibejs-org/errors.
+    const deps = (m: Manifest) => ({ ...m.dependencies, ...m.devDependencies });
     const typed =
-      entries !== undefined &&
-      '@vibejs-org/errors' in (manifest(join(packagesDir, pkg)).dependencies ?? {});
+      entries !== undefined && '@vibejs-org/errors' in deps(manifest(join(packagesDir, pkg)));
     committed.set(
       join(packagesDir, pkg, 'src/errors.gen.ts'),
       typed ? errorsGen(pkg, entries) : null,

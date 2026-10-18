@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "fileTypes": [],
+  "injectionSelector": "L:source.vibejs text.html.derivative -comment.block",
+  "patterns": [
+    {
+      "include": "source.vibejs#vibejs-interpolations"
+    }
+  ],
+  "scopeName": "vibejs.interpolations"
+}

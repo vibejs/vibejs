@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "pretypecheck": "pnpm errors",
-    "typecheck": "tsc -b",
-    "lint": "tsc -b && oxlint --type-aware --deny-warnings && node scripts/lint-repo.ts && knip",
+    "typecheck": "tsc -b && pnpm --dir packages/vscode typecheck",
+    "lint": "tsc -b && pnpm --dir packages/vscode typecheck && oxlint --type-aware --deny-warnings && node scripts/lint-repo.ts && knip",
     "fmt": "oxfmt",
     "pretest": "pnpm errors",
     "test": "vitest --project node --project dom",
@@ -20,6 +20,7 @@
     "@arethetypeswrong/core": "catalog:",
     "@changesets/cli": "catalog:",
     "@types/node": "catalog:",
+    "@types/vscode": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
