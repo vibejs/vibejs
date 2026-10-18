@@ -52,7 +52,8 @@ export interface RouteSpec<
   readonly def: D;
 }
 
-const SEGMENT = /^(?:[\w.~-]+|:[A-Za-z_]\w*)$/;
+// `.` and `..` are excluded: URL parsing removes them, so no request could reach the route.
+const SEGMENT = /^(?!\.\.?$)(?:[\w.~-]+|:[A-Za-z_]\w*)$/;
 const specs = new WeakSet();
 
 /** Throws VIBE9001 unless `path` follows the path grammar, and returns its param names. */
@@ -78,54 +79,59 @@ function route(method: HttpMethod, path: string, def: RouteDef = {}): RouteSpec 
   return spec;
 }
 
-// Each builder has an overload without a def, so that a call's context (such as the routes record
+// A def with a key that RouteDef does not declare is an error, so a typo is never ignored.
+type Def<P extends string, D> = RouteDef<P> & {
+  readonly [K in Exclude<keyof D, keyof RouteDef>]: never;
+};
+
+// Each builder has an overload without a def (or with `undefined`), so that a call's context (such as the routes record
 // of defineContract) cannot infer the def type: a route without a def has the def type `{}`.
 
 /** Declares a GET route. */
-export function get<const P extends string>(path: P): RouteSpec<'GET', P, {}>;
-export function get<const P extends string, const D extends RouteDef<P>>(
+export function get<const P extends string>(path: P, def?: undefined): RouteSpec<'GET', P, {}>;
+export function get<const P extends string, const D extends Def<P, D>>(
   path: P,
-  def: D,
+  def: D | undefined,
 ): RouteSpec<'GET', P, D>;
 export function get(path: string, def?: RouteDef): RouteSpec {
   return route('GET', path, def);
 }
 
 /** Declares a POST route. */
-export function post<const P extends string>(path: P): RouteSpec<'POST', P, {}>;
-export function post<const P extends string, const D extends RouteDef<P>>(
+export function post<const P extends string>(path: P, def?: undefined): RouteSpec<'POST', P, {}>;
+export function post<const P extends string, const D extends Def<P, D>>(
   path: P,
-  def: D,
+  def: D | undefined,
 ): RouteSpec<'POST', P, D>;
 export function post(path: string, def?: RouteDef): RouteSpec {
   return route('POST', path, def);
 }
 
 /** Declares a PUT route. */
-export function put<const P extends string>(path: P): RouteSpec<'PUT', P, {}>;
-export function put<const P extends string, const D extends RouteDef<P>>(
+export function put<const P extends string>(path: P, def?: undefined): RouteSpec<'PUT', P, {}>;
+export function put<const P extends string, const D extends Def<P, D>>(
   path: P,
-  def: D,
+  def: D | undefined,
 ): RouteSpec<'PUT', P, D>;
 export function put(path: string, def?: RouteDef): RouteSpec {
   return route('PUT', path, def);
 }
 
 /** Declares a PATCH route. */
-export function patch<const P extends string>(path: P): RouteSpec<'PATCH', P, {}>;
-export function patch<const P extends string, const D extends RouteDef<P>>(
+export function patch<const P extends string>(path: P, def?: undefined): RouteSpec<'PATCH', P, {}>;
+export function patch<const P extends string, const D extends Def<P, D>>(
   path: P,
-  def: D,
+  def: D | undefined,
 ): RouteSpec<'PATCH', P, D>;
 export function patch(path: string, def?: RouteDef): RouteSpec {
   return route('PATCH', path, def);
 }
 
 /** Declares a DELETE route. */
-export function del<const P extends string>(path: P): RouteSpec<'DELETE', P, {}>;
-export function del<const P extends string, const D extends RouteDef<P>>(
+export function del<const P extends string>(path: P, def?: undefined): RouteSpec<'DELETE', P, {}>;
+export function del<const P extends string, const D extends Def<P, D>>(
   path: P,
-  def: D,
+  def: D | undefined,
 ): RouteSpec<'DELETE', P, D>;
 export function del(path: string, def?: RouteDef): RouteSpec {
   return route('DELETE', path, def);

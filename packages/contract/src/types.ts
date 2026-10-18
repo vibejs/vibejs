@@ -1,13 +1,15 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { Route } from './contract.ts';
-import type { ParamKeys } from './route.ts';
+import type { ParamKeys, RawBody } from './route.ts';
 
-type Declared<R extends Route, K extends string> = R['def'] extends { readonly [P in K]: infer S }
-  ? S
-  : never;
+// The value type of a def key, `undefined` when the def lacks it. A key can also be optional (an
+// annotated `RouteDef`) or `undefined` (a conditional def), so the helpers match on the value.
+type Declared<R extends Route, K extends string> = K extends keyof R['def']
+  ? R['def'][K]
+  : undefined;
 type Flat<T> = { [K in keyof T]: T[K] };
 type Out<S> = S extends StandardSchemaV1 ? StandardSchemaV1.InferOutput<S> : never;
-type ParamsOut<R extends Route> = [Declared<R, 'params'>] extends [never]
+type ParamsOut<R extends Route> = [Out<Declared<R, 'params'>>] extends [never]
   ? {}
   : Out<Declared<R, 'params'>>;
 
@@ -22,23 +24,24 @@ export type RouteHeaders<R extends Route> = Out<Declared<R, 'headers'>>;
 /** The body schema's output; `never` when the route declares none. */
 export type RouteBody<R extends Route> = Out<Declared<R, 'body'>>;
 /** The declared error codes; `never` when the route declares none. */
-export type RouteErrorCode<R extends Route> = R['def'] extends { readonly errors: infer E }
-  ? keyof E & string
-  : never;
+export type RouteErrorCode<R extends Route> = Codes<Declared<R, 'errors'>>;
+type Codes<E> = E extends object ? keyof E & string : never;
 
 /** What a handler returns: the response schema's input, a raw body, or nothing. */
-export type RouteReply<R extends Route> = R['def'] extends { readonly response: infer S }
-  ? S extends StandardSchemaV1
-    ? StandardSchemaV1.InferInput<S>
-    : Response | BodyInit
-  : void;
+export type RouteReply<R extends Route> = Reply<Declared<R, 'response'>>;
+type Reply<S> = S extends StandardSchemaV1
+  ? StandardSchemaV1.InferInput<S>
+  : S extends RawBody
+    ? Response | BodyInit
+    : void;
 
 /** What a client receives: the response schema's output as JSON, the raw `Response`, or nothing. */
-export type RouteData<R extends Route> = R['def'] extends { readonly response: infer S }
-  ? S extends StandardSchemaV1
-    ? Jsonify<StandardSchemaV1.InferOutput<S>>
-    : Response
-  : undefined;
+export type RouteData<R extends Route> = Data<Declared<R, 'response'>>;
+type Data<S> = S extends StandardSchemaV1
+  ? Jsonify<StandardSchemaV1.InferOutput<S>>
+  : S extends RawBody
+    ? Response
+    : undefined;
 
 type Dropped = undefined | symbol | ((...args: never[]) => unknown);
 type JsonItem<V> = V extends Dropped ? null : Jsonify<V>;
@@ -64,9 +67,11 @@ export type Jsonify<T> = unknown extends T
       ? never
       : T extends string | number | boolean | null
         ? T
-        : T extends readonly unknown[]
-          ? { [K in keyof T]: JsonItem<T[K]> }
-          : Flat<JsonObject<T>>;
+        : T extends ReadonlyMap<unknown, unknown> | ReadonlySet<unknown>
+          ? {}
+          : T extends readonly unknown[]
+            ? { [K in keyof T]: JsonItem<T[K]> }
+            : Flat<JsonObject<T>>;
 
 /** The `code` of the problems the server itself sends. */
 export type BuiltinErrorCode =

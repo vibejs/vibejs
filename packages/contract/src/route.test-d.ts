@@ -30,3 +30,9 @@ get('/users', { status: 204 });
 get('/users', { errors: { NOT_FOUND: '404' } });
 // @ts-expect-error a response is a schema or raw()
 get('/users', { response: 'text/plain' });
+// An explicit undefined def is a route without a def.
+expectTypeOf(get('/users', undefined)).toEqualTypeOf<RouteSpec<'GET', '/users', {}>>();
+// @ts-expect-error respnse is not a def key
+get('/users', { summary: 'x', respnse: schema<{ a: 1 }>() });
+declare const maybe: { readonly summary: 'x' } | undefined;
+expectTypeOf(get('/users', maybe).def).toEqualTypeOf<{ readonly summary: 'x' }>();

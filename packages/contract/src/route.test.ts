@@ -25,9 +25,12 @@ describe('route builders', () => {
     expect(specs[1].def).toEqual({});
   });
 
-  it.each(['/', '/users', '/users/:id', '/a.b~c-d/:x_1', '/:_a/b/:C9'])('accepts %j', (path) => {
-    expect(get(path).path).toBe(path);
-  });
+  it.each(['/', '/users', '/users/:id', '/a.b~c-d/:x_1', '/:_a/b/:C9', '/.well-known/...'])(
+    'accepts %j',
+    (path) => {
+      expect(get(path).path).toBe(path);
+    },
+  );
 
   it.each([
     ['', ''],
@@ -40,6 +43,8 @@ describe('route builders', () => {
     ['/:', ':'],
     ['/users/*', '*'],
     ['/users/:id?', ':id?'],
+    ['/..', '..'],
+    ['/users/./x', '.'],
   ])('rejects %j with VIBE9001', (path, segment) => {
     expect(() => get(path)).toThrow(
       expect.objectContaining({ code: 'VIBE9001', args: { path, segment }, fixes: nonEmpty }),

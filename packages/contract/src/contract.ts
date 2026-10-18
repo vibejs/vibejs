@@ -33,25 +33,32 @@ export function defineContract(
   routes: Record<string, unknown>,
 ): Readonly<Record<string, Route>> {
   checkPath(prefix, true);
-  const contract: Record<string, Route> = {};
-  for (const [name, spec] of Object.entries(routes)) {
-    if (!isRouteSpec(spec)) throw vibeError('VIBE9003', { key: name });
-    const path = spec.path === '/' ? prefix : prefix + spec.path;
-    const params = checkPath(path, false);
-    const param = params.find((p, i) => params.indexOf(p) !== i);
-    if (param !== undefined) throw vibeError('VIBE9002', { path, param });
-    contract[name] = Object.freeze({
-      method: spec.method,
-      path,
-      def: spec.def,
-      name,
-      [BRAND]: true,
-    });
-  }
+  // fromEntries defines own properties, so a `__proto__` key stays a route.
+  const contract = Object.fromEntries(
+    Object.entries(routes).map(([name, spec]) => {
+      if (!isRouteSpec(spec)) throw vibeError('VIBE9003', { key: name });
+      const path = spec.path === '/' ? prefix : prefix + spec.path;
+      const params = checkPath(path, false);
+      const param = params.find((p, i) => params.indexOf(p) !== i);
+      if (param !== undefined) throw vibeError('VIBE9002', { path, param });
+      const route: Route = Object.freeze({
+        method: spec.method,
+        path,
+        def: spec.def,
+        name,
+        [BRAND]: true,
+      });
+      return [name, route];
+    }),
+  );
   return Object.freeze(contract);
 }
 
 /** True for a route bound by `defineContract`, including one from another copy of this package. */
 export function isRoute(value: unknown): value is Route {
-  return typeof value === 'object' && value !== null && BRAND in value;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.getOwnPropertyDescriptor(value, BRAND)?.value === true
+  );
 }

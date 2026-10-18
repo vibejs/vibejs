@@ -4,7 +4,7 @@
 
 > The path "{path}" has the invalid segment "{segment}".
 
-A route path is `/` or one or more segments, each starting with `/`. A static segment uses only letters, digits and `.`, `_`, `~`, `-`; a param segment is `:` followed by a name that starts with a letter or `_`. A contract prefix follows the same rules, is never `/` and has no trailing slash. Wildcard, optional and pattern segments are not supported.
+A route path is `/` or one or more segments, each starting with `/`. A static segment uses only letters, digits and `.`, `_`, `~`, `-`, and is never `.` or `..`, because URL parsing removes those; a param segment is `:` followed by a name that starts with a letter or `_`. A contract prefix follows the same rules, is never `/` and has no trailing slash. Wildcard, optional and pattern segments are not supported.
 
 ### Fix
 

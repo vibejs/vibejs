@@ -30,6 +30,13 @@ describe('defineContract', () => {
     expect(a.one).not.toBe(spec);
   });
 
+  it('keeps a __proto__ key as an own route', () => {
+    // A computed key defines an own `__proto__` property instead of setting the prototype.
+    const contract = defineContract('/a', { ['__proto__']: get('/x') });
+    expect(Object.keys(contract)).toEqual(['__proto__']);
+    expect(Object.getPrototypeOf(contract)).toBe(Object.prototype);
+  });
+
   it.each([
     ['/', ''],
     ['/users/', ''],
@@ -72,9 +79,12 @@ describe('defineContract', () => {
 describe('isRoute', () => {
   it('is true only for bound routes', () => {
     const spec = get('/');
-    expect(isRoute(defineContract('/a', { spec }).spec)).toBe(true);
+    const bound = defineContract('/a', { spec }).spec;
+    expect(isRoute(bound)).toBe(true);
     for (const value of [
       spec,
+      Object.create(bound),
+      { [Symbol.for('vibejs.route')]: false },
       { method: 'GET', path: '/a', def: {}, name: 'x' },
       null,
       undefined,
