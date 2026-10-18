@@ -10,7 +10,7 @@ trustPolicy: no-downgrade
 allowBuilds: {}
 
 catalog:
-  typescript: 7.0.2
+  typescript: 7.1.0-dev.20261015.1
   vite: 8.3.4
   vitest: 5.0.5
   '@vitest/coverage-v8': 5.0.5
@@ -24,7 +24,7 @@ catalog:
   oxlint-tsgolint: 7.0.2004
   oxfmt: 0.73.0
   '@changesets/cli': 3.0.3
-  '@types/node': 24.19.2
+  '@types/node': 26.6.5
   oxc-parser: ^0.154.0
   knip: 6.41.0
 
