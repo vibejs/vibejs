@@ -13,5 +13,11 @@ updates:
     groups:
       npm:
         patterns: ['*']
+    ignore:
+      # TypeScript is pinned by hand: one stable pin plus the nightly track (ADR 0004).
+      - dependency-name: typescript
+      # Node types follow the lowest supported Node major.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     cooldown:
       default-days: 3
