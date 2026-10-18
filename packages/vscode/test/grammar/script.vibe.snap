@@ -129,3 +129,49 @@
 #  ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
 #        ^ source.vibejs punctuation.definition.tag.end.html.vibejs
 >
+><script lang="js">
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#       ^ source.vibejs meta.tag-stuff
+#        ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html entity.other.attribute-name.html
+#            ^ source.vibejs meta.tag-stuff meta.attribute.lang.html punctuation.separator.key-value.html
+#             ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.begin.html
+#              ^^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html
+#                ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.end.html
+#                 ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>const plain = 1
+#^^^^^ source.vibejs source.ts meta.var.expr.ts storage.type.ts
+#     ^ source.vibejs source.ts meta.var.expr.ts
+#      ^^^^^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.definition.variable.ts variable.other.constant.ts
+#           ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts
+#            ^ source.vibejs source.ts meta.var.expr.ts keyword.operator.assignment.ts
+#             ^ source.vibejs source.ts meta.var.expr.ts
+#              ^ source.vibejs source.ts meta.var.expr.ts constant.numeric.decimal.ts
+></script>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#        ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>
+><script lang="css">
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#       ^ source.vibejs meta.tag-stuff
+#        ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html entity.other.attribute-name.html
+#            ^ source.vibejs meta.tag-stuff meta.attribute.lang.html punctuation.separator.key-value.html
+#             ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.begin.html
+#              ^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html
+#                 ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.end.html
+#                  ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>const styled = 2
+#^^^^^ source.vibejs source.ts meta.var.expr.ts storage.type.ts
+#     ^ source.vibejs source.ts meta.var.expr.ts
+#      ^^^^^^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.definition.variable.ts variable.other.constant.ts
+#            ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts
+#             ^ source.vibejs source.ts meta.var.expr.ts keyword.operator.assignment.ts
+#              ^ source.vibejs source.ts meta.var.expr.ts
+#               ^ source.vibejs source.ts meta.var.expr.ts constant.numeric.decimal.ts
+></script>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#        ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>

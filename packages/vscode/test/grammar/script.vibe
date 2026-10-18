@@ -12,3 +12,11 @@ function increment(step = 1): void {
 <script>
 export const name: string = 'Plain'
 </script>
+
+<script lang="js">
+const plain = 1
+</script>
+
+<script lang="css">
+const styled = 2
+</script>
