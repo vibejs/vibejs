@@ -19,5 +19,7 @@ updates:
       # Node types follow the lowest supported Node major.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+      # VS Code types must not exceed the extension's minimum engines.vscode.
+      - dependency-name: '@types/vscode'
     cooldown:
       default-days: 3
