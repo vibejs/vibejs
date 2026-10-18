@@ -5,6 +5,17 @@ const MESSAGES = {
   VIBE5003: ["Cannot assign to the value of a computed ref that was created with a getter only.","Write to the refs that the getter reads instead.","Pass an object with `get` and `set` functions to `computed()` when it must be writable."],
   VIBE5005: ["Cannot run a function in an effect scope that has already been stopped.","Create a new scope with `effectScope()` and run the function in it.","Call `stop()` only after the last `run()` of the scope."],
   VIBE5006: ["{api}() was called with no active effect scope or watcher, so its cleanup will never run.","Call {api}() synchronously inside `effectScope().run()`, a component's setup or a watcher.","Pass `true` as the second argument of {api}() when running without an owner is expected."],
+  VIBE7101: ["The route path {path} is invalid: {reason}.","Give each param its own segment: `/files/:name` instead of `/file.:ext` or `/:a-:b`.","Remove `\\` escapes and any `/` from param regexes, and close every parenthesis.","Check that the param regex compiles with `new RegExp()`.","Start every top-level path with `/`; only child paths are relative."],
+  VIBE7102: ["The route name {name} is used by more than one route.","Rename one of the routes named {name}.","Remove the `name` of a route that is only reached by its path."],
+  VIBE7103: ["{option} in {where} is not supported: {deferral}.","Remove {option} from {where}.","Check the spelling of {option} against the supported keys."],
+  VIBE7104: ["The route {route} needs a value for its param {param}.","Pass the param {param} in `params` when navigating to {route}.","Mark the param optional in the route path with `?` or `*` when the route works without it."],
+  VIBE7105: ["No route is named {name}.","Use the `name` of a route passed to `createRouter()`.","Navigate by path when the route has no name."],
+  VIBE7106: ["No route matches the path {path}.","Add a route for {path}.","Add a catch-all route last, such as `/:pathMatch(.*)*`, to show a not-found page."],
+  VIBE7107: ["The navigation guard {guard} declares {count} parameters, but a guard takes only to and from.","Return `false` to cancel the navigation, a location to redirect, or nothing to continue.","Remove the third parameter of {guard}."],
+  VIBE7108: ["The navigation to {path} redirected more than 10 times.","Make the guard return nothing when `to` is already the redirect target.","Remove the `redirect` that points back to a route that redirects to it."],
+  VIBE7109: ["The component of the route {path} failed to load.","Handle the error in `router.onError()`, for example by loading `to.fullPath` as a full page.","Check that the loader of {path} imports an existing file."],
+  VIBE7110: ["The loader of the route {path} resolved to {type}, not a component.","Return the module from the loader, as in `() => import('./Page.vibe')`.","Export the component as the `default` export of the loaded module."],
+  VIBE7118: ["The param {param} of the route {route} must be {expected}.","Pass an array for a repeatable param, such as `['a', 'b']` for `/:segments+`.","Pass a single value for a param without `+` or `*`."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => (__DEV__ ? MESSAGES : undefined));
