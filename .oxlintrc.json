@@ -39,7 +39,6 @@
       // when it gets its first implementation.
       "files": [
         "packages/create-vibejs/bin.js",
-        "packages/compiler/src/index.ts",
         "packages/compiler/src/vite.ts",
         "packages/language-tools/src/index.ts",
         "packages/server/src/openapi.ts",

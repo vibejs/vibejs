@@ -348,6 +348,10 @@ importers:
         version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.0.2)
 
   packages/compiler:
+    dependencies:
+      '@vibejs-org/errors':
+        specifier: workspace:*
+        version: link:../errors
     devDependencies:
       tsdown:
         specifier: 'catalog:'
