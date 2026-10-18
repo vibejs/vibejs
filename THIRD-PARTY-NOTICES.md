@@ -28,3 +28,7 @@ Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`]
   - `packages/ui/src/reactivity/ref.test.ts` from `packages/reactivity/__tests__/ref.spec.ts`
   - `packages/ui/src/reactivity/computed.test.ts` from `packages/reactivity/__tests__/computed.spec.ts`
   - `packages/ui/src/reactivity/effectScope.test.ts` from `packages/reactivity/__tests__/effectScope.spec.ts`
+- **vuejs/router** v4.6.4 at `47b95baae1ebdeb564bd1adf8168c9e9d6d09d0a`, MIT, Copyright (c) 2019-present Eduardo San Martin Morote.
+  - `packages/ui/src/router/path.ts` from `packages/router/src/matcher/pathParserRanker.ts`
+  - `packages/ui/src/router/path.test.ts` from `packages/router/__tests__/matcher/pathRanking.spec.ts` and `pathParser.spec.ts` (tests, not shipped)
+  - `packages/ui/src/router/matcher.test.ts` from `packages/router/__tests__/matcher/resolve.spec.ts` (tests, not shipped)
