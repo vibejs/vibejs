@@ -1,3 +1,5 @@
 * text=auto eol=lf
 # Highlight .vibe files as HTML, but keep them out of the repository language statistics.
 *.vibe linguist-language=HTML linguist-detectable=false
+# Grammar fixture that must keep its CRLF line endings.
+packages/vscode/test/grammar/crlf.vibe -text

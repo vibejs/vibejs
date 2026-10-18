@@ -1,0 +1,832 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "vibe.js",
+  "scopeName": "source.vibejs",
+  "patterns": [
+    {
+      "include": "#vibejs-comments"
+    },
+    {
+      "include": "#self-closing-tag"
+    },
+    {
+      "begin": "(<)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html.vibejs"
+        }
+      },
+      "end": "(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "([a-zA-Z0-9:-]+)\\b(?=[^>]*\\blang\\s*=\\s*(['\"]?)css\\b\\2)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/)",
+              "name": "source.css",
+              "patterns": [
+                {
+                  "include": "source.css"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "([a-zA-Z0-9:-]+)\\b(?=[^>]*\\blang\\s*=\\s*(['\"]?)scss\\b\\2)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/)",
+              "name": "source.css.scss",
+              "patterns": [
+                {
+                  "include": "source.css.scss"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "([a-zA-Z0-9:-]+)\\b(?=[^>]*\\blang\\s*=\\s*(['\"]?)less\\b\\2)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/)",
+              "name": "source.css.less",
+              "patterns": [
+                {
+                  "include": "source.css.less"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "(template)(?=\\s|\\/?>)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/template[\\s>])",
+              "name": "text.html.derivative",
+              "patterns": [
+                {
+                  "include": "#html-stuff"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "(script)(?=\\s|\\/?>)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#multi-line-script-tag-stuff"
+            }
+          ]
+        },
+        {
+          "begin": "(style)(?=\\s|\\/?>)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#multi-line-style-tag-stuff"
+            }
+          ]
+        },
+        {
+          "begin": "([a-zA-Z0-9:-]+)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.tag.$1.html.vibejs"
+            }
+          },
+          "end": "(</)(\\1)\\s*(?=>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "2": {
+              "name": "entity.name.tag.$2.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/)",
+              "name": "text"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "multi-line-script-tag-stuff": {
+      "begin": "\\G",
+      "end": "(?=<\\/script[\\s>])",
+      "patterns": [
+        {
+          "include": "#tag-stuff"
+        },
+        {
+          "begin": "(?<=>)(?=[^\\n]*<\\/script[\\s>])",
+          "end": "(?=<\\/script[\\s>])",
+          "name": "source.ts",
+          "patterns": [
+            {
+              "include": "source.ts"
+            }
+          ]
+        },
+        {
+          "begin": "(?<=>)",
+          "while": "^(?!\\s*<\\/script[\\s>])",
+          "name": "source.ts",
+          "patterns": [
+            {
+              "include": "source.ts"
+            }
+          ]
+        }
+      ]
+    },
+    "multi-line-style-tag-stuff": {
+      "begin": "\\G",
+      "end": "(?=<\\/style[\\s>])",
+      "patterns": [
+        {
+          "begin": "\\G(?!\\blang\\s*=\\s*(?:['\"]?)(?:scss|less)\\b)",
+          "end": "(?=\\blang\\s*=\\s*(?:['\"]?)(?:scss|less)\\b)|(>)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.html.vibejs"
+            }
+          },
+          "name": "meta.tag-stuff",
+          "patterns": [
+            {
+              "include": "#vibejs-directives"
+            },
+            {
+              "include": "text.html.basic#attribute"
+            }
+          ]
+        },
+        {
+          "begin": "(?=\\blang\\s*=\\s*(?:['\"]?)scss\\b)",
+          "end": "(?=<\\/style[\\s>])",
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/style[\\s>])",
+              "name": "source.css.scss",
+              "patterns": [
+                {
+                  "include": "source.css.scss"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "(?=\\blang\\s*=\\s*(?:['\"]?)less\\b)",
+          "end": "(?=<\\/style[\\s>])",
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "begin": "(?<=>)",
+              "end": "(?=<\\/style[\\s>])",
+              "name": "source.css.less",
+              "patterns": [
+                {
+                  "include": "source.css.less"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "(?<=>)",
+          "end": "(?=<\\/style[\\s>])",
+          "name": "source.css",
+          "patterns": [
+            {
+              "include": "source.css"
+            }
+          ]
+        }
+      ]
+    },
+    "self-closing-tag": {
+      "begin": "(<)([a-zA-Z0-9:-]+)(?=([^>]+/>))",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html.vibejs"
+        },
+        "2": {
+          "name": "entity.name.tag.$2.html.vibejs"
+        }
+      },
+      "end": "(/>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "name": "self-closing-tag",
+      "patterns": [
+        {
+          "include": "#tag-stuff"
+        }
+      ]
+    },
+    "capitalized-tag": {
+      "begin": "(<)([A-Z][a-zA-Z0-9:-]*)(?=\\s|/?>)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html.vibejs"
+        },
+        "2": {
+          "name": "entity.name.tag.html.vibejs"
+        }
+      },
+      "end": "/?>",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "name": "meta.tag.structure.$2.start.html.vibejs",
+      "patterns": [
+        {
+          "begin": "\\G",
+          "end": "(?=/?>)",
+          "patterns": [
+            {
+              "include": "#vibejs-directives"
+            },
+            {
+              "include": "text.html.basic#attribute"
+            }
+          ]
+        }
+      ]
+    },
+    "template-tag": {
+      "patterns": [
+        {
+          "include": "#template-tag-1"
+        },
+        {
+          "include": "#template-tag-2"
+        }
+      ]
+    },
+    "template-tag-1": {
+      "begin": "(<)(template)\\b(>)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html.vibejs"
+        },
+        "2": {
+          "name": "entity.name.tag.$2.html.vibejs"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "end": "(/?>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "name": "meta.template-tag.start",
+      "patterns": [
+        {
+          "begin": "\\G",
+          "end": "(?=/>)|((</)(template)(?=[\\s>]))",
+          "endCaptures": {
+            "2": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "3": {
+              "name": "entity.name.tag.$3.html.vibejs"
+            }
+          },
+          "name": "meta.template-tag.end",
+          "patterns": [
+            {
+              "include": "#html-stuff"
+            }
+          ]
+        }
+      ]
+    },
+    "template-tag-2": {
+      "begin": "(<)(template)(?=\\s|\\/?>)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html.vibejs"
+        },
+        "2": {
+          "name": "entity.name.tag.$2.html.vibejs"
+        }
+      },
+      "end": "(/?>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "name": "meta.template-tag.start",
+      "patterns": [
+        {
+          "begin": "\\G",
+          "end": "(?=/>)|((</)(template)(?=[\\s>]))",
+          "endCaptures": {
+            "2": {
+              "name": "punctuation.definition.tag.begin.html.vibejs"
+            },
+            "3": {
+              "name": "entity.name.tag.$3.html.vibejs"
+            }
+          },
+          "name": "meta.template-tag.end",
+          "patterns": [
+            {
+              "include": "#tag-stuff"
+            },
+            {
+              "include": "#html-stuff"
+            }
+          ]
+        }
+      ]
+    },
+    "html-stuff": {
+      "patterns": [
+        {
+          "include": "#template-tag"
+        },
+        {
+          "include": "#capitalized-tag"
+        },
+        {
+          "include": "text.html.derivative"
+        },
+        {
+          "include": "text.html.basic"
+        }
+      ]
+    },
+    "tag-stuff": {
+      "begin": "\\G",
+      "end": "(?=/>)|(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html.vibejs"
+        }
+      },
+      "name": "meta.tag-stuff",
+      "patterns": [
+        {
+          "include": "#vibejs-directives"
+        },
+        {
+          "include": "text.html.basic#attribute"
+        }
+      ]
+    },
+    "vibejs-directives": {
+      "patterns": [
+        {
+          "include": "#vibejs-directives-control"
+        },
+        {
+          "include": "#vibejs-directives-generic-attr"
+        },
+        {
+          "include": "#vibejs-directives-style-attr"
+        },
+        {
+          "include": "#vibejs-directives-original"
+        }
+      ]
+    },
+    "vibejs-directives-original": {
+      "begin": "(?:(?:(v-[\\w-]+)(:)?)|([:\\.])|(@)|(#))(?:(?:(\\[)([^\\]]*)(\\]))|([\\w-]+))?",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.other.attribute-name.html.vibejs"
+        },
+        "2": {
+          "name": "punctuation.separator.key-value.html.vibejs"
+        },
+        "3": {
+          "name": "punctuation.attribute-shorthand.bind.html.vibejs"
+        },
+        "4": {
+          "name": "punctuation.attribute-shorthand.event.html.vibejs"
+        },
+        "5": {
+          "name": "punctuation.attribute-shorthand.slot.html.vibejs"
+        },
+        "6": {
+          "name": "punctuation.separator.key-value.html.vibejs"
+        },
+        "7": {
+          "name": "source.ts.embedded.html.vibejs",
+          "patterns": [
+            {
+              "include": "source.ts#expression"
+            }
+          ]
+        },
+        "8": {
+          "name": "punctuation.separator.key-value.html.vibejs"
+        },
+        "9": {
+          "name": "entity.other.attribute-name.html.vibejs"
+        }
+      },
+      "end": "(?=\\s*[^=\\s])",
+      "name": "meta.attribute.directive.vibejs",
+      "patterns": [
+        {
+          "1": {
+            "name": "punctuation.separator.key-value.html.vibejs"
+          },
+          "2": {
+            "name": "entity.other.attribute-name.html.vibejs"
+          },
+          "match": "(\\.)([\\w-]*)"
+        },
+        {
+          "include": "#vibejs-directives-expression"
+        }
+      ]
+    },
+    "vibejs-directives-control": {
+      "begin": "(?:(v-for)|(v-if|v-else-if|v-else))(?=[=/>)\\s])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.loop.vibejs"
+        },
+        "2": {
+          "name": "keyword.control.conditional.vibejs"
+        }
+      },
+      "end": "(?=\\s*[^=\\s])",
+      "name": "meta.attribute.directive.control.vibejs",
+      "patterns": [
+        {
+          "include": "#vibejs-directives-expression"
+        }
+      ]
+    },
+    "vibejs-directives-expression": {
+      "patterns": [
+        {
+          "begin": "(=)\\s*('|\"|`)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.separator.key-value.html.vibejs"
+            },
+            "2": {
+              "name": "punctuation.definition.string.begin.html.vibejs"
+            }
+          },
+          "end": "(\\2)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.end.html.vibejs"
+            }
+          },
+          "patterns": [
+            {
+              "begin": "(?<=('|\"|`))",
+              "end": "(?=\\1)",
+              "name": "source.ts.embedded.html.vibejs",
+              "patterns": [
+                {
+                  "include": "source.ts#expression"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "begin": "(=)\\s*(?=[^'\"`])",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.separator.key-value.html.vibejs"
+            }
+          },
+          "end": "(?=(\\s|>|\\/>))",
+          "patterns": [
+            {
+              "begin": "(?=[^'\"`])",
+              "end": "(?=(\\s|>|\\/>))",
+              "name": "source.ts.embedded.html.vibejs",
+              "patterns": [
+                {
+                  "include": "source.ts#expression"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vibejs-directives-style-attr": {
+      "begin": "\\b(style)\\s*(=)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.other.attribute-name.html.vibejs"
+        },
+        "2": {
+          "name": "punctuation.separator.key-value.html.vibejs"
+        }
+      },
+      "end": "(?<='|\")",
+      "name": "meta.attribute.style.vibejs",
+      "patterns": [
+        {
+          "comment": "Copy from source.css#rule-list-innards",
+          "begin": "('|\")",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.html.vibejs"
+            }
+          },
+          "end": "(\\1)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.end.html.vibejs"
+            }
+          },
+          "name": "source.css.embedded.html.vibejs",
+          "patterns": [
+            {
+              "include": "source.css#comment-block"
+            },
+            {
+              "include": "source.css#escapes"
+            },
+            {
+              "include": "source.css#font-features"
+            },
+            {
+              "match": "(?x) (?<![\\w-])\n--\n(?:[-a-zA-Z_]    | [^\\x00-\\x7F])     # First letter\n(?:[-a-zA-Z0-9_] | [^\\x00-\\x7F]      # Remainder of identifier\n  |\\\\(?:[0-9a-fA-F]{1,6}|.)\n)*",
+              "name": "variable.css"
+            },
+            {
+              "begin": "(?<![-a-zA-Z])(?=[-a-zA-Z])",
+              "end": "$|(?![-a-zA-Z])",
+              "name": "meta.property-name.css",
+              "patterns": [
+                {
+                  "include": "source.css#property-names"
+                }
+              ]
+            },
+            {
+              "comment": "Modify end to fix #199. TODO: handle ' character.",
+              "begin": "(:)\\s*",
+              "beginCaptures": {
+                "1": {
+                  "name": "punctuation.separator.key-value.css"
+                }
+              },
+              "end": "\\s*(;)|\\s*(?='|\")",
+              "endCaptures": {
+                "1": {
+                  "name": "punctuation.terminator.rule.css"
+                }
+              },
+              "contentName": "meta.property-value.css",
+              "patterns": [
+                {
+                  "include": "source.css#comment-block"
+                },
+                {
+                  "include": "source.css#property-values"
+                }
+              ]
+            },
+            {
+              "match": ";",
+              "name": "punctuation.terminator.rule.css"
+            }
+          ]
+        }
+      ]
+    },
+    "vibejs-directives-generic-attr": {
+      "begin": "\\b(generic)\\s*(=)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.other.attribute-name.html.vibejs"
+        },
+        "2": {
+          "name": "punctuation.separator.key-value.html.vibejs"
+        }
+      },
+      "end": "(?<='|\")",
+      "name": "meta.attribute.generic.vibejs",
+      "patterns": [
+        {
+          "begin": "('|\")",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.html.vibejs"
+            }
+          },
+          "end": "(\\1)",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.end.html.vibejs"
+            }
+          },
+          "name": "meta.type.parameters.vibejs",
+          "comment": "https://github.com/microsoft/vscode/blob/fd4346210f59135fad81a8b8c4cea7bf5a9ca6b4/extensions/typescript-basics/syntaxes/TypeScript.tmLanguage.json#L4002-L4020",
+          "patterns": [
+            {
+              "include": "source.ts#comment"
+            },
+            {
+              "name": "storage.modifier.ts",
+              "match": "(?<![_$[:alnum:]])(?:(?<=\\.\\.\\.)|(?<!\\.))(extends|in|out)(?![_$[:alnum:]])(?:(?=\\.\\.\\.)|(?!\\.))"
+            },
+            {
+              "include": "source.ts#type"
+            },
+            {
+              "include": "source.ts#punctuation-comma"
+            },
+            {
+              "name": "keyword.operator.assignment.ts",
+              "match": "(=)(?!>)"
+            }
+          ]
+        }
+      ]
+    },
+    "vibejs-interpolations": {
+      "patterns": [
+        {
+          "begin": "(\\{\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.interpolation.begin.html.vibejs"
+            }
+          },
+          "end": "(\\}\\})",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.interpolation.end.html.vibejs"
+            }
+          },
+          "name": "expression.embedded.vibejs",
+          "patterns": [
+            {
+              "begin": "\\G",
+              "end": "(?=\\}\\})",
+              "name": "source.ts.embedded.html.vibejs",
+              "patterns": [
+                {
+                  "include": "source.ts#expression"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vibejs-comments": {
+      "patterns": [
+        {
+          "begin": "<!--",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.vibejs"
+            }
+          },
+          "end": "-->",
+          "name": "comment.block.vibejs"
+        }
+      ]
+    }
+  }
+}

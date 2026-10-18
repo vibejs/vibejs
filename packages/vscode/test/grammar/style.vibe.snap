@@ -1,0 +1,51 @@
+><style scoped>
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^ source.vibejs entity.name.tag.style.html.vibejs
+#      ^ source.vibejs meta.tag-stuff
+#       ^^^^^^ source.vibejs meta.tag-stuff meta.attribute.unrecognized.scoped.html entity.other.attribute-name.html
+#             ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>.todo { color: red; }
+#^^^^^^^^^^^^^^^^^^^^^^ source.vibejs source.css
+></style>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^ source.vibejs entity.name.tag.style.html.vibejs
+#       ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>
+><style lang="scss">
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^ source.vibejs entity.name.tag.style.html.vibejs
+#      ^ source.vibejs meta.tag-stuff
+#       ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html entity.other.attribute-name.html
+#           ^ source.vibejs meta.tag-stuff meta.attribute.lang.html punctuation.separator.key-value.html
+#            ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.begin.html
+#             ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html
+#                 ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.end.html
+#                  ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>$gap: 4px;
+#^^^^^^^^^^^ source.vibejs source.css.scss
+>.todo { margin: $gap; }
+#^^^^^^^^^^^^^^^^^^^^^^^^ source.vibejs source.css.scss
+></style>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^ source.vibejs entity.name.tag.style.html.vibejs
+#       ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>
+><style lang="less">
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^ source.vibejs entity.name.tag.style.html.vibejs
+#      ^ source.vibejs meta.tag-stuff
+#       ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html entity.other.attribute-name.html
+#           ^ source.vibejs meta.tag-stuff meta.attribute.lang.html punctuation.separator.key-value.html
+#            ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.begin.html
+#             ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html
+#                 ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.end.html
+#                  ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>@gap: 4px;
+#^^^^^^^^^^^ source.vibejs source.css.less
+>.todo { margin: @gap; }
+#^^^^^^^^^^^^^^^^^^^^^^^^ source.vibejs source.css.less
+></style>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^ source.vibejs entity.name.tag.style.html.vibejs
+#       ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>

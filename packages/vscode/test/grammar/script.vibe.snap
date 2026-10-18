@@ -1,0 +1,131 @@
+><script setup lang="ts">
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#       ^ source.vibejs meta.tag-stuff
+#        ^^^^^ source.vibejs meta.tag-stuff meta.attribute.unrecognized.setup.html entity.other.attribute-name.html
+#             ^ source.vibejs meta.tag-stuff
+#              ^^^^ source.vibejs meta.tag-stuff meta.attribute.lang.html entity.other.attribute-name.html
+#                  ^ source.vibejs meta.tag-stuff meta.attribute.lang.html punctuation.separator.key-value.html
+#                   ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.begin.html
+#                    ^^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html
+#                      ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.end.html
+#                       ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>import { ref } from '@vibejs-org/ui'
+#^^^^^^ source.vibejs source.ts meta.import.ts keyword.control.import.ts
+#      ^ source.vibejs source.ts meta.import.ts
+#       ^ source.vibejs source.ts meta.import.ts meta.block.ts punctuation.definition.block.ts
+#        ^ source.vibejs source.ts meta.import.ts meta.block.ts
+#         ^^^ source.vibejs source.ts meta.import.ts meta.block.ts variable.other.readwrite.alias.ts
+#            ^ source.vibejs source.ts meta.import.ts meta.block.ts
+#             ^ source.vibejs source.ts meta.import.ts meta.block.ts punctuation.definition.block.ts
+#              ^ source.vibejs source.ts meta.import.ts
+#               ^^^^ source.vibejs source.ts meta.import.ts keyword.control.from.ts
+#                   ^ source.vibejs source.ts meta.import.ts
+#                    ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.begin.ts
+#                     ^^^^^^^^^^^^^^ source.vibejs source.ts meta.import.ts string.quoted.single.ts
+#                                   ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.end.ts
+>import Item from './Item.vibe'
+#^^^^^^ source.vibejs source.ts meta.import.ts keyword.control.import.ts
+#      ^ source.vibejs source.ts meta.import.ts
+#       ^^^^ source.vibejs source.ts meta.import.ts variable.other.readwrite.alias.ts
+#           ^ source.vibejs source.ts meta.import.ts
+#            ^^^^ source.vibejs source.ts meta.import.ts keyword.control.from.ts
+#                ^ source.vibejs source.ts meta.import.ts
+#                 ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.begin.ts
+#                  ^^^^^^^^^^^ source.vibejs source.ts meta.import.ts string.quoted.single.ts
+#                             ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.end.ts
+>
+>const props = defineProps<{ title: string; limit?: number }>()
+#^^^^^ source.vibejs source.ts meta.var.expr.ts storage.type.ts
+#     ^ source.vibejs source.ts meta.var.expr.ts
+#      ^^^^^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.definition.variable.ts variable.other.constant.ts
+#           ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts
+#            ^ source.vibejs source.ts meta.var.expr.ts keyword.operator.assignment.ts
+#             ^ source.vibejs source.ts meta.var.expr.ts
+#              ^^^^^^^^^^^ source.vibejs source.ts meta.var.expr.ts meta.function-call.ts entity.name.function.ts
+#                         ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts punctuation.definition.typeparameters.begin.ts
+#                          ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts punctuation.definition.block.ts
+#                           ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts
+#                            ^^^^^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.definition.property.ts variable.object.property.ts
+#                                 ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts keyword.operator.type.annotation.ts
+#                                  ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts
+#                                   ^^^^^^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts support.type.primitive.ts
+#                                         ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts punctuation.terminator.statement.ts
+#                                          ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts
+#                                           ^^^^^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.definition.property.ts variable.object.property.ts
+#                                                ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts keyword.operator.optional.ts
+#                                                 ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts keyword.operator.type.annotation.ts
+#                                                  ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts
+#                                                   ^^^^^^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts support.type.primitive.ts
+#                                                         ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts meta.field.declaration.ts meta.type.annotation.ts
+#                                                          ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts meta.object.type.ts punctuation.definition.block.ts
+#                                                           ^ source.vibejs source.ts meta.var.expr.ts meta.type.parameters.ts punctuation.definition.typeparameters.end.ts
+#                                                            ^ source.vibejs source.ts meta.var.expr.ts meta.brace.round.ts
+#                                                             ^ source.vibejs source.ts meta.var.expr.ts meta.brace.round.ts
+>const count = ref(0)
+#^^^^^ source.vibejs source.ts meta.var.expr.ts storage.type.ts
+#     ^ source.vibejs source.ts meta.var.expr.ts
+#      ^^^^^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.definition.variable.ts variable.other.constant.ts
+#           ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts
+#            ^ source.vibejs source.ts meta.var.expr.ts keyword.operator.assignment.ts
+#             ^ source.vibejs source.ts meta.var.expr.ts
+#              ^^^ source.vibejs source.ts meta.var.expr.ts meta.function-call.ts entity.name.function.ts
+#                 ^ source.vibejs source.ts meta.var.expr.ts meta.brace.round.ts
+#                  ^ source.vibejs source.ts meta.var.expr.ts constant.numeric.decimal.ts
+#                   ^ source.vibejs source.ts meta.var.expr.ts meta.brace.round.ts
+>function increment(step = 1): void {
+#^^^^^^^^ source.vibejs source.ts meta.function.ts storage.type.function.ts
+#        ^ source.vibejs source.ts meta.function.ts
+#         ^^^^^^^^^ source.vibejs source.ts meta.function.ts meta.definition.function.ts entity.name.function.ts
+#                  ^ source.vibejs source.ts meta.function.ts meta.parameters.ts punctuation.definition.parameters.begin.ts
+#                   ^^^^ source.vibejs source.ts meta.function.ts meta.parameters.ts variable.parameter.ts
+#                       ^ source.vibejs source.ts meta.function.ts meta.parameters.ts
+#                        ^ source.vibejs source.ts meta.function.ts meta.parameters.ts keyword.operator.assignment.ts
+#                         ^ source.vibejs source.ts meta.function.ts meta.parameters.ts
+#                          ^ source.vibejs source.ts meta.function.ts meta.parameters.ts constant.numeric.decimal.ts
+#                           ^ source.vibejs source.ts meta.function.ts meta.parameters.ts punctuation.definition.parameters.end.ts
+#                            ^ source.vibejs source.ts meta.function.ts meta.return.type.ts keyword.operator.type.annotation.ts
+#                             ^ source.vibejs source.ts meta.function.ts meta.return.type.ts
+#                              ^^^^ source.vibejs source.ts meta.function.ts meta.return.type.ts support.type.primitive.ts
+#                                  ^ source.vibejs source.ts meta.function.ts meta.return.type.ts
+#                                   ^ source.vibejs source.ts meta.function.ts meta.block.ts punctuation.definition.block.ts
+>  count.value += step
+#^^ source.vibejs source.ts meta.function.ts meta.block.ts
+#  ^^^^^ source.vibejs source.ts meta.function.ts meta.block.ts variable.other.object.ts
+#       ^ source.vibejs source.ts meta.function.ts meta.block.ts punctuation.accessor.ts
+#        ^^^^^ source.vibejs source.ts meta.function.ts meta.block.ts support.variable.property.dom.ts
+#             ^ source.vibejs source.ts meta.function.ts meta.block.ts
+#              ^^ source.vibejs source.ts meta.function.ts meta.block.ts keyword.operator.assignment.compound.ts
+#                ^ source.vibejs source.ts meta.function.ts meta.block.ts
+#                 ^^^^ source.vibejs source.ts meta.function.ts meta.block.ts variable.other.readwrite.ts
+>}
+#^ source.vibejs source.ts meta.function.ts meta.block.ts punctuation.definition.block.ts
+></script>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#        ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>
+><script>
+#^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+# ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#       ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
+>export const name: string = 'Plain'
+#^^^^^^ source.vibejs source.ts meta.var.expr.ts keyword.control.export.ts
+#      ^ source.vibejs source.ts meta.var.expr.ts
+#       ^^^^^ source.vibejs source.ts meta.var.expr.ts storage.type.ts
+#            ^ source.vibejs source.ts meta.var.expr.ts
+#             ^^^^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.definition.variable.ts variable.other.constant.ts
+#                 ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.type.annotation.ts keyword.operator.type.annotation.ts
+#                  ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.type.annotation.ts
+#                   ^^^^^^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.type.annotation.ts support.type.primitive.ts
+#                         ^ source.vibejs source.ts meta.var.expr.ts meta.var-single-variable.expr.ts meta.type.annotation.ts
+#                          ^ source.vibejs source.ts meta.var.expr.ts keyword.operator.assignment.ts
+#                           ^ source.vibejs source.ts meta.var.expr.ts
+#                            ^ source.vibejs source.ts meta.var.expr.ts string.quoted.single.ts punctuation.definition.string.begin.ts
+#                             ^^^^^ source.vibejs source.ts meta.var.expr.ts string.quoted.single.ts
+#                                  ^ source.vibejs source.ts meta.var.expr.ts string.quoted.single.ts punctuation.definition.string.end.ts
+></script>
+#^^ source.vibejs punctuation.definition.tag.begin.html.vibejs
+#  ^^^^^^ source.vibejs entity.name.tag.script.html.vibejs
+#        ^ source.vibejs punctuation.definition.tag.end.html.vibejs
+>

@@ -1,0 +1,14 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import Item from './Item.vibe'
+
+const props = defineProps<{ title: string; limit?: number }>()
+const count = ref(0)
+function increment(step = 1): void {
+  count.value += step
+}
+</script>
+
+<script>
+export const name: string = 'Plain'
+</script>

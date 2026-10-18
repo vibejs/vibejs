@@ -1,0 +1,96 @@
+{
+  "name": "vibejs",
+  "displayName": "vibe.js",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Syntax highlighting and type checking for vibe.js .vibe single-file components.",
+  "categories": [
+    "Programming Languages"
+  ],
+  "homepage": "https://github.com/vibejs/vibejs#readme",
+  "bugs": {
+    "url": "https://github.com/vibejs/vibejs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibejs/vibejs.git",
+    "directory": "packages/vscode"
+  },
+  "publisher": "vibejs",
+  "files": [
+    "dist",
+    "syntaxes",
+    "language-configuration.json",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "type": "module",
+  "main": "./dist/extension.cjs",
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p .",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@vibejs-org/errors": "workspace:*",
+    "@vscode/vsce": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:ts-next",
+    "vscode-tmgrammar-test": "catalog:"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "vibejs",
+        "aliases": [
+          "vibe.js"
+        ],
+        "extensions": [
+          ".vibe"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "vibejs",
+        "scopeName": "source.vibejs",
+        "path": "./syntaxes/vibejs.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.ts": "typescript",
+          "source.css": "css",
+          "source.css.scss": "scss",
+          "source.css.less": "less"
+        }
+      },
+      {
+        "scopeName": "vibejs.directives",
+        "path": "./syntaxes/vibejs-directives.tmLanguage.json",
+        "injectTo": [
+          "source.vibejs"
+        ]
+      },
+      {
+        "scopeName": "vibejs.interpolations",
+        "path": "./syntaxes/vibejs-interpolations.tmLanguage.json",
+        "injectTo": [
+          "source.vibejs"
+        ]
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:vibejs"
+  ],
+  "engines": {
+    "vscode": "^1.126.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Type checking needs the TypeScript 7 extension, which runs only in trusted workspaces. Highlighting works everywhere."
+    }
+  }
+}
