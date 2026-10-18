@@ -4,7 +4,7 @@
   "categories": { "correctness": "error", "suspicious": "error" },
   "options": { "typeAware": true },
   "rules": {
-    "eslint/no-underscore-dangle": ["error", { "allow": ["__DEV__"] }],
+    "eslint/no-underscore-dangle": ["error", { "allow": ["__DEV__", "__v_isRef"] }],
     "eslint/no-console": "error",
     "eslint/no-restricted-imports": [
       "error",
@@ -52,6 +52,60 @@
       "rules": { "unicorn/no-empty-file": "off", "unicorn/require-module-specifiers": "off" }
     },
     {
+      // The reactivity layer runs without a DOM: it imports only its own directory and three ui
+      // modules (the base entries are restated because an override replaces them).
+      "files": ["packages/ui/src/reactivity/**"],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "reflect-metadata",
+                "message": "vibe.js uses no decorator metadata; inject with inject(Token)."
+              }
+            ],
+            "patterns": [
+              {
+                "regex": "^(?:@vibejs-org/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
+                "message": "Import another package by its name, not its src."
+              },
+              {
+                "group": ["*", "!./*", "!../shared.ts", "!../warn.ts", "!../errors.gen.ts"],
+                "message": "src/reactivity imports only ./*, ../shared.ts, ../warn.ts and ../errors.gen.ts."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Its tests also import the test runner and the conformance suite.
+      "files": [
+        "packages/ui/src/reactivity/**/*.test.ts",
+        "packages/ui/src/reactivity/**/*.test-d.ts"
+      ],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "reflect-metadata",
+                "message": "vibe.js uses no decorator metadata; inject with inject(Token)."
+              }
+            ],
+            "patterns": [
+              {
+                "regex": "^(?:@vibejs-org/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
+                "message": "Import another package by its name, not its src."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["packages/cli/src/**", "scripts/**", "packages/ui/src/warn.ts"],
       "rules": { "eslint/no-console": "off" }
     },
@@ -60,5 +114,11 @@
       "rules": { "import/no-default-export": "off" }
     }
   ],
-  "ignorePatterns": ["**/dist/**", "**/test/fixtures/**", "packages/create-vibejs/templates/**"]
+  // system.ts is vendored verbatim (see its header).
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/test/fixtures/**",
+    "packages/create-vibejs/templates/**",
+    "packages/ui/src/reactivity/system.ts"
+  ]
 }
