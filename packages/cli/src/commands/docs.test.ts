@@ -18,8 +18,8 @@ function write(dir: string, path: string, text: string): void {
 beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), 'vibejs-docs-'));
   docsDir = join(root, 'docs');
-  write(docsDir, 'server/di.md', '# Dependency injection\n\nProviders and `inject()`.\n');
-  write(docsDir, 'guide/no-title.md', 'Just prose about providers.\n');
+  write(docsDir, 'server/di.md', '# Dependency injection\n\nGizmos and `inject()`.\n');
+  write(docsDir, 'guide/no-title.md', 'Just prose about gizmos.\n');
   // At the path of a catalog page: the catalog entry wins.
   write(docsDir, 'errors/VIBE0001.md', '# VIBE0001: Stale copy\n');
   // Outside docsDir: never a page, never searched.
@@ -167,7 +167,7 @@ describe('docs command', () => {
       page: {
         path: 'server/di',
         title: 'Dependency injection',
-        markdown: '# Dependency injection\n\nProviders and `inject()`.\n',
+        markdown: '# Dependency injection\n\nGizmos and `inject()`.\n',
       },
     });
   });
@@ -181,7 +181,7 @@ describe('docs command', () => {
   });
 
   it('searches the catalog and the docs files', async () => {
-    const r = await run('providers');
+    const r = await run('gizmos');
     expect(r.mode).toBe('search');
     expect(r.hits!.map((hit) => hit.path)).toEqual(['guide/no-title', 'server/di']);
     expect(r.truncated).toBeUndefined();
