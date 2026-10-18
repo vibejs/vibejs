@@ -57,15 +57,19 @@ export function toDiagnostic(
   start: Position,
   end: Position,
 ): Diagnostic {
-  // The first line of the catalog message, without its `[VIBE####] ` prefix.
-  const message = error.message.slice(error.code.length + 3).split('\n', 1)[0];
+  // The catalog message without its `[VIBE####] ` prefix and its Fix and Docs lines. Cutting by
+  // length keeps an interpolated arg that holds a newline.
+  const tail = [...error.fixes.map((fix) => `\n  Fix: ${fix}`), `\n  Docs: ${error.docs}`].join('');
+  const message = error.message.slice(error.code.length + 3, error.message.length - tail.length);
   return { code: error.code, message, fixes: error.fixes, docs: error.docs, file, start, end };
 }
 
 /** The source lines of [start, end) with caret lines. Ranges of 4 or more lines elide the middle. */
 export function codeFrame(source: string, start: Position, end: Position): string {
   const index = new LineIndex(source);
-  const width = String(end.line).length;
+  // A range that ends right after a line terminator covers nothing of the next line.
+  const last = end.line > start.line && end.column === 1 ? end.line - 1 : end.line;
+  const width = String(last).length;
   const rows = (line: number): string[] => {
     const text = index.lineText(line);
     const from = line === start.line ? start.column - 1 : 0;
@@ -73,13 +77,14 @@ export function codeFrame(source: string, start: Position, end: Position): strin
     // Tabs stay tabs so the carets line up; any other code point becomes one space.
     const pad = Array.from(text.slice(0, from), (c) => (c === '\t' ? '\t' : ' ')).join('');
     const carets = '^'.repeat(Math.max(1, Array.from(text.slice(from, to)).length));
+    const gutter = String(line).padStart(width);
     return [
-      `${String(line).padStart(width)} | ${text}`.trimEnd(),
+      text === '' ? `${gutter} |` : `${gutter} | ${text}`,
       `${' '.repeat(width)} | ${pad}${carets}`,
     ];
   };
-  if (end.line - start.line >= 3) return [...rows(start.line), '...', ...rows(end.line)].join('\n');
-  const lines = Array.from({ length: end.line - start.line + 1 }, (_, i) => start.line + i);
+  if (last - start.line >= 3) return [...rows(start.line), '...', ...rows(last)].join('\n');
+  const lines = Array.from({ length: last - start.line + 1 }, (_, i) => start.line + i);
   return lines.flatMap(rows).join('\n');
 }
 

@@ -29,6 +29,12 @@ function formatAt(source: string, needle: string): string {
   return format(source, from, from + needle.length);
 }
 
+/** codeFrame over [from, to) of `source`. */
+function frame(source: string, from: number, to: number): string {
+  const index = new LineIndex(source);
+  return codeFrame(source, index.position(from), index.position(to));
+}
+
 const lines = (n: number): string =>
   Array.from({ length: n }, (_, i) => `line ${i + 1}`).join('\n');
 
@@ -145,15 +151,48 @@ describe('formatDiagnostic', () => {
 
 describe('codeFrame', () => {
   it('marks each covered line of a 3-line range, with one caret on an empty line', () => {
-    const source = 'ab\n\ncd';
-    const index = new LineIndex(source);
-    expect(codeFrame(source, index.position(1), index.position(5))).toMatchInlineSnapshot(`
+    expect(frame('ab\n\ncd', 1, 5)).toMatchInlineSnapshot(`
       "1 | ab
         |  ^
       2 |
         | ^
       3 | cd
         | ^"
+    `);
+  });
+
+  it('stops at the line a range ending right after \\n covers', () => {
+    expect(frame('abc\ndef\n', 0, 4)).toMatchInlineSnapshot(`
+      "1 | abc
+        | ^^^"
+    `);
+  });
+
+  it('prints every line of a 3-line range ending right after \\n', () => {
+    expect(frame('a\nb\nc\nd\n', 0, 6)).toMatchInlineSnapshot(`
+      "1 | a
+        | ^
+      2 | b
+        | ^
+      3 | c
+        | ^"
+    `);
+  });
+
+  it('elides the middle of a range covering exactly 4 lines', () => {
+    expect(frame(lines(5), 0, lines(4).length)).toMatchInlineSnapshot(`
+      "1 | line 1
+        | ^^^^^^
+      ...
+      4 | line 4
+        | ^^^^^^"
+    `);
+  });
+
+  it('prints trailing whitespace of a source line as written', () => {
+    expect(frame('foo \t\nbar', 3, 5)).toMatchInlineSnapshot(`
+      "1 | foo 	
+        |    ^^"
     `);
   });
 });
@@ -231,5 +270,14 @@ describe('toDiagnostic', () => {
     expect('typeChecked' in d).toBe(false);
     expect(structuredClone(d)).toStrictEqual(d);
     expect(JSON.parse(JSON.stringify(d))).toStrictEqual(d);
+  });
+
+  it('keeps an interpolated arg that holds a newline', () => {
+    const position = { offset: 0, line: 1, column: 1 };
+    const error = vibeError('VIBE1002', { tag: '<div\n  class>' });
+    expect(toDiagnostic(error, 'src/App.vibe', position, position)).toMatchObject({
+      message: 'Unclosed <div\n  class>.',
+      fixes: ['Close <div\n  class>.', 'Remove <div\n  class>.'],
+    });
   });
 });
