@@ -202,8 +202,8 @@ catalogs:
       specifier: 24.19.2
       version: 24.19.2
     '@types/vscode':
-      specifier: 1.125.0
-      version: 1.125.0
+      specifier: 1.140.0
+      version: 1.140.0
     '@vitest/browser-playwright':
       specifier: 5.0.5
       version: 5.0.5
@@ -287,7 +287,7 @@ importers:
         version: 24.19.2
       '@types/vscode':
         specifier: 'catalog:'
-        version: 1.125.0
+        version: 1.140.0
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.0.5(playwright@1.64.1)(vite@8.3.4(@types/node@24.19.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5)
@@ -1553,8 +1553,8 @@ packages:
   '@types/node@24.19.2':
     resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
 
-  '@types/vscode@1.125.0':
-    resolution: {integrity: sha512-0icm/ZQAaism87P0ekHqi4/Ju9du+Tm0RUW+y7vqRsxY2cY0FNRX1nAnaW7nT6npPt2tfHiheZ55Zm9UhqonFA==}
+  '@types/vscode@1.140.0':
+    resolution: {integrity: sha512-KAB5RBZIgnUhpp4mKsVJPPHLOQKu6WtGy2xpfWjaajEXO4xIIC+UESAXLiQ9ewx6QD1uBmvC/S8BJzkbvv4bRA==}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
@@ -3950,7 +3950,7 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
-  '@types/vscode@1.125.0': {}
+  '@types/vscode@1.140.0': {}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true
