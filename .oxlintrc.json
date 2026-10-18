@@ -38,7 +38,6 @@
       // Placeholder entries (shebang-only bins, `export {}` modules). Drop a file from this list
       // when it gets its first implementation.
       "files": [
-        "packages/cli/src/bin.ts",
         "packages/create-vibejs/bin.js",
         "packages/compiler/src/index.ts",
         "packages/compiler/src/vite.ts",
