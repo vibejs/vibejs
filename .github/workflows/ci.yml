@@ -44,18 +44,22 @@ jobs:
           - { os: ubuntu-latest, node: 26 }
           - { os: windows-latest, node: 24 }
     runs-on: ${{ matrix.os }}
-    env:
-      pnpm_config_runtime_on_fail: ignore
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # The matrix Node comes from setup-node. Tests run with that node directly,
-      # because pnpm scripts use the devEngines runtime pinned in the lockfile.
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: ${{ matrix.node }}
+      # install: false, because the action's own install adds --no-runtime once it
+      # has installed a runtime, and that breaks the frozen lockfile.
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           cache: true
+          install: false
+          node-version-file: false
+      - run: pnpm install --frozen-lockfile
+      # The matrix Node comes from setup-node, set up after pnpm/setup so it comes
+      # first on PATH. Tests run with that node directly, because pnpm scripts use
+      # the devEngines runtime pinned in the lockfile.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
       - name: Assert Node ${{ matrix.node }}
         shell: bash
         run: |
