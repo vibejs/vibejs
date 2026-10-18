@@ -15,7 +15,7 @@ The command needs a value that was not given. The CLI never prompts for it, so a
 
 > Unknown command or option `{name}`.
 
-The first word after `vibejs` must be a command, and every option must belong to that command or be one of the global options `--json`, `--help` and `--version`. For a common mistake, `next` suggests the intended command.
+The first word after `vibejs` must be a command, and every option must belong to that command or be one of the global options `--json`, `--help` and `--version`. A command takes only the arguments its usage lists. For a common mistake, `next` suggests the intended command.
 
 ### Fix
 

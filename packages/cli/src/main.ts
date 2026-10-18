@@ -95,6 +95,7 @@ async function dispatch(argv: string[], ctx: Ctx): Promise<Outcome> {
     }
   }
 
+  const helpLine = def ? `vibejs ${def.name} --help` : 'vibejs --help';
   let parsed;
   try {
     parsed = parseArgs({
@@ -106,10 +107,15 @@ async function dispatch(argv: string[], ctx: Ctx): Promise<Outcome> {
   } catch (error) {
     // Every parseArgs error quotes the offending option.
     const option = /'(.+?)'/.exec(String(error))![1];
-    const next = def ? `vibejs ${def.name} --help` : 'vibejs --help';
-    return fail(def?.name ?? 'help', ctx, vibeError('VIBE8004', { name: option }), next);
+    return fail(def?.name ?? 'help', ctx, vibeError('VIBE8004', { name: option }), helpLine);
   }
   const { values, positionals } = parsed;
+  // An argument beyond the declared positionals is an input error, not silently dropped.
+  const declared = def?.positionals ?? [];
+  const extra = declared.at(-1)?.variadic ? undefined : positionals[declared.length];
+  if (extra !== undefined) {
+    return fail(def?.name ?? 'help', ctx, vibeError('VIBE8004', { name: extra }), helpLine);
+  }
 
   if (values.help || (!def && !values.version)) {
     const r = help(ctx, def ? [def] : COMMANDS);
@@ -128,10 +134,19 @@ async function dispatch(argv: string[], ctx: Ctx): Promise<Outcome> {
   return [r, () => def.human(r)];
 }
 
+/**
+ * Whether the caller asked for JSON: a `--json` token before `--`. `--json=<value>` counts too, so
+ * the VIBE8004 it causes is printed as JSON. Strict parseArgs never reads `--json` as a value.
+ */
+function wantsJson(argv: string[]): boolean {
+  const end = argv.indexOf('--');
+  return argv.slice(0, end === -1 ? undefined : end).some((a) => /^--json(=|$)/.test(a));
+}
+
 /** Runs one command; JSON with `--json` or in agent mode, text for people otherwise. */
 export async function main(argv: string[], ctx: Ctx): Promise<0 | 1 | 2> {
   const [result, human] = await dispatch(argv, ctx);
-  if (argv.includes('--json') || ctx.agent.active) ctx.out(`${JSON.stringify(result)}\n`);
+  if (wantsJson(argv) || ctx.agent.active) ctx.out(`${JSON.stringify(result)}\n`);
   else if (result.ok) ctx.out(`${human!()}\n`);
   else ctx.err(`${errorText(result)}\n`);
   return exitCode(result);

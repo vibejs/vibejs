@@ -13,7 +13,14 @@ export interface CommandDef<R extends JsonEnvelope = JsonEnvelope> {
   usage: string;
   examples: string[];
   options: Record<string, OptionDef>;
-  positionals: { name: string; required: boolean; values?: string[]; example: string }[];
+  /** Only the last positional can be `variadic`; it takes every remaining argument. */
+  positionals: {
+    name: string;
+    required: boolean;
+    variadic?: boolean;
+    values?: string[];
+    example: string;
+  }[];
   /** Pure: no output, no exit. Failures are envelopes with `ok: false`. */
   run(
     input: {

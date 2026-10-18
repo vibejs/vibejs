@@ -36,7 +36,7 @@ export const explain: CommandDef<ExplainResult> = {
   async run({ positionals: [code] }, ctx) {
     const entry = lookup(code);
     if (entry) return { ok: true, command: 'explain', version: ctx.version, entry };
-    const error = envelopeError(vibeError('VIBE8008', { code }));
+    const error = envelopeError(vibeError('VIBE8008', { code: code.toUpperCase() }));
     return { ok: false, command: 'explain', version: ctx.version, error };
   },
   human: (r) => entryMarkdown(r.entry!),

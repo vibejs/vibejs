@@ -12,11 +12,11 @@ exports[`command matrix > JSON: vibejs docs -h exits 0 > stdout 1`] = `"{"ok":tr
 
 exports[`command matrix > JSON: vibejs docs VIBE8003 exits 0 > stdout 1`] = `"{"ok":true,"command":"docs","version":"1.2.3","query":"VIBE8003","mode":"code","entry":{"code":"VIBE8003","package":"cli","title":"Missing required input","message":"Missing required input \`{name}\` for \`vibejs {command}\`.","fixes":["Pass \`{name}\` as shown in \`vibejs {command} --help\`.","Run the command from \`next\` in the JSON output."],"body":"The command needs a value that was not given. The CLI never prompts for it, so a coding agent gets the same answer as a person: the JSON output lists the missing input in \`error.missing\` with an example, and \`next\` holds a complete command to run.","docs":"https://vibejs.org/v0/errors/VIBE8003","retired":false}}"`;
 
-exports[`command matrix > JSON: vibejs docs errors/VIBE8004 exits 0 > stdout 1`] = `"{"ok":true,"command":"docs","version":"1.2.3","query":"errors/VIBE8004","mode":"page","page":{"path":"errors/VIBE8004","title":"VIBE8004: Unknown command or option","markdown":"# VIBE8004: Unknown command or option\\n\\n> Unknown command or option \`{name}\`.\\n\\nThe first word after \`vibejs\` must be a command, and every option must belong to that command or be one of the global options \`--json\`, \`--help\` and \`--version\`. For a common mistake, \`next\` suggests the intended command.\\n\\n## Fix\\n\\n- Run \`vibejs --help\` to list the commands and their options.\\n- Run the command from \`next\` in the JSON output.\\n\\nDocs: https://vibejs.org/v0/errors/VIBE8004"}}"`;
+exports[`command matrix > JSON: vibejs docs errors/VIBE8004 exits 0 > stdout 1`] = `"{"ok":true,"command":"docs","version":"1.2.3","query":"errors/VIBE8004","mode":"page","page":{"path":"errors/VIBE8004","title":"VIBE8004: Unknown command or option","markdown":"# VIBE8004: Unknown command or option\\n\\n> Unknown command or option \`{name}\`.\\n\\nThe first word after \`vibejs\` must be a command, and every option must belong to that command or be one of the global options \`--json\`, \`--help\` and \`--version\`. A command takes only the arguments its usage lists. For a common mistake, \`next\` suggests the intended command.\\n\\n## Fix\\n\\n- Run \`vibejs --help\` to list the commands and their options.\\n- Run the command from \`next\` in the JSON output.\\n\\nDocs: https://vibejs.org/v0/errors/VIBE8004"}}"`;
 
 exports[`command matrix > JSON: vibejs docs exits 2 > stdout 1`] = `"{"ok":false,"command":"docs","version":"1.2.3","next":["vibejs docs \\"unknown option\\""],"error":{"code":"VIBE8003","message":"Missing required input \`query\` for \`vibejs docs\`.","docs":"https://vibejs.org/v0/errors/VIBE8003","fixes":["Pass \`query\` as shown in \`vibejs docs --help\`.","Run the command from \`next\` in the JSON output."],"missing":[{"name":"query","example":"vibejs docs \\"unknown option\\""}]}}"`;
 
-exports[`command matrix > JSON: vibejs docs unknown option exits 0 > stdout 1`] = `"{"ok":true,"command":"docs","version":"1.2.3","query":"unknown option","mode":"search","hits":[{"path":"errors/VIBE8004","title":"VIBE8004: Unknown command or option","score":12,"excerpt":"> Unknown command or option \`{name}\`. The first word after \`vibejs\` must be a command, and every option must belong to that command or be one of the global opti"},{"path":"errors/VIBE8008","title":"VIBE8008: Unknown error code","score":5,"excerpt":"> No error code \`{code}\` in the catalog of this vibejs version. \`vibejs explain\` and \`vibejs docs\` read the error catalog that ships with the installed CLI, so "}]}"`;
+exports[`command matrix > JSON: vibejs docs quokka exits 0 > stdout 1`] = `"{"ok":true,"command":"docs","version":"1.2.3","query":"quokka","mode":"search","hits":[{"path":"guide/quokka","title":"Quokka guide","score":6,"excerpt":"A quokka page."}]}"`;
 
 exports[`command matrix > JSON: vibejs explain --help exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]}]}"`;
 
@@ -132,7 +132,7 @@ exports[`command matrix > human: vibejs docs errors/VIBE8004 exits 0 > output 1`
 
 > Unknown command or option \`{name}\`.
 
-The first word after \`vibejs\` must be a command, and every option must belong to that command or be one of the global options \`--json\`, \`--help\` and \`--version\`. For a common mistake, \`next\` suggests the intended command.
+The first word after \`vibejs\` must be a command, and every option must belong to that command or be one of the global options \`--json\`, \`--help\` and \`--version\`. A command takes only the arguments its usage lists. For a common mistake, \`next\` suggests the intended command.
 
 ## Fix
 
@@ -152,11 +152,9 @@ exports[`command matrix > human: vibejs docs exits 2 > output 1`] = `
 "
 `;
 
-exports[`command matrix > human: vibejs docs unknown option exits 0 > output 1`] = `
-"errors/VIBE8004  VIBE8004: Unknown command or option
-  > Unknown command or option \`{name}\`. The first word after \`vibejs\` must be a command, and every option must belong to that command or be one of the global opti
-errors/VIBE8008  VIBE8008: Unknown error code
-  > No error code \`{code}\` in the catalog of this vibejs version. \`vibejs explain\` and \`vibejs docs\` read the error catalog that ships with the installed CLI, so 
+exports[`command matrix > human: vibejs docs quokka exits 0 > output 1`] = `
+"guide/quokka  Quokka guide
+  A quokka page.
 "
 `;
 

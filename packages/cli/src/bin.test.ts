@@ -9,7 +9,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-it('runs main with the process arguments and sets the exit code', async () => {
+// The cold import transforms the whole CLI module graph under coverage, which can take seconds on
+// a busy machine.
+it('runs main with the process arguments and sets the exit code', { timeout: 30_000 }, async () => {
   vi.stubEnv('VIBEJS_AGENT', '1');
   process.argv = ['node', 'vibejs', '--version'];
   const write = vi.spyOn(process.stdout, 'write').mockReturnValue(true);

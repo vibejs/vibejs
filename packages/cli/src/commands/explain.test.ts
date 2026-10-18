@@ -34,8 +34,8 @@ it('returns the catalog entry of a known code', async () => {
   expect(r.entry).toMatchObject({ code: 'VIBE8003', retired: false });
 });
 
-it('returns VIBE8008 for a code that is not in the catalog', async () => {
-  expect(await run('VIBE0000')).toEqual({
+it('returns VIBE8008 with the upper-case code for a code that is not in the catalog', async () => {
+  expect(await run('vibe0000')).toEqual({
     ok: false,
     command: 'explain',
     version: '1.2.3',

@@ -13,21 +13,26 @@ export interface Page {
   markdown: string;
 }
 
-/** The corpus: catalog entries as `errors/VIBE####` pages, then every Markdown file in docsDir. */
+/** A page titled by its first `# ` heading, or by its path when it has none. */
+const toPage = (path: string, markdown: string): Page => ({
+  path,
+  title: /^# (.+)$/m.exec(markdown)?.[1] ?? path,
+  markdown,
+});
+
+/**
+ * The corpus: catalog entries as `errors/VIBE####` pages, then every Markdown file in docsDir.
+ * A file at the path of a catalog page is skipped: the bundled catalog is the source of truth.
+ */
 export function loadPages(docsDir: string, catalog: readonly CatalogEntry[] = CATALOG): Page[] {
-  const entries = catalog.map((entry) => ({
-    path: `errors/${entry.code}`,
-    title: `${entry.code}: ${entry.title}`,
-    markdown: entryMarkdown(entry),
-  }));
+  const entries = catalog.map((entry) => toPage(`errors/${entry.code}`, entryMarkdown(entry)));
+  const paths = new Set(entries.map((page) => page.path));
   // A missing docsDir (before the docs build fills dist/docs) globs to nothing.
   const files = globSync('**/*.md', { cwd: docsDir })
     .toSorted()
-    .map((file) => {
-      const path = file.slice(0, -3).replaceAll(sep, '/');
-      const markdown = readFileSync(join(docsDir, file), 'utf8');
-      return { path, title: /^# (.+)$/m.exec(markdown)?.[1] ?? path, markdown };
-    });
+    .map((file) => [file, file.slice(0, -3).replaceAll(sep, '/')] as const)
+    .filter(([, path]) => !paths.has(path))
+    .map(([file, path]) => toPage(path, readFileSync(join(docsDir, file), 'utf8')));
   return [...entries, ...files];
 }
 
@@ -71,14 +76,16 @@ export const docs: CommandDef<DocsResult> = {
   usage: 'vibejs docs <query...>',
   examples: ['vibejs docs VIBE8003', 'vibejs docs errors/VIBE8004', 'vibejs docs "unknown option"'],
   options: {},
-  positionals: [{ name: 'query', required: true, example: 'vibejs docs "unknown option"' }],
+  positionals: [
+    { name: 'query', required: true, variadic: true, example: 'vibejs docs "unknown option"' },
+  ],
   async run({ positionals }, ctx) {
     const query = positionals.join(' ');
     const base = { ok: true, command: 'docs', version: ctx.version, query };
     if (/^VIBE\d{4}$/i.test(query)) {
       const entry = lookup(query);
       if (entry) return { ...base, mode: 'code', entry };
-      const error = envelopeError(vibeError('VIBE8008', { code: query }));
+      const error = envelopeError(vibeError('VIBE8008', { code: query.toUpperCase() }));
       return { ...base, ok: false, mode: 'code', error };
     }
     const pages = loadPages(ctx.docsDir);

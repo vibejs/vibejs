@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -7,18 +7,21 @@ import { COMMANDS, main, MISTAKES } from './main.ts';
 import type { HelpResult, JsonEnvelope } from './output.ts';
 
 const root = mkdtempSync(join(tmpdir(), 'vibejs-main-'));
+// The search rows match only this page, so new catalog entries never change their snapshots.
+mkdirSync(join(root, 'docs', 'guide'), { recursive: true });
+writeFileSync(join(root, 'docs', 'guide', 'quokka.md'), '# Quokka guide\n\nA quokka page.\n');
 afterAll(() => {
   rmSync(root, { recursive: true, force: true });
 });
 
-/** Runs main with a fixed version and no docs dir (the catalog-only corpus). */
+/** Runs main with a fixed version and a docs dir of one page. */
 async function run(argv: string[], agent = false) {
   let stdout = '';
   let stderr = '';
   const ctx: Ctx = {
     version: '1.2.3',
     agent: { active: agent },
-    docsDir: join(root, 'missing'),
+    docsDir: join(root, 'docs'),
     out: (s) => (stdout += s),
     err: (s) => (stderr += s),
   };
@@ -61,8 +64,10 @@ describe('unknown commands and options', () => {
     [['explain', '--bogus', 'VIBE8003'], 'explain', '--bogus', 'vibejs explain --help'],
     [['explain', '--json=yes', 'VIBE8003'], 'explain', '--json', 'vibejs explain --help'],
     [['--bogus'], 'help', '--bogus', 'vibejs --help'],
+    [['explain', 'VIBE8003', 'extra'], 'explain', 'extra', 'vibejs explain --help'],
+    [['--', '-x'], 'help', '-x', 'vibejs --help'],
   ])('%j gives VIBE8004 and exit 2', async (argv, command, name, next) => {
-    const result = await run([...argv, '--json']);
+    const result = await run(['--json', ...argv]);
     expect(result.code).toBe(2);
     expect(json(result)).toMatchObject({
       ok: false,
@@ -70,6 +75,12 @@ describe('unknown commands and options', () => {
       next: [next],
       error: { code: 'VIBE8004', message: `Unknown command or option \`${name}\`.` },
     });
+  });
+
+  it('answers --json=<value> with JSON', async () => {
+    const result = await run(['--json=1']);
+    expect(result.code).toBe(2);
+    expect(json(result)).toMatchObject({ error: { code: 'VIBE8004' } });
   });
 
   it('suggests only registered commands or the npm create line', () => {
@@ -87,7 +98,7 @@ describe('command matrix', () => {
     ['explain', 2],
     ['docs VIBE8003', 0],
     ['docs errors/VIBE8004', 0],
-    ['docs unknown option', 0],
+    ['docs quokka', 0],
     ['docs', 2],
     ['', 0],
     ['--help', 0],
@@ -154,6 +165,12 @@ describe('--help --json', () => {
     expect(r.ok).toBe(true);
     expect(r.commands.map((c) => c.name)).toEqual(['docs']);
   });
+});
+
+it('reads --json after -- as a docs query, not as the flag', async () => {
+  const result = await run(['docs', '--', '--json', 'quokka']);
+  expect(result.code).toBe(0);
+  expect(result.stdout).toMatch(/^guide\/quokka {2}Quokka guide\n/);
 });
 
 it('prints the version with --version --json, without a skew check', async () => {
