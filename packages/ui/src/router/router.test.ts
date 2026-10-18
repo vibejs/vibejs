@@ -14,6 +14,7 @@ import type {
   NavigationGuard,
   RouteLocation,
   Router,
+  RouterHistory,
   RouterOptions,
   RouteRecordRaw,
 } from './types.ts';
@@ -157,6 +158,11 @@ describe('resolve', () => {
     await router.push('/a?x=1#old');
     expect(router.resolve({ query: { y: 2 } }).fullPath).toBe('/a?y=2');
     expect(router.resolve({ hash: '#h' }).fullPath).toBe('/a#h');
+    expect(router.resolve({ path: '/a', hash: 'top' })).toMatchObject({
+      fullPath: '/a#top',
+      query: {},
+      hash: '#top',
+    });
     expect(router.resolve({}).fullPath).toBe('/a');
   });
 
@@ -293,6 +299,18 @@ describe('navigation', () => {
     expect(isNavigationFailure(failure, 'cancelled')).toBe(true);
     expect(isNavigationFailure(failure, 'aborted')).toBe(false);
     expect(router.currentRoute.value.path).toBe('/b');
+  });
+
+  it('cancels a pending push with a duplicated one', async () => {
+    const { router } = setup(routes);
+    await router.push('/a');
+    const gate = deferred<boolean>();
+    router.beforeEach((to) => (to.path === '/b' ? gate.promise : true));
+    const pending = router.push('/b');
+    expect(await router.push('/a')).toMatchObject({ type: 'duplicated' });
+    gate.resolve(true);
+    expect(await pending).toMatchObject({ type: 'cancelled' });
+    expect(router.currentRoute.value.path).toBe('/a');
   });
 
   it('gives a duplicated failure for the same fullPath and still calls afterEach', async () => {
@@ -477,6 +495,18 @@ describe('lazy components', () => {
     await expect(router.push('/throws')).rejects.toMatchObject({ code: 'VIBE7109', cause });
   });
 
+  it('loads again after a failed load', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const loader = vi
+      .fn<() => Promise<object>>()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce(component);
+    const { router } = setup([{ path: '/lazy', component: loader }]);
+    await expect(router.push('/lazy')).rejects.toEqual(code('VIBE7109'));
+    expect(await router.push('/lazy')).toBeUndefined();
+    expect(loader).toHaveBeenCalledTimes(2);
+  });
+
   it('throws VIBE7110 when the loader resolves to something other than a component', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const { router } = setup([
@@ -540,6 +570,11 @@ describe('VIBE7107 and VIBE7103', () => {
   });
 });
 
+/** History-driven navigations keep the history entry and `currentRoute` in step. */
+function expectSynced({ history, router }: { history: RouterHistory; router: Router }) {
+  expect(history.location).toBe(router.currentRoute.value.fullPath);
+}
+
 /** A router at /b after /a, with spies on the history writes. */
 async function atB() {
   const { history, router } = setup(routes);
@@ -568,16 +603,18 @@ describe('history-driven navigation', () => {
   });
 
   it('commits back(), forward() and go() without writing the history', async () => {
-    const { router, push, replace } = await atB();
+    const { history, router, push, replace } = await atB();
     router.back();
     expect((await settled(router)).to.path).toBe('/a');
     expect(router.currentRoute.value.path).toBe('/a');
+    expectSynced({ history, router });
     router.forward();
     await settled(router);
     expect(router.currentRoute.value.path).toBe('/b');
     router.go(-2);
     await settled(router);
     expect(router.currentRoute.value.path).toBe('/');
+    expectSynced({ history, router });
     expect(push).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
   });
@@ -596,8 +633,8 @@ describe('history-driven navigation', () => {
     expect(router.currentRoute.value.path).toBe('/b');
   });
 
-  it('reverts a cancelled one with go(-delta, false)', async () => {
-    const { router, go } = await atB();
+  it('leaves a cancelled one to the push that cancelled it', async () => {
+    const { history, router, go } = await atB();
     const gate = deferred();
     router.beforeEach((to) => (to.path === '/a' ? gate.promise : undefined));
     const after = vi.fn<AfterHook>();
@@ -612,16 +649,88 @@ describe('history-driven navigation', () => {
       expect.objectContaining({ path: '/b' }),
       expect.objectContaining({ type: 'cancelled' }),
     );
-    expect(go).toHaveBeenLastCalledWith(1, false);
+    expect(go).toHaveBeenCalledOnce();
     expect(router.currentRoute.value.path).toBe('/c');
+    expectSynced({ history, router });
+    history.go(-1, false);
+    expect(history.location).toBe('/a');
   });
 
-  it('does not revert a duplicated one', async () => {
+  it('restores the history when a push aborts while a back() is pending', async () => {
+    const { history, router, go } = await atB();
+    const gate = deferred();
+    router.beforeEach((to) => (to.path === '/a' ? gate.promise : to.path !== '/c'));
+    router.back();
+    expect(await router.push('/c')).toMatchObject({ type: 'aborted' });
+    expect(go).toHaveBeenLastCalledWith(1, false);
+    gate.resolve();
+    await tick();
+    expect(router.currentRoute.value.path).toBe('/b');
+    expectSynced({ history, router });
+  });
+
+  it('leaves a cancelled one to the history move that cancelled it', async () => {
+    const { history, router, go } = await atB();
+    const gate = deferred();
+    router.beforeEach((to) => (to.path === '/a' ? gate.promise : undefined));
+    router.back();
+    router.back();
+    expect((await settled(router)).to.path).toBe('/');
+    gate.resolve();
+    expect((await settled(router)).failure).toMatchObject({ type: 'cancelled' });
+    expect(go).toHaveBeenCalledTimes(2);
+    expect(router.currentRoute.value.path).toBe('/');
+    expectSynced({ history, router });
+  });
+
+  it('restores every history step when the latest of two moves aborts', async () => {
+    const { history, router, go } = await atB();
+    const gate = deferred();
+    router.beforeEach((to) => (to.path === '/a' ? gate.promise : to.path !== '/'));
+    router.back();
+    router.back();
+    expect((await settled(router)).failure).toMatchObject({ type: 'aborted' });
+    expect(go).toHaveBeenLastCalledWith(2, false);
+    gate.resolve();
+    await tick();
+    expect(router.currentRoute.value.path).toBe('/b');
+    expectSynced({ history, router });
+  });
+
+  it('leaves the history to the newer navigation when a cancelled one throws', async () => {
+    const { history, router } = await atB();
+    const [a, root] = [deferred(), deferred()];
+    router.beforeEach((to) => (to.path === '/a' ? a : root).promise);
+    const onError = vi.fn<ErrorHandler>();
+    router.onError(onError);
+    router.back();
+    router.back();
+    a.reject(new Error('stale guard failed'));
+    await tick();
+    expect(onError).toHaveBeenCalledOnce();
+    root.resolve();
+    await settled(router);
+    expect(router.currentRoute.value.path).toBe('/');
+    expectSynced({ history, router });
+  });
+
+  it('does not revert a duplicated one that is already the current entry', async () => {
     const { history, router, go } = await atB();
     history.push('/b');
     history.go(-1);
     expect((await settled(router)).failure).toMatchObject({ type: 'duplicated' });
     expect(go).toHaveBeenCalledOnce();
+    expectSynced({ history, router });
+  });
+
+  it('reverts one that a guard redirects to the current route', async () => {
+    const { history, router, go } = await atB();
+    router.beforeEach((to) => (to.path === '/a' ? '/b' : undefined));
+    router.back();
+    expect((await settled(router)).failure).toMatchObject({ type: 'duplicated' });
+    expect(go).toHaveBeenLastCalledWith(1, false);
+    expect(router.currentRoute.value.path).toBe('/b');
+    expectSynced({ history, router });
   });
 
   it('replaces the entry when it redirects', async () => {
@@ -636,7 +745,7 @@ describe('history-driven navigation', () => {
   });
 
   it('reports a thrown error to onError without an unhandled rejection', async () => {
-    const { router } = await atB();
+    const { history, router } = await atB();
     const error = new Error('guard failed');
     router.beforeEach(() => {
       throw error;
@@ -645,6 +754,8 @@ describe('history-driven navigation', () => {
     router.onError(failed.resolve);
     router.back();
     expect(await failed.promise).toBe(error);
+    expect(router.currentRoute.value.path).toBe('/b');
+    expectSynced({ history, router });
   });
 });
 
@@ -671,5 +782,18 @@ describe('isReady', () => {
     });
     await expect(router.push('/a')).rejects.toBe(error);
     await expect(router.isReady()).rejects.toBe(error);
+  });
+
+  it('rejects and starts listening when the first location does not resolve', async () => {
+    const { history, router } = setup(routes);
+    await expect(router.push({ name: 'nope' })).rejects.toEqual(code('VIBE7105'));
+    await expect(router.isReady()).rejects.toEqual(code('VIBE7105'));
+    history.push('/a');
+    history.go(-1);
+    await settled(router);
+    expect(router.currentRoute.value.path).toBe('/');
+    history.go(1);
+    await settled(router);
+    expect(router.currentRoute.value.path).toBe('/a');
   });
 });

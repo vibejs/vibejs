@@ -45,6 +45,7 @@ export function parsePath(path: string): PathParser {
     const char = path[i];
     if (char === '\\') {
       if (!depth) throw fail('escapes with "\\" are not supported');
+      if (path[i + 1] === '/') throw fail('a param regex cannot contain "/"');
       raw[raw.length - 1] += char + path.charAt(++i);
       continue;
     }
@@ -61,6 +62,10 @@ export function parsePath(path: string): PathParser {
   let source = '^';
   for (const segment of raw) {
     if (!segment.includes(':')) {
+      // `URL` would cut the text at `?` or `#`, or remove a dot segment.
+      if (/[?#]/.test(segment) || /^(?:\.|%2e){1,2}$/i.test(segment)) {
+        throw fail(`the static segment "${segment}" is a dot segment or contains "?" or "#"`);
+      }
       segments.push(segment);
       score.push(segment ? STATIC : ROOT);
       if (segment) source += '/' + encodeStatic(segment).replace(/[.+*?^${}()[\]|\\]/g, '\\$&');
@@ -69,6 +74,14 @@ export function parsePath(path: string): PathParser {
     const match = PARAM_SEGMENT.exec(segment);
     if (!match) throw fail(`the segment "${segment}" mixes static text and a param`);
     const [, name, regex = DEFAULT_REGEX, modifier] = match;
+    // The greedy match takes `x)(y` from `:a(x)(y)`: the regex must be one group of its own.
+    let open = 0;
+    for (let i = 0; i < regex.length && open >= 0; i++) {
+      if (regex[i] === '\\') i++;
+      else if (regex[i] === '(') open++;
+      else if (regex[i] === ')') open--;
+    }
+    if (!regex || open) throw fail(`the segment "${segment}" needs one non-empty param regex`);
     const param = {
       name,
       optional: modifier === '?' || modifier === '*',
@@ -146,6 +159,9 @@ export function buildPath(
       : value === undefined || value === null || value === ''
         ? []
         : [String(value)];
+    if (values.some((item) => item === '.' || item === '..')) {
+      throw invalid('a value other than "." or ".."');
+    }
     if (!values.length && !param.optional) {
       throw list
         ? invalid('a non-empty array')

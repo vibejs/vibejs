@@ -149,9 +149,9 @@ describe('Path parser', () => {
     it('regex special characters', () => {
       // A location path is encoded by URL, which encodes `^` but not `$`, `[`, `|` or `(`.
       expect(match('/foo$^', '/foo$%5E')).toEqual({});
-      // `?` starts the query of a location, so it also ends static text.
-      expect(match('/foo+.*?', '/foo+.*')).toEqual({});
-      expect(match('/foo+.*?', '/foooo')).toEqual(undefined);
+      // `?` starts the query of a location, so static text rejects it (VIBE7101).
+      expect(match('/foo+.*', '/foo+.*')).toEqual({});
+      expect(match('/foo+.*', '/foooo')).toEqual(undefined);
       expect(match('/foo[ea]', '/foo[ea]')).toEqual({});
       expect(match('/foo[ea]', '/fooe')).toEqual(undefined);
       expect(match('/foo(e|a)', '/foo(e|a)')).toEqual({});
@@ -337,6 +337,14 @@ describe('VIBE7101', () => {
     ['/file.:ext', 'mixes static text and a param'],
     ['/:a(\\d+)b', 'mixes static text and a param'],
     ['/:a([^/]+)', 'cannot contain "/"'],
+    ['/:p(a\\/b)', 'cannot contain "/"'],
+    ['/:a(x)(y)', 'one non-empty param regex'],
+    ['/:id()', 'one non-empty param regex'],
+    ['/what?', 'contains "?" or "#"'],
+    ['/a#b', 'contains "?" or "#"'],
+    ['/a/./b', 'dot segment'],
+    ['/a/..', 'dot segment'],
+    ['/a/%2E%2e', 'dot segment'],
     ['/\\:a', 'escapes'],
     ['/:a(\\d+', 'unbalanced'],
     ['/:a)', 'unbalanced'],
@@ -368,5 +376,9 @@ describe('VIBE7104 and VIBE7118', () => {
     expect(() => build('/:p', { p: ['a'] })).toThrow(
       invalid({ expected: 'a single value, not an array' }),
     );
+    expect(() => build('/:p', { p: '..' })).toThrow(
+      invalid({ expected: 'a value other than "." or ".."' }),
+    );
+    expect(() => build('/:p+', { p: ['a', '.'] })).toThrow(invalid({ param: 'p' }));
   });
 });

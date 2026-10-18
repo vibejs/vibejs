@@ -96,6 +96,8 @@ function load(record: RouteRecordNormalized, loader: () => unknown): Promise<voi
           Object.assign(record, { component });
         },
         (cause: unknown) => {
+          // A later navigation tries again, for example once the network is back.
+          loading.delete(record);
           throw vibeError('VIBE7109', { path: record.path }, { cause });
         },
       );
@@ -132,12 +134,17 @@ export function createRouter(options: RouterOptions): Router {
   });
   // isReady() may never be called, and a first navigation that throws still rejects it.
   ready.catch(() => {});
-  let pending: RouteLocation | undefined;
+  /** Counts navigations: a navigation is cancelled once a newer one starts. */
+  let navigations = 0;
+  /** The history steps taken by history-driven navigations since `currentRoute` was committed. */
+  let offset = 0;
   let unlisten: (() => void) | undefined;
 
   function resolve(raw: RouteLocationRaw, current = currentRoute.value): RouteLocation {
     if (typeof raw === 'string') return locate(parseLocation(raw, current.path));
-    const suffix = '?' + stringifyQuery(raw.query ?? {}) + (raw.hash ?? '');
+    const hash = raw.hash ?? '';
+    const suffix =
+      '?' + stringifyQuery(raw.query ?? {}) + (hash && !hash.startsWith('#') ? '#' : '') + hash;
     if ('name' in raw) {
       const route = matcher.resolveName(raw.name, raw.params ?? {});
       return locate(parseLocation(route.path + suffix, '/'), route);
@@ -152,30 +159,43 @@ export function createRouter(options: RouterOptions): Router {
     return { path, fullPath, name, params, query, hash, matched, meta, redirectedFrom: undefined };
   }
 
+  /** Moves the history back to `currentRoute` after the latest navigation failed. */
+  function restore() {
+    if (offset && history.location !== currentRoute.value.fullPath) history.go(-offset, false);
+    offset = 0;
+  }
+
+  /** `pop` is a navigation that follows a history move. */
   async function navigate(
     raw: RouteLocationRaw,
     replace: boolean,
-    delta?: number,
+    pop = false,
   ): Promise<NavigationFailure | undefined> {
     const from = currentRoute.value;
-    const first = resolve(raw);
-    replace ||= typeof raw === 'object' && raw.replace === true;
-    let to = first;
-    let redirects = 0;
+    let to: RouteLocation | undefined;
+    let id = navigations;
     try {
+      const first = resolve(raw);
+      id = ++navigations;
+      replace ||= typeof raw === 'object' && raw.replace === true;
+      to = first;
+      let redirects = 0;
       for (;;) {
-        const redirect = to.matched.at(-1)?.redirect;
-        let next = typeof redirect === 'function' ? redirect(to) : redirect;
+        const redirect: RouteRecordNormalized['redirect'] = to.matched.at(-1)?.redirect;
+        let next: RouteLocationRaw | undefined =
+          typeof redirect === 'function' ? redirect(to) : redirect;
         if (next === undefined) {
-          const result = await run(to, from);
+          const result = await run(to, from, id);
           if (isNavigationFailure(result)) {
-            if (delta && result.type !== 'duplicated') history.go(-delta, false);
+            // A cancelled navigation leaves the history position to the newer one.
+            if (id === navigations) restore();
             for (const hook of afterHooks) hook(to, from, result);
             return result;
           }
           if (result === undefined) {
             currentRoute.value = to;
-            if (delta === undefined) history[replace ? 'replace' : 'push'](to.fullPath);
+            offset = 0;
+            if (!pop) history[replace ? 'replace' : 'push'](to.fullPath);
             else if (to !== first) history.replace(to.fullPath);
             resolveReady();
             for (const hook of afterHooks) hook(to, from);
@@ -188,14 +208,19 @@ export function createRouter(options: RouterOptions): Router {
         to = { ...resolve(next, to), redirectedFrom: first };
       }
     } catch (error) {
-      if (errorHandlers.size) for (const handler of errorHandlers) handler(error, to, from);
-      else logError(error);
+      // An error while resolving the first target has no `to` to report to onError.
+      if (to) {
+        if (id === navigations) restore();
+        if (errorHandlers.size) for (const handler of errorHandlers) handler(error, to, from);
+        else logError(error);
+      }
       rejectReady(error);
       throw error;
     } finally {
       unlisten ??= history.listen((location, _from, info) => {
+        offset += info.delta;
         // A failure was handed to afterEach and an error to onError: nothing is left to report.
-        navigate(location, false, info.delta).catch(() => {});
+        navigate(location, false, true).catch(() => {});
       });
     }
   }
@@ -210,11 +235,12 @@ export function createRouter(options: RouterOptions): Router {
   async function run(
     to: RouteLocation,
     from: RouteLocation,
+    id: number,
   ): Promise<NavigationFailure | RouteLocationRaw | undefined> {
+    // A duplicated navigation still cancels a pending one: the latest intent wins.
     if (to.fullPath === from.fullPath && from !== START_LOCATION) {
       return new Failure('duplicated', to, from);
     }
-    pending = to;
     const leaving: RouteRecordNormalized[] = [];
     for (const record of from.matched) if (!to.matched.includes(record)) leaving.unshift(record);
     const updating = from.matched.filter((record) => to.matched.includes(record));
@@ -237,7 +263,7 @@ export function createRouter(options: RouterOptions): Router {
     ];
     for (const phase of phases) {
       const result = await phase();
-      if (pending !== to) return new Failure('cancelled', to, from);
+      if (id !== navigations) return new Failure('cancelled', to, from);
       if (result === false) return new Failure('aborted', to, from);
       if (result && result !== true) return result;
     }

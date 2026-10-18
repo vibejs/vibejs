@@ -10,6 +10,8 @@ A route path is a list of segments separated by `/`. Each segment is either stat
 
 - Give each param its own segment: `/files/:name` instead of `/file.:ext` or `/:a-:b`.
 - Remove `\` escapes and any `/` from param regexes, and close every parenthesis.
+- Give a param at most one non-empty regex: `:id(\d+)`, not `:id()` or `:id(a)(b)`.
+- Remove `?` and `#` from static text, and `.` and `..` segments, which a URL removes or reads as a query or a hash.
 - Check that the param regex compiles with `new RegExp()`.
 - Start every top-level path with `/`; only child paths are relative.
 
@@ -123,9 +125,10 @@ A lazy `component` is a function that returns a promise of a component or of a m
 
 > The param {param} of the route {route} must be {expected}.
 
-A param declared with `+` or `*` takes an array, and `+` needs at least one item. Any other param takes a single string or number.
+A param declared with `+` or `*` takes an array, and `+` needs at least one item. Any other param takes a single string or number. A value cannot be `.` or `..`, because a URL removes it as a dot segment.
 
 ### Fix
 
 - Pass an array for a repeatable param, such as `['a', 'b']` for `/:segments+`.
 - Pass a single value for a param without `+` or `*`.
+- Pass a value other than `.` or `..` for {param}.
