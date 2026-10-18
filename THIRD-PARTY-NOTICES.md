@@ -15,3 +15,16 @@ Details, the changes made and the full license texts are in [`packages/vscode/TH
   - `packages/vscode/test/grammars/TypeScript.tmLanguage` from `TypeScript.tmLanguage`
 - **microsoft/vscode** at `28a562309973a386b2bdefae78127788a4742fe8`, MIT, Copyright (c) 2015 - present Microsoft Corporation (test fixture, not shipped). The file is converted from textmate/html.tmbundle at `0c3d5ee54de3a993f747f54186b73a4d2d3c44a2`, under that bundle's permissive license.
   - `packages/vscode/test/grammars/html.tmLanguage.json` from `extensions/html/syntaxes/html.tmLanguage.json`
+
+## packages/ui
+
+Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`](packages/ui/THIRD-PARTY-NOTICES.md).
+
+- **stackblitz/alien-signals** 3.2.1 at `8734d386d925025d0e99419bd9161c17b112c5ee`, MIT, Copyright (c) 2024-present Johnson Chu.
+  - `packages/ui/src/reactivity/system.ts` from `src/system.ts`
+  - `packages/ui/src/reactivity/system.test.ts` from `tests/effect.spec.ts`, `tests/effectScope.spec.ts` and `tests/trigger.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/conformance.test.ts` from `tests/conformance.spec.ts` (tests, not shipped)
+- **vuejs/core** v3.5.44 at `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`, MIT, Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors (tests, not shipped).
+  - `packages/ui/src/reactivity/ref.test.ts` from `packages/reactivity/__tests__/ref.spec.ts`
+  - `packages/ui/src/reactivity/computed.test.ts` from `packages/reactivity/__tests__/computed.spec.ts`
+  - `packages/ui/src/reactivity/effectScope.test.ts` from `packages/reactivity/__tests__/effectScope.spec.ts`

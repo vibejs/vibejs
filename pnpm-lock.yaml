@@ -240,6 +240,9 @@ catalogs:
     publint:
       specifier: 0.3.25
       version: 0.3.25
+    reactive-framework-test-suite:
+      specifier: 0.1.0
+      version: 0.1.0
     std-env:
       specifier: ^4.3.0
       version: 4.3.0
@@ -402,6 +405,9 @@ importers:
         specifier: workspace:*
         version: link:../errors
     devDependencies:
+      reactive-framework-test-suite:
+        specifier: 'catalog:'
+        version: 0.1.0
       tsdown:
         specifier: 'catalog:'
         version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.0.2)
@@ -2686,6 +2692,9 @@ packages:
   quansync@1.0.0:
     resolution: {integrity: sha512-5xZacEEufv3HSTPQuchrvV6soaiACMFnq1H8wkVioctoH3TRha9Sz66lOxRwPK/qZj7HPiSveih9yAyh98gvqA==}
 
+  reactive-framework-test-suite@0.1.0:
+    resolution: {integrity: sha512-qXweOzwM8VP0iDLAY+fhoxArkMxRulbzwoIg5/f2y/ag4CBRRNhD+buq0ags/Rz4XyCTvjJm0Rl7CWXkJcSnRw==}
+
   read@1.0.7:
     resolution: {integrity: sha512-rSOKNYUmaxy0om1BNjMN4ezNT6VKK+2xF4GBhc81mkH7L60i6dp8qPYrkndNLT3QPphoII3maL9PVC9XmhHwVQ==}
     engines: {node: '>=0.8'}
@@ -4917,6 +4926,8 @@ snapshots:
       side-channel: 1.1.1
 
   quansync@1.0.0: {}
+
+  reactive-framework-test-suite@0.1.0: {}
 
   read@1.0.7:
     dependencies:
