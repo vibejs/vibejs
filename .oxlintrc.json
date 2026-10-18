@@ -42,7 +42,6 @@
         "packages/create-vibejs/bin.js",
         "packages/compiler/src/index.ts",
         "packages/compiler/src/vite.ts",
-        "packages/contract/src/index.ts",
         "packages/language-tools/src/index.ts",
         "packages/server/src/openapi.ts",
         "packages/server/src/testing.ts",

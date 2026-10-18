@@ -27,6 +27,10 @@ catalog:
   '@types/node': 24.19.2
   oxc-parser: ^0.154.0
   knip: 6.41.0
+  '@standard-schema/spec': ^1.1.0
+  zod: 4.6.7
+  valibot: 1.5.0
+  arktype: 2.2.8
 
 catalogs:
   ts-next:
