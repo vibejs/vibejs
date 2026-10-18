@@ -518,6 +518,13 @@ describe('rule 11: email addresses', () => {
     const notice = `    deprecated: Contact ${address('jane.doe', 'corp.io')} for support\n`;
     expect(lint({ 'pnpm-lock.yaml': notice })).toEqual([]);
   });
+
+  it('still reports an address on any other pnpm-lock.yaml line', () => {
+    const resolution = `    resolution: {tarball: https://${address('jane.doe', 'corp.io')}/x.tgz}\n`;
+    expect(lint({ 'pnpm-lock.yaml': resolution })).toEqual([
+      'pnpm-lock.yaml:1:35 email no email addresses; link a GitHub page instead',
+    ]);
+  });
 });
 
 describe('rule 12: positioning', () => {
