@@ -44,6 +44,9 @@
   "scripts": {
     "build": "tsdown"
   },
+  "dependencies": {
+    "@vibejs-org/errors": "workspace:*"
+  },
   "devDependencies": {
     "tsdown": "catalog:"
   },
