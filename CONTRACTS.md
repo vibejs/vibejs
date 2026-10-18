@@ -169,15 +169,19 @@ isAllowedGlobal(name); isSimpleHandler(expr); resolveComponentTag(tag, analysis,
   "include": ["src"], "references": [{ "path": "../contracts" }] }
 ```
 - `.vibe` imports keep their extension. Never write `declare module '*.vibe'`.
-- `vibejs check` parses lines matching `^(.+?)\((\d+),(\d+)\): (error|warning) ([A-Z]+\d+): (.*)`.
+- `vibejs check` runs `tsc -b --pretty false` and parses lines matching `^(.+?)\((\d+),(\d+)\): (error|warning) ([A-Z]+\d+): (.*)`.
 - Content-mapper diagnostics render their code as `VIBE####`, so the pattern above extracts it directly. If a TypeScript release changes that, language-tools prefixes the message with `[VIBE####]` and the parser extracts it from there.
+- `vibejs check` also handles the indented continuation lines that tsc prints for diagnostics in synthesized (unmapped) virtual code.
+- **Diagnostic forwarding.** tsc treats content-mapper diagnostics as syntax errors and then skips semantic checking for the whole program. The mapper therefore forwards only compiler diagnostics that make type checking meaningless (parse errors and an unusable SFC structure). Every other compiler diagnostic is reported by the compiler itself: by the Vite plugin during dev and build, and by a separate compile step in `vibejs check`.
+- **Editors.** The language server enables mappers through `initializationOptions.runExternalCode`; `tsc --lsp` has no `--runExternalCode` flag.
+- **Caching.** The mapper keeps `dynamicConfig: false`; its package `version` is the cache identity. Language-tools tests in this repository run `tsc --force` (or without buildinfo) so a changed mapper is never served from cache.
+- **Resolution.** `contentMappers` entries inherited through `extends` resolve from each leaf tsconfig's directory, so `@vibejs-org/language-tools` must be a direct dependency of the app.
 
 ## C7 Backend ↔ CLI, templates, UI
 - **App entry.** `server/src/app.module.ts` exports `AppModule` and `appOptions: AppOptions` (`basePath: '/api'`). `server/src/main.ts` runs `VibeFactory.create(AppModule, appOptions)`, then `enableShutdownHooks()`, then `listen(Number(process.env.PORT ?? 3000))`.
 - **Dev server.** It runs app.module.ts through Vite's SSR module runner with `create(AppModule, { ...appOptions, logger })` and mounts `app.fetch` at basePath via srvx `toNodeHandler`. A restart is `await app.close()` followed by `create` again.
   - `create` must have no side effects.
   - `close` must be idempotent.
-  - `@oxc-project/runtime` is a direct template dependency.
 - **Problem responses** are `application/problem+json`: `{ type, title, status, code, detail?, errors?, requestId }`.
 - **Contract isomorphism.**
   - `@vibejs-org/contract` imports nothing from `node:*`, srvx or the server, and is built against lib es2022+dom.
