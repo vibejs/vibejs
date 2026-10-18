@@ -40,8 +40,15 @@
   "scripts": {
     "build": "tsdown"
   },
+  "dependencies": {
+    "@standard-schema/spec": "catalog:",
+    "@vibejs-org/errors": "workspace:*"
+  },
   "devDependencies": {
-    "tsdown": "catalog:"
+    "arktype": "catalog:",
+    "tsdown": "catalog:",
+    "valibot": "catalog:",
+    "zod": "catalog:"
   },
   "engines": {
     "node": "^24.15.0 || >=26"
