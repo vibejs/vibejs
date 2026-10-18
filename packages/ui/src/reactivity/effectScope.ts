@@ -25,6 +25,9 @@ export let activeEffectScope: EffectScopeImpl | undefined;
 
 export class EffectScopeImpl implements EffectScope {
   active = true;
+  /** Whether `run()` on this inactive scope warns: not when it was created inside a stopped one. */
+  warnOnRun = true;
+  paused = false;
   readonly detached: boolean;
   effects: OwnedEffect[] = [];
   cleanups: (() => void)[] = [];
@@ -35,15 +38,20 @@ export class EffectScopeImpl implements EffectScope {
 
   constructor(detached = false) {
     this.detached = detached;
-    if (!detached && activeEffectScope) {
-      this.parent = activeEffectScope;
-      this.index = activeEffectScope.scopes.push(this) - 1;
+    const parent = activeEffectScope;
+    if (detached || !parent) return;
+    if (parent.active) {
+      this.parent = parent;
+      this.index = parent.scopes.push(this) - 1;
+    } else {
+      // Created inside a stopped scope: nothing could stop it, so it starts stopped.
+      this.active = this.warnOnRun = false;
     }
   }
 
   run<T>(fn: () => T): T | undefined {
     if (!this.active) {
-      warn(vibeError('VIBE5005'));
+      if (this.warnOnRun) warn(vibeError('VIBE5005'));
       return undefined;
     }
     const prev = activeEffectScope;
@@ -78,11 +86,16 @@ export class EffectScopeImpl implements EffectScope {
   }
 
   pause(): void {
+    if (!this.active) return;
+    this.paused = true;
     for (const scope of this.scopes) scope.pause();
     for (const effect of this.effects) effect.pause();
   }
 
   resume(): void {
+    // Only a paused scope resumes, so an effect paused on its own stays paused.
+    if (!this.active || !this.paused) return;
+    this.paused = false;
     // Copies: a resumed effect may stop a sibling effect or scope.
     for (const scope of this.scopes.slice()) scope.resume();
     for (const effect of this.effects.slice()) effect.resume();

@@ -351,11 +351,19 @@ describe('ref', () => {
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
-  test('triggerRef on a property, getter or computed ref is a no-op', () => {
+  test('triggerRef on a computed notifies its readers', () => {
     const c = computed(() => 1);
-    for (const r of [toRef({ x: 1 }, 'x'), toRef(() => 1), c]) {
-      expect(() => triggerRef(r)).not.toThrow();
-    }
-    expect(c.value).toBe(1);
+    const spy = vi.fn<(value?: unknown) => void>();
+    effect(() => spy(c.value));
+    triggerRef(c);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  test('triggerRef on a property or getter ref is a no-op', () => {
+    const spy = vi.fn<(value?: unknown) => void>();
+    const refs = [toRef({ x: 1 }, 'x'), toRef(() => 1)];
+    effect(() => spy(refs.map((r) => r.value)));
+    for (const r of refs) triggerRef(r);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

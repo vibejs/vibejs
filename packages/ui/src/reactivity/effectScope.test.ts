@@ -491,6 +491,65 @@ describe('effectScope', () => {
     expect(spy).toHaveBeenCalledTimes(3);
   });
 
+  test('resume() leaves an effect paused on its own paused unless the scope was paused', () => {
+    const counter = ref(0);
+    const runs = vi.fn<(value?: unknown) => void>();
+    const scope = effectScope();
+    const e = scope.run(() => effect(() => runs(counter.value)))!;
+    e.pause();
+    counter.value++;
+    scope.resume();
+    expect(runs).toHaveBeenCalledTimes(1);
+    e.resume();
+    expect(runs).toHaveBeenCalledTimes(2);
+  });
+
+  test('pause() and resume() on a stopped scope do nothing', () => {
+    const counter = ref(0);
+    const runs = vi.fn<(value?: unknown) => void>();
+    const paused = impl(effectScope());
+    paused.run(() => effect(() => runs(counter.value)));
+    paused.pause();
+    paused.stop();
+    paused.resume();
+    expect(paused.paused).toBe(true);
+    const stopped = impl(effectScope());
+    stopped.stop();
+    stopped.pause();
+    expect(stopped.paused).toBe(false);
+    counter.value++;
+    expect(runs).toHaveBeenCalledTimes(1);
+  });
+
+  test('an effect created inside a stopped scope starts stopped and is not owned', () => {
+    const counter = ref(0);
+    const runs = vi.fn<(value?: unknown) => void>();
+    const scope = impl(effectScope());
+    scope.run(() => {
+      scope.stop();
+      effect(() => runs(counter.value));
+    });
+    expect(scope.effects).toHaveLength(0);
+    counter.value++;
+    expect(runs).toHaveBeenCalledTimes(1);
+  });
+
+  test('a scope created inside a stopped scope starts stopped and runs nothing, silently', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const fn = vi.fn<() => void>();
+    const parent = impl(effectScope());
+    const child = parent.run(() => {
+      parent.stop();
+      return impl(effectScope());
+    })!;
+    expect(child.active).toBe(false);
+    expect(child.parent).toBeUndefined();
+    expect(parent.scopes).toHaveLength(0);
+    expect(child.run(fn)).toBeUndefined();
+    expect(fn).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   test('getCurrentScope() returns the running scope', () => {
     expect(getCurrentScope()).toBeUndefined();
     const scope = effectScope();

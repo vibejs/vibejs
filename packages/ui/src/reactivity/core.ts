@@ -92,7 +92,8 @@ function purgeDeps(sub: ReactiveNode): void {
 /**
  * Runs `fn` and re-runs it when what it read changes. With a `scheduler`, a change calls the
  * scheduler instead, which decides when to `run()` (after checking `dirty`). The effect belongs
- * to the effect scope active at creation, never to an enclosing effect.
+ * to the effect scope active at creation, never to an enclosing effect. Created while that scope
+ * is stopped, it starts stopped.
  */
 export class ReactiveEffect<T = unknown> implements ReactiveNode {
   deps: Link | undefined = undefined;
@@ -103,7 +104,10 @@ export class ReactiveEffect<T = unknown> implements ReactiveNode {
 
   constructor(fn: () => T) {
     this.fn = fn;
-    activeEffectScope?.effects.push(this);
+    const scope = activeEffectScope;
+    // Created inside a stopped scope: nothing could stop it, so it starts stopped.
+    if (scope?.active) scope.effects.push(this);
+    else if (scope) this.flags = ReactiveFlags.None;
   }
 
   /** Whether a dep changed since the last run. Recomputes stale computed deps to find out. */

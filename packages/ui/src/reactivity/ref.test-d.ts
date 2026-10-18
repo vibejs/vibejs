@@ -18,6 +18,11 @@ expectTypeOf(ref({ n: ref(1) })).toEqualTypeOf<
 >();
 expectTypeOf(ref().value).toBeAny();
 expectTypeOf(ref<string>()).toEqualTypeOf<Ref<string | undefined>>();
+// A class keeps its construct signature.
+class Foo {
+  x = 1;
+}
+expectTypeOf(ref({ C: Foo }).value.C).toEqualTypeOf<typeof Foo>();
 const existing = ref(1);
 expectTypeOf(ref(existing)).toEqualTypeOf(existing);
 

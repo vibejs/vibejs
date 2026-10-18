@@ -1,6 +1,6 @@
 // oxlint-disable typescript/no-explicit-any -- the public signatures default to `any` on purpose
 import { hasChanged, isFunction, isObject } from '../shared.ts';
-import type { ComputedRef, WritableComputedRef } from './computed.ts';
+import { ComputedRefImpl, type ComputedRef, type WritableComputedRef } from './computed.ts';
 import { activeSub, batchDepth, cycle, flush, runDepth, system, type Dependency } from './core.ts';
 import { ReactiveFlags, type Link } from './system.ts';
 
@@ -35,7 +35,8 @@ type Builtin =
   | null
   | Date
   | Error
-  | RegExp;
+  | RegExp
+  | (abstract new (...args: any[]) => unknown);
 
 export type UnwrapRef<T> =
   T extends ShallowRef<infer V, unknown>
@@ -203,8 +204,11 @@ export function toRefs(object: Record<PropertyKey, unknown>): any {
 
 /** Notifies the readers of a ref as if its value changed, e.g. after mutating a `shallowRef`. */
 export function triggerRef(target: Ref): void {
-  if (!(target instanceof RefImpl) || target.subs === undefined) return;
-  propagate(target.subs, runDepth > 0);
-  shallowPropagate(target.subs);
+  // Property and getter refs have no readers of their own.
+  if (!(target instanceof RefImpl || target instanceof ComputedRefImpl)) return;
+  const subs = target.subs;
+  if (subs === undefined) return;
+  propagate(subs, runDepth > 0);
+  shallowPropagate(subs);
   if (!batchDepth) flush();
 }
