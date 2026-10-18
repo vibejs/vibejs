@@ -34,6 +34,10 @@
     "prebuild": "pnpm -w errors",
     "build": "tsdown"
   },
+  "dependencies": {
+    "@vibejs-org/errors": "workspace:*",
+    "std-env": "catalog:"
+  },
   "devDependencies": {
     "tsdown": "catalog:"
   },
