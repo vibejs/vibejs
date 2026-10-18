@@ -48,18 +48,21 @@ jobs:
       pnpm_config_runtime_on_fail: ignore
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The matrix Node comes from setup-node. Tests run with that node directly,
+      # because pnpm scripts use the devEngines runtime pinned in the lockfile.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
-          runtime: node@${{ matrix.node }}
           cache: true
       - name: Assert Node ${{ matrix.node }}
         shell: bash
         run: |
-          for v in "$(node -v)" "$(pnpm exec node -v)"; do
-            echo "$v"
-            [[ "$v" == v${{ matrix.node }}.* ]]
-          done
-      - run: pnpm test --run
+          node -v
+          [[ "$(node -v)" == v${{ matrix.node }}.* ]]
+      - run: node scripts/errors.ts
+      - run: node node_modules/vitest/vitest.mjs run --project node --project dom
 
   integration:
     runs-on: ubuntu-latest
