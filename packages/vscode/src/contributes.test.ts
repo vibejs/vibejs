@@ -6,7 +6,10 @@ import { describe, expect, it } from 'vitest';
 const dir = fileURLToPath(new URL('..', import.meta.url));
 const json = (file: string) => JSON.parse(readFileSync(dir + file, 'utf8'));
 const pkg = json('package.json');
-const syntaxes = globSync('syntaxes/*.json', { cwd: dir }).toSorted();
+// globSync returns native separators; package.json paths always use '/'.
+const syntaxes = globSync('*.json', { cwd: `${dir}syntaxes` })
+  .map((file) => `syntaxes/${file}`)
+  .toSorted();
 
 describe('grammar', () => {
   it('matches the committed snapshots', () => {
