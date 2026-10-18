@@ -420,7 +420,8 @@ export function main(root: string): number {
         `${match[0]} is a local path; use a relative one`,
       );
     }
-    for (const match of text.matchAll(EMAIL)) {
+    // The lockfile copies registry deprecation notices verbatim, maintainer addresses included.
+    for (const match of file === 'pnpm-lock.yaml' ? [] : text.matchAll(EMAIL)) {
       if (ALLOWED_EMAIL.test(match[0])) continue;
       report(file, text, match.index, 'email', 'no email addresses; link a GitHub page instead');
     }

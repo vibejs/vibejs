@@ -513,6 +513,11 @@ describe('rule 11: email addresses', () => {
       `notes.md:6:10 ${message}`,
     ]);
   });
+
+  it('skips the deprecation notices that pnpm-lock.yaml copies from the registry', () => {
+    const notice = `    deprecated: Contact ${address('jane.doe', 'corp.io')} for support\n`;
+    expect(lint({ 'pnpm-lock.yaml': notice })).toEqual([]);
+  });
 });
 
 describe('rule 12: positioning', () => {
