@@ -1,0 +1,73 @@
+{
+  "name": "@vibejs-org/ui",
+  "version": "0.0.0",
+  "description": "Fine-grained reactive runtime, router and test utilities for vibe.js .vibe single-file components.",
+  "keywords": [
+    "components",
+    "reactivity",
+    "router",
+    "signals",
+    "typescript",
+    "ui",
+    "vibejs"
+  ],
+  "homepage": "https://github.com/vibejs/vibejs#readme",
+  "bugs": {
+    "url": "https://github.com/vibejs/vibejs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibejs/vibejs.git",
+    "directory": "packages/ui"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "vibejs-source": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./internal": {
+      "vibejs-source": "./src/internal.ts",
+      "default": "./dist/internal.js"
+    },
+    "./router": {
+      "vibejs-source": "./src/router.ts",
+      "default": "./dist/router.js"
+    },
+    "./testing": {
+      "vibejs-source": "./src/testing.ts",
+      "default": "./dist/testing.js"
+    },
+    "./tooling": {
+      "vibejs-source": "./src/tooling.ts",
+      "default": "./dist/tooling.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./internal": "./dist/internal.js",
+      "./router": "./dist/router.js",
+      "./testing": "./dist/testing.js",
+      "./tooling": "./dist/tooling.js"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@vibejs-org/errors": "workspace:*"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": "^24.15.0 || >=26"
+  }
+}

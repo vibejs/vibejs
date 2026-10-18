@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleDetection": "force",
+    "types": [],
+    "strict": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "isolatedDeclarations": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "customConditions": ["vibejs-source"],
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "${configDir}/src",
+    "outDir": "${configDir}/.tsbuild",
+    "tsBuildInfoFile": "${configDir}/.tsbuild/tsconfig.tsbuildinfo"
+  },
+  "include": ["${configDir}/src"]
+}

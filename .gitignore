@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build, test and tool output
+dist/
+coverage/
+.tsbuild/
+*.tsbuildinfo
+.vitest/
+.vite/
+.e2e/
+.vibejs/
+playwright-report/
+test-results/
+.playwright-mcp/
+packages/cli/src/catalog.gen.ts
+
+# Local maintainer material
+.planning/
+CLAUDE.local.md
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

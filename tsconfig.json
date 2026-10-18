@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/errors" },
+    { "path": "packages/ui" },
+    { "path": "packages/compiler" },
+    { "path": "packages/language-tools" },
+    { "path": "packages/contract" },
+    { "path": "packages/server" },
+    { "path": "packages/cli" },
+    { "path": "packages/create-vibejs" },
+    { "path": "tsconfig.tools.json" }
+  ]
+}

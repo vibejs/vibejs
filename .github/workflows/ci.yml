@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm check
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+      - run: pnpm build
+      - run: git diff --exit-code
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, node: 24 }
+          - { os: ubuntu-latest, node: 26 }
+          - { os: windows-latest, node: 24 }
+    runs-on: ${{ matrix.os }}
+    env:
+      pnpm_config_runtime_on_fail: ignore
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node@${{ matrix.node }}
+          cache: true
+      - name: Assert Node ${{ matrix.node }}
+        shell: bash
+        run: |
+          for v in "$(node -v)" "$(pnpm exec node -v)"; do
+            echo "$v"
+            [[ "$v" == v${{ matrix.node }}.* ]]
+          done
+      - run: pnpm test --run
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+      - run: pnpm test:integration
+
+  ts-next:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          install: false
+      - run: node scripts/use-ts-next.ts
+      - run: pnpm install --no-frozen-lockfile
+        env:
+          pnpm_config_minimum_release_age: 0
+      - run: pnpm typecheck
+      - run: pnpm test --run
+      - run: pnpm test:integration
+
+  secrets:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSLo "$RUNNER_TEMP/$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$archive"
+          echo "$GITLEAKS_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+      - name: Scan the git history for secrets
+        run: $RUNNER_TEMP/gitleaks git --redact --no-banner --verbose .
+
+  pr-meta:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+      - run: node scripts/pr-meta.ts
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}

@@ -1,0 +1,46 @@
+{
+  "name": "vibejs-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "pretypecheck": "pnpm errors",
+    "typecheck": "tsc -b",
+    "lint": "tsc -b && oxlint --type-aware --deny-warnings && node scripts/lint-repo.ts && knip",
+    "fmt": "oxfmt",
+    "pretest": "pnpm errors",
+    "test": "vitest --project node --project dom",
+    "test:coverage": "vitest run --coverage --project node --project dom --project browser",
+    "test:integration": "pnpm build && vitest run --project integration",
+    "build": "pnpm -r --filter \"./packages/*\" build",
+    "check": "pnpm errors --check && oxfmt --check && pnpm lint && pnpm test:coverage",
+    "errors": "node scripts/errors.ts",
+    "version-packages": "changeset version && pnpm errors && pnpm install --lockfile-only"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/core": "catalog:",
+    "@changesets/cli": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "knip": "catalog:",
+    "oxc-parser": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "playwright": "catalog:",
+    "publint": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.15.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.14.0"
+}

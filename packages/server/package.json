@@ -1,0 +1,63 @@
+{
+  "name": "@vibejs-org/server",
+  "version": "0.0.0",
+  "description": "vibe.js server: modules, dependency injection, decorators and a fetch-based HTTP pipeline.",
+  "keywords": [
+    "decorators",
+    "dependency-injection",
+    "http",
+    "openapi",
+    "server",
+    "typescript",
+    "vibejs"
+  ],
+  "homepage": "https://github.com/vibejs/vibejs#readme",
+  "bugs": {
+    "url": "https://github.com/vibejs/vibejs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibejs/vibejs.git",
+    "directory": "packages/server"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "vibejs-source": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./openapi": {
+      "vibejs-source": "./src/openapi.ts",
+      "default": "./dist/openapi.js"
+    },
+    "./testing": {
+      "vibejs-source": "./src/testing.ts",
+      "default": "./dist/testing.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./openapi": "./dist/openapi.js",
+      "./testing": "./dist/testing.js"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@vibejs-org/errors": "workspace:*"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": "^24.15.0 || >=26"
+  }
+}

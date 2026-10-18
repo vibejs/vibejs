@@ -1,0 +1,5 @@
+{
+  "singleQuote": true,
+  "printWidth": 100,
+  "ignorePatterns": ["CONTRACTS.md", "**/*.gen.ts"]
+}

@@ -1,0 +1,35 @@
+name: Bug report
+description: Report something that does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report security problems privately instead, as described in SECURITY.md.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: The smallest set of steps, code or repository that shows the problem.
+    validations:
+      required: true
+  - type: input
+    id: error-code
+    attributes:
+      label: Error code
+      description: The `VIBE####` code, if an error was reported.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: vibe.js package versions, Node version, package manager and operating system.
+      render: text
+    validations:
+      required: true

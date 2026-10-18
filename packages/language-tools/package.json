@@ -1,0 +1,58 @@
+{
+  "name": "@vibejs-org/language-tools",
+  "version": "0.0.0",
+  "description": "TypeScript content mapper that type-checks vibe.js .vibe single-file components in tsc and the editor.",
+  "keywords": [
+    "content-mapper",
+    "language-tools",
+    "type-checking",
+    "typescript",
+    "vibejs"
+  ],
+  "homepage": "https://github.com/vibejs/vibejs#readme",
+  "bugs": {
+    "url": "https://github.com/vibejs/vibejs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibejs/vibejs.git",
+    "directory": "packages/language-tools"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "vibejs-source": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "typescript": {
+    "contentMapper": {
+      "compilerOptions": [],
+      "dynamicConfig": false,
+      "exec": [
+        "node",
+        "./dist/server.js"
+      ]
+    }
+  },
+  "engines": {
+    "node": "^24.15.0 || >=26"
+  }
+}

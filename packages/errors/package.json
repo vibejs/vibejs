@@ -1,0 +1,47 @@
+{
+  "name": "@vibejs-org/errors",
+  "version": "0.0.0",
+  "description": "Stable error codes, typed error factories and documentation links for vibe.js.",
+  "keywords": [
+    "error-codes",
+    "errors",
+    "typescript",
+    "vibejs"
+  ],
+  "homepage": "https://github.com/vibejs/vibejs#readme",
+  "bugs": {
+    "url": "https://github.com/vibejs/vibejs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibejs/vibejs.git",
+    "directory": "packages/errors"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "vibejs-source": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": "^24.15.0 || >=26"
+  }
+}

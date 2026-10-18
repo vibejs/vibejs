@@ -1,0 +1,66 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+  "categories": { "correctness": "error", "suspicious": "error" },
+  "options": { "typeAware": true },
+  "rules": {
+    "eslint/no-underscore-dangle": ["error", { "allow": ["__DEV__"] }],
+    "eslint/no-console": "error",
+    "eslint/no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "reflect-metadata",
+            "message": "vibe.js uses no decorator metadata; inject with inject(Token)."
+          }
+        ],
+        "patterns": [
+          {
+            "regex": "^(?:@vibejs-org/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
+            "message": "Import another package by its name, not its src."
+          }
+        ]
+      }
+    ],
+    "import/no-cycle": "error",
+    "import/no-default-export": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }],
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "vitest/no-focused-tests": "error"
+  },
+  "overrides": [
+    {
+      // Placeholder entries (shebang-only bins, `export {}` modules). Drop a file from this list
+      // when it gets its first implementation.
+      "files": [
+        "packages/cli/src/bin.ts",
+        "packages/create-vibejs/bin.js",
+        "packages/compiler/src/index.ts",
+        "packages/compiler/src/vite.ts",
+        "packages/contract/src/index.ts",
+        "packages/language-tools/src/index.ts",
+        "packages/server/src/openapi.ts",
+        "packages/server/src/testing.ts",
+        "packages/ui/src/internal.ts",
+        "packages/ui/src/router.ts",
+        "packages/ui/src/testing.ts",
+        "packages/ui/src/tooling.ts"
+      ],
+      "rules": { "unicorn/no-empty-file": "off", "unicorn/require-module-specifiers": "off" }
+    },
+    {
+      "files": ["packages/cli/src/**", "scripts/**", "packages/ui/src/warn.ts"],
+      "rules": { "eslint/no-console": "off" }
+    },
+    {
+      "files": ["**/*.config.ts"],
+      "rules": { "import/no-default-export": "off" }
+    }
+  ],
+  "ignorePatterns": ["**/dist/**", "**/test/fixtures/**", "packages/create-vibejs/templates/**"]
+}

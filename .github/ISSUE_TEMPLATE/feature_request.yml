@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a new feature or a change to existing behavior.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: The problem you want to solve, and who has it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The API or behavior you propose, with a short example.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other approaches you considered, including workarounds available today.

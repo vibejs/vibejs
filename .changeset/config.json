@@ -1,0 +1,8 @@
+{
+  "baseBranch": "main",
+  "access": "public",
+  "format": "oxfmt",
+  "fixed": [["@vibejs-org/*", "create-vibejs"]],
+  "updateInternalDependencies": "patch",
+  "privatePackages": { "version": false, "tag": false }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "@vibejs-org/compiler",
+  "version": "0.0.0",
+  "description": "Compiler and Vite plugin for vibe.js .vibe single-file components.",
+  "keywords": [
+    "compiler",
+    "single-file-components",
+    "typescript",
+    "vibejs",
+    "vite-plugin"
+  ],
+  "homepage": "https://github.com/vibejs/vibejs#readme",
+  "bugs": {
+    "url": "https://github.com/vibejs/vibejs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibejs/vibejs.git",
+    "directory": "packages/compiler"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "vibejs-source": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./vite": {
+      "vibejs-source": "./src/vite.ts",
+      "default": "./dist/vite.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./vite": "./dist/vite.js"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": "^24.15.0 || >=26"
+  }
+}
