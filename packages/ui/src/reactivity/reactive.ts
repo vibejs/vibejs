@@ -11,7 +11,7 @@ import type { Builtin, RawSymbol, Ref, ShallowReactiveMarker, UnwrapRefSimple } 
 
 declare const ReactiveMarkerSymbol: unique symbol;
 
-interface ReactiveMarker {
+export interface ReactiveMarker {
   /** A type-only brand of reactive arrays. */
   [ReactiveMarkerSymbol]?: void;
 }
