@@ -9,6 +9,7 @@
     { "path": "packages/server" },
     { "path": "packages/cli" },
     { "path": "packages/create-vibejs" },
+    { "path": "docs" },
     { "path": "tsconfig.tools.json" }
   ]
 }
