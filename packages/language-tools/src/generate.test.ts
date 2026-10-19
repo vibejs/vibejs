@@ -1,4 +1,4 @@
-import { analyzeScript, parse } from '@vibejs-org/compiler';
+import { analyzeScript, compile, parse } from '@vibejs-org/compiler';
 import { describe, expect, it } from 'vitest';
 import { CODEGEN, codegen, compiler } from '../test/fixtures.ts';
 import { formatSpans } from './dump.ts';
@@ -36,10 +36,16 @@ describe('forwarded diagnostics', () => {
 
   it('does not forward the compiler errors of kebab tags, string :is and refs', () => {
     const source = `<script setup lang="ts">
-const a = 1
+import MyComp from './MyComp.vibe'
 </script>
 <template><my-comp /><component :is="'A'" /><p ref="p" /></template>
 `;
+    const codes = compile(source, {
+      filename: 'A.vibe',
+      id: '0000000a',
+      dev: false,
+    }).diagnostics.map((d) => d.code);
+    expect(codes).toEqual(['VIBE2002', 'VIBE2006', 'VIBE2701']);
     expect(generate('A.vibe', source).diagnostics).toEqual([]);
   });
 

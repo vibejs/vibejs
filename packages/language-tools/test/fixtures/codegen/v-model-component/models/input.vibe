@@ -3,6 +3,7 @@ import { ref } from '@vibejs-org/ui'
 import Comp from './Comp.vibe'
 const text = ref('')
 const open = ref(false)
+function h(value: string) {}
 </script>
 
 <template>
@@ -11,4 +12,5 @@ const open = ref(false)
   <Comp v-model.trim="text" v-model:title.trim.lazy="text" />
   <Comp v-model="text + 1" />
   <component :is="Comp" v-model="text" />
+  <Comp @update:model-value="h" v-model="text" />
 </template>

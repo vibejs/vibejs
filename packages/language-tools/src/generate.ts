@@ -2,7 +2,7 @@ import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@vib
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
 import type { Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
-import { children, key, type Walk } from './template.ts';
+import { children, CTX_TYPES, key, type Walk } from './template.ts';
 
 /** A forwarded compiler diagnostic; `code` is the numeric part of VIBE####. */
 export interface LanguageDiagnostic {
@@ -24,8 +24,6 @@ const CTX = ['$attrs', '$slots', '$emit', '$props'];
 const MACROS =
   /\/\/[^\n]*|\/\*[\s\S]*?\*\/|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`|\b(define(?:Props|Emits|Slots|Model|Expose|Options))\s*[<(]/g;
 const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
-/** The props a template reads: the declared ones and the models. */
-const CTX_TYPES = '__VibeProps & __VibeModels, __VibeEmits, __VibeSlots';
 
 /**
  * The virtual TypeScript of a `.vibe` file and its spans into `text` (UTF-16 offsets). Never throws
@@ -58,9 +56,6 @@ export function generate(fileName: string, text: string): GeneratedFile {
       !setup.has(tag.split('.')[0]) &&
       !ctx.has(tag.split('.')[0]) &&
       resolveComponentTag(tag, analysis, fileName) !== null,
-    imports: new Set(
-      [...analysis.bindings].filter(([, { kind }]) => kind === 'import').map(([name]) => name),
-    ),
     handles: 0,
     refs: new Map(),
     loops: 0,

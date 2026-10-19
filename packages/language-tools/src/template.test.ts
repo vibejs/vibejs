@@ -7,7 +7,7 @@ function emit(
   template: string,
   setup: string[] = [],
   refs = new Map<string, string>(),
-  imports = new Set<string>(),
+  locals = new Set<string>(),
 ) {
   const source = `<template>${template}</template>`;
   const { descriptor } = parse(source, { filename: 'A.vibe' });
@@ -20,8 +20,8 @@ function emit(
     unknown: new Map(),
     writes: false,
   };
-  const w = { b, names, source, depth: 0, self: () => false, imports, handles: 0, refs, loops: 0 };
-  children(descriptor.template!.ast.children, w, new Set());
+  const w = { b, names, source, depth: 0, self: () => false, handles: 0, refs, loops: 0 };
+  children(descriptor.template!.ast.children, w, locals);
   return b.text
     .trim()
     .split('\n')
@@ -110,9 +110,11 @@ it('binds the names read by a v-for alias default, not the ones it declares', ()
 
 it('emits components with handles, and leaves v-slot content untyped with unknown refs', () => {
   const refs = new Map<string, string>();
-  expect(emit('<C v-slot="{ x }"><p ref="a">{{ x }}</p></C><C ref="c" />', ['C'], refs)).toEqual([
+  expect(
+    emit('<C v-slot="{ x }"><p ref="a">{{ x }}</p></C><L ref="c" />', ['C'], refs, new Set(['L'])),
+  ).toEqual([
     'var __vibe_c0 = __vibe.component(C)({ });',
-    'var __vibe_c1 = __vibe.component(C)({ });',
+    'var __vibe_c1 = __vibe.component(L)({ });',
   ]);
   expect([...refs]).toEqual([
     ['a', 'unknown'],
@@ -120,15 +122,16 @@ it('emits components with handles, and leaves v-slot content untyped with unknow
   ]);
 });
 
-it('types the ref of an imported component from its tag, and of <component :is> as unknown', () => {
+const exposed = (tag: string) =>
+  `${tag} extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown`;
+
+it('types a component ref from its tag binding, and the ref of <component :is> as unknown', () => {
   const refs = new Map<string, string>();
-  emit('<C ref="c" /><component :is="C" ref="d" />', ['C'], refs, new Set(['C']));
+  emit('<C.D ref="c" /><component :is="C" ref="d" /><U ref="u" />', ['C'], refs);
   expect([...refs]).toEqual([
-    [
-      'c',
-      "typeof C extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown",
-    ],
+    ['c', exposed("ReturnType<typeof __vibe.unrefs<{ c: typeof C }>>['c']['D']")],
     ['d', 'unknown'],
+    ['u', 'typeof __vibe_c2.exposed'],
   ]);
 });
 

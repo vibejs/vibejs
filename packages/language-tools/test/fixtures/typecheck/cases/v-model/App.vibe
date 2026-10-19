@@ -10,6 +10,9 @@ const choice = ref('a')
 const form = ref({ name: '' })
 const note = ref<string>()
 let draft = ''
+const answer = ref('no')
+const flag = ref<'on' | false>(false)
+const level = ref(0)
 </script>
 
 <template>
@@ -23,6 +26,10 @@ let draft = ''
   <select v-model="choice"><option>a</option></select>
   <select multiple v-model="tags"><option>a</option></select>
   <input type="radio" value="a" v-model="choice">
+  <input type="checkbox" true-value="yes" false-value="no" v-model="answer">
+  <input type="checkbox" :true-value="'on' as const" v-model="flag">
+  <input type="radio" :value="1" v-model="level">
+  <select v-model="level"><option :value="1">one</option></select>
   <Field v-model="text" />
   <Field v-model="text" v-model:count="amount" v-model:title.trim="note" />
   <Field v-model="text" v-model:first-name.trim="note" />

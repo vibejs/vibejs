@@ -19,6 +19,9 @@ cases/_fail_model-component/App.vibe(8,19): error TS2322: Type 'string' is not a
 cases/_fail_model-const/App.vibe(6,19): error TS2540: Cannot assign to 'label' because it is a read-only property.
 cases/_fail_model-number/App.vibe(7,26): error TS2322: Type 'number' is not assignable to type 'string'.
 cases/_fail_model-prop/App.vibe(6,19): error TS2540: Cannot assign to 'label' because it is a read-only property.
+cases/_fail_model-taken-key/App.vibe(10,49): error TS2540: Cannot assign to 'label' because it is a read-only property.
+cases/_fail_model-true-value/App.vibe(7,52): error TS2322: Type 'string | boolean' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
 cases/_fail_model-unknown/App.vibe(8,8): error TS2353: Object literal may only specify known properties, and 'v-model' does not exist in type 'PropsOf<__VibeProps, __VibeEmits, __VibeModels>'.
 cases/_fail_prop-type/App.vibe(6,21): error TS2322: Type 'string' is not assignable to type 'number'.
 cases/_fail_props-import-wrong-prop/main.ts(4,19): error TS2322: Type 'string' is not assignable to type 'number'.

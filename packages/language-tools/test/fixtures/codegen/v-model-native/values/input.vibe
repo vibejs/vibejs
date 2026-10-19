@@ -1,0 +1,17 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const answer = ref('no')
+const flag = ref<'on' | false>(false)
+const n = ref(0)
+const ns = ref<number[]>([])
+</script>
+
+<template>
+  <input type="checkbox" true-value="yes" false-value="no" v-model="answer">
+  <input type="checkbox" :true-value="'on' as const" v-model="flag">
+  <input type="checkbox" true-value :false-value="answer" v-model="answer + 1">
+  <input type="radio" :value="1" v-model="n">
+  <select v-model="n"><optgroup><option :value="1">one</option></optgroup></select>
+  <select v-model="n"><option>1</option></select>
+  <select multiple v-model="ns"><option :value="1">one</option></select>
+</template>

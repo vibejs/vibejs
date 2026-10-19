@@ -29,8 +29,6 @@ export interface Walk {
   depth: number;
   /** Whether a component tag names the file itself: it stays untyped until slots are typed. */
   self: (tag: string) => boolean;
-  /** The imported setup bindings: a component tag rooted at one is typed without the template block. */
-  imports: ReadonlySet<string>;
   /** The number of component handles (`__vibe_cN`) emitted so far. */
   handles: number;
   /** The `ref="key"` targets: key -> type. */
@@ -50,11 +48,13 @@ const STRUCTURE = new Set(['if', 'else-if', 'else', 'for', 'slot']);
 const SVG = 1;
 const range = (node: { loc: { start: { offset: number }; end: { offset: number } } }) =>
   [node.loc.start.offset, node.loc.end.offset] as [number, number];
-/** An object key: the name, or a string literal. */
-export const key = (name: string): string => (IDENTIFIER.test(name) ? name : `'${name}'`);
 /** A single-line string literal. */
 const quote = (s: string) =>
   `'${s.replace(/[\\'\n\r\u2028\u2029]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`)}'`;
+/** An object key: the name, or a string literal. */
+export const key = (name: string): string => (IDENTIFIER.test(name) ? name : quote(name));
+/** The type arguments of `__vibe.ctx`: the props a template reads, its emits and slots. */
+export const CTX_TYPES = '__VibeProps & __VibeModels, __VibeEmits, __VibeSlots';
 
 const line = (w: Walk, s = '') => w.b.add(`\n${'  '.repeat(w.depth)}${s}`);
 const directive = (el: ElementNode, name: string) =>
@@ -234,8 +234,14 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
     const group = el.props.filter((prop) => staticKey(prop) === name);
     if (group.length > 1) group.forEach((prop, i) => merged.set(prop, i === 0 ? group : null));
   }
+  // A checkbox model consumes `true-value` and `false-value`: they are typed with its write.
+  const consumed = (prop: Prop) =>
+    el.tag === 'input' &&
+    findAttr(el, 'type')?.value?.content === 'checkbox' &&
+    directive(el, 'model') !== undefined &&
+    /^(?:true|false)-value$/.test(staticKey(prop) ?? '');
   for (const prop of el.props) {
-    if (prop === is) continue;
+    if (prop === is || consumed(prop)) continue;
     const group = merged.get(prop);
     if (group === null) continue;
     if (group) mergedProperty(p, group);
@@ -313,22 +319,38 @@ function staticValue(node: AttributeNode, w: Walk): void {
   else w.b.atom('true', ...range({ loc: node.nameLoc }), Preset.BOUND);
 }
 
+/** Whether an `<option>` in this subtree binds its `:value`. */
+const boundOption = (node: TemplateChildNode): boolean =>
+  node.type === NodeTypes.ELEMENT &&
+  ((node.tag === 'option' &&
+    node.props.some((x) => x.type === NodeTypes.DIRECTIVE && staticKey(x) === 'value')) ||
+    node.children.some(boundOption));
+
 /** `ref="r"`: the element type or the component's exposed values; an array inside `v-for`. */
 function ref(node: AttributeNode, p: Props, el: ElementNode): void {
   const name = node.value?.content;
   if (!name) return;
   const map = el.ns === SVG ? 'SVGElementTagNameMap' : 'HTMLElementTagNameMap';
-  // An imported tag is read from the script, not the template block: a template that reads the
-  // ref then has no type cycle through `__vibe_cN`. A non-component tag gives `unknown` here; its
-  // error is at the tag.
-  // ponytail: other setup roots (a component in a ref) still go through `__vibe_cN`.
+  // The tag's binding is read from the script, not from the template block: a template that reads
+  // the ref then has no type cycle through `__vibe_cN`. A non-component tag gives `unknown` here;
+  // its error is at the tag.
+  const [root, ...path] = el.tag.split('.');
+  const binding = p.locals.has(root)
+    ? undefined
+    : p.w.names.setup.has(root)
+      ? `ReturnType<typeof __vibe.unrefs<{ c: typeof ${root} }>>['c']`
+      : p.w.names.ctx.has(root)
+        ? `ReturnType<typeof __vibe.ctx<${CTX_TYPES}>>['${root}']`
+        : undefined;
+  const tag = binding && binding + path.map((m) => `['${m}']`).join('');
+  // ponytail: a `v-for` local (or an unresolved name) as the tag still goes through `__vibe_cN`.
   const type =
     p.kind === 'dynamic'
       ? 'unknown'
       : p.kind === 'el' || p.kind === 'custom'
         ? `${map} extends Record<'${el.tag}', infer E> ? E : Element`
-        : p.w.imports.has(el.tag.split('.')[0])
-          ? `typeof ${el.tag} extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown`
+        : tag
+          ? `${tag} extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown`
           : `typeof __vibe_c${p.w.handles - 1}.exposed`;
   p.w.refs.set(name, p.w.loops > 0 ? `(${type})[]` : type);
 }
@@ -405,9 +427,10 @@ function handler(dir: DirectiveNode, p: Props, isLoose = false): void {
 
 /**
  * Native `v-model`: the value key (`checked` for a checkbox), then a write of what the element
- * yields: a string (a number with `.number` or `type="number"`), or for a checkbox or a multiple
- * select the target itself, checked against the values it can hold. On a component: `x: m` (a
- * kebab name camelized), `'onUpdate:x'` writing `m`, and `xModifiers`.
+ * yields: a string (a number with `.number` or `type="number"`), the `true-value`/`false-value`
+ * of a checkbox, the bound `:value` of a radio, or for a checkbox or a multiple select the target
+ * itself, checked against the values it can hold. On a component: `x: m` (a kebab name
+ * camelized), `'onUpdate:x'` writing `m`, and `xModifiers`.
  */
 function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
   const { w, locals } = p;
@@ -421,25 +444,56 @@ function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
   if (p.kind === 'el' || p.kind === 'custom') {
     const type = findAttr(el, 'type')?.value?.content;
     const checkbox = el.tag === 'input' && type === 'checkbox';
-    if (property(p, checkbox ? 'checked' : 'value', at, true)) read();
+    const find = (name: string) => el.props.find((x) => staticKey(x) === name);
+    // A checkbox with `true-value`/`false-value` yields those values, not `checked`.
+    // ponytail: with them, an array or Set model is not accepted; it is meaningless there.
+    const yes = checkbox ? find('true-value') : undefined;
+    const no = checkbox ? find('false-value') : undefined;
+    if (!yes && !no && property(p, checkbox ? 'checked' : 'value', at, true)) read();
     else loose(p, read);
     const multiple = el.tag === 'select' && findAttr(el, 'multiple');
     const number = type === 'number' || dir.modifiers.some((m) => m.content === 'number');
+    // A radio with a bound `:value` yields that value.
+    const radio = el.tag === 'input' && type === 'radio' ? find('value') : undefined;
+    const radioValue = radio?.type === NodeTypes.DIRECTIVE ? radio : undefined;
+    if (!writes) {
+      for (const prop of [yes, no])
+        if (prop?.type === NodeTypes.DIRECTIVE) loose(p, () => value(prop, w, locals));
+      return;
+    }
+    // ponytail: a select with a bound `<option :value>` is not write-checked; type it from the
+    // option values if needed.
+    if (el.tag === 'select' && !multiple && el.children.some(boundOption)) return;
     // TS reports a failed `satisfies` at the keyword: it stands for the value.
     const values = `satisfies ${checkbox ? 'boolean | ' : ''}unknown[] | Set<unknown>`;
-    if (!writes) return;
+    /** A yielded value: the attribute, the bound expression, or `fallback`. */
+    const yielded = (prop: Prop | undefined, fallback: string) => {
+      if (!prop) w.b.add(fallback);
+      else if (prop.type === NodeTypes.ATTRIBUTE) staticValue(prop, w);
+      else value(prop, w, locals);
+    };
     p.after.push(() => {
       target();
-      if (!checkbox && !multiple) {
+      if (yes || no) {
+        w.b.add(' = Boolean() ? ');
+        yielded(yes, 'true');
+        w.b.add(' : ');
+        yielded(no, 'false');
+        w.b.add(';');
+      } else if (radioValue) {
+        w.b.add(' = ');
+        value(radioValue, w, locals, { features: Preset.NONE });
+        w.b.add(';');
+      } else if (!checkbox && !multiple) {
         w.b.add(number ? ' = Number();' : ' = String();');
-        return;
+      } else {
+        w.b.add(' = ');
+        value(dir, w, locals, { features: Preset.NONE });
+        w.b
+          .add(' ')
+          .atom(values, ...range(dir.exp!), Preset.NONE)
+          .add(';');
       }
-      w.b.add(' = ');
-      value(dir, w, locals, { features: Preset.NONE });
-      w.b
-        .add(' ')
-        .atom(values, ...range(dir.exp!), Preset.NONE)
-        .add(';');
     });
     return;
   }
@@ -447,11 +501,16 @@ function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
   if (property(p, name, at, name !== dir.arg?.content)) read();
   // ponytail: `<component :is>` declares no models, so its write side is not checked.
   if (p.kind === 'dynamic') return;
-  if (writes && property(p, `onUpdate:${name}`, at, false, Preset.NONE)) {
-    // The initializer stands in for a missing contextual type (an unknown model): no implicit any.
+  // The initializer stands in for a missing contextual type (an unknown model): no implicit any.
+  const update = () => {
     w.b.add('($event = undefined as never) => { ');
     target();
     w.b.add(' = $event }');
+  };
+  // A taken key (an explicit `@update:x` first) still checks the write, as a statement.
+  if (writes) {
+    if (property(p, `onUpdate:${name}`, at, false, Preset.NONE)) update();
+    else loose(p, update);
   }
   const modifiers = name === 'modelValue' ? 'modelModifiers' : `${name}Modifiers`;
   if (dir.modifiers.length === 0 || !property(p, modifiers, at, false, Preset.NONE)) return;

@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import Field from './Field.vibe'
+const label = 'fixed'
+function changed(value: string): void {
+  void value
+}
+</script>
+
+<template>
+  <Field @update:model-value="changed" v-model="label" />
+</template>
