@@ -62,7 +62,7 @@ describe('forEachIdentifier', () => {
     expect(calls('({ [k]: a } = b)', 0).map(([name]) => name)).toStrictEqual(['k', 'a', 'b']);
   });
 
-  it.each(['a +', 'a b', '{ a', ''])('calls nothing on %j', (expr) => {
+  it.each(['a +', 'a b', '{ a', '', 'a), (b'])('calls nothing on %j', (expr) => {
     expect(calls(expr)).toStrictEqual([]);
   });
 });
@@ -83,6 +83,7 @@ describe('helpers', () => {
     ['(e) => a(e)', true],
     ['a()', false],
     ['a b', false],
+    ['a) => (b', false],
   ])('isSimpleHandler(%j) is %s', (expr, expected) => {
     expect(isSimpleHandler(expr)).toBe(expected);
   });

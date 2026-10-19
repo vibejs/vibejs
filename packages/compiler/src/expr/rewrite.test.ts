@@ -141,8 +141,17 @@ describe('rewriteExpr', () => {
     expect(diagnostics[0]).not.toHaveProperty('typeChecked');
   });
 
-  it('allows `this` inside a nested function', () => {
-    expect(codes(`{{ function () { return this } }}`)).toStrictEqual([]);
+  it.each([
+    'function () { return this }',
+    'class { x = this.y }',
+    'class { accessor x = this.y }',
+    'class { static { this.y } }',
+  ])('allows `this` in %s', (exp) => {
+    expect(codes(`{{ ${exp} }}`)).toStrictEqual([]);
+  });
+
+  it('reports `this` in a computed class key', () => {
+    expect(codes(`{{ class { [this.k] = 1 } }}`)).toStrictEqual(['VIBE2008']);
   });
 
   it.each(['($setup) => 1', '() => { let $props }', '() => { try {} catch ($ctx) {} }'])(
@@ -183,6 +192,12 @@ describe('VIBE2007 suggestions', () => {
     ['(value) => valeu', 'valeu', 'value'],
   ])('suggests a name for %s', (exp, unknown, name) => {
     expect(fixes(exp, unknown)[0]).toBe(`Write \`${name}\`, the closest name in scope.`);
+  });
+
+  it('suggests no expression local that is out of scope at the reference', () => {
+    expect(fixes('[1].map((item2) => item2) && itme2', 'itme2')[0]).toBe(
+      'Write `item`, the closest name in scope.',
+    );
   });
 
   it('suggests nothing when no name is within edit distance 2', () => {

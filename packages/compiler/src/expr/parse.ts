@@ -1,7 +1,7 @@
 import type { VibeError } from '@vibejs-org/errors';
-import { parseSync } from 'oxc-parser';
+import { parseSync, visitorKeys } from 'oxc-parser';
 import { toDiagnostic, type Diagnostic, type LineIndex } from '../diagnostics.ts';
-import { children, type Node } from './walk.ts';
+import { children, FUNCTIONS, type Node } from './walk.ts';
 
 export interface ExprContext {
   file: string;
@@ -34,13 +34,45 @@ export function report(ctx: ExprContext, error: VibeError, start: number, end: n
   return d;
 }
 
+/** `await a` or `await using x = a`. */
+const isAwait = (node: Node) => node.type === 'AwaitExpression' || node.kind === 'await using';
+
+/**
+ * The first node under `node`, outside nested functions, that is valid only in a module:
+ * `await`, an `import` or an `export`.
+ */
+function moduleOnly(node: Node): Node | undefined {
+  if (isAwait(node) || node.type === 'ImportDeclaration' || /^(TS)?Export/.test(node.type)) {
+    return node;
+  }
+  if (FUNCTIONS.has(node.type)) return undefined;
+  for (const key of visitorKeys[node.type]) {
+    for (const child of children(node, key)) {
+      const found = moduleOnly(child);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
 /** Parses `text`, whose content of `length` starts at `prefix`. */
 function parseProgram(text: string, prefix: number, length: number): { root: Node } | Failure {
-  const { program, errors } = parseSync('e.ts', text, { lang: 'ts', preserveParens: false });
-  if (errors.length === 0) return { root: { ...program } };
+  const { program, errors, module } = parseSync('e.ts', text, {
+    lang: 'ts',
+    preserveParens: false,
+  });
+  const clamp = (offset: number) => Math.min(Math.max(offset - prefix, 0), length);
+  if (errors.length === 0) {
+    const root: Node = { ...program };
+    // Templates render in a plain function, where module syntax is invalid.
+    const found = module.hasModuleSyntax ? moduleOnly(root) : undefined;
+    if (!found) return { root };
+    const what = isAwait(found) ? '`await`' : '`import` and `export`';
+    const reason = `${what} cannot be used outside a function in a template`;
+    return { reason, start: clamp(found.start), end: clamp(found.end) };
+  }
   // oxc reports every error with a primary label; the defaults keep a label-less one in bounds.
   const label = Object.assign({ start: prefix, end: prefix + length }, errors[0].labels[0]);
-  const clamp = (offset: number) => Math.min(Math.max(offset - prefix, 0), length);
   return { reason: errors[0].message, start: clamp(label.start), end: clamp(label.end) };
 }
 
@@ -61,7 +93,9 @@ export function parseExpression(content: string): Parsed | Failure {
   const parsed = parseProgram(text, 1, content.length);
   if ('reason' in parsed) return parsed;
   const node = single(parsed.root, text.length);
-  return node
+  // Without preserved parentheses, an expression inside the wrapper starts after its `(`. One that
+  // starts at 0 escapes it, as in `a), (b`.
+  return node && node.start > 0
     ? { kind: 'expression', node, prefix: 1 }
     : { reason: 'Expected a single expression', start: 0, end: content.length };
 }

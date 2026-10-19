@@ -113,13 +113,16 @@ export function rewriteExpr(
     return mapped ? { code, offset: base + from } : code;
   };
   const scopes = new Set<LocalScope>();
-  const declared: string[] = [];
   const edits: { start: number; end: number; parts: ExprPart[] }[] = [];
   const at = (id: { start: number; end: number }) =>
     [base + id.start - prefix, base + id.end - prefix] as const;
 
   /** The replacement parts of a free name, whose user text is `original`, or undefined to keep it. */
-  const resolve = (id: Identifier, original: ExprPart): ExprPart[] | undefined => {
+  const resolve = (
+    id: Identifier,
+    original: ExprPart,
+    visible: readonly Set<string>[],
+  ): ExprPart[] | undefined => {
     const { name } = id;
     switch (scope.bindings.get(name)) {
       case 'prop':
@@ -146,7 +149,7 @@ export function rewriteExpr(
     const names = [
       ...scope.bindings.keys(),
       ...scope.locals.flatMap((local) => [...local.names]),
-      ...declared,
+      ...visible.flatMap((local) => [...local]),
       ...CONTEXT.keys(),
       ...GLOBALS,
     ];
@@ -160,7 +163,7 @@ export function rewriteExpr(
   walk(
     node,
     {
-      ref(id, { local }, shorthand) {
+      ref(id, { local }, shorthand, visible) {
         if (local) return;
         const hit = scope.locals.findLast((s) => s.names.has(id.name));
         if (hit) {
@@ -168,13 +171,12 @@ export function rewriteExpr(
           return;
         }
         const [start, end] = [id.start - prefix, id.end - prefix];
-        const parts = resolve(id, user(start, end));
+        const parts = resolve(id, user(start, end), visible);
         // A shorthand property `{ a }` becomes `{ a: <replacement> }`.
         if (parts)
           edits.push({ start, end, parts: shorthand ? [user(start, end), ': ', ...parts] : parts });
       },
       bind(id) {
-        declared.push(id.name);
         if (RESERVED.has(id.name)) report(ctx, vibeError('VIBE2010', { name: id.name }), ...at(id));
       },
       this(expression) {

@@ -19,11 +19,14 @@ export interface RefInfo {
 }
 
 export interface WalkHandlers {
-  /** An identifier reference; `shorthand` when it is the value of a shorthand property `{ a }`. */
-  ref(id: Identifier, info: RefInfo, shorthand: boolean): void;
+  /**
+   * An identifier reference; `shorthand` when it is the value of a shorthand property `{ a }`.
+   * `scopes` holds the names visible at the reference, read during the call only.
+   */
+  ref(id: Identifier, info: RefInfo, shorthand: boolean, scopes: readonly Set<string>[]): void;
   /** A name declared inside the walked code, once per declaration. */
   bind?(id: Identifier): void;
-  /** A `this` outside every non-arrow function. */
+  /** A `this` outside every non-arrow function and class member value. */
   this?(node: Node): void;
 }
 
@@ -49,7 +52,11 @@ const TS_VALUES = new Set([
 ]);
 /** Nodes whose children keep the mode of their parent. */
 const PASS_MODE = new Set(['ArrayPattern', 'ObjectPattern', 'RestElement', ...TS_VALUES]);
-const FUNCTIONS = new Set(['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']);
+export const FUNCTIONS: ReadonlySet<string> = new Set([
+  'FunctionDeclaration',
+  'FunctionExpression',
+  'ArrowFunctionExpression',
+]);
 const LABELS = new Set(['LabeledStatement', 'BreakStatement', 'ContinueStatement']);
 
 const isNode = (value: unknown): value is Node =>
@@ -109,7 +116,13 @@ function statementsOf(node: Node): Node[] {
  */
 export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string> = []): void {
   const scopes: Set<string>[] = [new Set(bound)];
+  /** The depth of the nodes that bind their own `this`. */
   let functions = 0;
+  const ownThis = (body: () => void) => {
+    functions++;
+    body();
+    functions--;
+  };
   const isLocal = (name: string) => scopes.some((scope) => scope.has(name));
 
   const enter = (declared: Identifier[], body: () => void) => {
@@ -136,7 +149,7 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
     if (type.startsWith('TS') && !TS_VALUES.has(type)) return;
     if (isIdentifier(node)) {
       const info = { local: isLocal(node.name), writeRoot: mode === 'write' };
-      if (mode !== 'decl') handlers.ref(node, info, shorthand);
+      if (mode !== 'decl') handlers.ref(node, info, shorthand, scopes);
       return;
     }
     switch (type) {
@@ -151,10 +164,14 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
         return;
       case 'Property':
       case 'MethodDefinition':
-      case 'PropertyDefinition':
-      case 'AccessorProperty':
         if (node.computed) at(node, 'key');
         at(node, 'value', mode, node.shorthand === true);
+        return;
+      case 'PropertyDefinition':
+      case 'AccessorProperty':
+        // A field value reads the instance as `this`; a computed key reads the outer one.
+        if (node.computed) at(node, 'key');
+        ownThis(() => at(node, 'value'));
         return;
       case 'AssignmentPattern':
         at(node, 'left', mode, shorthand);
@@ -198,8 +215,10 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
       case 'Program':
         enter([...varIds(node), ...blockIds(statementsOf(node))], () => visitKeys(node, 'read'));
         return;
-      case 'BlockStatement':
       case 'StaticBlock':
+        ownThis(() => enter(blockIds(statementsOf(node)), () => visitKeys(node, 'read')));
+        return;
+      case 'BlockStatement':
       case 'SwitchStatement':
         enter(blockIds(statementsOf(node)), () => visitKeys(node, 'read'));
         return;

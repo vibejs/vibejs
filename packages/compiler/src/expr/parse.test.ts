@@ -20,6 +20,10 @@ describe('parseExpression', () => {
     ['a /*', 'Unterminated multiline comment', 2, 4],
     ['a); (b', 'Expected a single expression', 0, 6],
     ['a); //', 'Expected a single expression', 0, 6],
+    ['a), (b', 'Expected a single expression', 0, 6],
+    ['a) || (b', 'Expected a single expression', 0, 8],
+    ['a) => (b', 'Expected a single expression', 0, 8],
+    ['f(await a)', '`await` cannot be used outside a function in a template', 2, 9],
   ])('fails on %j with the reason and the content range', (content, reason, start, end) => {
     expect(parseExpression(content)).toStrictEqual({ reason, start, end });
   });
@@ -31,6 +35,23 @@ describe('parseStatements', () => {
       kind: 'statements',
       prefix: 0,
       node: { type: 'Program', body: [{}, {}] },
+    });
+  });
+
+  it.each([
+    ['import x from "y"', '`import` and `export`', 0, 17],
+    ['export {}', '`import` and `export`', 0, 9],
+    ['export = x', '`import` and `export`', 0, 10],
+    ['await using x = y', '`await`', 0, 17],
+    ['(class { x = await a })', '`await`', 13, 20],
+  ])('rejects the module syntax in %j', (content, what, start, end) => {
+    const reason = `${what} cannot be used outside a function in a template`;
+    expect(parseStatements(content)).toStrictEqual({ reason, start, end });
+  });
+
+  it('accepts `await` in an async function and `import.meta`', () => {
+    expect(parseStatements('import.meta.url; async () => await a')).toMatchObject({
+      kind: 'statements',
     });
   });
 
