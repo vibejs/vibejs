@@ -1,0 +1,20 @@
+<script setup lang="ts">
+import { ref, computed } from '@vibejs-org/ui'
+import TodoItem from './TodoItem.vibe'
+import type { Todo } from './types'
+const { title = 'Todos', todos } = defineProps<{ title?: string; todos: Todo[] }>()
+const emit = defineEmits<{ toggle: [id: number] }>()
+const filter = ref('')
+const visible = computed(() => todos.filter((t) => t.text.includes(filter.value)))
+</script>
+<template>
+  <section class="todos">
+    <h2>{{ title }} ({{ visible.length }})</h2>
+    <input v-model.trim="filter" placeholder="Filter">
+    <ul v-if="visible.length">
+      <TodoItem v-for="todo in visible" :key="todo.id" :todo="todo" done @toggle="emit('toggle', todo.id)" />
+    </ul>
+    <p v-else class="empty">Nothing to do</p>
+  </section>
+</template>
+<style scoped>.empty { color: gray }</style>

@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const rows = ref([1, 2])
+const on = ref(true)
+</script>
+<template>
+  <table>
+    <tr v-for="row in rows" :key="row"><td>{{ row }}</td></tr>
+  </table>
+  <p><div>split</div></p>
+  <svg viewBox="0 0 10 10"><circle v-if="on" r="5" /></svg>
+  <math><mi>x</mi></math>
+  <pre v-pre>{{ raw }}</pre>
+</template>
+<style scoped>td { color: red }</style>

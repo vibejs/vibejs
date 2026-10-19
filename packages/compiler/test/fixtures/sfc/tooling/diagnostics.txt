@@ -1,0 +1,23 @@
+error[VIBE2305]: `.stop` cannot modify a component event.
+  --> sfc/tooling/input.vibe:14:15
+14 |       @remove.stop.prevent="remove(index)"
+   |               ^^^^
+fix: Remove `.stop` and handle the case inside the handler.
+docs: https://vibejs.org/v0/errors/VIBE2305
+
+error[VIBE2305]: `.prevent` cannot modify a component event.
+  --> sfc/tooling/input.vibe:14:20
+14 |       @remove.stop.prevent="remove(index)"
+   |                    ^^^^^^^
+fix: Remove `.prevent` and handle the case inside the handler.
+docs: https://vibejs.org/v0/errors/VIBE2305
+
+error[VIBE2007]: `remove` is not defined in the template.
+  --> sfc/tooling/input.vibe:14:29
+14 |       @remove.stop.prevent="remove(index)"
+   |                             ^^^^^^
+fix: Fix the spelling of `remove`.
+fix: Declare or import `remove` in `<script setup lang="ts">`.
+fix: Declare `remove` as a prop in `defineProps`.
+fix: Read another global, such as `window`, in `<script setup lang="ts">` and use that binding in the template.
+docs: https://vibejs.org/v0/errors/VIBE2007

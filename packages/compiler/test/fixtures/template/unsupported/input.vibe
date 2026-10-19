@@ -1,0 +1,17 @@
+<template>
+  <div v-memo="[text]"></div>
+  <div v-once></div>
+  <div v-focus></div>
+  <div v-cloak></div>
+  <div @vue:mounted="count++"></div>
+  <div @vnode-mounted="count++"></div>
+</template>
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+import Item from './Item.vibe'
+const { label } = defineProps<{ label: string }>()
+const text = ref('')
+const items = ref([{ id: 1, done: false }])
+const fixed = { a: 1 }
+let count = 0
+</script>

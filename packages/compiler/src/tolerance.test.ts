@@ -7,6 +7,7 @@ import { parseParams, rewriteExpr } from './expr/rewrite.ts';
 import { analyze } from './script/analyze.ts';
 import { compileScript } from './script/compile.ts';
 import { parse } from './sfc/parse.ts';
+import { transform } from './transform/index.ts';
 
 /** Parses `source` and lists every location of the descriptor, the AST or the diagnostics that is wrong. */
 function problems(source: string): string[] {
@@ -54,7 +55,23 @@ function scriptProblems(source: string): string[] {
     .map(([start, end]) => `${JSON.stringify(source)}: ${start}-${end} is out of bounds`);
 }
 
+/** Transforms `source` and lists every diagnostic out of bounds and a mismatch of `ir` and diagnostics. */
+function templateProblems(source: string): string[] {
+  const { descriptor } = parse(source, { filename: 'input.vibe' });
+  const { ir, diagnostics } = transform(descriptor, analyze(descriptor), { id: '0a1b2c3d' });
+  const bad = diagnostics
+    .filter(
+      (d) =>
+        !(0 <= d.start.offset && d.start.offset <= d.end.offset && d.end.offset <= source.length),
+    )
+    .map((d) => `${d.code} at ${d.start.offset}-${d.end.offset} is out of bounds`);
+  if ((ir === null) !== diagnostics.length > 0) bad.push('ir is null iff diagnostics exist');
+  return bad.map((b) => `${JSON.stringify(source)}: ${b}`);
+}
+
 const scripts = fixtures.filter(([name]) => name.startsWith('script/')).slice(0, 5);
+
+const templates = fixtures.filter(([name]) => name.startsWith('template/'));
 
 const withTemplate = fixtures
   .filter(([name]) => !name.startsWith('script/'))
@@ -62,6 +79,27 @@ const withTemplate = fixtures
   .slice(0, 10);
 
 describe('tolerance', () => {
+  it.each(templates)('%s: the template transform cut at every 7th character', (_, source) => {
+    const bad: string[] = [];
+    for (let end = 0; end <= source.length; end += 7)
+      bad.push(...templateProblems(source.slice(0, end)));
+    expect(bad).toStrictEqual([]);
+  });
+
+  it.each(templates.slice(0, 10))(
+    '%s: the template transform without one character',
+    (_, source) => {
+      const { loc } = parse(source, { filename: 'input.vibe' }).descriptor.template!;
+      const bad: string[] = [];
+      for (let i = loc.start.offset; i < loc.end.offset; i++) {
+        bad.push(...templateProblems(source.slice(0, i) + source.slice(i + 1)));
+      }
+      expect(bad).toStrictEqual([]);
+    },
+    // One parse, analysis and transform per character of a whole template.
+    60_000,
+  );
+
   it.each(fixtures)('%s cut at every 7th character', (_, source) => {
     const bad: string[] = [];
     for (let end = 0; end <= source.length; end += 7) bad.push(...problems(source.slice(0, end)));

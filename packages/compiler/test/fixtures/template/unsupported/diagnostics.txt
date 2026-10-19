@@ -1,0 +1,43 @@
+error[VIBE2906]: `v-memo` is not supported.
+  --> template/unsupported/input.vibe:2:8
+2 |   <div v-memo="[text]"></div>
+  |        ^^^^^^^^^^^^^^^
+fix: Remove `v-memo`.
+docs: https://vibejs.org/v0/errors/VIBE2906
+
+error[VIBE2907]: `v-once` is not supported.
+  --> template/unsupported/input.vibe:3:8
+3 |   <div v-once></div>
+  |        ^^^^^^
+fix: Remove `v-once`.
+fix: Read the value once in `<script setup lang="ts">` and render that constant.
+docs: https://vibejs.org/v0/errors/VIBE2907
+
+error[VIBE2908]: `v-focus` is not a built-in directive, and custom directives are not supported.
+  --> template/unsupported/input.vibe:4:8
+4 |   <div v-focus></div>
+  |        ^^^^^^^
+fix: Reach the element with `useTemplateRef` and run the code in `onMounted` or a `watch`.
+fix: Move reusable element logic into a composable that takes the template ref.
+docs: https://vibejs.org/v0/errors/VIBE2908
+
+error[VIBE2909]: `v-cloak` is not supported.
+  --> template/unsupported/input.vibe:5:8
+5 |   <div v-cloak></div>
+  |        ^^^^^^^
+fix: Remove `v-cloak`.
+docs: https://vibejs.org/v0/errors/VIBE2909
+
+error[VIBE2910]: `@vue:mounted` is not supported.
+  --> template/unsupported/input.vibe:6:8
+6 |   <div @vue:mounted="count++"></div>
+  |        ^^^^^^^^^^^^^^^^^^^^^^
+fix: Use `onMounted` or `onUnmounted` with a template ref in `<script setup lang="ts">`.
+docs: https://vibejs.org/v0/errors/VIBE2910
+
+error[VIBE2910]: `@vnode-mounted` is not supported.
+  --> template/unsupported/input.vibe:7:8
+7 |   <div @vnode-mounted="count++"></div>
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^
+fix: Use `onMounted` or `onUnmounted` with a template ref in `<script setup lang="ts">`.
+docs: https://vibejs.org/v0/errors/VIBE2910

@@ -1,0 +1,19 @@
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+const form = ref({ name: '', agree: false, size: 1, kind: 'a' })
+const field = useTemplateRef('field')
+const tags = ref(['x'])
+function submit() {}
+</script>
+<template>
+  <form @submit.prevent="submit">
+    <input ref="field" v-model.lazy="form.name">
+    <textarea v-model.trim="form.name"></textarea>
+    <label><input type="checkbox" v-model="form.agree" true-value="yes" false-value="no"> Agree</label>
+    <input type="radio" v-model="form.kind" value="a">
+    <select v-model.number="form.size"><option :value="1">One</option></select>
+    <p v-show="form.agree" v-text="form.name"></p>
+    <div v-html="form.name"></div>
+    <span v-for="(tag, i) in tags" :key="tag" :class="{ first: i === 0 }" @keydown.enter.ctrl="tags.splice(i, 1)">{{ tag }}</span>
+  </form>
+</template>

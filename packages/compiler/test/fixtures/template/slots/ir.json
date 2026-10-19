@@ -1,0 +1,290 @@
+{
+  "templates": [
+    {
+      "html": "<h3> </h3>"
+    },
+    {
+      "html": "No footer"
+    },
+    {
+      "html": " "
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "block",
+        "id": 0,
+        "parent": null,
+        "anchor": null,
+        "make": {
+          "k": "component",
+          "is": "Card",
+          "props": [],
+          "spread": [
+            [
+              {
+                "key": "title",
+                "value": "Rows",
+                "loc": 218
+              }
+            ],
+            {
+              "kind": "expression",
+              "parts": [
+                "$ctx.attrs"
+              ],
+              "scopes": []
+            }
+          ],
+          "slots": [
+            {
+              "name": "header",
+              "scope": {
+                "names": [
+                  "count"
+                ]
+              },
+              "params": {
+                "code": "{ count }",
+                "offset": 271
+              },
+              "block": {
+                "ops": [
+                  {
+                    "op": "tpl",
+                    "id": 2,
+                    "tpl": 0
+                  },
+                  {
+                    "op": "walk",
+                    "id": 1,
+                    "from": 2,
+                    "steps": [
+                      "txt"
+                    ]
+                  },
+                  {
+                    "op": "effect",
+                    "call": {
+                      "fn": "setText",
+                      "args": [
+                        {
+                          "ref": 1
+                        },
+                        {
+                          "expr": {
+                            "kind": "expression",
+                            "parts": [
+                              "_toDisplayString(",
+                              {
+                                "code": "count",
+                                "offset": 296
+                              },
+                              ")",
+                              " + ",
+                              "\" rows\""
+                            ],
+                            "scopes": [
+                              {
+                                "names": [
+                                  "count"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "loc": 293
+                  }
+                ],
+                "returns": [
+                  2
+                ]
+              },
+              "test": null
+            },
+            {
+              "name": "footer",
+              "scope": null,
+              "params": null,
+              "block": {
+                "ops": [
+                  {
+                    "op": "block",
+                    "id": 4,
+                    "parent": null,
+                    "anchor": null,
+                    "make": {
+                      "k": "slot",
+                      "name": "footer",
+                      "props": [
+                        {
+                          "key": "rows",
+                          "value": {
+                            "kind": "expression",
+                            "parts": [
+                              "$setup.",
+                              {
+                                "code": "rows",
+                                "offset": 399
+                              }
+                            ],
+                            "scopes": []
+                          },
+                          "loc": 392
+                        }
+                      ],
+                      "spread": null,
+                      "fallback": {
+                        "ops": [
+                          {
+                            "op": "tpl",
+                            "id": 3,
+                            "tpl": 1
+                          }
+                        ],
+                        "returns": [
+                          3
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "returns": [
+                  4
+                ]
+              },
+              "test": {
+                "kind": "expression",
+                "parts": [
+                  "$setup.",
+                  {
+                    "code": "open",
+                    "offset": 359
+                  }
+                ],
+                "scopes": []
+              }
+            },
+            {
+              "name": "default",
+              "scope": null,
+              "params": null,
+              "block": {
+                "ops": [
+                  {
+                    "op": "block",
+                    "id": 5,
+                    "parent": null,
+                    "anchor": null,
+                    "make": {
+                      "k": "component",
+                      "is": "List",
+                      "props": [
+                        {
+                          "key": "items",
+                          "value": {
+                            "kind": "expression",
+                            "parts": [
+                              "$setup.",
+                              {
+                                "code": "rows",
+                                "offset": 456
+                              }
+                            ],
+                            "scopes": []
+                          },
+                          "loc": 448
+                        }
+                      ],
+                      "spread": null,
+                      "slots": [
+                        {
+                          "name": "item",
+                          "scope": {
+                            "names": [
+                              "item"
+                            ]
+                          },
+                          "params": {
+                            "code": "{ item }",
+                            "offset": 486
+                          },
+                          "block": {
+                            "ops": [
+                              {
+                                "op": "tpl",
+                                "id": 6,
+                                "tpl": 2
+                              },
+                              {
+                                "op": "effect",
+                                "call": {
+                                  "fn": "setText",
+                                  "args": [
+                                    {
+                                      "ref": 6
+                                    },
+                                    {
+                                      "expr": {
+                                        "kind": "expression",
+                                        "parts": [
+                                          "_toDisplayString(",
+                                          {
+                                            "code": "item.name",
+                                            "offset": 499
+                                          },
+                                          ")"
+                                        ],
+                                        "scopes": [
+                                          {
+                                            "names": [
+                                              "item"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "loc": 496
+                              }
+                            ],
+                            "returns": [
+                              6
+                            ]
+                          },
+                          "test": null
+                        }
+                      ],
+                      "singleRoot": false
+                    }
+                  }
+                ],
+                "returns": [
+                  5
+                ]
+              },
+              "test": null
+            }
+          ],
+          "singleRoot": true
+        }
+      }
+    ],
+    "returns": [
+      0
+    ]
+  },
+  "abi": [
+    "toDisplayString",
+    "createComponent",
+    "template",
+    "txt",
+    "renderEffect",
+    "setText",
+    "createSlot"
+  ]
+}

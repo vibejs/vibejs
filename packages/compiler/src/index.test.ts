@@ -16,6 +16,7 @@ import { describe, expect, it } from 'vitest';
 import { fixtures, objects } from '../test/walk.ts';
 import { formatDiagnostic } from './diagnostics.ts';
 import { compileStyle } from './style/compileStyle.ts';
+import { resolveComponentTag } from './transform/resolve.ts';
 
 type TemplateNode =
   | RootNode
@@ -25,7 +26,7 @@ type TemplateNode =
   | SimpleExpressionNode;
 
 describe('@vibejs-org/compiler', () => {
-  it('exports formatDiagnostic, compileStyle, parse, analyzeScript, the AST enums and the expression helpers at runtime', () => {
+  it('exports formatDiagnostic, compileStyle, parse, analyzeScript, the AST enums, the expression helpers and resolveComponentTag at runtime', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
       'NodeTypes',
@@ -39,8 +40,10 @@ describe('@vibejs-org/compiler', () => {
       'isAllowedGlobal',
       'isSimpleHandler',
       'parse',
+      'resolveComponentTag',
     ]);
     expect(compiler.formatDiagnostic).toBe(formatDiagnostic);
+    expect(compiler.resolveComponentTag).toBe(resolveComponentTag);
     expect(compiler.compileStyle).toBe(compileStyle);
   });
 
