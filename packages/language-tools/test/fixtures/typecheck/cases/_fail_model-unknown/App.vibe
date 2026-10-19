@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import Row from './Row.vibe'
+const text = ref('')
+</script>
+
+<template>
+  <Row v-model="text" />
+</template>

@@ -29,6 +29,8 @@ export interface Walk {
   depth: number;
   /** Whether a component tag names the file itself: it stays untyped until slots are typed. */
   self: (tag: string) => boolean;
+  /** The imported setup bindings: a component tag rooted at one is typed without the template block. */
+  imports: ReadonlySet<string>;
   /** The number of component handles (`__vibe_cN`) emitted so far. */
   handles: number;
   /** The `ref="key"` targets: key -> type. */
@@ -316,10 +318,18 @@ function ref(node: AttributeNode, p: Props, el: ElementNode): void {
   const name = node.value?.content;
   if (!name) return;
   const map = el.ns === SVG ? 'SVGElementTagNameMap' : 'HTMLElementTagNameMap';
+  // An imported tag is read from the script, not the template block: a template that reads the
+  // ref then has no type cycle through `__vibe_cN`. A non-component tag gives `unknown` here; its
+  // error is at the tag.
+  // ponytail: other setup roots (a component in a ref) still go through `__vibe_cN`.
   const type =
-    p.kind === 'component' || p.kind === 'dynamic'
-      ? `typeof __vibe_c${p.w.handles - 1}.exposed`
-      : `${map} extends Record<'${el.tag}', infer E> ? E : Element`;
+    p.kind === 'dynamic'
+      ? 'unknown'
+      : p.kind === 'el' || p.kind === 'custom'
+        ? `${map} extends Record<'${el.tag}', infer E> ? E : Element`
+        : p.w.imports.has(el.tag.split('.')[0])
+          ? `typeof ${el.tag} extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown`
+          : `typeof __vibe_c${p.w.handles - 1}.exposed`;
   p.w.refs.set(name, p.w.loops > 0 ? `(${type})[]` : type);
 }
 
@@ -396,7 +406,8 @@ function handler(dir: DirectiveNode, p: Props, isLoose = false): void {
 /**
  * Native `v-model`: the value key (`checked` for a checkbox), then a write of what the element
  * yields: a string (a number with `.number` or `type="number"`), or for a checkbox or a multiple
- * select the target itself, checked against the values it can hold. On a component: `x: m`,
+ * select the target itself, checked against the values it can hold. On a component: `x: m` (a
+ * kebab name camelized),
  * `'onUpdate:x'` writing `m`, and `xModifiers`.
  */
 function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
@@ -433,12 +444,13 @@ function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
     });
     return;
   }
-  const name = dir.arg?.content ?? 'modelValue';
-  if (property(p, name, at, !dir.arg)) read();
+  const name = dir.arg ? componentKey(p, dir.arg.content) : 'modelValue';
+  if (property(p, name, at, name !== dir.arg?.content)) read();
   // ponytail: `<component :is>` declares no models, so its write side is not checked.
   if (p.kind === 'dynamic') return;
   if (writes && property(p, `onUpdate:${name}`, at, false, Preset.NONE)) {
-    w.b.add('($event) => { ');
+    // The initializer stands in for a missing contextual type (an unknown model): no implicit any.
+    w.b.add('($event = undefined as never) => { ');
     target();
     w.b.add(' = $event }');
   }

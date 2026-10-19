@@ -3,7 +3,12 @@ import { expect, it } from 'vitest';
 import { CodeBuilder } from './builder.ts';
 import { children } from './template.ts';
 
-function emit(template: string, setup: string[] = [], refs = new Map<string, string>()) {
+function emit(
+  template: string,
+  setup: string[] = [],
+  refs = new Map<string, string>(),
+  imports = new Set<string>(),
+) {
   const source = `<template>${template}</template>`;
   const { descriptor } = parse(source, { filename: 'A.vibe' });
   const b = new CodeBuilder(source);
@@ -15,7 +20,7 @@ function emit(template: string, setup: string[] = [], refs = new Map<string, str
     unknown: new Map(),
     writes: false,
   };
-  const w = { b, names, source, depth: 0, self: () => false, handles: 0, refs, loops: 0 };
+  const w = { b, names, source, depth: 0, self: () => false, imports, handles: 0, refs, loops: 0 };
   children(descriptor.template!.ast.children, w, new Set());
   return b.text
     .trim()
@@ -115,8 +120,26 @@ it('emits components with handles, and leaves v-slot content untyped with unknow
   ]);
 });
 
+it('types the ref of an imported component from its tag, and of <component :is> as unknown', () => {
+  const refs = new Map<string, string>();
+  emit('<C ref="c" /><component :is="C" ref="d" />', ['C'], refs, new Set(['C']));
+  expect([...refs]).toEqual([
+    [
+      'c',
+      "typeof C extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown",
+    ],
+    ['d', 'unknown'],
+  ]);
+});
+
 it('writes a component model through its update handler, with modifiers', () => {
   expect(emit('<C v-model:x.trim="m" />', ['C', 'm'])).toEqual([
-    "var __vibe_c0 = __vibe.component(C)({ x: m, 'onUpdate:x': ($event) => { __vibe_w.m = $event }, xModifiers: { trim: true } });",
+    "var __vibe_c0 = __vibe.component(C)({ x: m, 'onUpdate:x': ($event = undefined as never) => { __vibe_w.m = $event }, xModifiers: { trim: true } });",
+  ]);
+});
+
+it('camelizes a kebab model name on a component', () => {
+  expect(emit('<C v-model:first-name="m" />', ['C', 'm'])).toEqual([
+    "var __vibe_c0 = __vibe.component(C)({ firstName: m, 'onUpdate:firstName': ($event = undefined as never) => { __vibe_w.m = $event } });",
   ]);
 });

@@ -25,4 +25,5 @@ let draft = ''
   <input type="radio" value="a" v-model="choice">
   <Field v-model="text" />
   <Field v-model="text" v-model:count="amount" v-model:title.trim="note" />
+  <Field v-model="text" v-model:first-name.trim="note" />
 </template>

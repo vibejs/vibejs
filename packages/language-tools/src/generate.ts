@@ -58,6 +58,9 @@ export function generate(fileName: string, text: string): GeneratedFile {
       !setup.has(tag.split('.')[0]) &&
       !ctx.has(tag.split('.')[0]) &&
       resolveComponentTag(tag, analysis, fileName) !== null,
+    imports: new Set(
+      [...analysis.bindings].filter(([, { kind }]) => kind === 'import').map(([name]) => name),
+    ),
     handles: 0,
     refs: new Map(),
     loops: 0,

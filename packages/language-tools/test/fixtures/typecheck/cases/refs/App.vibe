@@ -22,6 +22,7 @@ function setEl(el: unknown): void {
 <template>
   <input ref="input">
   <Row ref="row" />
+  <button @click="row?.focus()">focus</button>
   <ul><li v-for="n in 3" ref="items" :key="n">{{ n }}</li></ul>
   <svg><circle ref="circle" /></svg>
   <slot><p ref="slotted" /></slot>
