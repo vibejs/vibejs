@@ -9,7 +9,7 @@ import { captureLog, caught } from '../../test/log.ts';
 import { JsonLogger, Logger } from '../logger.ts';
 import { Controller, Handle, Module, UseFilters, UseGuards } from '../module/decorators.ts';
 import type { OnModuleInit } from '../module/lifecycle.ts';
-import { VibeFactory, type Middleware } from './app.ts';
+import { inspect, VibeFactory, type Middleware } from './app.ts';
 import type { CanActivate, Ctx, ExceptionFilter, Interceptor } from './context.ts';
 
 const srvx = vi.hoisted(() => ({ loaded: vi.fn<() => void>() }));
@@ -417,13 +417,15 @@ describe('VibeFactory.create', () => {
   });
 
   it('inspects routes with the base path and enhancers in run order, and modules', async () => {
-    const app = await VibeFactory.create(AppModule, {
+    const options = {
       basePath: '/api',
       guards: [Allow],
       interceptors: [Timing],
       filters: [Fallback],
       logger: new JsonLogger({ level: 'silent' }),
-    });
+    };
+    const app = await VibeFactory.create(AppModule, options);
+    expect(inspect(AppModule, options)).toEqual(app.inspect());
     expect(app.inspect()).toEqual({
       routes: [
         inspected('GET', '/api/users', 'UsersController.list'),

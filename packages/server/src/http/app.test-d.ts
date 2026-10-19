@@ -4,7 +4,9 @@ import * as v from 'valibot';
 import { expectTypeOf } from 'vitest';
 import type { RequestState } from '../index.ts';
 import { UseFilters, UseGuards, UseInterceptors } from '../module/decorators.ts';
-import type { App, AppOptions } from './app.ts';
+import type { Class } from '../di/token.ts';
+import type { DynamicModule } from '../module/graph.ts';
+import { inspect, type App, type AppInspection, type AppOptions } from './app.ts';
 import type { CanActivate, Ctx, ExceptionFilter, Interceptor, RequestContext } from './context.ts';
 import { HttpError } from './errors.ts';
 
@@ -88,3 +90,11 @@ UseFilters(NeedsArgsFilter);
 export const rejectedInterceptor: AppOptions = { interceptors: [NeedsArgsInterceptor] };
 // @ts-expect-error -- global filters are built without constructor arguments
 export const rejectedFilter: AppOptions = { filters: [NeedsArgsFilter] };
+
+class Root {}
+expectTypeOf(inspect).parameter(0).toEqualTypeOf<Class | DynamicModule>();
+expectTypeOf(inspect).parameter(1).toEqualTypeOf<AppOptions | undefined>();
+expectTypeOf(inspect(Root)).toEqualTypeOf<AppInspection>();
+expectTypeOf(inspect({ module: Root }, { basePath: '/api' })).toEqualTypeOf<AppInspection>();
+// @ts-expect-error -- the root is a module class or a dynamic module
+inspect('AppModule');
