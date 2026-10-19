@@ -30,3 +30,19 @@ export type {
   ToRefs,
   UnwrapRef,
 } from './reactivity/ref.ts';
+export { nextTick } from './runtime/scheduler.ts';
+export {
+  onWatcherCleanup,
+  watch,
+  watchEffect,
+  watchPostEffect,
+  watchSyncEffect,
+} from './runtime/watch.ts';
+export type {
+  OnCleanup,
+  WatchCallback,
+  WatchHandle,
+  WatchOptions,
+  WatchSource,
+  WatchStopHandle,
+} from './runtime/watch.ts';

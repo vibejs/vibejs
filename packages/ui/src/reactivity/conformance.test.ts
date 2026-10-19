@@ -2,9 +2,10 @@
 // Upstream: stackblitz/alien-signals@8734d386d925025d0e99419bd9161c17b112c5ee tests/conformance.spec.ts (MIT)
 import { setExpect, testSuite, type ReactiveFramework } from 'reactive-framework-test-suite';
 import { describe, expect, test } from 'vitest';
+import { onWatcherCleanup, watchSyncEffect } from '../runtime/watch.ts';
 import { computed } from './computed.ts';
-import { endBatch, ReactiveEffect, setActiveSub, startBatch } from './core.ts';
-import { effectScope, onScopeDispose } from './effectScope.ts';
+import { endBatch, setActiveSub, startBatch } from './core.ts';
+import { effectScope } from './effectScope.ts';
 import { shallowRef } from './ref.ts';
 
 function untracked<T>(fn: () => T): T {
@@ -30,26 +31,13 @@ const framework: ReactiveFramework = {
     const c = computed(fn);
     return { read: () => c.value };
   },
-  // A sync effect registered in the active scope. The cleanup that `fn` may return runs, untracked,
-  // before the next run and when the effect or its scope stops.
-  effect(fn) {
-    let cleanup: (() => void) | void = undefined;
-    const runCleanup = () => {
-      const current = cleanup;
-      cleanup = undefined;
-      if (current) untracked(current);
-    };
-    const effect = new ReactiveEffect(() => {
-      runCleanup();
-      cleanup = fn();
-    });
-    onScopeDispose(runCleanup, true);
-    effect.run();
-    return () => {
-      effect.stop();
-      runCleanup();
-    };
-  },
+  // The cleanup that `fn` may return is a watcher cleanup: it runs, untracked, before the next run
+  // and when the watcher or its scope stops.
+  effect: (fn) =>
+    watchSyncEffect(() => {
+      const cleanup = fn();
+      if (cleanup) onWatcherCleanup(cleanup);
+    }),
   run(fn) {
     const scope = effectScope();
     scope.run(fn);

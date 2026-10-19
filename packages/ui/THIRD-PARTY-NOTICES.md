@@ -38,7 +38,7 @@ SOFTWARE.
 - Repository: https://github.com/vuejs/core
 - Version: v3.5.44, commit `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`
 - License: MIT
-- Used in: `packages/ui/src/reactivity/reactive.ts`, `baseHandlers.ts`, `collectionHandlers.ts`, `arrayInstrumentations.ts` and `dep.ts` (the reactive proxies, shipped in the `@vibejs-org/ui` dist) and the ported reactivity specs in `packages/ui/src/reactivity/ref.test.ts`, `computed.test.ts`, `effectScope.test.ts`, `reactive.test.ts`, `reactiveArray.test.ts`, `readonly.test.ts`, `shallowReactive.test.ts`, `shallowReadonly.test.ts`, `collectionMap.test.ts`, `collectionSet.test.ts`, `collectionWeakMap.test.ts`, `collectionWeakSet.test.ts` and `collectionShallowReadonly.test.ts` (tests, not shipped)
+- Used in: `packages/ui/src/reactivity/reactive.ts`, `baseHandlers.ts`, `collectionHandlers.ts`, `arrayInstrumentations.ts` and `dep.ts` (the reactive proxies) and `packages/ui/src/runtime/scheduler.ts`, `errorHandling.ts` and `watch.ts` (the scheduler and watchers), shipped in the `@vibejs-org/ui` dist; the ported runtime specs in `packages/ui/src/runtime/scheduler.test.ts`, `errorHandling.test.ts` and `watch.test.ts`; and the ported reactivity specs in `packages/ui/src/reactivity/ref.test.ts`, `computed.test.ts`, `effectScope.test.ts`, `reactive.test.ts`, `reactiveArray.test.ts`, `readonly.test.ts`, `shallowReactive.test.ts`, `shallowReadonly.test.ts`, `collectionMap.test.ts`, `collectionSet.test.ts`, `collectionWeakMap.test.ts`, `collectionWeakSet.test.ts` and `collectionShallowReadonly.test.ts` (tests, not shipped)
 
 ```text
 The MIT License (MIT)

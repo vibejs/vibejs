@@ -101,6 +101,8 @@ export class ReactiveEffect<T = unknown> implements ReactiveNode {
   flags: number = ReactiveFlags.Watching;
   fn: () => T;
   scheduler: (() => void) | undefined = undefined;
+  /** Runs after `stop()`, for example a watcher's cleanups. */
+  onStop: (() => void) | undefined = undefined;
 
   constructor(fn: () => T) {
     this.fn = fn;
@@ -142,6 +144,7 @@ export class ReactiveEffect<T = unknown> implements ReactiveNode {
   stop(): void {
     this.flags = ReactiveFlags.None;
     releaseDeps(this);
+    this.onStop?.();
   }
 
   pause(): void {
