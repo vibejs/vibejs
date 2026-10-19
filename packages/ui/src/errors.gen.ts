@@ -38,6 +38,14 @@ const MESSAGES = {
   VIBE7109: ["The component of the route {path} failed to load.","Handle the error in `router.onError()`, for example by loading `to.fullPath` as a full page.","Check that the loader of {path} imports an existing file."],
   VIBE7110: ["The loader of the route {path} resolved to {type}, not a component.","Return the module from the loader, as in `() => import('./Page.vibe')`.","Export the component as the `default` export of the loaded module."],
   VIBE7118: ["The param {param} of the route {route} must be {expected}.","Pass an array for a repeatable param, such as `['a', 'b']` for `/:segments+`.","Pass a single value for a param without `+` or `*`.","Pass a value other than `.` or `..` for {param}."],
+  VIBE7201: ["get({selector}) found no element in the rendered HTML: {html}","Compare the selector with the rendered HTML above.","Await the action that renders the element, such as `trigger()`, `setProps()` or `flushPromises()`, before the query.","Use `find()` and `exists()` when the element is expected to be absent."],
+  VIBE7202: ["find({selector}) found no element, so {method}() cannot run on it.","Use `get()` when the element must exist: it fails at the query and shows the rendered HTML.","Check `exists()` before using the wrapper when the element may be absent."],
+  VIBE7203: ["trigger() received the event name {event}, which has a modifier: pass the key in the event init instead, as in {example}.","Pass the key as `key` in the event init, such as `key: 'Enter'` for `keydown.enter`.","Pass modifier keys as booleans in the event init, such as `ctrlKey: true` for `click.ctrl`."],
+  VIBE7204: ["setValue() cannot set a value on a <{tag}> element.","Query the form control itself, such as `get('input')`, before calling `setValue()`.","Use `trigger()` to dispatch events on other elements."],
+  VIBE7205: ["The wrapper of {name} was used after the component unmounted.","Read what the test checks before calling `unmount()`.","Mount the component again in each test that uses it, for example in `beforeEach()`."],
+  VIBE7206: ["mount() does not take the option {option}: {fix}.","Pass `plugins` and `provide` as top-level options of `mount()`.","Replace a child component with a mock of its module, as in `vi.mock('./Child.vibe')`.","Pass attributes and the starting state of the component in `props`."],
+  VIBE7207: ["The component renders {count} root elements, so its wrapper has no single element.","Query the element first, as in `get('header')`, and use that wrapper.","Use `html()` or `text()`, which read every root node."],
+  VIBE7208: ["mount() could not find the attachTo element {selector}.","Check that the document has an element that matches {selector} before calling `mount()`.","Pass the element itself instead of a selector."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => (__DEV__ ? MESSAGES : undefined));
