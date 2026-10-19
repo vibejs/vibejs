@@ -71,7 +71,7 @@ Lifecycle hooks, `provide()`, `inject()`, `useTemplateRef()`, `useAttrs()`, `use
 
 ## VIBE5207: Invalid dynamic component
 
-> <component :is> received {type}, which is not a component.
+> `<component :is>` received {type}, which is not a component.
 
 `<component :is>` renders the component it receives, and nothing for `null` or `undefined`. Any other value, such as a string or a plain object without a render function, cannot be rendered. This error is raised in every build and, like any error of a render, goes to `onErrorCaptured` and `app.config.errorHandler`.
 
