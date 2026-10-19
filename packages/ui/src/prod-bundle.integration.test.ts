@@ -37,9 +37,6 @@ it('bundles the counter for prod in at most 7 kB gzip, without HMR code or dev m
     (name) => name.endsWith('.js') || name.endsWith('.mjs'),
   );
   const code = readFileSync(join(outDir, file), 'utf8');
-  // The size budget (CONTRACTS C10): 7 kB gzip.
-  const gzip = gzipSync(code, { level: 9 }).length;
-  expect(gzip).toBeLessThanOrEqual(7168);
   expect(sentences.length).toBeGreaterThan(20);
   expect(sentences.every((text) => text.length >= 10)).toBe(true);
   for (const text of [
@@ -61,4 +58,7 @@ it('bundles the counter for prod in at most 7 kB gzip, without HMR code or dev m
   button.click();
   await new Promise((resolve) => setTimeout(resolve));
   expect(button.textContent).toBe('2');
+  // The size budget (CONTRACTS C10): 7 kB gzip. Checked last so the content and behavior checks above always run.
+  const gzip = gzipSync(code, { level: 9 }).length;
+  expect(gzip).toBeLessThanOrEqual(7168);
 });
