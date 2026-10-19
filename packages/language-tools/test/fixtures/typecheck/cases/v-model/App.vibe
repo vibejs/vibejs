@@ -31,6 +31,7 @@ const level = ref(0)
   <input type="radio" :value="1" v-model="level">
   <select v-model="level"><option :value="1">one</option></select>
   <Field v-model="text" />
+  <Field v-model="text" @update:model-value="text = $event" />
   <Field v-model="text" v-model:count="amount" v-model:title.trim="note" />
   <Field v-model="text" v-model:first-name.trim="note" />
 </template>

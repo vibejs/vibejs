@@ -1,0 +1,10 @@
+<script setup lang="ts">
+function go() {}
+function need(value: string): void {
+  void value
+}
+</script>
+
+<template>
+  <p @click="go" @click.once="need($event)">text</p>
+</template>

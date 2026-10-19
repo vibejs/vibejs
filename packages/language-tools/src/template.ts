@@ -212,7 +212,7 @@ function slots(el: ElementNode, w: Walk, locals: Locals, tag: [number, number]):
 function untyped(node: TemplateChildNode, w: Walk): void {
   if (node.type !== NodeTypes.ELEMENT) return;
   const name = findAttr(node, 'ref')?.value?.content;
-  if (name && !w.refs.has(name)) w.refs.set(name, 'unknown');
+  if (name) addRef(w, name, 'unknown');
   for (const child of node.children) untyped(child, w);
 }
 
@@ -257,6 +257,8 @@ interface Props {
   seen: Set<string>;
   /** Statements after the element: values whose key is taken, `v-show`, `v-model` writes. */
   after: (() => void)[];
+  /** The props type that types a handler whose key is taken; undefined leaves its payload `unknown`. */
+  props: string | undefined;
 }
 
 /**
@@ -332,7 +334,16 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
   // A missing required prop is reported on the object literal, which stands for the tag.
   if (kind === 'component' || (kind === 'slot' && !w.outlets)) b.atom('{', ...tag, Preset.NONE);
   else b.add('{');
-  const p: Props = { w, kind, locals, seen: new Set(), after: [] };
+  const callee = el.tag === w.own ? '__vibe_self' : el.tag;
+  const props =
+    kind === 'el'
+      ? `Partial<typeof __vibe.tags.${el.tag}>`
+      : kind === 'custom'
+        ? 'Parameters<typeof __vibe.customElement>[0]'
+        : kind === 'component'
+          ? `Partial<Parameters<ReturnType<typeof __vibe.component<typeof ${callee}>>>[0]>`
+          : undefined;
+  const p: Props = { w, kind, locals, seen: new Set(), after: [], props };
   // Static and bound `class` (and `style`) merge into one array: head -> the group, rest -> null.
   const merged = new Map<Prop, Prop[] | null>();
   for (const name of ['class', 'style']) {
@@ -453,8 +464,8 @@ function ref(node: AttributeNode, p: Props, el: ElementNode): void {
         ? `ReturnType<typeof __vibe.ctx<${CTX_TYPES}>>['${root}']`
         : undefined;
   const tag = binding && binding + path.map((m) => `['${m}']`).join('');
-  // ponytail: a `v-for` local (or an unresolved name) as the tag still goes through `__vibe_cN`.
-  // ponytail: a ref on the file's own tag is `unknown` once it exposes values, which may read that
+  // Limitation: a `v-for` local (or an unresolved name) as the tag still goes through `__vibe_cN`.
+  // Limitation: a ref on the file's own tag is `unknown` once it exposes values, which may read that
   // ref (a type cycle through `__VibeExposed`); check whether `defineExpose` reads it if needed.
   const self = el.tag === p.w.own && p.w.exposes;
   const type =
@@ -465,7 +476,20 @@ function ref(node: AttributeNode, p: Props, el: ElementNode): void {
         : tag
           ? `${tag} extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown`
           : `typeof __vibe_c${p.w.handles - 1}.exposed`;
-  p.w.refs.set(name, p.w.loops > 0 ? `(${type})[]` : type);
+  addRef(p.w, name, p.w.loops > 0 ? `(${type})[]` : type);
+}
+
+/** Adds a ref target; a repeated key holds the union, `unknown` when any target is untyped. */
+function addRef(w: Walk, name: string, type: string): void {
+  const prev = w.refs.get(name);
+  w.refs.set(
+    name,
+    prev === undefined || type === 'unknown'
+      ? type
+      : prev === 'unknown'
+        ? prev
+        : `(${prev}) | (${type})`,
+  );
 }
 
 /** `class: ['c', e]`: the static and bound values of one key, in order. */
@@ -522,8 +546,17 @@ function bound(dir: DirectiveNode, p: Props): void {
   const camel = on || dir.modifiers.some((m) => m.content === 'camel');
   const name = camel ? camelize(arg.content) : componentKey(p, arg.content);
   const alias = on || (!camel && name !== arg.content);
-  if (property(p, on ? `on${capitalize(name)}` : name, range(arg), alias)) handler(dir, p);
-  else loose(p, () => handler(dir, p, true));
+  const prop = on ? `on${capitalize(name)}` : name;
+  if (property(p, prop, range(arg), alias)) handler(dir, p);
+  else if (!on || !p.props) loose(p, () => handler(dir, p, true));
+  else {
+    // A handler whose key is taken is typed by that key, as a one-property object of the props.
+    loose(p, () => {
+      w.b.add(`{ ${key(prop)}: `);
+      handler(dir, p);
+      w.b.add(` } satisfies ${p.props}`);
+    });
+  }
 }
 
 /**
@@ -561,7 +594,7 @@ function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
     const checkbox = el.tag === 'input' && type === 'checkbox';
     const find = (name: string) => el.props.find((x) => staticKey(x) === name);
     // A checkbox with `true-value`/`false-value` yields those values, not `checked`.
-    // ponytail: with them, an array or Set model is not accepted; it is meaningless there.
+    // Limitation: with them, an array or Set model is not accepted; it is meaningless there.
     const yes = checkbox ? find('true-value') : undefined;
     const no = checkbox ? find('false-value') : undefined;
     if (!yes && !no && property(p, checkbox ? 'checked' : 'value', at, true)) read();
@@ -576,7 +609,7 @@ function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
         if (prop?.type === NodeTypes.DIRECTIVE) loose(p, () => value(prop, w, locals));
       return;
     }
-    // ponytail: a select with a bound `<option :value>` is not write-checked; type it from the
+    // Limitation: a select with a bound `<option :value>` is not write-checked; type it from the
     // option values if needed.
     if (el.tag === 'select' && !multiple && el.children.some(boundOption)) return;
     // TS reports a failed `satisfies` at the keyword: it stands for the value.
@@ -614,7 +647,7 @@ function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
   }
   const name = dir.arg ? componentKey(p, dir.arg.content) : 'modelValue';
   if (property(p, name, at, name !== dir.arg?.content)) read();
-  // ponytail: `<component :is>` declares no models, so its write side is not checked.
+  // Limitation: `<component :is>` declares no models, so its write side is not checked.
   if (p.kind === 'dynamic') return;
   // The initializer stands in for a missing contextual type (an unknown model): no implicit any.
   const update = () => {

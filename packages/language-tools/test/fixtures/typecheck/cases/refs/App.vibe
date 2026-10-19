@@ -13,6 +13,8 @@ const Local = Row
 const local = useTemplateRef('local')
 const item = useTemplateRef('item')
 const quoted = useTemplateRef("a'b")
+const either = useTemplateRef('either')
+const ok = true
 expectType<TemplateRef<HTMLInputElement>>()(input)
 expectType<TemplateRef<ComponentExposed<typeof Row>>>()(row)
 expectType<TemplateRef<HTMLLIElement[]>>()(items)
@@ -22,6 +24,7 @@ expectType<TemplateRef<HTMLElement>>()(typed)
 expectType<TemplateRef<ComponentExposed<typeof Row>>>()(local)
 expectType<TemplateRef<ComponentExposed<typeof Row>>>()(item)
 expectType<TemplateRef<HTMLParagraphElement>>()(quoted)
+expectType<TemplateRef<HTMLInputElement | HTMLTextAreaElement>>()(either)
 function setEl(el: unknown): void {
   void el
 }
@@ -38,5 +41,6 @@ function setEl(el: unknown): void {
   <Local ref="local" />
   <Item ref="item" />
   <button @click="local?.focus(); item?.focus()">{{ local && item ? 'both' : 'none' }}</button>
+  <input v-if="ok" ref="either"><textarea v-else ref="either" />
   <p ref="a'b">{{ quoted ? 'y' : 'n' }}</p>
 </template>

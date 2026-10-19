@@ -15,7 +15,7 @@ export function script(b: CodeBuilder, d: SFCDescriptor, analysis: ScriptAnalysi
     { name: '__VibeEmits', range: emits?.typeArg },
     ...(slots ? [{ name: '__VibeSlots', range: slots.typeArg }] : []),
   ];
-  // ponytail: an assigned `const x = defineExpose(…)` is not captured; its exposed type is `{}`.
+  // Limitation: an assigned `const x = defineExpose(…)` is not captured; its exposed type is `{}`.
   const exposeAt =
     expose && !d.source.slice(0, expose.callStart).trimEnd().endsWith('=')
       ? expose.callStart

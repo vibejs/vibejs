@@ -5,6 +5,9 @@ const clicks = ref(0)
 function reset() {
   text.value = ''
 }
+function log(event: MouseEvent) {
+  void event
+}
 function set(value: string) {
   text.value = value
 }
@@ -14,5 +17,6 @@ function set(value: string) {
   <button @click="reset">Reset</button>
   <button @click="clicks++">{{ clicks }}</button>
   <input @input="set(($event.target as HTMLInputElement).value)" @keydown.enter="(e) => e.key">
+  <button @click="reset" @click.once="log($event)">Once</button>
   <button v-on:dblclick="() => reset()">Twice</button>
 </template>

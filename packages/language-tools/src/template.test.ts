@@ -107,11 +107,42 @@ it('checks a value whose key is taken as a statement, and camelizes .camel', () 
     emit('<svg :id="a" :view-box.camel="v" @click="f" @click.once="g($event)" v-text="a" />'),
   ).toEqual([
     '__vibe.el(__vibe.tags.svg)({ id: a, viewBox: v, onClick: f, textContent: a });',
-    '(($event: unknown) => { g($event) });',
+    '({ onClick: ($event) => { g($event) } } satisfies Partial<typeof __vibe.tags.svg>);',
   ]);
   expect(emit('<p v-text="a" v-text.x="b" />')).toEqual([
     '__vibe.el(__vibe.tags.p)({ textContent: a });',
     '(b);',
+  ]);
+});
+
+it('types a handler whose key is taken by that key of the props, or as unknown when loose', () => {
+  expect(emit('<x-a @e="f" @e.once="g($event)" />')).toEqual([
+    '__vibe.customElement({ onE: f });',
+    '({ onE: ($event) => { g($event) } } satisfies Parameters<typeof __vibe.customElement>[0]);',
+  ]);
+  expect(emit('<C.D v-model="m" @update:model-value="m = $event" />', ['C', 'm'])).toEqual([
+    "var __vibe_c0 = __vibe.component(C.D)({ modelValue: m, 'onUpdate:modelValue': ($event = undefined as never) => { __vibe_w.m = $event } });",
+    "({ 'onUpdate:modelValue': ($event) => { __vibe_w.m = $event } } satisfies Partial<Parameters<ReturnType<typeof __vibe.component<typeof C.D>>>[0]>);",
+  ]);
+  expect(emit('<component :is="C" @e="f" @e.once="g($event)" />', ['C'])).toEqual([
+    'var __vibe_c0 = __vibe.dynamicComponent(C)({ onE: f });',
+    '(($event: unknown) => { g($event) });',
+  ]);
+});
+
+const el = (tag: string) => `HTMLElementTagNameMap extends Record<'${tag}', infer E> ? E : Element`;
+
+it('types a repeated ref key as the union of its targets, unknown when one is untyped', () => {
+  const refs = new Map<string, string>();
+  emit(
+    '<input v-if="a" ref="r"><textarea v-else ref="r" /><p ref="u" /><template><i ref="u" /></template><template><i ref="v" /></template><p ref="v" />',
+    [],
+    refs,
+  );
+  expect([...refs]).toEqual([
+    ['r', `(${el('input')}) | (${el('textarea')})`],
+    ['u', 'unknown'],
+    ['v', 'unknown'],
   ]);
 });
 
