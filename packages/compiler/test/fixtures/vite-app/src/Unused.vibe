@@ -1,0 +1,7 @@
+<template>
+  <p class="unused">unused</p>
+</template>
+
+<style scoped>
+.unused { color: tomato; }
+</style>

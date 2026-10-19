@@ -1,0 +1,7 @@
+<template>
+  <p>broken</p>
+</template>
+
+<style module>
+.a { color: red; }
+</style>

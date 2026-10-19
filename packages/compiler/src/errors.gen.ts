@@ -128,6 +128,8 @@ const MESSAGES = {
   VIBE4003: ["`v-bind()` is not supported in component styles.","Set a CSS custom property such as `--color` with `:style` in the template, and read it with `var(--color)`.","Bind a class or style in the template with `:class` or `:style`."],
   VIBE4004: ["`{selector}` is not supported in component styles.","Write `:deep(.child)` to style `.child` inside child components.","Write `:global(.name)` for a rule that is not scoped."],
   VIBE4005: ["{escape} needs exactly one selector as its argument.","Wrap exactly one selector, such as `:deep(.child)` or `:global(.theme-dark)`.","Split a list into one escape per selector, such as `:deep(.a), :deep(.b)`."],
+  VIBE4901: ["`{file}` is imported by server code, but `.vibe` components run only in the browser.","Import `.vibe` files only from client code.","Run component tests in a DOM environment such as jsdom, happy-dom or browser mode."],
+  VIBE4902: ["`@vibejs-org/ui` is at version {ui}, but `@vibejs-org/compiler` is at version {compiler}.","Install the same version of every `@vibejs-org/*` package."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

@@ -1,0 +1,8 @@
+<template>
+  <p class="a">broken style</p>
+</template>
+
+<style scoped>
+.a { color: red; }
+.b { color: blue;
+</style>
