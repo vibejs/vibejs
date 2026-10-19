@@ -4,6 +4,8 @@ import { fixtures, locations } from '../test/walk.ts';
 import { LineIndex, type Position } from './diagnostics.ts';
 import { forEachIdentifier } from './expr/index.ts';
 import { parseParams, rewriteExpr } from './expr/rewrite.ts';
+import { analyze } from './script/analyze.ts';
+import { compileScript } from './script/compile.ts';
 import { parse } from './sfc/parse.ts';
 
 /** Parses `source` and lists every location of the descriptor, the AST or the diagnostics that is wrong. */
@@ -30,7 +32,32 @@ function problems(source: string): string[] {
   return bad.map((b) => `${JSON.stringify(source)}: ${b}`);
 }
 
+/** Analyzes and compiles the script of `source` and lists every range that is out of bounds. */
+function scriptProblems(source: string): string[] {
+  const { descriptor } = parse(source, { filename: 'input.vibe' });
+  const a = analyze(descriptor);
+  compileScript(descriptor, a).s.toString();
+  const ranges: [number, number][] = [
+    ...[...a.bindings.values()].map((b) => b.decl),
+    ...a.propKeys.map((k) => k.decl),
+    ...[a.macros.props, a.macros.emits, a.macros.slots].flatMap((m) => (m ? [m.typeArg] : [])),
+    ...a.templateRefs.flatMap((r): [number, number][] => [
+      r.keyLoc,
+      [r.typeArgInsertAt ?? 0, r.typeArgInsertAt ?? 0],
+    ]),
+    ...a.importRanges,
+    ...a.edits.map((e): [number, number] => [e.start, e.end]),
+    ...a.diagnostics.map((d): [number, number] => [d.start.offset, d.end.offset]),
+  ];
+  return ranges
+    .filter(([start, end]) => !(start >= 0 && start <= end && end <= source.length))
+    .map(([start, end]) => `${JSON.stringify(source)}: ${start}-${end} is out of bounds`);
+}
+
+const scripts = fixtures.filter(([name]) => name.startsWith('script/')).slice(0, 5);
+
 const withTemplate = fixtures
+  .filter(([name]) => !name.startsWith('script/'))
   .filter(([, source]) => parse(source, { filename: 'input.vibe' }).descriptor.template)
   .slice(0, 10);
 
@@ -38,6 +65,22 @@ describe('tolerance', () => {
   it.each(fixtures)('%s cut at every 7th character', (_, source) => {
     const bad: string[] = [];
     for (let end = 0; end <= source.length; end += 7) bad.push(...problems(source.slice(0, end)));
+    expect(bad).toStrictEqual([]);
+  });
+
+  it.each(fixtures)('%s: the script cut at every 7th character', (_, source) => {
+    const bad: string[] = [];
+    for (let end = 0; end <= source.length; end += 7)
+      bad.push(...scriptProblems(source.slice(0, end)));
+    expect(bad).toStrictEqual([]);
+  });
+
+  it.each(scripts)('%s without one character of its script', (_, source) => {
+    const { loc } = parse(source, { filename: 'input.vibe' }).descriptor.scriptSetup!;
+    const bad: string[] = [];
+    for (let i = loc.start.offset; i < loc.end.offset; i++) {
+      bad.push(...scriptProblems(source.slice(0, i) + source.slice(i + 1)));
+    }
     expect(bad).toStrictEqual([]);
   });
 

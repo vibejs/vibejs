@@ -1,4 +1,5 @@
 import { vibeError } from '../errors.gen.ts';
+import type { BindingKind } from '../script/analyze.ts';
 import type { SimpleExpressionNode } from '../template/ast.ts';
 import { GLOBALS, isAllowedGlobal } from './index.ts';
 import {
@@ -10,8 +11,7 @@ import {
 } from './parse.ts';
 import { walk, type Identifier } from './walk.ts';
 
-/** The binding kinds of `analyzeScript` (C5). */
-export type BindingKind = 'prop' | 'prop-alias' | 'const' | 'maybe-ref' | 'let' | 'import';
+export type { BindingKind } from '../script/analyze.ts';
 
 /** One v-for or v-slot scope. Its identity tells codegen which preludes an expression needs. */
 export interface LocalScope {
