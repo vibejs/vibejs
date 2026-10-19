@@ -104,16 +104,26 @@ const problem = (status: number, codes: string[]): Json => ({
  */
 export function generateOpenApi(contracts: object, options: OpenApiOptions): OpenApiDocument {
   const paths: OpenApiDocument['paths'] = {};
-  const schemas: Json = {};
+  // A Map, so that names such as `constructor` or `__proto__` are plain keys.
+  const schemas = new Map<string, unknown>();
 
   const convert = (schema: StandardSchemaV1, io: 'input' | 'output', route: string, part: Part) => {
-    const { $schema: _, $defs, ...rest } = toJson(schema, io, options, route, part);
+    const json = toJson(schema, io, options, route, part);
+    // `#` points at the root schema, which is not a component; in the document it is the document.
+    if (JSON.stringify(json).includes('"$ref":"#"'))
+      throw vibeError('VIBE9801', {
+        route,
+        part,
+        reason:
+          'the schema refers to itself with `$ref: "#"`; give it a name, such as zod `.meta({ id })`',
+      });
+    const { $schema: _, $defs, ...rest } = json;
     for (const [name, def] of Object.entries(isJson($defs) ? $defs : {})) {
       const value = rewrite(def);
       // Converters emit keys in a fixed order, so equal schemas serialize equally.
-      if (name in schemas && JSON.stringify(schemas[name]) !== JSON.stringify(value))
+      if (schemas.has(name) && JSON.stringify(schemas.get(name)) !== JSON.stringify(value))
         throw vibeError('VIBE9802', { name, route });
-      schemas[name] = value;
+      schemas.set(name, value);
     }
     return rewriteRefs(rest);
   };
@@ -201,6 +211,6 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
     info: { ...options.info },
     ...(options.servers && { servers: options.servers.map((server) => ({ ...server })) }),
     paths,
-    components: { schemas },
+    components: { schemas: Object.fromEntries(schemas) },
   };
 }

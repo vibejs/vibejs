@@ -310,12 +310,56 @@ describe('generateOpenApi: $defs', () => {
     expect(error.message).toContain('User');
     expect(error.message).toContain('GET /d/b');
   });
+
+  it('keeps definitions named after Object.prototype members', () => {
+    const c = defineContract('/p', {
+      a: get('/', {
+        response: fake({
+          $ref: '#/$defs/constructor',
+          $defs: { constructor: { type: 'string' }, ['__proto__']: { type: 'number' } },
+        }),
+      }),
+    });
+    const { schemas } = generateOpenApi(c, { info }).components;
+    expect(Object.hasOwn(schemas, 'constructor')).toBe(true);
+    expect(Object.hasOwn(schemas, '__proto__')).toBe(true);
+    expect(JSON.stringify(schemas)).toBe(
+      '{"constructor":{"type":"string"},"__proto__":{"type":"number"}}',
+    );
+  });
 });
 
 const run = (contracts: object, options: Partial<OpenApiOptions> = {}) =>
   caught(() => generateOpenApi(contracts, { info, ...options }));
 
 describe('generateOpenApi: fallbacks', () => {
+  it('throws VIBE9801 for an unnamed recursive schema and accepts a named one', async () => {
+    const Cat = z.object({
+      name: z.string(),
+      get kids() {
+        return z.array(Cat);
+      },
+    });
+    const error = Object(await run(defineContract('/c', { a: get('/', { response: Cat }) })));
+    expect(error.code).toBe('VIBE9801');
+    expect(error.message).toContain('The response schema of GET /c');
+    expect(error.message).toContain('$ref: "#"');
+
+    const Named = z
+      .object({
+        name: z.string(),
+        get kids() {
+          return z.array(Named);
+        },
+      })
+      .meta({ id: 'Named' });
+    const doc = generateOpenApi(defineContract('/c', { a: get('/', { response: Named }) }), {
+      info,
+    });
+    expect(JSON.stringify(doc)).not.toContain('"$ref":"#"');
+    expect(Object.keys(doc.components.schemas)).toEqual(['Named']);
+  });
+
   it('forwards libraryOptions to the converter', () => {
     const input = vi.fn<() => Json>(() => ({ type: 'object' }));
     const output = vi.fn<() => Json>(() => ({ type: 'string' }));
