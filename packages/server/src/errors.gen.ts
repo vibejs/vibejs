@@ -32,6 +32,7 @@ const MESSAGES = {
   VIBE9505: ["{route} declares a raw response but returned a value of type {type}.","Return a `Response`, or a `string`, `Blob`, `ArrayBuffer`, typed array, `ReadableStream`, `URLSearchParams` or `FormData` from the handler."],
   VIBE9601: ["The environment variables do not match the config schema: {issues}.","Set the listed environment variables to values that match their schemas."],
   VIBE9602: ["The config schema of {key} validates asynchronously, but a config is validated synchronously.","Use a synchronous schema for {key}, without async checks or transforms."],
+  VIBE9701: ["{module} overrides {token}, but no module of the application provides it.","Provide {token} in a module that the testing module imports, or add its provider to the testing module's `providers`.","Remove the `overrideProvider({token})` call."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);
