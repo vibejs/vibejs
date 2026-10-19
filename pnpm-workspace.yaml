@@ -36,6 +36,7 @@ catalog:
   csstype: ^3.2.3
   knip: 6.41.0
   '@standard-schema/spec': ^1.1.0
+  srvx: ^1.0.5
   zod: 4.6.7
   valibot: 1.5.0
   arktype: 2.2.8
