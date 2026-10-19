@@ -167,12 +167,17 @@ export function vibe(): Plugin {
         };
       }
 
-      const prev = cache.get(file)?.prev;
+      const last = cache.get(file);
+      const prev = last?.prev;
       const cid = componentId(file, code);
       const result = compile(code, { filename: rel(file), id: cid, dev });
       const { descriptor } = result;
+      if (result.diagnostics.length > 0) {
+        // The client never receives a failed module, so the baseline stays the last served one.
+        cache.set(file, { descriptor, id: cid, prev: prev ?? last?.descriptor });
+        fail(this, result.diagnostics, code, file, id);
+      }
       cache.set(file, { descriptor, id: cid });
-      if (result.diagnostics.length > 0) fail(this, result.diagnostics, code, file, id);
 
       let out = result.code;
       for (const { index, lang } of result.styles)

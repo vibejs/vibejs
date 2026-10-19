@@ -353,6 +353,23 @@ describe('vibe() hot updates', () => {
     expect(code).not.toContain('_sfc.__rerenderOnly = true');
   });
 
+  it('reloads after a failed transform when the script changed since the last served module', async () => {
+    const client = dev.environments.client;
+    await client.transformRequest('/src/App.vibe');
+    const edited = source.replace(/ref\(\d+\)/, 'ref(4)');
+    await writeFile(file, edited.replace('{{ count }}', '{{ count + }}'));
+    await change(file);
+    await expect(client.transformRequest('/src/App.vibe')).rejects.toMatchObject({
+      code: 'VIBE1201',
+    });
+    await writeFile(file, edited);
+    source = edited;
+    await change(file);
+    const { code } = (await client.transformRequest('/src/App.vibe'))!;
+    expect(code).toContain('ref(4)');
+    expect(code).not.toContain('_sfc.__rerenderOnly = true');
+  });
+
   it('keeps a ?raw import of the file in the hot update', async () => {
     await dev.environments.client.transformRequest('/src/App.vibe?raw');
     const modules = new Promise<ModuleNode[]>((resolve) => {
