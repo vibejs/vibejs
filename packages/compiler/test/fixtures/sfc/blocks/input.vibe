@@ -1,0 +1,13 @@
+<template>
+  <p>first</p>
+</template>
+<template lang="pug" src="./other.pug"></template>
+<script lang="js">
+export default {};
+</script>
+<script setup lang="ts" generic="T" foo>
+</script>
+<style module scoped lang="sass2" title="x"></style>
+<docs>Custom block</docs>
+Stray text
+<!-- a root comment is fine -->

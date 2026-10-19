@@ -3,3 +3,5 @@
 *.vibe linguist-language=HTML linguist-detectable=false
 # Grammar fixture that must keep its CRLF line endings.
 packages/vscode/test/grammar/crlf.vibe -text
+# Compiler fixtures that must keep their CRLF line endings.
+packages/compiler/test/fixtures/**/*-crlf/** -text

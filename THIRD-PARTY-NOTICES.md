@@ -16,6 +16,20 @@ Details, the changes made and the full license texts are in [`packages/vscode/TH
 - **microsoft/vscode** at `28a562309973a386b2bdefae78127788a4742fe8`, MIT, Copyright (c) 2015 - present Microsoft Corporation (test fixture, not shipped). The file is converted from textmate/html.tmbundle at `0c3d5ee54de3a993f747f54186b73a4d2d3c44a2`, under that bundle's permissive license.
   - `packages/vscode/test/grammars/html.tmLanguage.json` from `extensions/html/syntaxes/html.tmLanguage.json`
 
+## packages/compiler
+
+Details and the full license texts are in [`packages/compiler/THIRD-PARTY-NOTICES.md`](packages/compiler/THIRD-PARTY-NOTICES.md).
+
+- **vuejs/core** v3.5.44 at `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`, MIT, Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors.
+  - `packages/compiler/src/template/tokenizer.ts` from `packages/compiler-core/src/tokenizer.ts`
+  - `packages/compiler/src/template/parser.ts` from `packages/compiler-core/src/parser.ts`, `packages/compiler-dom/src/parserOptions.ts` and `packages/compiler-core/src/utils.ts`
+  - `packages/compiler/src/template/ast.ts` from `packages/compiler-core/src/ast.ts`
+  - `packages/compiler/src/template/tags.ts` from `packages/shared/src/domTagConfig.ts` and `packages/shared/src/makeMap.ts`
+  - `packages/compiler/src/template/parser.test.ts` from `packages/compiler-core/__tests__/parse.spec.ts` (tests, not shipped)
+  - `packages/compiler/src/sfc/parse.test.ts` from `packages/compiler-sfc/__tests__/parse.spec.ts` (tests, not shipped)
+- **fb55/htmlparser2**, MIT, Copyright 2010, 2011, Chris Winberry, through the vuejs/core tokenizer.
+  - `packages/compiler/src/template/tokenizer.ts`
+
 ## packages/ui
 
 Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`](packages/ui/THIRD-PARTY-NOTICES.md).

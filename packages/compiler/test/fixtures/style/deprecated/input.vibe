@@ -1,0 +1,12 @@
+<template>
+  <slot />
+</template>
+
+<style scoped lang="scss">
+// ::v-deep in a line comment is ignored
+.a >>> .b { color: red; }
+.a /deep/ .b { color: v-bind(color); }
+::v-deep(.c), ::v-global(.d) { margin: 0; }
+:slotted(.e), ::v-slotted(.f) { padding: 0; }
+/* >>> in a block comment is ignored */
+</style>

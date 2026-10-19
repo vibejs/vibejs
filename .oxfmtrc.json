@@ -6,6 +6,10 @@
     "**/*.gen.ts",
     "**/test/fixtures/**",
     "packages/vscode/test/grammars/**",
-    "packages/ui/src/reactivity/system.ts"
+    "packages/ui/src/reactivity/system.ts",
+    "packages/compiler/src/template/ast.ts",
+    "packages/compiler/src/template/parser.ts",
+    "packages/compiler/src/template/tags.ts",
+    "packages/compiler/src/template/tokenizer.ts"
   ]
 }
