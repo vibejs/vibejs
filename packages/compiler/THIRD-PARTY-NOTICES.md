@@ -12,9 +12,11 @@
   - `packages/compiler/src/template/parser.ts` from `packages/compiler-core/src/parser.ts`, the parser options of `packages/compiler-dom/src/parserOptions.ts` and three helpers of `packages/compiler-core/src/utils.ts`
   - `packages/compiler/src/template/ast.ts` from the template nodes of `packages/compiler-core/src/ast.ts`
   - `packages/compiler/src/template/tags.ts` from `packages/shared/src/domTagConfig.ts` and `packages/shared/src/makeMap.ts`
+  - `packages/compiler/src/style/pluginScoped.ts` from `packages/compiler-sfc/src/style/pluginScoped.ts`
 - Used in (tests, not shipped):
   - `packages/compiler/src/template/parser.test.ts` from `packages/compiler-core/__tests__/parse.spec.ts`
   - `packages/compiler/src/sfc/parse.test.ts` from `packages/compiler-sfc/__tests__/parse.spec.ts`
+  - `packages/compiler/src/style/pluginScoped.test.ts` from `packages/compiler-sfc/__tests__/compileStyle.spec.ts`
 
 ```text
 The MIT License (MIT)

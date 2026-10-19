@@ -28,6 +28,9 @@ catalog:
   '@types/node': 24.19.2
   oxc-parser: ^0.154.0
   entities: ^8.1.0
+  postcss: ^8.5.30
+  postcss-selector-parser: ^7.1.6
+  '@jridgewell/trace-mapping': 0.3.31
   knip: 6.41.0
   '@standard-schema/spec': ^1.1.0
   zod: 4.6.7

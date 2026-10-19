@@ -47,9 +47,12 @@
   },
   "dependencies": {
     "@vibejs-org/errors": "workspace:*",
-    "entities": "catalog:"
+    "entities": "catalog:",
+    "postcss": "catalog:",
+    "postcss-selector-parser": "catalog:"
   },
   "devDependencies": {
+    "@jridgewell/trace-mapping": "catalog:",
     "tsdown": "catalog:"
   },
   "engines": {
