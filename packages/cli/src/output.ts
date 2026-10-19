@@ -65,6 +65,46 @@ export interface DocsResult extends JsonEnvelope {
   truncated?: { shown: number; total: number };
 }
 
+export interface CheckDiagnostic {
+  source: 'tsc' | 'oxlint' | 'oxfmt' | 'vitest' | 'coverage' | 'vibejs';
+  code: string;
+  severity: 'error' | 'warning' | 'info';
+  file: string;
+  /** `file:line:col`, 1-based; the bare file when the position is unknown, `''` for no file. */
+  loc: string;
+  /** 0-based. */
+  range: { start: { line: number; character: number }; end: { line: number; character: number } };
+  message: string;
+  docs?: string;
+  fixes?: string[];
+}
+
+export interface Step {
+  status: 'passed' | 'failed' | 'skipped';
+  errors: number;
+  warnings: number;
+  ms: number;
+}
+
+export interface CheckResult extends JsonEnvelope {
+  durationMs: number;
+  steps: {
+    types: Step;
+    lint: Step;
+    format: Step;
+    tests: Step & { passed: number; failed: number; skipped: number };
+    coverage: Step & {
+      lines: number;
+      branches: number;
+      functions: number;
+      statements: number;
+      filesBelow100: number;
+    };
+  };
+  diagnostics: CheckDiagnostic[];
+  truncated?: { shown: number; total: number };
+}
+
 /** The envelope error of a VibeError: its message without the code prefix and fix lines. */
 export function envelopeError(
   e: VibeError,
@@ -85,8 +125,11 @@ export function errorText(r: JsonEnvelope): string {
   ].join('\n');
 }
 
-/** 0 ok, 2 usage error (missing input, unknown command or option), 1 any other failure. */
+/** Usage, project and tool errors: nothing could be checked. */
+const USAGE: readonly string[] = ['VIBE8001', 'VIBE8003', 'VIBE8004', 'VIBE8005', 'VIBE8301'];
+
+/** 0 ok, 2 usage, project or tool error, 1 any other failure. */
 export function exitCode(r: JsonEnvelope): 0 | 1 | 2 {
   if (r.ok) return 0;
-  return r.error?.code === 'VIBE8003' || r.error?.code === 'VIBE8004' ? 2 : 1;
+  return r.error && USAGE.includes(r.error.code) ? 2 : 1;
 }

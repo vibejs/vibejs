@@ -1,0 +1,7 @@
+src/handler.ts(29,4): error TS1241: Unable to resolve signature of method decorator when called as an expression.
+  Argument of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number>' is not assignable to parameter of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }>'.
+    Types of property 'value' are incompatible.
+      Type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number) | undefined' is not assignable to type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }) | undefined'.
+        Type '(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number' is not assignable to type '(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }'.
+          Type 'number' is not assignable to type 'Promise<{ id: string; name: string; }> | { id: string; name: string; }'.
+src/math.ts(1,14): error TS2322: Type 'string' is not assignable to type 'number'.

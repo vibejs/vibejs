@@ -2,9 +2,14 @@
 import { defineErrors, type VibeErrorFactory } from '@vibejs-org/errors';
 
 const MESSAGES = {
+  VIBE8001: ["No vibe.js project at or above `{cwd}`: no package.json depends on @vibejs-org/cli.","Run the command inside a vibe.js project.","Add `@vibejs-org/cli` to the `devDependencies` of the project's `package.json`."],
   VIBE8003: ["Missing required input `{name}` for `vibejs {command}`.","Pass `{name}` as shown in `vibejs {command} --help`.","Run the command from `next` in the JSON output."],
   VIBE8004: ["Unknown command or option `{name}`.","Run `vibejs --help` to list the commands and their options.","Run the command from `next` in the JSON output."],
+  VIBE8005: ["`{tool}` is missing or older than {minimum}; install it with `{install}`.","Run `{install}` in the project root."],
   VIBE8008: ["No error code `{code}` in the catalog of this vibejs version.","Check the spelling: a code is `VIBE` followed by four digits.","Update the vibe.js packages in this project if the code comes from a newer version."],
+  VIBE8301: ["`{tool}` exited with code {exitCode} and output that vibejs check cannot read.","Run the tool directly in the project root to see its full output.","Fix the configuration or the installation the output points to."],
+  VIBE8302: ["`{file}` is not fully covered: {uncovered}.","Add tests for the listed ranges; never add coverage-ignore comments."],
+  VIBE8303: ["`{file}` is not formatted.","Run `vibejs check --fix`."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

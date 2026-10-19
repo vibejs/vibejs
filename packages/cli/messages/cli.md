@@ -1,5 +1,16 @@
 # CLI core
 
+## VIBE8001: Not in a vibe.js project
+
+> No vibe.js project at or above `{cwd}`: no package.json depends on @vibejs-org/cli.
+
+Project commands such as `vibejs check` run from the project root: the nearest directory, at or above the current one, whose `package.json` lists `@vibejs-org/cli` in `dependencies` or `devDependencies`.
+
+### Fix
+
+- Run the command inside a vibe.js project.
+- Add `@vibejs-org/cli` to the `devDependencies` of the project's `package.json`.
+
 ## VIBE8003: Missing required input
 
 > Missing required input `{name}` for `vibejs {command}`.
@@ -22,6 +33,16 @@ The first word after `vibejs` must be a command, and every option must belong to
 - Run `vibejs --help` to list the commands and their options.
 - Run the command from `next` in the JSON output.
 
+## VIBE8005: Required tool missing or too old
+
+> `{tool}` is missing or older than {minimum}; install it with `{install}`.
+
+`vibejs check` runs the type checker, linter, formatter and test runner installed in the project, never global copies, so every result matches what the project's own scripts report. It needs TypeScript 7.1 or newer, which runs the content mapper for `.vibe` files.
+
+### Fix
+
+- Run `{install}` in the project root.
+
 ## VIBE8008: Unknown error code
 
 > No error code `{code}` in the catalog of this vibejs version.
@@ -32,3 +53,34 @@ The first word after `vibejs` must be a command, and every option must belong to
 
 - Check the spelling: a code is `VIBE` followed by four digits.
 - Update the vibe.js packages in this project if the code comes from a newer version.
+
+## VIBE8301: Unreadable tool output
+
+> `{tool}` exited with code {exitCode} and output that vibejs check cannot read.
+
+The tool crashed or printed something other than the format `vibejs check` parses, often because of a broken configuration file. The diagnostic carries the first 40 lines of the tool's output; the other tools' results are still reported.
+
+### Fix
+
+- Run the tool directly in the project root to see its full output.
+- Fix the configuration or the installation the output points to.
+
+## VIBE8302: File not fully covered
+
+> `{file}` is not fully covered: {uncovered}.
+
+`vibejs check` reports every file below 100% statement, branch, function or line coverage, with its uncovered ranges. It is a warning: the check still passes. To make it a failure, enable the commented `thresholds` line in `vitest.config.ts`.
+
+### Fix
+
+- Add tests for the listed ranges; never add coverage-ignore comments.
+
+## VIBE8303: File not formatted
+
+> `{file}` is not formatted.
+
+The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
+
+### Fix
+
+- Run `vibejs check --fix`.

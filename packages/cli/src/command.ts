@@ -29,6 +29,6 @@ export interface CommandDef<R extends JsonEnvelope = JsonEnvelope> {
     },
     ctx: Ctx,
   ): Promise<R>;
-  /** The text for people; called only when `r.ok`. */
+  /** The text for people; called unless `r.error` is set. */
   human(r: R): string;
 }

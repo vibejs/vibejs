@@ -1,0 +1,199 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the recorded output of broken/ > gives exactly the six seeded diagnostics, enriched, in order, with exit 1 1`] = `
+"{
+  "ok": false,
+  "command": "check",
+  "version": "1.2.3",
+  "next": [
+    "vibejs explain VIBE8303",
+    "vibejs check --fix"
+  ],
+  "durationMs": 0,
+  "steps": {
+    "types": {
+      "status": "failed",
+      "errors": 2,
+      "warnings": 0,
+      "ms": 0
+    },
+    "lint": {
+      "status": "failed",
+      "errors": 1,
+      "warnings": 0,
+      "ms": 0
+    },
+    "format": {
+      "status": "failed",
+      "errors": 1,
+      "warnings": 0,
+      "ms": 0
+    },
+    "tests": {
+      "status": "failed",
+      "errors": 1,
+      "warnings": 0,
+      "ms": 0,
+      "passed": 1,
+      "failed": 1,
+      "skipped": 0
+    },
+    "coverage": {
+      "status": "passed",
+      "errors": 0,
+      "warnings": 1,
+      "ms": 0,
+      "lines": 100,
+      "branches": 50,
+      "functions": 100,
+      "statements": 91.67,
+      "filesBelow100": 1
+    }
+  },
+  "diagnostics": [
+    {
+      "source": "tsc",
+      "code": "TS1241",
+      "severity": "error",
+      "file": "src/handler.ts",
+      "loc": "src/handler.ts:29:4",
+      "range": {
+        "start": {
+          "line": 28,
+          "character": 3
+        },
+        "end": {
+          "line": 28,
+          "character": 3
+        }
+      },
+      "message": "Unable to resolve signature of method decorator when called as an expression.\\n  Argument of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number>' is not assignable to parameter of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }>'.\\n    Types of property 'value' are incompatible.\\n      Type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number) | undefined' is not assignable to type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }) | undefined'.\\n        Type '(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number' is not assignable to type '(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }'.\\n          Type 'number' is not assignable to type 'Promise<{ id: string; name: string; }> | { id: string; name: string; }'.",
+      "docs": "https://vibejs.org/v0/server/handlers",
+      "fixes": [
+        "the handler must be \`(ctx: Ctx<typeof contract.route>)\` and return the route response type; do not cast or use \`any\`"
+      ]
+    },
+    {
+      "source": "tsc",
+      "code": "TS2322",
+      "severity": "error",
+      "file": "src/math.ts",
+      "loc": "src/math.ts:1:14",
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 13
+        },
+        "end": {
+          "line": 0,
+          "character": 13
+        }
+      },
+      "message": "Type 'string' is not assignable to type 'number'."
+    },
+    {
+      "source": "vitest",
+      "code": "test-failed",
+      "severity": "error",
+      "file": "src/app.test.ts",
+      "loc": "src/app.test.ts:10:1",
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 0
+        },
+        "end": {
+          "line": 9,
+          "character": 0
+        }
+      },
+      "message": "AssertionError: expected 1 to be 2 // Object.is equality"
+    },
+    {
+      "source": "oxlint",
+      "code": "unicorn(no-useless-spread)",
+      "severity": "error",
+      "file": "src/math.ts",
+      "loc": "src/math.ts:2:22",
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 21
+        },
+        "end": {
+          "line": 1,
+          "character": 24
+        }
+      },
+      "message": "Using a spread operator here creates a new array unnecessarily.",
+      "docs": "https://oxc.rs/docs/guide/usage/linter/rules/unicorn/no-useless-spread.html",
+      "fixes": [
+        "Consider removing the spread operator."
+      ]
+    },
+    {
+      "source": "oxfmt",
+      "code": "VIBE8303",
+      "severity": "error",
+      "file": "src/math.ts",
+      "loc": "src/math.ts",
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 0,
+          "character": 0
+        }
+      },
+      "message": "\`src/math.ts\` is not formatted.",
+      "docs": "https://vibejs.org/v0/errors/VIBE8303",
+      "fixes": [
+        "Run \`vibejs check --fix\`."
+      ]
+    },
+    {
+      "source": "coverage",
+      "code": "VIBE8302",
+      "severity": "warning",
+      "file": "src/math.ts",
+      "loc": "src/math.ts:5:3",
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 2
+        },
+        "end": {
+          "line": 4,
+          "character": 2
+        }
+      },
+      "message": "\`src/math.ts\` is not fully covered: statements 5:14; branches 5:3.",
+      "docs": "https://vibejs.org/v0/errors/VIBE8302",
+      "fixes": [
+        "Add tests for the listed ranges; never add coverage-ignore comments."
+      ]
+    }
+  ]
+}"
+`;
+
+exports[`the recorded output of broken/ > renders each diagnostic with its continuation lines and one line per step for people 1`] = `
+"src/handler.ts:29:4  error  TS1241  Unable to resolve signature of method decorator when called as an expression.
+      Argument of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number>' is not assignable to parameter of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }>'.
+        Types of property 'value' are incompatible.
+          Type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number) | undefined' is not assignable to type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }) | undefined'.
+            Type '(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number' is not assignable to type '(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }'.
+              Type 'number' is not assignable to type 'Promise<{ id: string; name: string; }> | { id: string; name: string; }'.
+src/math.ts:1:14  error  TS2322  Type 'string' is not assignable to type 'number'.
+src/app.test.ts:10:1  error  test-failed  AssertionError: expected 1 to be 2 // Object.is equality
+src/math.ts:2:22  error  unicorn(no-useless-spread)  Using a spread operator here creates a new array unnecessarily.
+src/math.ts  error  VIBE8303  \`src/math.ts\` is not formatted.
+src/math.ts:5:3  warning  VIBE8302  \`src/math.ts\` is not fully covered: statements 5:14; branches 5:3.
+types: failed (2 errors, 0 warnings, 0 ms)
+lint: failed (1 errors, 0 warnings, 0 ms)
+format: failed (1 errors, 0 warnings, 0 ms)
+tests: failed (1 errors, 0 warnings, 0 ms, passed 1, failed 1, skipped 0)
+coverage: passed (0 errors, 1 warnings, 0 ms, lines 100, branches 50, functions 100, statements 91.67, filesBelow100 1)"
+`;

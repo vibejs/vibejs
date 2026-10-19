@@ -1,0 +1,8 @@
+{
+  "name": "clean",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@vibejs-org/cli": "0.0.0"
+  }
+}
