@@ -8,6 +8,7 @@ import { token } from './di/token.ts';
 import { VibeFactory } from './http/app.ts';
 import type { CanActivate, Ctx } from './http/context.ts';
 import { Controller, Handle, Module } from './module/decorators.ts';
+import { Logger } from './logger.ts';
 import { Test } from './testing.ts';
 
 const quiet = () => captureLog().logger;
@@ -202,6 +203,31 @@ describe('overrideProvider', () => {
     const first = await builder.compile();
     const second = await builder.overrideProvider(Name).useValue('fake').compile();
     expect([first.get(Name), second.get(Name)]).toEqual(['real', 'fake']);
+  });
+  it('routes injected Logger calls to an overridden Logger, framework logs to the logger option', async () => {
+    const framework = captureLog('debug');
+    const app = captureLog('debug');
+    const hello = defineContract('/hello', { say: get('/') });
+    @Controller(hello)
+    class HelloController {
+      readonly log = inject(Logger);
+      @Handle(hello.say)
+      say(): void {
+        this.log.info('said');
+      }
+    }
+    const compiled = await Test.createTestingModule({
+      controllers: [HelloController],
+      logger: framework.logger,
+    })
+      .overrideProvider(Logger)
+      .useValue(app.logger)
+      .compile();
+    await compiled.request('/hello');
+    await compiled.close();
+    expect(app.lines.map((line) => line.msg)).toEqual(['said']);
+    expect(framework.lines.map((line) => line.msg)).toContain('request');
+    expect(framework.lines.map((line) => line.msg)).not.toContain('said');
   });
 });
 

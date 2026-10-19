@@ -6,7 +6,11 @@ import { Module } from './module/decorators.ts';
 import type { ModuleOptions } from './module/graph.ts';
 
 export interface TestingModuleBuilder {
-  /** Replaces `token` in every module that provides it; the last override of a token wins. */
+  /**
+   * Replaces `token` in every module that provides it; the last override of a token wins.
+   * Overriding `Logger` reaches only code that injects it; the framework's own request,
+   * error and lifecycle logs go to the `logger` option, so pass `logger` to capture them.
+   */
   overrideProvider<T>(token: Token<T>): OverrideBuilder<T>;
   /** Scans with the overrides, builds, runs init hooks; same `App` as production. */
   compile(): Promise<App>;
