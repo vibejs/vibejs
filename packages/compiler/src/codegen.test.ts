@@ -13,7 +13,9 @@ function gen(template: string, dev = false): string {
     new GenMapping(),
     0,
   );
-  expect(parseSync('render.ts', code, { lang: 'ts' }).errors).toStrictEqual([]);
+  expect(
+    parseSync('render.ts', code, { lang: 'ts', showSemanticErrors: true }).errors,
+  ).toStrictEqual([]);
   return code;
 }
 
@@ -177,10 +179,37 @@ describe('generate', () => {
       '_on(_n1, "a", (...args) => { const row = _for1.value; const i = _for1k.value; return row.go(...args) })',
     );
     expect(code).toContain(
-      '_renderEffect(() => { const { id, rows } = _for0.value; const { cell } = _slot0; const row = _for1.value; const i = _for1k.value; _setAttr(_n1, "x", ([id, row, cell])) })',
+      '_renderEffect(() => { const { id, rows } = _for0.value; { const { cell } = _slot0; { const row = _for1.value; const i = _for1k.value; _setAttr(_n1, "x", ([id, row, cell])) } } })',
     );
-    expect(code).toContain('}, (row, i) => { const { id, rows } = _for0.value; return id + i })');
+    expect(code).toContain(
+      '}, (_for1, _for1k) => { const { id, rows } = _for0.value; { const row = _for1; const i = _for1k; return id + i } })',
+    );
     expect(code).toContain('default: (_slot0) => {');
+  });
+
+  it('lets an inner v-for alias, slot prop or key parameter shadow an outer local', () => {
+    const loops = render(
+      '<div v-for="(x, i) in items" :key="i"><p v-for="x in x.c" :key="x + i">{{ x }} {{ i }}</p></div>',
+    );
+    expect(loops).toContain(
+      '_createFor(() => { const x = _for0.value; const i = _for0k.value; return x.c }',
+    );
+    expect(loops).toContain(
+      '_renderEffect(() => { const x = _for0.value; const i = _for0k.value; { const x = _for1.value; _setText(',
+    );
+    expect(loops).toContain(
+      '}, (_for1) => { const x = _for0.value; const i = _for0k.value; { const x = _for1; return x + i } })',
+    );
+    const slot = render(
+      '<Item v-for="item in items" :key="item.id" #default="{ item }">{{ item }}</Item>',
+    );
+    expect(slot).toContain('{ const { item } = _slot0; _setText(');
+  });
+
+  it('ends a statement handler with a line break after a trailing line comment', () => {
+    expect(render('<p @click="count++ // inc">x</p>')).toContain(
+      '($event) => { $setup.count++ // inc\n })',
+    );
   });
 
   it('calls a function handler that reads a template local through a prelude', () => {

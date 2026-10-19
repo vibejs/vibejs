@@ -33,7 +33,7 @@ function _render($setup: any, $props: any, $ctx: any) {
       }, {
         default: (_slot0) => {
           const _n1 = _t0()
-          _renderEffect(() => { const { id, text } = _for0.value; const index = _for0k.value; const { done = false } = _slot0; _setText(_n1, _toDisplayString(done ? '✓' : text!.trim())) })
+          _renderEffect(() => { const { id, text } = _for0.value; const index = _for0k.value; { const { done = false } = _slot0; _setText(_n1, _toDisplayString(done ? '✓' : text!.trim())) } })
           return _n1
         },
       })

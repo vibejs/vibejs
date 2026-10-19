@@ -4,8 +4,22 @@ import { fixtures } from '../test/walk.ts';
 import { compile } from './compile.ts';
 
 const IDENTIFIER = /^[A-Za-z_$][\w$]*/;
-/** Names the compiler declares: template and node variables and ABI helpers. They map to nodes. */
-const COMPILER = /^_(?:[tn]\d+|[a-z][A-Za-z]*)$/;
+/** Template and node variables, which map to nodes. */
+const REFS = /^_[tn]\d+$/;
+
+/**
+ * Whether `gen`, which starts with `__props`, reads the prop that the original text `from` names:
+ * the key itself, or the local it is destructured to (`key: local`) in `source`.
+ */
+function readsProp(gen: string, from: string, source: string): boolean {
+  const read = /^__props(?:\.([\w$]+)|\[("[^"]*")\])/.exec(gen);
+  const local = IDENTIFIER.exec(from)?.[0];
+  if (!read || local === undefined) return false;
+  const key: string = read[2] ? JSON.parse(read[2]) : read[1];
+  return (
+    local === key || source.includes(`${key}: ${local}`) || source.includes(`'${key}': ${local}`)
+  );
+}
 
 const compiled = fixtures.flatMap(([name, source]) => {
   const result = compile(source, { filename: `${name}/input.vibe`, id: '0a1b2c3d', dev: false });
@@ -36,6 +50,8 @@ describe('source maps', () => {
       const generated = code.split('\n');
       const original = source.split('\n');
       const bad: string[] = [];
+      // The ABI helpers, as the output imports them; they map to nodes.
+      const helpers = new Set([...code.matchAll(/\b\w+ as (_\w+)/g)].map((m) => m[1]));
       eachMapping(map, (m) => {
         const gen = generated.at(m.generatedLine - 1);
         const orig = original.at(m.originalLine! - 1);
@@ -48,14 +64,13 @@ describe('source maps', () => {
           return;
         }
         const id = IDENTIFIER.exec(gen.slice(m.generatedColumn))?.[0];
-        if (id === undefined || COMPILER.test(id)) return;
+        if (id === undefined || REFS.test(id) || helpers.has(id)) return;
         const from = orig.slice(m.originalColumn!);
         // The rewrites of C3: context names, macros, destructured props and prop aliases.
         const rewritten =
           (id === '$ctx' && /^\$(attrs|slots|emit)/.test(from)) ||
           (id === '__ctx' && /^define[A-Z]/.test(from)) ||
-          (id === '__props' && IDENTIFIER.test(from)) ||
-          (id === '$props' && IDENTIFIER.test(from));
+          (id === '__props' && readsProp(gen.slice(m.generatedColumn), from, source));
         if (!from.startsWith(id) && !rewritten)
           bad.push(`${id} at ${m.generatedLine}:${m.generatedColumn} -> ${from.slice(0, 20)}`);
       });

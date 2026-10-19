@@ -63,7 +63,7 @@ export function compile(source: string, options: CompileOptions): CompileResult 
     name !== undefined && `name: ${JSON.stringify(name)}`,
     dev && `__file: ${JSON.stringify(filename)}`,
     dev && `__hmrId: ${JSON.stringify(id)}`,
-    styles.some((s) => s.scoped) && `__scopeId: "data-vb-${id}"`,
+    styles.some((s) => s.scoped) && `__scopeId: ${JSON.stringify(`data-vb-${id}`)}`,
     script.propKeys.length > 0 && `__propKeys: ${strings(script.propKeys)}`,
     script.emits.length > 0 && `__emits: ${strings(script.emits)}`,
     script.defaults !== null && '__defaults: _defaults',

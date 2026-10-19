@@ -100,6 +100,16 @@ describe('the ABI imports of the output.ts fixtures', () => {
   });
 
   it.each(imported.map((o) => [o.file, o] as const))(
+    '%s imports exactly the helpers it calls',
+    (_, { code, names }) => {
+      const called = new Set(
+        [...code.matchAll(/\b_([A-Za-z]+)\(/g)].map((m) => m[1]).filter((n) => C3.includes(n)),
+      );
+      expect(names.toSorted()).toStrictEqual([...called].toSorted());
+    },
+  );
+
+  it.each(imported.map((o) => [o.file, o] as const))(
     '%s imports from no other module than the input script does',
     (_, { input, others }) => {
       for (const statement of others) expect(input).toContain(statement);

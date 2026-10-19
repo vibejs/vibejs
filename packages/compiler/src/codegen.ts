@@ -68,30 +68,38 @@ export function generate(
   let fors = 0;
   let slots = 0;
 
-  /** The statements that declare the template locals `scopes` reference, outer to inner. */
-  const prelude = (scopes: Set<LocalScope>, skip?: LocalScope): Code =>
-    [...preludes]
-      .filter(([scope]) => scope !== skip && scopes.has(scope))
-      .flatMap(([, statements]) => statements.flatMap((s) => [...s, '; ']));
+  /**
+   * `body` after the statements that declare the template locals `scopes` reference, outer to
+   * inner. Each inner scope opens a block, so its locals may shadow outer ones. Null without one.
+   */
+  const prelude = (scopes: Set<LocalScope>, body: Code): Code | null => {
+    const used = [...preludes].filter(([scope]) => scopes.has(scope));
+    if (used.length === 0) return null;
+    return used.reduceRight<Code>((inner, [, statements], i) => {
+      const code = [...statements.flatMap((s) => [...s, '; ']), ...inner];
+      return i > 0 ? ['{ ', ...code, ' }'] : code;
+    }, body);
+  };
 
   /** A closure that evaluates `body` after the prelude of `scopes`. */
   const closure = (params: string, scopes: Set<LocalScope>, body: Code): Code => {
-    const pre = prelude(scopes);
-    return pre.length > 0
-      ? [`${params} => { `, ...pre, 'return ', ...paren(body), ' }']
-      : [`${params} => `, ...paren(body)];
+    const pre = prelude(scopes, ['return ', ...paren(body)]);
+    return pre ? [`${params} => { `, ...pre, ' }'] : [`${params} => `, ...paren(body)];
   };
   const getter = (e: ExprIR): Code => closure('()', e.scopes, e.parts);
 
   function handler(h: HandlerIR): Code {
     const { kind, parts, scopes } = h.expr;
-    const pre = prelude(scopes);
     let code: Code;
     if (kind === 'statements' || kind === 'expression') {
-      code = ['($event) => { ', ...pre, ...parts, ' }'];
+      // A trailing line comment would swallow the closing brace.
+      const end = /\/\/[^\n]*$/.test(text(parts)) ? '\n' : '';
+      const body = [...parts, end];
+      code = ['($event) => { ', ...(prelude(scopes, body) ?? body), ' }'];
     } else {
       const fn = kind === 'path' ? parts : ['(', ...parts, ')'];
-      if (pre.length > 0) code = ['(...args) => { ', ...pre, 'return ', ...fn, '(...args) }'];
+      const pre = prelude(scopes, ['return ', ...fn, '(...args)']);
+      if (pre) code = ['(...args) => { ', ...pre, ' }'];
       else code = kind === 'path' ? ['(...args) => ', ...fn, '(...args)'] : parts;
     }
     if (h.mods.length > 0) code = ['_withModifiers(', ...code, `, ${literal(h.mods)})`];
@@ -138,9 +146,9 @@ export function generate(
     }
     if (op.op === 'effect') {
       const scopes = op.call.args.flatMap((a) => ('expr' in a ? [...a.expr.scopes] : []));
-      const pre = prelude(new Set(scopes));
       const body = call(op.call);
-      const fn = pre.length > 0 ? ['() => { ', ...pre, ...body, ' }'] : ['() => ', ...body];
+      const pre = prelude(new Set(scopes), body);
+      const fn = pre ? ['() => { ', ...pre, ' }'] : ['() => ', ...body];
       let loc = '';
       if (o.dev) {
         const { line: l, column } = lines.position(op.loc);
@@ -242,25 +250,27 @@ export function generate(
       const n = fors++;
       const names = [`_for${n}`, `_for${n}k`, `_for${n}i`];
       const used = m.params.findLastIndex((p) => p !== null) + 1;
-      preludes.set(
-        m.scope,
-        m.params.flatMap((p, i) => (p === null ? [] : [['const ', p, ` = ${names[i]}.value`]])),
-      );
+      const own = (suffix: string): Code[] =>
+        m.params.flatMap((p, i) => (p === null ? [] : [['const ', p, ` = ${names[i]}${suffix}`]]));
+      let getKey: Code = ['(v) => v'];
+      if (m.key) {
+        if ([...m.key.scopes].some((s) => s !== m.scope)) {
+          // With outer locals, the key's own locals are declared innermost so they shadow them.
+          preludes.set(m.scope, own(''));
+          getKey = closure(`(${names.slice(0, used).join(', ')})`, m.key.scopes, m.key.parts);
+        } else {
+          const params = m.params
+            .slice(0, used)
+            .map((p, i): Code => (p === null ? [names[i]] : [p]));
+          getKey = ['(', ...list(params), ') => ', ...paren(m.key.parts)];
+        }
+      }
+      preludes.set(m.scope, own('.value'));
       const src = getter(m.source);
       const render = [
         `(${names.slice(0, Math.max(used, 1)).join(', ')}) => `,
         ...block(m.block, ind),
       ];
-      let getKey: Code = ['(v) => v'];
-      if (m.key) {
-        const params = m.params.slice(0, used).map((p, i): Code => (p === null ? [names[i]] : [p]));
-        const pre = prelude(m.key.scopes, m.scope);
-        const head: Code = ['(', ...list(params), ') => '];
-        getKey =
-          pre.length > 0
-            ? [...head, '{ ', ...pre, 'return ', ...paren(m.key.parts), ' }']
-            : [...head, ...paren(m.key.parts)];
-      }
       return ['_createFor(', ...list([src, render, getKey]), ')'];
     }
     if (m.k === 'keyed') {

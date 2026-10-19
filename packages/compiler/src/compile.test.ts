@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { compile } from './compile.ts';
 
@@ -26,6 +27,33 @@ describe('compile', () => {
     expect(sfcOf(full, true)).toBe(
       'const _sfc = { name: "Card", __file: "src/Card.vibe", __hmrId: "0a1b2c3d", __scopeId: "data-vb-0a1b2c3d", __propKeys: ["a"], __emits: ["pick"], __defaults: _defaults, setup: _setup, render: _render }',
     );
+  });
+
+  it('compiles a todo list to setup bindings, prop reads, a model, a keyed loop and the module', () => {
+    const source = readFileSync(
+      new URL('../test/fixtures/template/todo-list/input.vibe', import.meta.url),
+      'utf8',
+    );
+    const { code, diagnostics } = compile(source, options);
+    expect(diagnostics).toStrictEqual([]);
+    for (const fragment of [
+      'return { emit, filter, visible }',
+      '_toDisplayString($props.title)',
+      '_toDisplayString($setup.visible.length)',
+      '() => $setup.filter, ($event) => { $setup.filter = $event }, { trim: true })',
+      '_createFor(() => $setup.visible, (_for0) => {',
+      'todo: () => { const todo = _for0.value; return todo },',
+      "onToggle: () => ($event) => { const todo = _for0.value; $setup.emit('toggle', todo.id) },",
+      '}, (todo) => todo.id)',
+      '\nexport default _sfc',
+    ]) {
+      expect(code).toContain(fragment);
+    }
+  });
+
+  it('escapes the scope id', () => {
+    const { code } = compile(full, { ...options, id: 'x"+1+"' });
+    expect(code).toContain('__scopeId: "data-vb-x\\"+1+\\""');
   });
 
   it('keeps the name of defineOptions and inheritAttrs: false, and omits empty metadata', () => {

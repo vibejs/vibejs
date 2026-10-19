@@ -23,7 +23,9 @@ const outputSnapshot = (name: string, file = 'output.ts') => fileURLToPath(fixtu
 
 /** Asserts that generated code parses as TypeScript. */
 const expectParses = (code: string) =>
-  expect(parseSync('output.ts', code, { lang: 'ts' }).errors).toStrictEqual([]);
+  expect(
+    parseSync('output.ts', code, { lang: 'ts', showSemanticErrors: true }).errors,
+  ).toStrictEqual([]);
 
 /** The codes and every `line:column` of a source's descriptor, AST and diagnostics. */
 function linesOf(source: string) {

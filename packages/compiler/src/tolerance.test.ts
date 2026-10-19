@@ -75,7 +75,7 @@ function templateProblems(source: string): string[] {
   if ((code === '') !== diagnostics.length > 0 || (map === null) !== (code === '')) {
     bad.push('code and map are empty iff diagnostics exist');
   }
-  if (parseSync('output.ts', code, { lang: 'ts' }).errors.length > 0)
+  if (parseSync('output.ts', code, { lang: 'ts', showSemanticErrors: true }).errors.length > 0)
     bad.push('code does not parse');
   return bad.map((b) => `${JSON.stringify(source)}: ${b}`);
 }
