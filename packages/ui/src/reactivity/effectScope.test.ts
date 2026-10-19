@@ -1,8 +1,7 @@
 // @vitest-environment node
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/reactivity/__tests__/effectScope.spec.ts (MIT)
 //
-// Sources that upstream builds with reactive() are refs here. The cases built on watch() and
-// nextTick() move to RR-3; on()/off() are not part of this API.
+// The cases built on watch() and nextTick() move to RR-3; on()/off() are not part of this API.
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 import { vibeError } from '../errors.gen.ts';
 import { computed } from './computed.ts';
@@ -14,6 +13,7 @@ import {
   onScopeDispose,
   type EffectScope,
 } from './effectScope.ts';
+import { isProxy, reactive } from './reactive.ts';
 import { ref } from './ref.ts';
 
 function effect(fn: () => unknown): ReactiveEffect {
@@ -59,11 +59,11 @@ describe('reactivity/effect/scope', () => {
     const scope = impl(effectScope());
     scope.run(() => {
       let dummy;
-      const counter = ref(0);
-      effect(() => (dummy = counter.value));
+      const counter = reactive({ num: 0 });
+      effect(() => (dummy = counter.num));
 
       expect(dummy).toBe(0);
-      counter.value = 7;
+      counter.num = 7;
       expect(dummy).toBe(7);
     });
 
@@ -72,38 +72,38 @@ describe('reactivity/effect/scope', () => {
 
   it('stop', () => {
     let dummy, doubled;
-    const counter = ref(0);
+    const counter = reactive({ num: 0 });
 
     const scope = impl(effectScope());
     scope.run(() => {
-      effect(() => (dummy = counter.value));
-      effect(() => (doubled = counter.value * 2));
+      effect(() => (dummy = counter.num));
+      effect(() => (doubled = counter.num * 2));
     });
 
     expect(scope.effects.length).toBe(2);
 
     expect(dummy).toBe(0);
-    counter.value = 7;
+    counter.num = 7;
     expect(dummy).toBe(7);
     expect(doubled).toBe(14);
 
     scope.stop();
 
-    counter.value = 6;
+    counter.num = 6;
     expect(dummy).toBe(7);
     expect(doubled).toBe(14);
   });
 
   it('should collect nested scope', () => {
     let dummy, doubled;
-    const counter = ref(0);
+    const counter = reactive({ num: 0 });
 
     const scope = impl(effectScope());
     scope.run(() => {
-      effect(() => (dummy = counter.value));
+      effect(() => (dummy = counter.num));
       // nested scope
       effectScope().run(() => {
-        effect(() => (doubled = counter.value * 2));
+        effect(() => (doubled = counter.num * 2));
       });
     });
 
@@ -112,41 +112,41 @@ describe('reactivity/effect/scope', () => {
     expect(scope.scopes[0]).toBeInstanceOf(EffectScopeImpl);
 
     expect(dummy).toBe(0);
-    counter.value = 7;
+    counter.num = 7;
     expect(dummy).toBe(7);
     expect(doubled).toBe(14);
 
     // stop the nested scope as well
     scope.stop();
 
-    counter.value = 6;
+    counter.num = 6;
     expect(dummy).toBe(7);
     expect(doubled).toBe(14);
   });
 
   it('nested scope can be escaped', () => {
     let dummy, doubled;
-    const counter = ref(0);
+    const counter = reactive({ num: 0 });
 
     const scope = impl(effectScope());
     scope.run(() => {
-      effect(() => (dummy = counter.value));
+      effect(() => (dummy = counter.num));
       // nested scope
       effectScope(true).run(() => {
-        effect(() => (doubled = counter.value * 2));
+        effect(() => (doubled = counter.num * 2));
       });
     });
 
     expect(scope.effects.length).toBe(1);
 
     expect(dummy).toBe(0);
-    counter.value = 7;
+    counter.num = 7;
     expect(dummy).toBe(7);
     expect(doubled).toBe(14);
 
     scope.stop();
 
-    counter.value = 6;
+    counter.num = 6;
     expect(dummy).toBe(7);
 
     // nested scope should not be stopped
@@ -155,22 +155,22 @@ describe('reactivity/effect/scope', () => {
 
   it('able to run the scope', () => {
     let dummy, doubled;
-    const counter = ref(0);
+    const counter = reactive({ num: 0 });
 
     const scope = impl(effectScope());
     scope.run(() => {
-      effect(() => (dummy = counter.value));
+      effect(() => (dummy = counter.num));
     });
 
     expect(scope.effects.length).toBe(1);
 
     scope.run(() => {
-      effect(() => (doubled = counter.value * 2));
+      effect(() => (doubled = counter.num * 2));
     });
 
     expect(scope.effects.length).toBe(2);
 
-    counter.value = 7;
+    counter.num = 7;
     expect(dummy).toBe(7);
     expect(doubled).toBe(14);
 
@@ -180,11 +180,11 @@ describe('reactivity/effect/scope', () => {
   it('can not run an inactive scope', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     let dummy, doubled;
-    const counter = ref(0);
+    const counter = reactive({ num: 0 });
 
     const scope = impl(effectScope());
     scope.run(() => {
-      effect(() => (dummy = counter.value));
+      effect(() => (dummy = counter.num));
     });
 
     expect(scope.effects.length).toBe(1);
@@ -193,7 +193,7 @@ describe('reactivity/effect/scope', () => {
 
     expect(
       scope.run(() => {
-        effect(() => (doubled = counter.value * 2));
+        effect(() => (doubled = counter.num * 2));
       }),
     ).toBeUndefined();
 
@@ -201,7 +201,7 @@ describe('reactivity/effect/scope', () => {
 
     expect(scope.effects.length).toBe(0);
 
-    counter.value = 7;
+    counter.num = 7;
     expect(dummy).toBe(0);
     expect(doubled).toBe(undefined);
   });
@@ -300,8 +300,8 @@ describe('reactivity/effect/scope', () => {
   });
 
   it('should pause/resume EffectScope', () => {
-    const counter = ref(0);
-    const fnSpy = vi.fn<() => number>(() => counter.value);
+    const counter = reactive({ num: 0 });
+    const fnSpy = vi.fn<() => number>(() => counter.num);
     const scope = effectScope();
     scope.run(() => {
       effect(fnSpy);
@@ -309,65 +309,72 @@ describe('reactivity/effect/scope', () => {
 
     expect(fnSpy).toHaveBeenCalledTimes(1);
 
-    counter.value++;
+    counter.num++;
     expect(fnSpy).toHaveBeenCalledTimes(2);
 
     scope.pause();
-    counter.value++;
+    counter.num++;
     expect(fnSpy).toHaveBeenCalledTimes(2);
 
-    counter.value++;
+    counter.num++;
     expect(fnSpy).toHaveBeenCalledTimes(2);
 
     scope.resume();
     expect(fnSpy).toHaveBeenCalledTimes(3);
   });
 
-  it('should still trigger updates after stopping scope stored in a ref', () => {
-    const stage = ref(0);
-    const status: { scope: EffectScope | null } = { scope: null };
+  // Upstream watches the stage inside the scope; an effect stands in until watch() exists.
+  it('should still trigger updates after stopping scope stored in reactive object', () => {
+    const rs = ref({
+      stage: 0,
+      scope: null as EffectScope | null,
+    });
 
     let renderCount = 0;
     effect(() => {
       renderCount++;
-      return stage.value;
+      return rs.value.stage;
     });
 
     const handleBegin = () => {
-      stage.value = 1;
+      const status = rs.value;
+      status.stage = 1;
       status.scope = effectScope();
       status.scope.run(() => {
-        effect(() => stage.value);
+        effect(() => status.stage);
       });
     };
 
     const handleExit = () => {
-      stage.value = 0;
+      const status = rs.value;
+      status.stage = 0;
       const watchScope = status.scope;
       status.scope = null;
       watchScope?.stop();
     };
 
-    expect(stage.value).toBe(0);
+    expect(rs.value.stage).toBe(0);
     expect(renderCount).toBe(1);
 
     // 1. Click begin
     handleBegin();
-    expect(stage.value).toBe(1);
+    expect(rs.value.stage).toBe(1);
     expect(renderCount).toBe(2);
+    // The stored scope stays raw.
+    expect(isProxy(rs.value.scope)).toBe(false);
 
     // 2. Click add
-    stage.value++;
-    expect(stage.value).toBe(2);
+    rs.value.stage++;
+    expect(rs.value.stage).toBe(2);
     expect(renderCount).toBe(3);
 
     // 3. Click end
     handleExit();
-    expect(stage.value).toBe(0);
+    expect(rs.value.stage).toBe(0);
     expect(renderCount).toBe(4);
 
     handleBegin();
-    expect(stage.value).toBe(1);
+    expect(rs.value.stage).toBe(1);
     expect(renderCount).toBe(5);
   });
 

@@ -2,7 +2,10 @@
 import { defineErrors, type VibeErrorFactory } from '@vibejs-org/errors';
 
 const MESSAGES = {
+  VIBE5001: ["{api}() received {value}, which is not an object, so it was returned as-is.","Wrap a primitive value in `ref()` instead of {api}().","Pass an object, an array, a `Map` or a `Set` to {api}()."],
+  VIBE5002: ["Cannot {operation} {key}: the target is readonly.","Mutate the reactive source that the readonly proxy wraps.","Pass the source to `reactive()` instead of `readonly()` where it must be writable."],
   VIBE5003: ["Cannot assign to the value of a computed ref that was created with a getter only.","Write to the refs that the getter reads instead.","Pass an object with `get` and `set` functions to `computed()` when it must be writable."],
+  VIBE5004: ["toRefs() received a plain object, so its refs will not track changes.","Pass the object to `reactive()` first and call `toRefs()` on the result.","Use `ref()` for each value when the object does not need to stay in sync."],
   VIBE5005: ["Cannot run a function in an effect scope that has already been stopped.","Create a new scope with `effectScope()` and run the function in it.","Call `stop()` only after the last `run()` of the scope."],
   VIBE5006: ["{api}() was called with no active effect scope or watcher, so its cleanup will never run.","Call {api}() synchronously inside `effectScope().run()`, a component's setup or a watcher.","Pass `true` as the second argument of {api}() when running without an owner is expected."],
   VIBE7101: ["The route path {path} is invalid: {reason}.","Give each param its own segment: `/files/:name` instead of `/file.:ext` or `/:a-:b`.","Remove `\\` escapes and any `/` from param regexes, and close every parenthesis.","Give a param at most one non-empty regex: `:id(\\d+)`, not `:id()` or `:id(a)(b)`.","Remove `?` and `#` from static text, and `.` and `..` segments, which a URL removes or reads as a query or a hash.","Check that the param regex compiles with `new RegExp()`.","Start every top-level path with `/`; only child paths are relative."],
