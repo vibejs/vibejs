@@ -18,6 +18,17 @@ function shallowReadArray<T>(array: T[]): T[] {
   return array;
 }
 
+/**
+ * Tracks every item of `array` and returns them as the proxy would (raw for a raw array); `wrap`
+ * is the wrap of the proxy, `wrapperFor(array)` in `reactive.ts`.
+ */
+function reactiveReadArray<T>(array: T[], wrap: Wrap): T[] {
+  const raw = toRaw(array);
+  if (raw === array) return raw;
+  track(raw, ARRAY_ITERATE_KEY);
+  return isShallow(array) ? raw : (raw.map(wrap) as T[]);
+}
+
 /** Searches the raw array, then again with a raw argument, so a raw item and its proxy match. */
 function search(self: unknown[], method: string, args: unknown[]): unknown {
   const raw = shallowReadArray(self) as AnyArray;
@@ -36,8 +47,12 @@ function mutate(self: unknown[], method: string, args: unknown[]): unknown {
   try {
     return (toRaw(self) as AnyArray)[method].apply(self, args);
   } finally {
-    endBatch();
-    setActiveSub(prevSub);
+    // An effect that the batch flushes may throw: the caller must still get its subscriber back.
+    try {
+      endBatch();
+    } finally {
+      setActiveSub(prevSub);
+    }
   }
 }
 
@@ -53,14 +68,6 @@ const wrapItems = (items: unknown[], wrap: Wrap): unknown[] => items.map(wrap);
 export function createArrayInstrumentations(
   wrapperFor: (array: unknown[]) => Wrap,
 ): Record<PropertyKey, unknown> {
-  /** Tracks every item of `array` and returns them as the proxy would (raw for a raw array). */
-  function reactiveReadArray<T>(array: T[]): T[] {
-    const raw = toRaw(array);
-    if (raw === array) return raw;
-    track(raw, ARRAY_ITERATE_KEY);
-    return isShallow(array) ? raw : (raw.map(wrapperFor(array)) as T[]);
-  }
-
   /** Runs a native method that reads every item, passing wrapped items and the proxy to `fn`. */
   function apply(
     self: unknown[],
@@ -120,7 +127,7 @@ export function createArrayInstrumentations(
     return wrapped;
   }
 
-  const read = (self: unknown[]): AnyArray => reactiveReadArray(self) as AnyArray;
+  const read = (self: unknown[]): AnyArray => reactiveReadArray(self, wrapperFor(self)) as AnyArray;
 
   const methods: Record<PropertyKey, unknown> = {
     __proto__: null,

@@ -4,7 +4,15 @@ import { hasChanged, isFunction, isIntegerKey, isObject } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { ComputedRefImpl, type ComputedRef, type WritableComputedRef } from './computed.ts';
 import { activeSub, batchDepth, cycle, flush, runDepth, system, type Dependency } from './core.ts';
-import { flag, getDepFromReactive, isReadonly, isRef, isShallow, toRaw } from './dep.ts';
+import {
+  flag,
+  getDepFromReactive,
+  isReactive,
+  isReadonly,
+  isRef,
+  isShallow,
+  toRaw,
+} from './dep.ts';
 import { isProxy, toReactive } from './reactive.ts';
 import { ReactiveFlags, type Link } from './system.ts';
 
@@ -234,7 +242,7 @@ export function toRef(source: unknown, key?: PropertyKey, defaultValue?: unknown
 
 export function toRefs<T extends object>(object: T): ToRefs<T>;
 export function toRefs(object: Record<PropertyKey, unknown>): any {
-  if (!isProxy(object)) warn(vibeError('VIBE5004'));
+  if (!isReactive(object) && !isReadonly(object)) warn(vibeError('VIBE5004'));
   const refs: any = Array.isArray(object) ? Array.from({ length: object.length }) : {};
   for (const key in object) refs[key] = new PropertyRef(object, key);
   return refs;

@@ -25,7 +25,14 @@ const get = (target: Collection, key: unknown): unknown => proto(target).get.cal
 
 const ignored = (operation: string, key: string): void =>
   warn(vibeError('VIBE5002', { operation, key }));
-const quote = (key: unknown): string => `"${String(key)}"`;
+const quote = (key: unknown): string => {
+  try {
+    return `"${String(key)}"`;
+  } catch {
+    // An object without a usable `toString` (`Object.create(null)`): a readonly no-op never throws.
+    return 'an object';
+  }
+};
 
 /**
  * The proxy handler of `Map`, `Set`, `WeakMap` and `WeakSet` in one mode: it answers the flags and

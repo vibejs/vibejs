@@ -627,8 +627,31 @@ describe('readonly mutations', () => {
 
     warn.mockClear();
     vi.stubGlobal('__DEV__', false);
+    (map as Map<string, number>).set('k', 2);
+    (map as Map<string, number>).delete('k');
+    (set as Set<number>).add(2);
+    (set as Set<number>).delete(1);
     (set as Set<number>).clear();
-    (readonly({ a: 1 }) as { a: number }).a = 2;
+    const object = readonly({ a: 1 }) as { a?: number };
+    object.a = 2;
+    delete object.a;
     expect(warn).not.toHaveBeenCalled();
+    expect([...map]).toEqual([['k', 1]]);
+    expect([...set]).toEqual([1]);
+    expect(object.a).toBe(1);
+  });
+
+  test('a collection mutator with a key that has no toString is ignored, in dev and production', () => {
+    const key = Object.create(null) as object;
+    const map = readonly(new Map<object, number>()) as Map<object, number>;
+    const set = readonly(new Set<object>()) as Set<object>;
+    expect(map.set(key, 1)).toBe(map);
+    expect(warn).toHaveBeenLastCalledWith(readonlyWarning('set', 'an object'));
+    expect(set.add(key)).toBe(set);
+    expect(map.delete(key)).toBe(false);
+    vi.stubGlobal('__DEV__', false);
+    expect(set.add(key)).toBe(set);
+    expect(set.delete(key)).toBe(false);
+    expect(map.size + set.size).toBe(0);
   });
 });

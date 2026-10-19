@@ -951,4 +951,19 @@ describe('reactive arrays', () => {
     n.value++;
     expect(spy).toHaveBeenCalledTimes(2);
   });
+
+  test('an effect that throws when a mutator flushes it leaves the caller tracking', () => {
+    const arr = reactive<number[]>([]);
+    const n = ref(0);
+    effect(() => {
+      if (arr.length > 0) throw new Error('flushed');
+    });
+    const spy = vi.fn<() => void>(() => void n.value);
+    effect(() => {
+      expect(() => arr.push(1)).toThrow('flushed');
+      spy();
+    });
+    n.value++;
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
 });

@@ -543,12 +543,14 @@ describe('reactive', () => {
     const props = Object.defineProperties({}, { __v_isReactive: { get: () => true } });
     expect(isReactive(props)).toBe(true);
     expect(isProxy(props)).toBe(false);
+    // The props proxy claims both flags and has no `__v_raw`.
     const readonlyProps = Object.defineProperties(
       {},
-      { __v_isReadonly: { get: () => true }, __v_raw: { get: () => props } },
+      { __v_isReactive: { get: () => true }, __v_isReadonly: { get: () => true } },
     );
     expect(isReadonly(readonlyProps)).toBe(true);
     expect(isReactive(readonlyProps)).toBe(true);
+    expect(isProxy(readonlyProps)).toBe(false);
   });
 
   test('flags of the four modes', () => {

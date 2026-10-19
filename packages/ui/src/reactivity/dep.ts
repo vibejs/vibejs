@@ -154,8 +154,9 @@ export const flag = (value: unknown, key: keyof Target): unknown =>
 
 /** Whether `value` is a reactive proxy, or a readonly proxy over one. */
 export function isReactive(value: unknown): boolean {
-  if (isReadonly(value)) return isReactive(flag(value, '__v_raw'));
-  return !!flag(value, '__v_isReactive');
+  // An object that only claims the flags (the props proxy) has no `__v_raw` to follow.
+  const raw = isReadonly(value) ? flag(value, '__v_raw') : undefined;
+  return raw ? isReactive(raw) : !!flag(value, '__v_isReactive');
 }
 
 /** Whether `value` is a readonly proxy (or a getter-only computed). */

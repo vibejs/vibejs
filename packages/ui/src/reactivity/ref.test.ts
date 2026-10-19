@@ -711,6 +711,9 @@ describe('ref', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     toRefs(reactive({ a: 1 }));
     toRefs(readonly({ a: 1 }));
+    // An object that only claims the flags, as the props proxy does.
+    toRefs(Object.defineProperties({ a: 1 }, { __v_isReactive: { get: () => true } }));
+    toRefs(Object.defineProperties({ a: 1 }, { __v_isReadonly: { get: () => true } }));
     expect(warn).not.toHaveBeenCalled();
     vi.stubGlobal('__DEV__', false);
     toRefs({ a: 1 });
