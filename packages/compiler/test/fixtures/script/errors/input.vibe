@@ -1,0 +1,23 @@
+<template>
+  <p>{{ a }}</p>
+</template>
+
+<script setup lang="ts">
+import { defineProps as props, watch } from '@vibejs-org/ui';
+import type { Imported } from './types';
+
+export const version = 1;
+const local = 1;
+const { a = local, ...rest } = defineProps<{ a?: number; b: string }>();
+const emit = defineEmits<{ save(id: number): void }>();
+const other = defineEmits<Imported>();
+let model = defineModel();
+const slots = defineSlots();
+defineOptions({ name: getName() });
+const data = await load();
+a = 2;
+watch(a, () => {});
+function nested() {
+  defineExpose({});
+}
+</script>

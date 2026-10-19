@@ -1,16 +1,27 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
 import { fixtureFile, fixtures, locations } from '../test/walk.ts';
 import { formatDiagnostic } from './diagnostics.ts';
+import { analyze } from './script/analyze.ts';
+import { compileScript } from './script/compile.ts';
 import { parse } from './sfc/parse.ts';
 
-const parsed = fixtures.map(([name, source]) => ({
-  name,
-  source,
-  ...parse(source, { filename: `${name}/input.vibe` }),
-}));
+const parsed = fixtures.map(([name, source]) => {
+  const { descriptor, diagnostics } = parse(source, { filename: `${name}/input.vibe` });
+  const analysis = analyze(descriptor);
+  const all = [...diagnostics, ...analysis.diagnostics];
+  return {
+    name,
+    source,
+    descriptor,
+    analysis,
+    diagnostics: all.toSorted((a, b) => a.start.offset - b.start.offset),
+  };
+});
 const snapshot = (name: string) => fileURLToPath(fixtureFile(name, 'diagnostics.txt'));
+const scriptSnapshot = (name: string) => fileURLToPath(fixtureFile(name, 'script.ts'));
 
 /** The codes and every `line:column` of a source's descriptor, AST and diagnostics. */
 function linesOf(source: string) {
@@ -35,6 +46,24 @@ describe('fixtures', () => {
     '%s is clean and has no diagnostics.txt',
     (name) => {
       expect(existsSync(snapshot(name))).toBe(false);
+    },
+  );
+
+  const compiled = parsed.filter((f) => f.diagnostics.length === 0 && f.descriptor.scriptSetup);
+
+  it.each(compiled.map((f) => [f.name, f] as const))(
+    '%s compiles its script to script.ts',
+    async (_, { name, descriptor, analysis }) => {
+      const code = compileScript(descriptor, analysis).s.toString();
+      expect(parseSync('script.ts', code, { lang: 'ts' }).errors).toStrictEqual([]);
+      await expect(code).toMatchFileSnapshot(scriptSnapshot(name));
+    },
+  );
+
+  it.each(parsed.filter((f) => !compiled.includes(f)).map((f) => f.name))(
+    '%s has no script.ts',
+    (name) => {
+      expect(existsSync(scriptSnapshot(name))).toBe(false);
     },
   );
 

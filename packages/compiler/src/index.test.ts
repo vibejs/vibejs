@@ -1,5 +1,6 @@
 import * as compiler from '@vibejs-org/compiler';
 import {
+  analyzeScript,
   ElementTypes,
   NodeTypes,
   parse,
@@ -24,10 +25,11 @@ type TemplateNode =
   | SimpleExpressionNode;
 
 describe('@vibejs-org/compiler', () => {
-  it('exports formatDiagnostic, compileStyle, parse, the AST enums and the expression helpers at runtime', () => {
+  it('exports formatDiagnostic, compileStyle, parse, analyzeScript, the AST enums and the expression helpers at runtime', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
       'NodeTypes',
+      'analyzeScript',
       'camelize',
       'capitalize',
       'compileStyle',
@@ -81,5 +83,70 @@ describe('@vibejs-org/compiler', () => {
     expect([on.arg, ...on.modifiers].map(at)).toStrictEqual(['remove', 'stop', 'prevent']);
     const bind = directives.find((d) => d.rawName === ':todo.camel')!;
     expect([bind.arg, ...bind.modifiers].map(at)).toStrictEqual(['todo', 'camel']);
+  });
+
+  it('analyzes a full script for language tools', () => {
+    const source = fixtures.find(([name]) => name === 'script/full')![1];
+    const { descriptor } = parse(source, { filename: 'ItemList.vibe' });
+    const a = analyzeScript(descriptor);
+    const at = ([start, end]: [number, number]) => {
+      expect(0 <= start && start <= end && end <= source.length).toBe(true);
+      return source.slice(start, end);
+    };
+    expect(a.diagnostics).toStrictEqual([]);
+    expect([...a.bindings].map(([name, b]) => [name, b.kind, at(b.decl)])).toStrictEqual([
+      ['computed', 'import', 'computed'],
+      ['ref', 'import', 'ref'],
+      ['useTemplateRef', 'import', 'useTemplateRef'],
+      ['Child', 'import', 'Child'],
+      ['title', 'prop', 'title'],
+      ['items', 'prop', 'items'],
+      ['variant', 'prop-alias', 'variant'],
+      ['emit', 'const', 'emit'],
+      ['slots', 'const', 'slots'],
+      ['query', 'maybe-ref', 'query'],
+      ['queryModifiers', 'maybe-ref', 'queryModifiers'],
+      ['checked', 'maybe-ref', 'checked'],
+      ['clicks', 'let', 'clicks'],
+      ['label', 'maybe-ref', 'label'],
+      ['list', 'maybe-ref', 'list'],
+      ['input', 'maybe-ref', 'input'],
+      ['pick', 'const', 'pick'],
+    ]);
+    expect(a.propKeys.map((k) => [k.name, at(k.decl)])).toStrictEqual([
+      ['title', 'title'],
+      ['items', 'items'],
+      ['size', 'size'],
+      ['query', "'query'"],
+      ['queryModifiers', "'query'"],
+      ['modelValue', 'defineModel'],
+      ['modelValueModifiers', 'defineModel'],
+    ]);
+    const { props, emits, slots, models, expose } = a.macros;
+    expect([props, emits, slots].map((m) => at(m!.typeArg))).toStrictEqual([
+      'Props',
+      '{ pick: [id: number]; close: [] }',
+      '{ default?: (props: { item: Item }) => unknown }',
+    ]);
+    expect(models).toStrictEqual([
+      { name: 'query', binding: 'query', required: false },
+      { name: 'modelValue', binding: 'checked', required: true },
+    ]);
+    expect(source.slice(expose!.callStart).startsWith('defineExpose(')).toBe(true);
+    expect(
+      a.templateRefs.map((r) => [
+        r.key,
+        at(r.keyLoc),
+        r.typeArgInsertAt === null ? null : source.slice(r.typeArgInsertAt, r.typeArgInsertAt + 2),
+      ]),
+    ).toStrictEqual([
+      ['list', "'list'", null],
+      ['input', "'input'", "('"],
+    ]);
+    expect(a.importRanges.map(at)).toStrictEqual([
+      "import { computed, ref, useTemplateRef } from '@vibejs-org/ui';",
+      "import type { Item } from './types';",
+      "import Child from './Child.vibe';",
+    ]);
   });
 });

@@ -1,0 +1,6 @@
+error[VIBE3003]: The script is not valid TypeScript: Unexpected token.
+  --> script/syntax-error/input.vibe:6:15
+6 | const value = ;
+  |               ^
+fix: Correct the syntax at the reported position, such as a missing bracket, quote or comma.
+docs: https://vibejs.org/v0/errors/VIBE3003

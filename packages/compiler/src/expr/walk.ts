@@ -62,7 +62,7 @@ const LABELS = new Set(['LabeledStatement', 'BreakStatement', 'ContinueStatement
 const isNode = (value: unknown): value is Node =>
   typeof value === 'object' && value !== null && 'type' in value;
 
-const isIdentifier = (node: Node): node is Identifier => node.type === 'Identifier';
+export const isIdentifier = (node: Node): node is Identifier => node.type === 'Identifier';
 
 /** The nodes under `node[key]`, which holds a node, an array of nodes (with holes) or nothing. */
 export const children = (node: Node, key: string): Node[] => [node[key]].flat().filter(isNode);
@@ -71,7 +71,7 @@ export const children = (node: Node, key: string): Node[] => [node[key]].flat().
 const ids = (node: Node, key: string): Identifier[] => children(node, key).filter(isIdentifier);
 
 /** The identifiers that a binding pattern declares, in source order. */
-function patternIds(pattern: Node): Identifier[] {
+export function patternIds(pattern: Node): Identifier[] {
   if (isIdentifier(pattern)) return [pattern];
   // AssignmentPattern: only `left`; Property: only `value`; RestElement, ArrayPattern, ObjectPattern.
   const keys =

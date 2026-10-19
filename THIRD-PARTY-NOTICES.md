@@ -30,6 +30,7 @@ Details and the full license texts are in [`packages/compiler/THIRD-PARTY-NOTICE
   - `packages/compiler/src/sfc/parse.test.ts` from `packages/compiler-sfc/__tests__/parse.spec.ts` (tests, not shipped)
   - `packages/compiler/src/style/pluginScoped.test.ts` from `packages/compiler-sfc/__tests__/compileStyle.spec.ts` (tests, not shipped)
   - `packages/compiler/src/expr/transformExpression.test.ts` from `packages/compiler-core/__tests__/transforms/transformExpressions.spec.ts` (tests, not shipped)
+  - `packages/compiler/src/script/definePropsDestructure.test.ts` from `packages/compiler-sfc/__tests__/compileScript/definePropsDestructure.spec.ts` (tests, not shipped)
 - **fb55/htmlparser2**, MIT, Copyright 2010, 2011, Chris Winberry, through the vuejs/core tokenizer.
   - `packages/compiler/src/template/tokenizer.ts`
 

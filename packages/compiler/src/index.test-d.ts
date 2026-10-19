@@ -1,6 +1,8 @@
 import { expectTypeOf } from 'vitest';
 import type {
+  analyzeScript,
   AttributeNode,
+  BindingKind,
   CommentNode,
   Diagnostic,
   DirectiveNode,
@@ -11,6 +13,7 @@ import type {
   NodeTypes,
   Position,
   RootNode,
+  ScriptAnalysis,
   SFCBlock,
   SFCDescriptor,
   SimpleExpressionNode,
@@ -122,3 +125,33 @@ expectTypeOf<typeof isSimpleHandler>().toEqualTypeOf<(expr: string) => boolean>(
 expectTypeOf<typeof camelize>().toEqualTypeOf<(s: string) => string>();
 expectTypeOf<typeof hyphenate>().toEqualTypeOf<(s: string) => string>();
 expectTypeOf<typeof capitalize>().toEqualTypeOf<(s: string) => string>();
+
+// The analysis of C5.
+interface C5ScriptAnalysis {
+  bindings: Map<
+    string,
+    {
+      kind: 'prop' | 'prop-alias' | 'const' | 'maybe-ref' | 'let' | 'import';
+      decl: [number, number];
+    }
+  >;
+  propKeys: { name: string; decl: [number, number] }[];
+  macros: {
+    props?: { typeArg: [number, number] };
+    emits?: { typeArg: [number, number] };
+    slots?: { typeArg: [number, number] };
+    models: { name: string; binding: string; required: boolean }[];
+    expose?: { callStart: number };
+  };
+  templateRefs: { key: string; keyLoc: [number, number]; typeArgInsertAt: number | null }[];
+  importRanges: [number, number][];
+  diagnostics: Diagnostic[];
+}
+
+expectTypeOf<ScriptAnalysis>().toEqualTypeOf<C5ScriptAnalysis>();
+expectTypeOf<C5ScriptAnalysis>().toExtend<ScriptAnalysis>();
+expectTypeOf<ScriptAnalysis>().toExtend<C5ScriptAnalysis>();
+expectTypeOf<BindingKind>().toEqualTypeOf<
+  'prop' | 'prop-alias' | 'const' | 'maybe-ref' | 'let' | 'import'
+>();
+expectTypeOf<typeof analyzeScript>().toEqualTypeOf<(d: SFCDescriptor) => ScriptAnalysis>();

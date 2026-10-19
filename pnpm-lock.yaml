@@ -231,6 +231,9 @@ catalogs:
     knip:
       specifier: 6.41.0
       version: 6.41.0
+    magic-string:
+      specifier: ^1.4.3
+      version: 1.4.3
     oxc-parser:
       specifier: ^0.154.0
       version: 0.154.0
@@ -400,6 +403,9 @@ importers:
       entities:
         specifier: 'catalog:'
         version: 8.1.0
+      magic-string:
+        specifier: 'catalog:'
+        version: 1.4.3
       oxc-parser:
         specifier: 'catalog:'
         version: 0.154.0
