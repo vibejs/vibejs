@@ -13,6 +13,7 @@ coverage/
 playwright-report/
 test-results/
 .playwright-mcp/
+packages/compiler/test/.tmp/
 packages/cli/src/catalog.gen.ts
 docs/errors/
 docs/cli/

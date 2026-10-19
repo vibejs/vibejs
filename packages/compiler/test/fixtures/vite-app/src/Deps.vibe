@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import MagicString from 'magic-string';
+
+const text = new MagicString('deps').toString();
+</script>
+
+<template>
+  <p>{{ text }}</p>
+</template>

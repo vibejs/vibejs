@@ -57,7 +57,20 @@
   "devDependencies": {
     "@jridgewell/trace-mapping": "catalog:",
     "@vibejs-org/ui": "workspace:*",
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "vite": "catalog:"
+  },
+  "peerDependencies": {
+    "@vibejs-org/ui": "workspace:*",
+    "vite": "catalog:peers"
+  },
+  "peerDependenciesMeta": {
+    "@vibejs-org/ui": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
   },
   "engines": {
     "node": "^24.15.0 || >=26"

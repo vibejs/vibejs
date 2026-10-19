@@ -57,4 +57,5 @@ catalogs:
     typescript: 7.1.0-dev.20261015.1
   # Ranges for peerDependencies, which the exact pins above would publish as exact versions.
   peers:
+    vite: ^8.3.0
     vitest: ^5.0.5
