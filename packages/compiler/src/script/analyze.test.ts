@@ -190,6 +190,12 @@ describe('analyzeScript', () => {
     ['VIBE3331', `defineOptions({ name() { return 'X' } })`, `{ name() { return 'X' } }`],
     ['VIBE3322', `defineProps<{ a: string }>()\nconst m = defineModel('a')`, `'a'`],
     ['VIBE3009', 'const cc = 1\nconst { c: cc } = defineProps<{ c: number }>()', 'cc'],
+    ['VIBE3009', 'const { a: b } = defineProps<{ a: string; b: number }>()', 'b'],
+    [
+      'VIBE3322',
+      'const m = defineModel()\nconst { modelValueModifiers } = defineProps<{ modelValueModifiers?: any }>()',
+      'defineModel',
+    ],
     ['VIBE3001', `type T = 1\nexport { type T, a }\nconst a = 1`, 'export'],
     ['VIBE3010', 'namespace N.M { export const x = 1 }', 'namespace N.M'],
     ['VIBE3010', 'import Q = N.x', 'import Q'],

@@ -133,6 +133,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
   // Spaces in front of the content make every span a file offset.
   const { program, errors } = parseSync('script.ts', ' '.repeat(base) + block.content, {
     lang: 'ts',
+    sourceType: 'module',
     preserveParens: false,
   });
   if (errors.length > 0) {
@@ -375,7 +376,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
       }
       const { name } = local;
       defineKeys.push({ name: key, decl: range(first(property, 'key')!) });
-      // A prop of the same name is checked with the other prop keys below.
+      // A prop key of the same name is checked with the other prop keys below.
       if (name !== key && bindings.has(name)) {
         at(vibeError('VIBE3009', { name }), range(local));
         continue;
@@ -482,9 +483,12 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
   for (const key of defineKeys) if (!keys.has(key.name)) keys.set(key.name, key);
   for (const [name, decl] of modelDecls) {
     if (keys.has(name)) at(vibeError('VIBE3322', { name }), decl);
+    const modifiers = `${name}Modifiers`;
+    if (keys.has(modifiers)) at(vibeError('VIBE3322', { name: modifiers }), decl);
   }
   for (const [name, binding] of bindings) {
-    if (keys.has(name) && binding.kind !== 'prop' && binding.kind !== 'prop-alias') {
+    // An alias never has its own key as name, so a prop key under it names another prop.
+    if (keys.has(name) && binding.kind !== 'prop') {
       at(vibeError('VIBE3009', { name }), binding.decl);
     }
   }

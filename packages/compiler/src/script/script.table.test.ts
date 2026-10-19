@@ -10,6 +10,7 @@ const S = (code: string) => `<template></template><script setup lang="ts">${code
 const rows: [string, string, string][] = [
   ['VIBE3001', S('export const a = 1'), '1:46-1:52'],
   ['VIBE3002', S('const a = await f()'), '1:56-1:61'],
+  ['VIBE3002', S('for await (const x of y) {}'), '1:50-1:55'],
   ['VIBE3003', S('const = 1'), '1:52-1:53'],
   ['VIBE3004', S('f(defineProps<{ a: string }>())'), '1:48-1:59'],
   ['VIBE3005', S('defineEmits<{ a: [] }>()\ndefineEmits<{ b: [] }>()'), '2:1-2:12'],
