@@ -56,9 +56,7 @@
         "packages/language-tools/src/index.ts",
         "packages/server/src/openapi.ts",
         "packages/server/src/testing.ts",
-        "packages/ui/src/internal.ts",
-        "packages/ui/src/testing.ts",
-        "packages/ui/src/tooling.ts"
+        "packages/ui/src/testing.ts"
       ],
       "rules": { "unicorn/no-empty-file": "off", "unicorn/require-module-specifiers": "off" }
     },
@@ -153,11 +151,13 @@
       "rules": { "import/no-default-export": "off" }
     }
   ],
-  // system.ts is vendored verbatim (see its header).
+  // system.ts is vendored verbatim (see its header). src/virtual holds hand-written virtual code
+  // of .vibe files, kept byte-for-byte as the language tools emit it.
   "ignorePatterns": [
     "**/dist/**",
     "**/test/fixtures/**",
     "packages/create-vibejs/templates/**",
-    "packages/ui/src/reactivity/system.ts"
+    "packages/ui/src/reactivity/system.ts",
+    "packages/ui/src/virtual/**"
   ]
 }

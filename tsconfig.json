@@ -3,6 +3,7 @@
   "references": [
     { "path": "packages/errors" },
     { "path": "packages/ui" },
+    { "path": "packages/ui/tsconfig.virtual.json" },
     { "path": "packages/compiler" },
     { "path": "packages/language-tools" },
     { "path": "packages/contract" },

@@ -10,6 +10,7 @@
     "packages/compiler/src/template/ast.ts",
     "packages/compiler/src/template/parser.ts",
     "packages/compiler/src/template/tags.ts",
-    "packages/compiler/src/template/tokenizer.ts"
+    "packages/compiler/src/template/tokenizer.ts",
+    "packages/ui/src/virtual/**"
   ]
 }
