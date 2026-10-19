@@ -49,8 +49,9 @@ const ORDER = ['guides', 'ui', 'server', 'cli'];
 const HEADINGS: Record<string, string> = { ui: 'UI', cli: 'CLI' };
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 const FENCE = /^ *(`{3,}|~{3,})(.*)$/;
-const CONTAINER = /^::: (tip|warning|danger|info|details)(?: (.+))?$/;
-const LINK = /\]\(([^()\s]+)\)/g;
+const CONTAINER = /^( *):::\s*(tip|warning|danger|info|details)(?:\s+(.+?))?\s*$/;
+const LINK = /\]\(([^()\s]+)(\s+"[^"]*")?\)/g;
+const DEFINITION = /^( {0,3}\[[^\]]+\]:\s*)(\S+)/;
 
 /** Sorts by a string key in code-unit order. */
 const sortBy = <T>(list: readonly T[], key: (item: T) => string): T[] =>
@@ -66,10 +67,27 @@ function write(file: string, text: string): void {
   writeFileSync(file, text);
 }
 
-/** A YAML scalar: double-quoted (JSON escapes), single-quoted (`''` escapes) or plain. */
-function unquote(value: string): string {
-  if (value.startsWith('"')) return JSON.parse(value);
-  return value.startsWith("'") ? value.slice(1, -1).replaceAll("''", "'") : value;
+/**
+ * A one-line YAML scalar: double-quoted (JSON escapes), single-quoted (`''` escapes) or plain,
+ * with an optional trailing comment. Throws on anything else, such as a block scalar.
+ */
+function scalar(value: string): string {
+  const quoted = /^("(?:[^"\\]|\\.)*"|'(?:[^']|'')*')(?:\s+#.*)?$/.exec(value)?.[1];
+  if (quoted?.startsWith('"')) return JSON.parse(quoted);
+  if (quoted) return quoted.slice(1, -1).replaceAll("''", "'");
+  if (/^["'>|]/.test(value)) throw new Error('unsupported value');
+  return value.replace(/(?:^|\s+)#.*$/, '');
+}
+
+/** The first `# ` heading outside fences. */
+function heading(lines: readonly string[]): string | undefined {
+  const closes = new Map(fences(lines).map((fence) => [fence.open, fence.close]));
+  for (let i = 0; i < lines.length; i++) {
+    const close = closes.get(i);
+    if (close !== undefined) i = close;
+    else if (lines[i].startsWith('# ')) return lines[i].slice(2).trim();
+  }
+  return undefined;
 }
 
 /** A page from its Markdown; the title comes from frontmatter `title`, then the first `# `. */
@@ -77,9 +95,13 @@ function toPage(path: string, markdown: string): Page {
   const meta = new Map<string, string>();
   for (const line of (FRONTMATTER.exec(markdown)?.[1] ?? '').split('\n')) {
     const [, key, value] = /^(\w+): *(.*?)\s*$/.exec(line) ?? [];
-    if (key) meta.set(key, unquote(value));
+    try {
+      if (key) meta.set(key, scalar(value));
+    } catch (cause) {
+      throw new Error(`${path}.md: invalid frontmatter line ${JSON.stringify(line)}`, { cause });
+    }
   }
-  const title = meta.get('title') ?? /^# (.+)$/m.exec(markdown)?.[1] ?? path;
+  const title = meta.get('title') ?? heading(markdown.replace(FRONTMATTER, '').split('\n')) ?? path;
   return { path, title, description: meta.get('description'), markdown };
 }
 
@@ -126,7 +148,10 @@ function link(from: string, target: string, links: 'site' | 'package'): string {
     .replace(/^\//, '')
     .replace(/\.(?:md|html)$/, '');
   if (!path || path.endsWith('/')) path += 'index';
-  if (links === 'site' || path.startsWith('errors/')) return url(path) + hash;
+  // The bundle holds pages only: error pages and assets stay site URLs.
+  if (links === 'site' || path.startsWith('errors/') || posix.extname(path)) {
+    return url(path) + hash;
+  }
   return `${posix.relative(posix.dirname(from), path)}.md${hash}`;
 }
 
@@ -139,8 +164,13 @@ export function toAgentMarkdown(page: Page, links: 'site' | 'package'): string {
   const blocks = new Map(fences(lines).map((fence) => [fence.open, fence]));
   const out: string[] = [];
   let quoted = false;
+  let indent = '';
   let titled = false;
-  const emit = (line: string) => out.push(!quoted ? line : line ? `> ${line}` : '>');
+  const emit = (line: string) => {
+    const text = line.startsWith(indent) ? line.slice(indent.length) : line.trimStart();
+    out.push(!quoted ? line : text ? `${indent}> ${text}` : `${indent}>`);
+  };
+  const rewrite = (target: string) => link(page.path, target, links);
   for (let i = 0; i < lines.length; i++) {
     const fence = blocks.get(i);
     if (fence) {
@@ -159,13 +189,19 @@ export function toAgentMarkdown(page: Page, links: 'site' | 'package'): string {
     const container = quoted ? null : CONTAINER.exec(lines[i]);
     if (container) {
       quoted = true;
+      indent = container[1];
       // An optional group is undefined when it does not match.
-      emit(`**${container[2] || capitalize(container[1])}:**`);
-    } else if (quoted && lines[i] === ':::') {
+      emit(`**${container[3] || capitalize(container[2])}:**`);
+    } else if (quoted && lines[i].trim() === ':::') {
       quoted = false;
+      indent = '';
     } else {
       if (!quoted && lines[i].startsWith('# ')) titled = true;
-      emit(lines[i].replace(LINK, (_, target: string) => `](${link(page.path, target, links)})`));
+      emit(
+        lines[i]
+          .replace(LINK, (_, target: string, title = '') => `](${rewrite(target)}${title})`)
+          .replace(DEFINITION, (_, head: string, target: string) => head + rewrite(target)),
+      );
     }
   }
   if (!titled) out.unshift(`# ${page.title}`, '');

@@ -24,11 +24,11 @@ const TSC = createRequire(import.meta.url)
 const BASE = fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url));
 const DIAGNOSTIC = /^(?:.*[\\/])?(\d+)\.ts\((\d+),(\d+)\): error (TS\d+): (.*)$/;
 
-/** The fences whose info string starts with the word `ts`. */
+/** The `ts` fences: the info string's leading language name, as VitePress reads it, is `ts`. */
 export function extractSnippets(md: string, file: string): Snippet[] {
   const lines = md.split('\n');
   return fences(lines)
-    .filter((fence) => fence.info.split(/\s/)[0] === 'ts')
+    .filter((fence) => /^[\w-]*/.exec(fence.info)![0] === 'ts')
     .map((fence) => ({
       file,
       mdLine: fence.open + 1,

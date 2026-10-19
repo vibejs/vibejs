@@ -92,6 +92,30 @@ describe('loadSource', () => {
     writeFileSync(join(tmp, 'q.md'), "---\ntitle: 'It''s here'\n- not a key\n---\n");
     expect(loadSource(tmp)[0].title).toBe("It's here");
   });
+
+  it('drops trailing frontmatter comments', () => {
+    const yaml = 'title: "Say \\"hi\\"" # c\ndescription: plain # c\nx: # c';
+    writeFileSync(join(tmp, 'c.md'), `---\n${yaml}\n---\n`);
+    expect(loadSource(tmp)[0]).toMatchObject({ title: 'Say "hi"', description: 'plain' });
+  });
+
+  it.each([
+    ['a block scalar', 'description: >\n  Folded text.', 'description: >'],
+    ['an unclosed quote', "title: 'open", "title: 'open"],
+    ['an escape JSON lacks', 'title: "\\x41"', 'title: \\"\\\\x41\\"'],
+  ])('throws on %s, naming the file and line', (_, yaml, line) => {
+    mkdirSync(join(tmp, 'guides'));
+    writeFileSync(join(tmp, 'guides/bad.md'), `---\n${yaml}\n---\n`);
+    expect(() => loadSource(tmp)).toThrow(`guides/bad.md: invalid frontmatter line "${line}"`);
+  });
+
+  it('takes the fallback title from the first `# ` line outside fences', () => {
+    const fenced = 'Install:\n\n```sh\n# install it\npnpm add x\n```\n';
+    writeFileSync(join(tmp, 'a.md'), fenced);
+    writeFileSync(join(tmp, 'b.md'), `${fenced}\n# Real\n`);
+    expect(loadSource(tmp).map((p) => p.title)).toEqual(['a', 'Real']);
+    expect(toAgentMarkdown(loadSource(tmp)[0], 'package')).toMatch(/^# a\n/);
+  });
 });
 
 describe('stripCut', () => {
@@ -156,6 +180,20 @@ describe('toAgentMarkdown', () => {
       '# A\n\n::: tip\n```ts\n// ---cut---\nx;\n```\n:::\n\n```ts\nopen',
       'site',
       '# A\n\n> **Tip:**\n> ```ts\n> x;\n> ```\n\n```ts\nopen\n',
+    ],
+    [
+      'quotes an indented or unspaced container, keeping the indent',
+      'a',
+      '# A\n\n- item\n\n  ::: tip\n  Indented.\n\n Less.\n  :::\n\n:::warning  Careful\nW.\n:::\n',
+      'site',
+      '# A\n\n- item\n\n  > **Tip:**\n  > Indented.\n  >\n  > Less.\n\n> **Careful:**\n> W.\n',
+    ],
+    [
+      'rewrites links with a title, reference definitions and assets',
+      'guides/a',
+      '# A\n\nSee [x](/server/x "T"), ![d](./d.png) and [ref].\n\n[ref]: /server/y\n',
+      'package',
+      '# A\n\nSee [x](../server/x.md "T"), ![d](https://vibejs.org/v0/guides/d.png) and [ref].\n\n[ref]: ../server/y.md\n',
     ],
     [
       'makes internal links absolute in site mode',

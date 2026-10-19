@@ -11,6 +11,9 @@ describe('extractSnippets', () => {
   it.each<[string, string, Pick<Snippet, 'mdLine' | 'code'>[]]>([
     ['a ts fence', '# T\n\n```ts\nconst a = 1;\n```\n', [{ mdLine: 3, code: 'const a = 1;' }]],
     ['meta after ts', '```ts {2}\na;\nb;\n```', [{ mdLine: 1, code: 'a;\nb;' }]],
+    ['highlighted lines without a space', '```ts{2}\na;\n```', [{ mdLine: 1, code: 'a;' }]],
+    ['line numbers', '```ts:line-numbers {1}\na;\n```', [{ mdLine: 1, code: 'a;' }]],
+    ['a title', '```ts [a.ts]\na;\n```', [{ mdLine: 1, code: 'a;' }]],
     ['a tilde fence', '~~~ts\na;\n~~~', [{ mdLine: 1, code: 'a;' }]],
     [
       'a longer closing fence, not a shorter or other marker or an info string',
