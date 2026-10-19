@@ -9,7 +9,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CatalogEntry } from '../catalog.gen.ts';
 import type { Ctx, ExecResult } from '../ctx.ts';
 import { exitCode, type CheckDiagnostic, type CheckResult } from '../output.ts';
@@ -104,6 +104,7 @@ async function run(
     },
     out: () => {},
     err: () => {},
+    untilSignal: vi.fn<Ctx['untilSignal']>(),
   };
   const r = await check.run({ values, positionals: [] }, ctx);
   return { r, calls };
@@ -527,6 +528,7 @@ it('times each step and the whole run with ctx.now', async () => {
     },
     out: () => {},
     err: () => {},
+    untilSignal: vi.fn<Ctx['untilSignal']>(),
   };
   const r: CheckResult = await check.run({ values: { only: 'types' }, positionals: [] }, ctx);
   expect(calls).toHaveLength(1);

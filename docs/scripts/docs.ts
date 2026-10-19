@@ -229,7 +229,8 @@ interface HelpJson {
   }[];
 }
 
-const cell = (text: string): string => text.replaceAll('|', '\\|');
+// `<` would open an HTML tag in the rendered page.
+const cell = (text: string): string => text.replaceAll('|', '\\|').replaceAll('<', '&lt;');
 const optionTable = (options: readonly HelpOption[]): string[] => [
   '| Option | Type | Description |',
   '| --- | --- | --- |',

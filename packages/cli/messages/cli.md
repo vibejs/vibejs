@@ -54,6 +54,59 @@ The first word after `vibejs` must be a command, and every option must belong to
 - Check the spelling: a code is `VIBE` followed by four digits.
 - Update the vibe.js packages in this project if the code comes from a newer version.
 
+## VIBE8201: Project layout incomplete
+
+> `{path}` is missing; `vibejs {command}` expects `ui/index.html`, `server/src/app.module.ts` and `server/src/main.ts`.
+
+`vibejs dev` and `vibejs build` work on a full-stack project: the UI in `ui/`, the server in `server/` and the shared contracts in `contracts/`, all in one package. The UI starts at `ui/index.html`, the server application is `AppModule` in `server/src/app.module.ts`, and `server/src/main.ts` starts it in production.
+
+### Fix
+
+- Run `vibejs {command}` from a project created with `create-vibejs`.
+- Create `{path}` as in the project template.
+
+## VIBE8202: Invalid app module
+
+> `server/src/app.module.ts` must export `AppModule` (a module class) and `appOptions` (an object); found {found}.
+
+`vibejs dev` loads `server/src/app.module.ts` and creates the application from its `AppModule` export, a class decorated with `@Module()`, and its `appOptions` export, such as `{ basePath: '/api' }`. Until the module has both exports, every request under the API base path is answered with a 503 problem response, and the dev server keeps running.
+
+### Fix
+
+- Export `AppModule` and `appOptions` as in the template.
+
+## VIBE8203: Backend failed to start
+
+> The backend failed to start: {reason}.
+
+Loading the server modules or creating the application threw. The dev server keeps serving the UI, answers every request under the API base path with a 503 problem response, and records the error with its stack in `.vibejs/dev.log`, where `vibejs errors` finds it. The backend restarts when a file under `server/` or `contracts/` changes.
+
+### Fix
+
+- Fix the error at the logged location; the backend restarts on save.
+- Run `vibejs errors` to see the error with its stack.
+
+## VIBE8204: Port in use
+
+> Port {port} is already in use.
+
+`vibejs dev --port <port>` uses exactly that port and does not try another one.
+
+### Fix
+
+- Pass `--port <free port>` or stop the other process.
+- Run `vibejs dev` without `--port` to let it pick a free port.
+
+## VIBE8205: Empty base path
+
+> `appOptions.basePath` in `server/src/app.module.ts` is empty.
+
+`vibejs dev` serves the UI and the backend on one port: the UI at the root and the backend under `appOptions.basePath`. With an empty base path the backend would answer every request, including the UI's. Until the base path is set, every request under the previous base path (`/api` before the first start) is answered with a 503 problem response.
+
+### Fix
+
+- Set a base path such as `basePath: '/api'` in `appOptions`, as in the template.
+
 ## VIBE8301: Unreadable tool output
 
 > `{tool}` exited with code {exitCode} and output that vibejs check cannot read.
@@ -84,3 +137,13 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 ### Fix
 
 - Run `vibejs check --fix`.
+
+## VIBE8304: Build failed
+
+> Building the {part} failed: {reason}.
+
+`vibejs build` builds the UI into `ui/dist`, then the server into `server/dist/main.js`. The reason holds the error code, location and message of the first build error.
+
+### Fix
+
+- Fix the reported error and run `vibejs build` again.

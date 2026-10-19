@@ -7,8 +7,9 @@ export default {
     '.': { entry: ['scripts/*.ts'] },
     'packages/*': {},
     'packages/cli': {
-      // Run, never imported, by the check tool-contract test from packages/cli/node_modules.
-      ignoreDependencies: ['oxlint', 'oxfmt'],
+      // Run, never imported, by the check tool-contract test from packages/cli/node_modules;
+      // the contract package is imported only by the dev fixture app.
+      ignoreDependencies: ['oxlint', 'oxfmt', '@vibejs-org/contract'],
     },
     'packages/language-tools': {
       // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.

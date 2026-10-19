@@ -98,3 +98,26 @@ describe('exec', () => {
     expect((await ctx.exec(join(tmpdir(), 'vibejs-no-such-program'), [], { cwd })).code).toBe(1);
   });
 });
+
+describe('untilSignal', () => {
+  it.each(['SIGINT', 'SIGTERM'] as const)(
+    'resolves on a real %s and then removes both listeners',
+    async (signal) => {
+      // Set aside, so the runner's own signal listeners never see the emitted signal.
+      const others = { SIGINT: process.listeners('SIGINT'), SIGTERM: process.listeners('SIGTERM') };
+      process.removeAllListeners('SIGINT').removeAllListeners('SIGTERM');
+      try {
+        const waiting = nodeCtx().untilSignal();
+        expect([process.listenerCount('SIGINT'), process.listenerCount('SIGTERM')]).toEqual([1, 1]);
+        // Node passes the signal name to its listeners.
+        process.emit(signal, signal);
+        expect(await waiting).toBe(signal);
+        expect([process.listenerCount('SIGINT'), process.listenerCount('SIGTERM')]).toEqual([0, 0]);
+      } finally {
+        for (const [name, listeners] of Object.entries(others)) {
+          for (const listener of listeners) process.on(name, listener);
+        }
+      }
+    },
+  );
+});
