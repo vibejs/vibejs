@@ -111,9 +111,12 @@ export class ComponentInstance {
   }
 }
 
-/** An HMR record: the def a `.vibe` module exported first, and its live instances. */
+/**
+ * An HMR record: every def registered under the id (each re-executed `.vibe` module exports a new
+ * def object, and hidden components are created later from any of them) and the live instances.
+ */
 export interface HmrRecord {
-  readonly def: ComponentDef;
+  readonly defs: Set<ComponentDef>;
   readonly instances: Set<ComponentInstance>;
 }
 
