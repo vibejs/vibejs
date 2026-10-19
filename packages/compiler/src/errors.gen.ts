@@ -33,9 +33,11 @@ const MESSAGES = {
   VIBE1125: ["An interpolation has no closing braces.","Close the interpolation with two closing braces after the expression.","Wrap the text in `<span v-pre>` to show the braces as literal text."],
   VIBE1126: ["The attribute `{name}` is a directive without a name.","Write the directive name after `v-`, as in `v-if=\"ok\"`.","Remove the attribute."],
   VIBE1127: ["The dynamic argument has no closing `]`.","Close the argument with `]`.","Remove the spaces from the argument, or compute the name in the script."],
+  VIBE4001: ["The CSS of a scoped style block has a syntax error: {reason}.","Close the block, string, comment or bracket that starts at the reported position.","Write a declaration as `property: value;` inside a rule."],
   VIBE4002: ["`{selector}` is not supported in component styles.","Style the slot content in the `<style scoped>` block of the component that passes it.","Wrap the selector in `:global()` to write a global rule."],
   VIBE4003: ["`v-bind()` is not supported in component styles.","Set a CSS custom property such as `--color` with `:style` in the template, and read it with `var(--color)`.","Bind a class or style in the template with `:class` or `:style`."],
   VIBE4004: ["`{selector}` is not supported in component styles.","Write `:deep(.child)` to style `.child` inside child components.","Write `:global(.name)` for a rule that is not scoped."],
+  VIBE4005: ["{escape} needs exactly one selector as its argument.","Wrap exactly one selector, such as `:deep(.child)` or `:global(.theme-dark)`.","Split a list into one escape per selector, such as `:deep(.a), :deep(.b)`."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);
