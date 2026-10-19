@@ -1,4 +1,9 @@
-import type { resolveComponentTag } from '@vibejs-org/compiler';
+import type {
+  compile,
+  CompileOptions,
+  CompileResult,
+  resolveComponentTag,
+} from '@vibejs-org/compiler';
 import { expectTypeOf } from 'vitest';
 import type {
   analyzeScript,
@@ -160,4 +165,17 @@ expectTypeOf<typeof analyzeScript>().toEqualTypeOf<(d: SFCDescriptor) => ScriptA
 // The C5 signature, read through the package name as language tools import it.
 expectTypeOf<typeof resolveComponentTag>().toEqualTypeOf<
   (tag: string, a: ScriptAnalysis, filename: string) => string | null
+>();
+
+// The CV5 signature of compile(), read through the package name.
+expectTypeOf<CompileOptions>().toEqualTypeOf<{ filename: string; id: string; dev: boolean }>();
+expectTypeOf<CompileResult>().toEqualTypeOf<{
+  code: string;
+  map: SourceMapV3 | null;
+  descriptor: SFCDescriptor;
+  styles: { index: number; scoped: boolean; lang: StyleLang }[];
+  diagnostics: Diagnostic[];
+}>();
+expectTypeOf<typeof compile>().toEqualTypeOf<
+  (source: string, options: CompileOptions) => CompileResult
 >();

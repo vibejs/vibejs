@@ -1,6 +1,9 @@
 import type { Op, Ref, Step } from './ir.ts';
 
-/** A node of an emitted template. `ref` is set on the nodes that render code reaches. */
+/**
+ * A node of an emitted template. `ref` is set on the nodes that render code reaches; `loc` is the
+ * file offset of an element or of the first node of a text run.
+ */
 export type HNode =
   | {
       kind: 'el';
@@ -9,8 +12,9 @@ export type HNode =
       children: HNode[];
       void: boolean;
       ref?: Ref;
+      loc?: number;
     }
-  | { kind: 'text'; text: string; ref?: Ref }
+  | { kind: 'text'; text: string; ref?: Ref; loc?: number }
   | { kind: 'anchor'; ref?: Ref };
 
 // The escapes of the HTML serializer, so that a template string re-serializes unchanged.
@@ -61,7 +65,13 @@ export function walks(root: HNode & { ref: Ref }): Op[] {
       parents.set(child, node);
       if (child.ref !== undefined) {
         const { from, steps } = path(child);
-        ops.push({ op: 'walk', id: child.ref, from, steps });
+        ops.push({
+          op: 'walk',
+          id: child.ref,
+          from,
+          steps,
+          loc: 'loc' in child ? child.loc : undefined,
+        });
       }
       visit(child);
     }

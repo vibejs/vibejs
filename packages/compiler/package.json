@@ -46,6 +46,7 @@
     "build": "tsdown"
   },
   "dependencies": {
+    "@jridgewell/gen-mapping": "catalog:",
     "@vibejs-org/errors": "workspace:*",
     "entities": "catalog:",
     "magic-string": "catalog:",
@@ -55,6 +56,7 @@
   },
   "devDependencies": {
     "@jridgewell/trace-mapping": "catalog:",
+    "@vibejs-org/ui": "workspace:*",
     "tsdown": "catalog:"
   },
   "engines": {
