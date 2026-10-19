@@ -199,7 +199,11 @@ describe('provide and inject', () => {
 
     it('should be true within setup', () => {
       expect.assertions(1);
-      render(comp(() => expect(hasInjectionContext()).toBe(true)));
+      render(
+        comp(() => {
+          expect(hasInjectionContext()).toBe(true);
+        }),
+      );
     });
 
     it('should be true within app.runWithContext()', () => {

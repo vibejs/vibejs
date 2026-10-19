@@ -497,6 +497,14 @@ describe('error routing', () => {
     });
   });
 
+  test('the handle passed to the error handler carries the file of the component', () => {
+    const files: unknown[] = [];
+    const app = createApp({ ...failing('setup'), __file: 'src/Failing.vibe' });
+    app.config.errorHandler = (_err, instance) => files.push(instance?.file);
+    app.mount(document.createElement('div'));
+    expect(files).toEqual(['src/Failing.vibe']);
+  });
+
   test('without an app handler, an error is logged as VIBE5102 with its info', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mount({

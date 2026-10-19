@@ -11,6 +11,8 @@
           "__DEV__",
           "__defaults",
           "__emits",
+          "__file",
+          "__hmrId",
           "__propKeys",
           "__scopeId",
           "__v_isRef",

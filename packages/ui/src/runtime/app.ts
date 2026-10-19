@@ -22,6 +22,8 @@ import { flushPostFlushCbs } from './scheduler.ts';
 export interface ComponentHandle {
   readonly uid: number;
   readonly name?: string;
+  /** Dev only: the source file of the component, such as `src/App.vibe`. */
+  readonly file?: string;
   readonly parent: ComponentHandle | null;
 }
 
@@ -125,9 +127,21 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
       el.textContent = '';
       const props: RawProps = {};
       for (const key in rootProps) props[key] = () => rootProps[key];
-      instance = scope.run(() => createRootComponent(root, props, context))!;
-      insert(instance, el);
-      flushPostFlushCbs();
+      let rootScope: EffectScopeImpl;
+      const render = (): ComponentInstance => {
+        rootScope = scope.run(() => new EffectScopeImpl())!;
+        const created = rootScope.run(() => createRootComponent(root, props, context))!;
+        insert(created, el);
+        flushPostFlushCbs();
+        return created;
+      };
+      instance = render();
+      const remount = (): void => {
+        rootScope.stop();
+        removeNodes(instance!);
+        instance = render();
+      };
+      context.remount = __DEV__ ? remount : undefined;
       exposed = proxyRefs(instance.exposed ?? {});
       return exposed;
     },

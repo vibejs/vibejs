@@ -2,11 +2,18 @@
 import { vibeError } from '../errors.gen.ts';
 import type { ComponentDef } from '../internal.ts';
 import { setActiveSub } from '../reactivity/core.ts';
-import { onScopeDispose } from '../reactivity/effectScope.ts';
+import { EffectScopeImpl, onScopeDispose } from '../reactivity/effectScope.ts';
 import { proxyRefs } from '../reactivity/ref.ts';
 import { isObject } from '../shared.ts';
 import { warn } from '../warn.ts';
-import { createSwitch, SwitchFragment, type Block } from './block.ts';
+import {
+  createSwitch,
+  firstNode,
+  insert,
+  removeNodes,
+  SwitchFragment,
+  type Block,
+} from './block.ts';
 import { setDynamicProps } from './dom.ts';
 import { handleError } from './errorHandling.ts';
 import {
@@ -14,6 +21,7 @@ import {
   ComponentInstance,
   currentInstance,
   currentParent,
+  hmrRecords,
   withInstance,
   type AppContext,
 } from './instance.ts';
@@ -70,8 +78,8 @@ function setupComponent(instance: ComponentInstance): ComponentInstance {
       instance.exposed = exposed;
     },
   };
-  const prevSub = setActiveSub(undefined);
-  try {
+  if (__DEV__ && def.__hmrId) hmrRecords.get(def.__hmrId)?.instances.add(instance);
+  untracked(() =>
     withInstance(instance, () =>
       instance.scope.run(() => {
         let state: Record<string, unknown> | void;
@@ -84,26 +92,60 @@ function setupComponent(instance: ComponentInstance): ComponentInstance {
         if (state instanceof Promise) {
           throw vibeError('VIBE5204', { name: instance.name ?? 'Anonymous' });
         }
-        let block: Block;
-        try {
-          block = def.render(proxyRefs(state ?? {}), instance.props, instance.ctx);
-        } catch (err) {
-          handleError(err, instance, 'render effect');
-          return;
-        }
-        instance.block = block;
-        decorateRoot(instance);
+        instance.setupState = proxyRefs(state ?? {});
+        renderComponent(instance);
       }),
-    );
+    ),
+  );
+  return instance;
+}
+
+/** Runs `fn` with no active subscriber, so that what it reads is not tracked. */
+function untracked(fn: () => void): void {
+  const prevSub = setActiveSub(undefined);
+  try {
+    fn();
   } finally {
     setActiveSub(prevSub);
   }
-  return instance;
+}
+
+/** Runs the render of `instance` in a new render scope and decorates its root. */
+function renderComponent(instance: ComponentInstance): void {
+  const scope = instance.scope.run(() => new EffectScopeImpl())!;
+  instance.renderScope = scope;
+  scope.run(() => {
+    try {
+      instance.block = instance.def.render(instance.setupState, instance.props, instance.ctx);
+    } catch (err) {
+      instance.block = document.createComment('');
+      handleError(err, instance, 'render effect');
+      return;
+    }
+    decorateRoot(instance);
+  });
+}
+
+/**
+ * HMR: renders `instance` again with the current `def.render` and the same setup state, props and
+ * context, and puts the new block where the old one was. Child components are created again.
+ */
+export function rerenderComponent(instance: ComponentInstance): void {
+  if (instance.isUnmounted) return;
+  const old = instance.block;
+  instance.renderScope?.stop();
+  untracked(() => withInstance(instance, () => renderComponent(instance)));
+  const anchor = firstNode(old);
+  if (anchor?.parentNode) insert(instance.block, anchor.parentNode, anchor);
+  removeNodes(old);
 }
 
 /** Unmounts `instance`: `beforeUnmount` hooks, then its scope stops (and with it its children), then `unmounted` hooks are queued. */
 function unmountComponent(instance: ComponentInstance): void {
   callHooks(instance, 'beforeUnmount');
+  if (__DEV__ && instance.def.__hmrId) {
+    hmrRecords.get(instance.def.__hmrId)?.instances.delete(instance);
+  }
   instance.scope.stop();
   instance.isUnmounted = true;
   queuePostFlushCb(() => callHooks(instance, 'unmounted'));

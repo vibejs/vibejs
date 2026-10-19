@@ -1,0 +1,19 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui';
+import Badge from './Badge.vibe';
+
+const count = ref(0);
+</script>
+
+<template>
+  <div class="hmr">
+    <button type="button" @click="count++">{{ count }}</button>
+    <Badge />
+  </div>
+</template>
+
+<style scoped>
+.hmr {
+  display: flex;
+}
+</style>
