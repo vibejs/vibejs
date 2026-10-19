@@ -90,6 +90,38 @@ describe('install', () => {
     expect(router.currentRoute.value.fullPath).toBe('/');
   });
 
+  it('keeps a push made before install as the first navigation', async () => {
+    const { router } = setup();
+    const pushed = router.push('/a');
+    mountComposable(() => {}, { plugins: [router] });
+    await expect(pushed).resolves.toBeUndefined();
+    expect(router.currentRoute.value.fullPath).toBe('/a');
+  });
+
+  it('starts the first navigation once when a second app installs while it is pending', async () => {
+    const { router } = setup([{ path: '/', component: async () => page('home') }]);
+    const guard = vi.fn<NavigationGuard>();
+    router.beforeEach(guard);
+    const after = vi.fn<() => void>();
+    router.afterEach(after);
+    mountComposable(() => {}, { plugins: [router] });
+    mountComposable(() => {}, { plugins: [router] });
+    await router.isReady();
+    expect(guard).toHaveBeenCalledOnce();
+    expect(after).toHaveBeenCalledOnce();
+  });
+
+  it('starts the first navigation on install after an earlier push failed', async () => {
+    const { history, router } = setup();
+    history.push('/a');
+    const stop = router.beforeEach(() => false);
+    await router.push('/users/1');
+    stop();
+    mountComposable(() => {}, { plugins: [router] });
+    await router.isReady();
+    expect(router.currentRoute.value.fullPath).toBe('/a');
+  });
+
   it('reports an error of the first navigation to onError and isReady()', async () => {
     const { router } = setup();
     const error = new Error('guard');

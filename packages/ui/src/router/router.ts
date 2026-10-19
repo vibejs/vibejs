@@ -158,6 +158,8 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
   ready.catch(() => {});
   /** Counts navigations: a navigation is cancelled once a newer one starts. */
   let navigations = 0;
+  /** The latest navigation that settled: a navigation is in flight while it trails `navigations`. */
+  let settled = 0;
   /** The history steps taken by history-driven navigations since `currentRoute` was committed. */
   let offset = 0;
   let unlisten: (() => void) | undefined;
@@ -262,6 +264,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       rejectReady(error);
       throw error;
     } finally {
+      if (id === navigations) settled = id;
       if (!installed) listen();
     }
   }
@@ -327,7 +330,10 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       });
       listen();
       // It replaces the entry the page was loaded with, and reports its errors to onError and isReady().
-      if (currentRoute.value === START_LOCATION) navigate(history.location, true).catch(() => {});
+      // A navigation in flight, from an earlier push or install, is the first one already.
+      if (currentRoute.value === START_LOCATION && settled === navigations) {
+        navigate(history.location, true).catch(() => {});
+      }
     },
     currentRoute,
     push: (to) => navigate(to, false),
