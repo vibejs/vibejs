@@ -407,8 +407,7 @@ function handler(dir: DirectiveNode, p: Props, isLoose = false): void {
  * Native `v-model`: the value key (`checked` for a checkbox), then a write of what the element
  * yields: a string (a number with `.number` or `type="number"`), or for a checkbox or a multiple
  * select the target itself, checked against the values it can hold. On a component: `x: m` (a
- * kebab name camelized),
- * `'onUpdate:x'` writing `m`, and `xModifiers`.
+ * kebab name camelized), `'onUpdate:x'` writing `m`, and `xModifiers`.
  */
 function model(dir: DirectiveNode, p: Props, el: ElementNode): void {
   const { w, locals } = p;
