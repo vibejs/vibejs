@@ -519,6 +519,13 @@ describe('rule 11: email addresses', () => {
     expect(lint({ 'pnpm-lock.yaml': notice })).toEqual([]);
   });
 
+  it('skips the address on the copyright line of a license notice', () => {
+    const notice = `Copyright 2010, Jane Doe <${address('jane', 'corp.io')}>. All rights reserved.\n`;
+    expect(
+      lint({ 'src/a.ts': `// ${notice}`, 'NOTICE.md': `x ${address('jane', 'corp.io')}` }),
+    ).toEqual(['NOTICE.md:1:3 email no email addresses; link a GitHub page instead']);
+  });
+
   it('still reports an address on any other pnpm-lock.yaml line', () => {
     const resolution = `    resolution: {tarball: https://${address('jane.doe', 'corp.io')}/x.tgz}\n`;
     expect(lint({ 'pnpm-lock.yaml': resolution })).toEqual([

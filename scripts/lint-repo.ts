@@ -425,6 +425,8 @@ export function main(root: string): number {
       // The lockfile copies registry deprecation notices verbatim, maintainer addresses included.
       const line = text.slice(text.lastIndexOf('\n', match.index) + 1, match.index);
       if (file === 'pnpm-lock.yaml' && /^\s+deprecated: /.test(line)) continue;
+      // A license notice keeps its copyright line verbatim, the holder's address included.
+      if (/\bCopyright\b/.test(line)) continue;
       report(file, text, match.index, 'email', 'no email addresses; link a GitHub page instead');
     }
     if (POSITIONING_FILES.test(file)) continue;
