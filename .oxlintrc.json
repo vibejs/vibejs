@@ -155,6 +155,10 @@
               {
                 "group": ["@vibejs-org/server/*", "node:*"],
                 "message": "ui code must not import the server or Node modules; share contracts instead."
+              },
+              {
+                "regex": "^(?:\\.\\./)+server(?:/|$)",
+                "message": "ui code must not import the app's server code; share contracts instead."
               }
             ]
           }
@@ -176,8 +180,8 @@
             ],
             "patterns": [
               {
-                "group": ["*", "!@vibejs-org/contract", "!valibot"],
-                "message": "contracts import only @vibejs-org/contract and valibot."
+                "group": ["*", "!./*", "!@vibejs-org/contract", "!valibot"],
+                "message": "contracts import only ./*, @vibejs-org/contract and valibot."
               }
             ]
           }
