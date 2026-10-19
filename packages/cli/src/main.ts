@@ -10,6 +10,7 @@ import {
   envelopeError,
   errorText,
   exitCode,
+  type CheckResult,
   type CommandHelp,
   type HelpResult,
   type JsonEnvelope,
@@ -154,8 +155,12 @@ function wantsJson(argv: string[]): boolean {
 export async function main(argv: string[], ctx: Ctx): Promise<0 | 1 | 2> {
   const [result, human] = await dispatch(argv, ctx);
   if (wantsJson(argv) || ctx.agent.active) ctx.out(`${JSON.stringify(result)}\n`);
-  // A failure without an error (a check with diagnostics) is a result for people too.
-  else if (result.ok || !result.error) ctx.out(`${human!()}\n`);
-  else ctx.err(`${errorText(result)}\n`);
+  else {
+    // A failure without an error (a check with diagnostics) is a result for people too, and so are
+    // the diagnostics of a check with an error (a crashed tool), which then follows on stderr.
+    const diagnostics = (result as Partial<CheckResult>).diagnostics?.length;
+    if (result.ok || !result.error || diagnostics) ctx.out(`${human!()}\n`);
+    if (result.error) ctx.err(`${errorText(result)}\n`);
+  }
   return exitCode(result);
 }

@@ -1,7 +1,15 @@
 // The tool contract: the pinned real tools (tsc from catalog:ts-next, oxlint, oxfmt, vitest with
 // coverage-v8) run through the built bin on copies of test/fixtures/broken and clean.
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,7 +82,7 @@ it('passes clean/ with full coverage', { timeout: 60_000 }, () => {
 });
 
 it(
-  'keeps coverage below 100% a warning when the thresholds opt-in fails vitest',
+  'keeps coverage below 100% a warning with the thresholds opt-in on',
   {
     timeout: 60_000,
   },
@@ -96,6 +104,34 @@ it(
     expect(r.steps.coverage.filesBelow100).toBe(1);
   },
 );
+
+it('fails a vitest run with a leaked rejection and no failed test', { timeout: 60_000 }, () => {
+  const dir = copy('clean');
+  writeFileSync(
+    join(dir, 'src/leak.test.ts'),
+    "import { it } from 'vitest';\n\nit('leaks', async () => {\n  void Promise.reject(new Error('leaked'));\n  await new Promise((r) => setTimeout(r, 10));\n});\n",
+  );
+  const { status, r } = check(dir, '--only', 'test');
+  expect(status).toBe(1);
+  expect(r.ok).toBe(false);
+  expect(r.diagnostics.map((d) => [d.source, d.code, d.file])).toEqual([
+    ['vitest', 'test-failed', ''],
+  ]);
+  expect(r.diagnostics[0].message).toContain('leaked');
+});
+
+it('reads the reports of a vitest config with its own root', { timeout: 60_000 }, () => {
+  const dir = copy('clean');
+  writeFileSync(
+    join(dir, 'vitest.config.ts'),
+    "import { defineConfig } from 'vitest/config';\n\nexport default defineConfig({\n  test: {\n    root: 'src',\n    include: ['**/*.test.ts'],\n    coverage: { provider: 'v8', include: ['**/*.ts'] },\n  },\n});\n",
+  );
+  const { status, r } = check(dir, '--only', 'test');
+  expect(r.diagnostics).toEqual([]);
+  expect(status).toBe(0);
+  expect(r.steps.tests).toMatchObject({ status: 'passed', passed: 2 });
+  expect(existsSync(join(dir, 'src/.vibejs'))).toBe(false);
+});
 
 it('--fix leaves no format and no fixable lint diagnostics', { timeout: 60_000 }, () => {
   const dir = copy('broken');

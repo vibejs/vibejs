@@ -30,7 +30,8 @@ const TOOLS: Record<StepName, [pkg: string, bin: string][]> = {
 };
 
 const OUT = '.vibejs/check';
-const ARGS: Record<StepName, string[]> = {
+/** The arguments of each step. Report paths are absolute: Vitest resolves them against its own `root`. */
+const args = (root: string): Record<StepName, string[]> => ({
   types: ['-b', '--pretty', 'false', '--runExternalCode'],
   lint: ['--format', 'json'],
   format: ['--list-different'],
@@ -39,13 +40,19 @@ const ARGS: Record<StepName, string[]> = {
     '--coverage',
     '--includeTaskLocation',
     '--reporter=json',
-    `--outputFile.json=${OUT}/vitest.json`,
+    // The JSON report omits unhandled errors; this reporter prints them on stderr.
+    '--reporter=dot',
+    `--outputFile.json=${join(root, OUT, 'vitest.json')}`,
     '--coverage.reporter=json',
-    `--coverage.reportsDirectory=${OUT}/coverage`,
+    `--coverage.reportsDirectory=${join(root, OUT, 'coverage')}`,
     // Coverage is still written when a test fails.
     '--coverage.reportOnFailure',
+    // C9: below 100% is a VIBE8302 warning, so the user's thresholds never fail the run.
+    ...['100=false', 'lines=0', 'functions=0', 'branches=0', 'statements=0'].map(
+      (t) => `--coverage.thresholds.${t}`,
+    ),
   ],
-};
+});
 
 /** TypeScript 7.1 runs content mappers; a 7.1 nightly (`7.1.0-dev.*`) passes. */
 const tsTooOld = (version: string) => {
@@ -93,20 +100,26 @@ const sourceLine = (root: string, d: CheckDiagnostic) =>
 
 const ZERO = { line: 0, character: 0 };
 
-/** The VIBE8301 error of a tool whose output did not parse, and its diagnostic with 40 lines of that output. */
-function unreadable(tool: string, r: ExecResult): [VibeError, CheckDiagnostic] {
-  const e = vibeError('VIBE8301', { tool, exitCode: r.code });
-  const output = (r.stderr.trim() || r.stdout.trim()).split(/\r?\n/).slice(0, 40).join('\n');
-  const d: CheckDiagnostic = {
-    source: 'vibejs',
-    code: 'VIBE8301',
+/** The first 40 lines of a tool's output: stderr, or stdout when stderr is empty. */
+const output = (r: ExecResult) =>
+  (r.stderr.trim() || r.stdout.trim()).split(/\r?\n/).slice(0, 40).join('\n');
+
+/** An error diagnostic without a location. */
+const unplaced = (source: CheckDiagnostic['source'], code: string, message: string) =>
+  ({
+    source,
+    code,
     severity: 'error',
     file: '',
     loc: '',
     range: { start: ZERO, end: ZERO },
-    message: `${envelopeError(e).message}\n${output}`,
-  };
-  return [e, d];
+    message,
+  }) satisfies CheckDiagnostic;
+
+/** The VIBE8301 error of a tool whose output did not parse, and its diagnostic with 40 lines of that output. */
+function unreadable(tool: string, r: ExecResult): [VibeError, CheckDiagnostic] {
+  const e = vibeError('VIBE8301', { tool, exitCode: r.code });
+  return [e, unplaced('vibejs', 'VIBE8301', `${envelopeError(e).message}\n${output(r)}`)];
 }
 
 /** A step over its diagnostics; `undefined` diagnostics mean it did not run. */
@@ -167,22 +180,25 @@ export const check: CommandDef<CheckResult> = {
     for (const s of STEPS.filter((name) => only.includes(name))) {
       for (const [pkg, bin] of TOOLS[s]) {
         const tool = resolveTool(root, pkg, bin);
-        if (!tool || (pkg === 'typescript' && tsTooOld(tool.version))) missing.push(pkg);
-        else if (bin) bins[s] = tool.bin;
+        if (!tool || (bin && !tool.bin) || (pkg === 'typescript' && tsTooOld(tool.version))) {
+          missing.push(pkg);
+        } else if (bin) bins[s] = tool.bin;
       }
     }
     if (missing.length) {
-      // ponytail: `typescript@next` until TypeScript 7.1 is stable, then plain `typescript`.
+      // TypeScript 7.1 is only on the next tag until it is stable; then install plain `typescript`.
       const pkgs = missing.map((pkg) => (pkg === 'typescript' ? 'typescript@next' : pkg));
       const install = installCommand(packageManager(root), pkgs);
-      const minimum = missing.includes('typescript') ? '7.1' : 'any version';
+      // The 7.1 minimum is TypeScript's alone: name it only when typescript is the one package.
+      const minimum = missing.join() === 'typescript' ? '7.1' : 'the required version';
       const e = vibeError('VIBE8005', { tool: missing.join(', '), minimum, install });
       return failed(ctx, envelopeError(e), [install]);
     }
 
     const start = ctx.now();
-    const exec = (bin: string, args: string[]) =>
-      ctx.exec(process.execPath, [bin, ...args], { cwd: root });
+    const exec = (bin: string, argv: string[]) =>
+      ctx.exec(process.execPath, [bin, ...argv], { cwd: root });
+
     if (values.fix) {
       if (bins.lint) await exec(bins.lint, ['--fix']);
       if (bins.format) await exec(bins.format, ['--write']);
@@ -194,7 +210,7 @@ export const check: CommandDef<CheckResult> = {
         const bin = bins[s];
         if (!bin) return undefined;
         const at = ctx.now();
-        const r = await exec(bin, ARGS[s]);
+        const r = await exec(bin, args(root)[s]);
         return { r, ms: ctx.now() - at };
       }),
     );
@@ -213,7 +229,19 @@ export const check: CommandDef<CheckResult> = {
     const report = tests && parseVitest(read(join(root, OUT, 'vitest.json')), root);
     const totals =
       report && parseCoverage(read(join(root, OUT, 'coverage/coverage-final.json')), root);
-    const vitest = tests && or8301('vitest', tests.r, report?.diagnostics);
+    // Vitest also exits non-zero without a failed test: an unhandled error, or no test files.
+    const failedRun =
+      tests?.r.code && report && !report.diagnostics.length
+        ? [
+            unplaced(
+              'vitest',
+              'test-failed',
+              `\`vitest\` exited with code ${tests.r.code} without a failed test.\n${output(tests.r)}`,
+            ),
+          ]
+        : [];
+    const vitest =
+      tests && or8301('vitest', tests.r, report && [...report.diagnostics, ...failedRun]);
     // Without a test report there is no coverage to read.
     const coverage = tests && report && or8301('vitest', tests.r, totals?.diagnostics);
 
@@ -260,8 +288,9 @@ export const check: CommandDef<CheckResult> = {
     };
   },
   human(r) {
+    // Continuation lines (a tsc message chain, a crashed tool's output) are indented under it.
     const lines = r.diagnostics.map(
-      (d) => `${d.loc}  ${d.severity}  ${d.code}  ${d.message.split('\n', 1)[0]}`,
+      (d) => `${d.loc}  ${d.severity}  ${d.code}  ${d.message.replaceAll('\n', '\n    ')}`,
     );
     if (r.truncated) lines.push(`(${r.truncated.shown} of ${r.truncated.total} diagnostics shown)`);
     for (const [name, { status, errors, warnings, ms, ...counts }] of Object.entries(r.steps)) {

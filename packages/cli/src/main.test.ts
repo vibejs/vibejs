@@ -241,3 +241,17 @@ it('prints a check with diagnostics for people on stdout, with exit 1', async ()
     tscOutput = '';
   }
 });
+
+it('prints a crashed tool for people: its diagnostic with the output on stdout, the error on stderr', async () => {
+  tscOutput = 'Segmentation fault\n';
+  try {
+    const result = await run(['check', '--only', 'types']);
+    expect(result.code).toBe(2);
+    expect(result.stdout).toMatch(
+      /^ {2}error {2}VIBE8301 {2}`tsc` exited .*\n {4}Segmentation fault\ntypes: failed /,
+    );
+    expect(result.stderr).toMatch(/^\[VIBE8301\] `tsc` exited with code 2 /);
+  } finally {
+    tscOutput = '';
+  }
+});

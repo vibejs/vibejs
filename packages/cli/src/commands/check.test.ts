@@ -52,12 +52,13 @@ const result = (stdout: string, code = 0, stderr = ''): ExecResult => ({ code, s
 
 /** Writes the Vitest reports the way `vitest run` does, with /project replaced by the root. */
 const vitestWrites =
-  (report: string | undefined, coverage: string | undefined, code = 1): Reply =>
-  (_, cwd) => {
+  (report: string | undefined, coverage: string | undefined, code = 1, stderr = ''): Reply =>
+  (args, cwd) => {
+    expect(args).toContain(`--outputFile.json=${join(cwd, '.vibejs/check/vitest.json')}`);
     const at = (s: string) => s.replaceAll('/project', JSON.stringify(cwd).slice(1, -1));
     if (report !== undefined) write('.vibejs/check/vitest.json', at(report));
     if (coverage !== undefined) write('.vibejs/check/coverage/coverage-final.json', at(coverage));
-    return result('', code);
+    return result('', code, stderr);
   };
 
 const BROKEN: Record<Tool, Reply> = {
@@ -124,7 +125,7 @@ describe('the recorded output of broken/', () => {
     expect(JSON.stringify(r, null, 2)).toMatchSnapshot();
   });
 
-  it('renders one line per diagnostic and one per step for people', async () => {
+  it('renders each diagnostic with its continuation lines and one line per step for people', async () => {
     const { r } = await run();
     expect(check.human(r)).toMatchSnapshot();
   });
@@ -184,9 +185,19 @@ describe('enrich', () => {
 });
 
 describe('coverage below 100%', () => {
-  it('is a warning only: ok, exit 0, one VIBE8302 per file, also when vitest exits 1', async () => {
-    const vitest = vitestWrites(EMPTY_REPORT, tool('coverage-final.json'), 1);
-    const { r } = await run({}, { ...CLEAN, vitest });
+  it('is a warning only: ok, exit 0, one VIBE8302 per file, with the thresholds off', async () => {
+    const vitest = vitestWrites(EMPTY_REPORT, tool('coverage-final.json'), 0);
+    const { r, calls } = await run({}, { ...CLEAN, vitest });
+    // The user's thresholds opt-in never fails vitest (C9).
+    expect(calls.find(([name]) => name === 'vitest')).toEqual(
+      expect.arrayContaining([
+        '--coverage.thresholds.100=false',
+        '--coverage.thresholds.lines=0',
+        '--coverage.thresholds.functions=0',
+        '--coverage.thresholds.branches=0',
+        '--coverage.thresholds.statements=0',
+      ]),
+    );
     expect(r.ok).toBe(true);
     expect(exitCode(r)).toBe(0);
     expect(r.diagnostics.map((d) => [d.code, d.severity, d.file])).toEqual([
@@ -205,6 +216,21 @@ describe('coverage below 100%', () => {
   });
 });
 
+it('gives a vitest exit without a failed test (an unhandled error) one error and exit 1', async () => {
+  const noise = Array.from({ length: 50 }, (_, i) => `line ${i + 1}`).join('\n');
+  const vitest = vitestWrites(EMPTY_REPORT, '{}', 1, noise);
+  const { r } = await run({ only: 'test' }, { ...CLEAN, vitest });
+  expect(exitCode(r)).toBe(1);
+  expect(r.error).toBeUndefined();
+  expect(r.diagnostics).toHaveLength(1);
+  expect(r.diagnostics[0]).toMatchObject({ source: 'vitest', code: 'test-failed', loc: '' });
+  expect(r.diagnostics[0].message.split('\n')).toEqual([
+    '`vitest` exited with code 1 without a failed test.',
+    ...noise.split('\n').slice(0, 40),
+  ]);
+  expect(r.steps.tests).toMatchObject({ status: 'failed', errors: 1, passed: 2, failed: 0 });
+});
+
 describe('required tools', () => {
   it.each([
     ['vitest', () => rmSync(join(root, 'node_modules/vitest'), { recursive: true }), 'vitest'],
@@ -215,6 +241,7 @@ describe('required tools', () => {
     ],
     ['typescript 7.0.2', () => install('typescript', '7.0.2', 'bin/tsc'), 'typescript@next'],
     ['typescript 6.0.3', () => install('typescript', '6.0.3', 'bin/tsc'), 'typescript@next'],
+    ['oxlint without a bin', () => install('oxlint', '1.88.0'), 'oxlint'],
   ])(
     '%s gives VIBE8005 with the install command, exit 2 and no tool run',
     async (_, setup, pkg) => {
@@ -229,12 +256,14 @@ describe('required tools', () => {
     },
   );
 
-  it('names every missing package and the TypeScript minimum in one error', async () => {
+  it('names every missing package in one error, and the 7.1 minimum for typescript alone', async () => {
     install('typescript', '7.0.2', 'bin/tsc');
+    expect((await run()).r.error!.message).toBe(
+      '`typescript` is missing or older than 7.1; install it with `npm install -D typescript@next`.',
+    );
     rmSync(join(root, 'node_modules/oxlint'), { recursive: true });
-    const { r } = await run();
-    expect(r.error!.message).toBe(
-      '`typescript, oxlint` is missing or older than 7.1; install it with `npm install -D typescript@next oxlint`.',
+    expect((await run()).r.error!.message).toBe(
+      '`typescript, oxlint` is missing or older than the required version; install it with `npm install -D typescript@next oxlint`.',
     );
   });
 
@@ -278,14 +307,14 @@ describe('unreadable tool output', () => {
         tsc: () => result('?', 2),
         oxlint: () => result('not json', 1),
         oxfmt: () => result('', 2),
-        vitest: vitestWrites(EMPTY_REPORT, 'not json', 1),
+        vitest: vitestWrites(EMPTY_REPORT, 'not json', 0),
       },
     );
     expect(r.diagnostics.map((d) => d.message.split('\n'))).toEqual([
       ['`tsc` exited with code 2 and output that vibejs check cannot read.', '?'],
       ['`oxlint` exited with code 1 and output that vibejs check cannot read.', 'not json'],
       ['`oxfmt` exited with code 2 and output that vibejs check cannot read.', ''],
-      ['`vitest` exited with code 1 and output that vibejs check cannot read.', ''],
+      ['`vitest` exited with code 0 and output that vibejs check cannot read.', ''],
     ]);
     expect(r.error!.message).toContain('`tsc`');
     expect(r.steps.coverage.status).toBe('failed');
