@@ -1,0 +1,51 @@
+<script setup lang="ts">
+import { inject, onMounted, ref } from '@vibejs-org/ui';
+import { API } from './api.ts';
+
+const api = inject(API)!;
+
+type Todo = { id: string; title: string; done: boolean };
+
+const items = ref<Todo[]>([]);
+const title = ref('');
+const error = ref<{ code: string } | null>(null);
+
+async function load() {
+  const r = await api.todos.list();
+  if (r.ok) items.value = r.data;
+  else error.value = r.error;
+}
+
+async function add() {
+  const r = await api.todos.create({ body: { title: title.value } });
+  if (r.ok) {
+    items.value = [...items.value, r.data];
+    title.value = '';
+  } else error.value = r.error;
+}
+
+async function toggle(id: string) {
+  const r = await api.todos.toggle({ params: { id } });
+  if (r.ok) items.value = items.value.map((todo) => (todo.id === id ? r.data : todo));
+  else error.value = r.error;
+}
+
+onMounted(() => void load());
+</script>
+
+<template>
+  <section>
+    <form @submit.prevent="add">
+      <input v-model="title" placeholder="What next?" />
+      <button>Add</button>
+    </form>
+    <ul v-if="items.length">
+      <li v-for="todo in items" :key="todo.id">
+        <input type="checkbox" :checked="todo.done" @change="toggle(todo.id)" />
+        {{ todo.title }}
+      </li>
+    </ul>
+    <p v-else>Nothing to do.</p>
+    <p v-if="error" class="error">{{ error.code }}</p>
+  </section>
+</template>

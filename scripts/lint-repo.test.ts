@@ -348,6 +348,19 @@ describe('rule 5: references', () => {
       'packages/ui/tsconfig.json:1:1 references add { "path": "../errors" } (a workspace dependency)',
     ]);
   });
+
+  it('leaves the references of an example to its own projects', () => {
+    expect(
+      lint({
+        'examples/todo/package.json': JSON.stringify({
+          name: 'todo',
+          private: true,
+          dependencies: { '@vibejs-org/ui': 'workspace:*' },
+        }),
+        'examples/todo/tsconfig.json': '{ "files": [], "references": [{ "path": "ui" }] }',
+      }),
+    ).toEqual([]);
+  });
 });
 
 describe('rule 6: manifests', () => {

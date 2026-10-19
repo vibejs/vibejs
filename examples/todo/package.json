@@ -1,0 +1,23 @@
+{
+  "name": "todo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsc -b --runExternalCode --force && vitest run"
+  },
+  "dependencies": {
+    "@vibejs-org/contract": "workspace:*",
+    "@vibejs-org/server": "workspace:*",
+    "@vibejs-org/ui": "workspace:*",
+    "valibot": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vibejs-org/compiler": "workspace:*",
+    "@vibejs-org/language-tools": "workspace:*",
+    "jsdom": "catalog:",
+    "typescript": "catalog:ts-next",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}
