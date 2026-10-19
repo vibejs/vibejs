@@ -1,12 +1,17 @@
 import type {
   Route,
   RouteBody,
+  RouteDef,
   RouteErrorCode,
   RouteHeaders,
   RouteParams,
   RouteQuery,
 } from '@vibejs-org/contract';
+import type { Logger } from '../logger.ts';
 import type { MetadataKey } from '../module/decorators.ts';
+import type { RouteBinding } from '../module/graph.ts';
+import { createCookies, type Cookies } from './cookies.ts';
+import { HttpError } from './errors.ts';
 
 /**
  * Per-request values that guards and interceptors share with handlers. Add fields by augmentation:
@@ -23,6 +28,9 @@ export interface RequestContext {
   readonly requestId: string;
   readonly ip: string | undefined;
   readonly signal: AbortSignal;
+  /** The application logger with the `requestId` of this request. */
+  readonly log: Logger;
+  readonly cookies: Cookies;
   readonly responseHeaders: Headers;
   readonly state: RequestState;
   readonly params: Readonly<Record<string, unknown>>;
@@ -52,7 +60,51 @@ export interface Interceptor {
   intercept(ctx: RequestContext, next: () => Promise<unknown>): Promise<unknown>;
 }
 
-/** Turns an error into a response; `undefined` passes the error to the next filter. */
+/**
+ * Turns an error into a response, or into an `HttpError` that is answered as a problem;
+ * `undefined` passes the error to the next filter.
+ */
 export interface ExceptionFilter {
-  catch(error: unknown, ctx: RequestContext): Response | undefined | Promise<Response | undefined>;
+  catch(
+    error: unknown,
+    ctx: RequestContext,
+  ): Response | HttpError | undefined | Promise<Response | HttpError | undefined>;
+}
+
+/** What `createContext` needs besides the parsed request parts. */
+interface ContextInit {
+  readonly req: Request;
+  readonly url: URL;
+  readonly binding: RouteBinding;
+  readonly params: Readonly<Record<string, unknown>>;
+  readonly requestId: string;
+  readonly log: Logger;
+  readonly responseHeaders: Headers;
+}
+
+/** The context of a routed request; `parts` adds the parsed parts the route declares (`body`). */
+export function createContext(
+  init: ContextInit,
+  parts: Readonly<Record<string, unknown>> = {},
+): RequestContext & { fail(code: string, detail?: string): never } {
+  const { binding, ...rest } = init;
+  const { req, responseHeaders } = rest;
+  const ip: unknown = Reflect.get(req, 'ip');
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- every route def is a RouteDef
+  const def = binding.route.def as RouteDef;
+  return {
+    ...rest,
+    ...parts,
+    route: binding.route,
+    ip: typeof ip === 'string' ? ip : undefined,
+    signal: req.signal,
+    cookies: createCookies(req, responseHeaders),
+    state: {},
+    getMetadata: <T>(key: MetadataKey<T>) =>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a key holds values of its own type
+      binding.metadata.get(key) as T | undefined,
+    fail(code, detail) {
+      throw new HttpError(Number(def.errors?.[code]), code, detail);
+    },
+  };
 }
