@@ -330,6 +330,25 @@ describe('generateOpenApi: $defs', () => {
     expect(error.message).toContain('GET /d/b');
   });
 
+  it('throws VIBE9803 for an error status outside 400-599', () => {
+    for (const status of [200, 399, 600, 4000, 404.5]) {
+      const c = defineContract('/e', { a: get('/', { errors: { ODD: status } }) });
+      const error = Object(
+        (() => {
+          try {
+            return generateOpenApi(c, { info });
+          } catch (thrown) {
+            return thrown;
+          }
+        })(),
+      );
+      expect(error.code).toBe('VIBE9803');
+      expect(error.message).toContain('ODD');
+      expect(error.message).toContain('GET /e');
+      expect(error.message).toContain(String(status));
+    }
+  });
+
   it('shares equal definitions whose keys are in another order', () => {
     const c = defineContract('/d', {
       a: get('/a', { response: fake(withUser(user)) }),
@@ -475,22 +494,25 @@ describe('generateOpenApi: recipe', () => {
       }
     }
 
-    // The recipe from the JSDoc of generateOpenApi, verbatim.
+    // The recipe from docs/server/contracts.md, verbatim, under the template's base path.
     const doc = generateOpenApi(
       { users },
       { info: { title: 'API', version: '1.0.0' }, servers: [{ url: '/api' }] },
     );
     const openapi: Middleware = (req, next) =>
-      new URL(req.url).pathname === '/openapi.json' ? Promise.resolve(Response.json(doc)) : next();
+      new URL(req.url).pathname.endsWith('/openapi.json')
+        ? Promise.resolve(Response.json(doc))
+        : next();
 
     const app = await Test.createTestingModule({
       controllers: [UsersController],
       middleware: [openapi],
+      basePath: '/api',
     }).compile();
-    const served = await app.fetch(new Request('http://localhost/openapi.json'));
+    const served = await app.fetch(new Request('http://localhost/api/openapi.json'));
     expect(served.status).toBe(200);
     expect(await served.json()).toEqual(doc);
-    const user = await app.fetch(new Request('http://localhost/users/7'));
+    const user = await app.fetch(new Request('http://localhost/api/users/7'));
     expect(await user.json()).toEqual({ id: '7' });
     await app.close();
   });

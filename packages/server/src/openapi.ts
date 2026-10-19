@@ -107,7 +107,8 @@ const problem = (status: number, codes: string[]): Json => ({
  * An OpenAPI 3.1 document of every route in `contracts`: a contract, a record of contracts or
  * nested records (the `createClient` shape). Schemas are converted with their Standard JSON
  * Schema converter; their named definitions are shared in `components.schemas`. Throws VIBE9801
- * for a schema that cannot be converted and VIBE9802 for two different schemas with one name.
+ * for a schema that cannot be converted, VIBE9802 for two different schemas with one name and
+ * VIBE9803 for an error status outside 400-599.
  *
  * @see https://vibejs.org/v0/server/contracts#openapi for serving the document.
  */
@@ -193,7 +194,12 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
     const hasInput = Boolean(def.params ?? def.query ?? def.headers ?? def.body);
     const errors = { ...(hasInput && { VALIDATION_FAILED: 400 }), ...def.errors };
     const groups: Record<number, string[]> = {};
-    for (const [code, at] of Object.entries(errors)) (groups[at] ??= []).push(code);
+    for (const [code, at] of Object.entries(errors)) {
+      // The success status is 2xx; an error status outside 4xx/5xx would replace it or be invalid.
+      if (!Number.isInteger(at) || at < 400 || at > 599)
+        throw vibeError('VIBE9803', { code, route: label, status: String(at) });
+      (groups[at] ??= []).push(code);
+    }
     for (const [at, codes] of Object.entries(groups))
       responses[at] = {
         description: codes.join(', '),
