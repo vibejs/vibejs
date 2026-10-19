@@ -144,6 +144,28 @@ describe('app.fetch status matrix', () => {
     expect(await getRes.json()).toEqual(['ada']);
   });
 
+  it('cancels the GET body for HEAD, even an errored one', async () => {
+    const cancel = vi.fn<() => void>();
+    const bodies = [
+      new ReadableStream({ cancel }),
+      new ReadableStream({ start: (controller) => controller.error(new Error('broken')) }),
+    ];
+    const files = defineContract('/files', { one: get('/one', { response: raw() }) });
+    @Controller(files)
+    class FilesController {
+      @Handle(files.one)
+      one(): Response {
+        return new Response(bodies.shift());
+      }
+    }
+    @Module({ controllers: [FilesController] })
+    class Root {}
+    const app = await VibeFactory.create(Root, { logger: capture().logger });
+    expect((await app.request('/files/one', { method: 'HEAD' })).status).toBe(200);
+    expect(cancel).toHaveBeenCalledOnce();
+    expect((await app.request('/files/one', { method: 'HEAD' })).status).toBe(200);
+  });
+
   it('answers OPTIONS without a route with 204 and Allow', async () => {
     const { app } = await create();
     const res = await app.request('/users', { method: 'OPTIONS' });
@@ -344,6 +366,24 @@ describe('VibeFactory.create', () => {
     class Root {}
     await expect(VibeFactory.create(Root)).rejects.toBe(failure);
   });
+
+  it.each(['api', '/api/', '/', '//api', '/api//v1'])(
+    'throws VIBE9405 for the base path %j before any provider runs',
+    async (basePath) => {
+      const onModuleInit = vi.fn<() => void>();
+      @Module({})
+      class Root implements OnModuleInit {
+        onModuleInit(): void {
+          onModuleInit();
+        }
+      }
+      await expect(VibeFactory.create(Root, { basePath })).rejects.toMatchObject({
+        code: 'VIBE9405',
+        args: { basePath },
+      });
+      expect(onModuleInit).not.toHaveBeenCalled();
+    },
+  );
 
   it('throws VIBE9401 for two contracts that serve the same route shape', async () => {
     const a = defineContract('/users', { one: get('/:id') });

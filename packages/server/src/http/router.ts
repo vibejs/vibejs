@@ -55,11 +55,10 @@ function* walk(
 }
 
 /**
- * A segment trie over the routes, mounted under `basePath`. Throws VIBE9405 for a malformed base
- * path and VIBE9401 on a conflict.
+ * A segment trie over the routes, mounted under `basePath` (validated by the caller). Throws
+ * VIBE9401 on a conflict.
  */
 export function createRouter(bindings: readonly RouteBinding[], basePath: string): Router {
-  if (!/^(?:\/[^/]+)*$/.test(basePath)) throw vibeError('VIBE9405', { basePath });
   const root = node();
   for (const binding of bindings) {
     const { method } = binding.route;

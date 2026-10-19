@@ -68,6 +68,16 @@ describe('JsonLogger', () => {
     expect(lines[0].error).not.toHaveProperty('cause.cause');
   });
 
+  it('writes BigInt as a string and ends an object cycle', () => {
+    const { lines, logger } = capture();
+    const loop: Record<string, unknown> = { n: 1n };
+    loop.self = loop;
+    logger.error('failed', { cause: new Error('x', { cause: loop }) });
+    expect(lines[0]).toMatchObject({
+      cause: { message: 'x', cause: { n: '1', self: '[Circular]' } },
+    });
+  });
+
   it('ends a cause cycle and keeps its own time, level and msg', () => {
     const { lines, logger } = capture();
     const error = new Error('loop');

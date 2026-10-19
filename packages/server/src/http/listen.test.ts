@@ -93,10 +93,22 @@ describe('listen', () => {
   });
 
   it('listens on port 3000 by default', async () => {
-    const { app } = await create();
-    const { url } = await app.listen(undefined, '127.0.0.1');
-    expect(url).toBe('http://127.0.0.1:3000/');
-    await app.close();
+    const close = vi.fn<(force: boolean) => Promise<void>>(async () => {});
+    const serve = vi.fn<(options: { port: number }) => object>(() => ({
+      url: 'http://localhost:3000/',
+      ready: async () => {},
+      close,
+    }));
+    vi.doMock('srvx', () => ({ serve }));
+    try {
+      const { app } = await create();
+      await expect(app.listen()).resolves.toEqual({ url: 'http://localhost:3000/' });
+      expect(serve).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
+      await app.close();
+      expect(close).toHaveBeenCalledWith(false);
+    } finally {
+      vi.doUnmock('srvx');
+    }
   });
 });
 
