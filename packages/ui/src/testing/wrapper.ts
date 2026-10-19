@@ -87,14 +87,18 @@ export const serializeAll = (nodes: Iterable<Node>): string =>
 /**
  * The implementation of every wrapper: `roots` gives the nodes it reads, or is the selector that
  * matched nothing for the empty wrapper of `find()`; `alive` throws once the component unmounted.
+ * Queries match the roots themselves only with `matchRoots`, which the component wrapper sets; an
+ * element wrapper queries its descendants alone.
  */
 export class Wrapper {
   readonly #roots: (() => readonly Node[]) | string;
   readonly #alive: () => void;
+  readonly #matchRoots: boolean;
 
-  constructor(roots: (() => readonly Node[]) | string, alive: () => void) {
+  constructor(roots: (() => readonly Node[]) | string, alive: () => void, matchRoots = false) {
     this.#roots = roots;
     this.#alive = alive;
+    this.#matchRoots = matchRoots;
   }
 
   #use(method: string): readonly Node[] {
@@ -115,7 +119,7 @@ export class Wrapper {
     const found: Element[] = [];
     for (const node of this.#use(method)) {
       if (!(node instanceof Element)) continue;
-      if (node.matches(selector)) found.push(node);
+      if (this.#matchRoots && node.matches(selector)) found.push(node);
       found.push(...node.querySelectorAll(selector));
     }
     return found.map((el) => new Wrapper(() => [el], this.#alive));

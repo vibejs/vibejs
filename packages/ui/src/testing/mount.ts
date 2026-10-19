@@ -176,7 +176,7 @@ export function mount<C extends Component<any>>(
   const alive = (): void => {
     if (host.unmounted) throw vibeError('VIBE7205', { name });
   };
-  const wrapper = new Wrapper(() => [...host.el.childNodes], alive);
+  const wrapper = new Wrapper(() => [...host.el.childNodes], alive, true);
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the wrapper is typed by the component
   return Object.assign(wrapper, {
     async setProps(props: object): Promise<void> {

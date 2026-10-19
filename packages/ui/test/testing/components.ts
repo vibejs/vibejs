@@ -68,6 +68,15 @@ export const Fragment = {
   render: () => [...fragment.content.cloneNode(true).childNodes],
 } as ComponentDef as Component;
 
+const nested = document.createElement('template');
+nested.innerHTML = '<ul class="o"><li>a<ul class="i"><li>b</li></ul></li></ul>';
+
+/** Nested elements of the same tag. */
+export const Nested = {
+  name: 'Nested',
+  render: () => [...nested.content.cloneNode(true).childNodes],
+} as ComponentDef as Component;
+
 type ControlsState = { text: string; note: string; agree: boolean; size: string; tags: string[] };
 
 const t3 = template(

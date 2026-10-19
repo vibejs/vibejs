@@ -3,7 +3,7 @@ import { isVibeError } from '@vibejs-org/ui';
 import { flushPromises, mount, type DOMWrapper } from '@vibejs-org/ui/testing';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { thrownCode } from '../codes.ts';
-import { Controls, Fragment, Greeting } from './components.ts';
+import { Controls, Fragment, Greeting, Nested } from './components.ts';
 
 /** Whether `promise` rejects with the VIBE error `code`. */
 const rejectsWith = (promise: Promise<unknown>, code: `VIBE${number}`): Promise<void> =>
@@ -39,6 +39,18 @@ export function wrapperSuite(): void {
     it('queries every root of a fragment and skips its text and comments', () => {
       const wrapper = mount(Fragment);
       expect(wrapper.findAll('p, li').map((w) => w.text())).toEqual(['One', 'A']);
+    });
+
+    it('queries only the descendants of an element wrapper', () => {
+      const wrapper = mount(Nested);
+      expect(
+        wrapper
+          .get('ul.o')
+          .findAll('ul')
+          .map((w) => w.classes()),
+      ).toEqual([['i']]);
+      expect(wrapper.get('li').find('li').text()).toBe('b');
+      expect(wrapper.get('ul.i').find('ul').exists()).toBe(false);
     });
 
     it('throws VIBE7201 from get() with the selector and the HTML', () => {
