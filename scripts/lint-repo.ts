@@ -26,7 +26,7 @@ const PUBLISHED = [
 ];
 /** Turkish-specific letters (rule 9), escaped so that this file stays ASCII. */
 export const TURKISH = /[\u011F\u011E\u0131\u015F\u015E\u0130\u00E7\u00C7\u00F6\u00D6\u00FC\u00DC]/;
-const SPECS = ['catalog:', 'catalog:ts-next', 'workspace:*'];
+const SPECS = ['catalog:', 'catalog:ts-next', 'catalog:peers', 'workspace:*'];
 const DEP_FIELDS = [
   'dependencies',
   'devDependencies',
@@ -328,6 +328,8 @@ export function main(root: string): number {
           reportFile(file, 'dep-spec', `${field}.${name} is "${spec}"; use ${SPECS.join(', ')}`);
         } else if (spec === 'catalog:ts-next' && !TS_NEXT.test(file)) {
           reportFile(file, 'dep-spec', `${field}.${name}: catalog:ts-next is for C10 consumers`);
+        } else if (spec === 'catalog:peers' && field !== 'peerDependencies') {
+          reportFile(file, 'dep-spec', `${field}.${name}: catalog:peers is for peerDependencies`);
         }
       }
     }

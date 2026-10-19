@@ -59,8 +59,7 @@
         "packages/compiler/src/vite.ts",
         "packages/language-tools/src/index.ts",
         "packages/server/src/openapi.ts",
-        "packages/server/src/testing.ts",
-        "packages/ui/src/testing.ts"
+        "packages/server/src/testing.ts"
       ],
       "rules": { "unicorn/no-empty-file": "off", "unicorn/require-module-specifiers": "off" }
     },

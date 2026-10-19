@@ -350,8 +350,16 @@ describe('pnpm errors --check', () => {
   it('fails on a live code without a literal in a test', () => {
     put({ 'packages/server/src/inject.test.ts': '' });
     expect(check()).toEqual([
-      "VIBE9101 is never asserted: no 'VIBE9101' in a *.test.ts of packages/server",
+      "VIBE9101 is never asserted: no 'VIBE9101' in a *.test.ts or *.suite.ts of packages/server",
     ]);
+  });
+
+  it('accepts a literal in a shared suite', () => {
+    put({
+      'packages/server/src/inject.test.ts': '',
+      'packages/server/test/inject.suite.ts': "isVibeError(error, 'VIBE9101');",
+    });
+    expect(check()).toEqual([]);
   });
 
   it('scans the bin of a package without src', () => {

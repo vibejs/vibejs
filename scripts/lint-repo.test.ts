@@ -294,8 +294,21 @@ describe('rule 4: dependency specs', () => {
         }),
       }),
     ).toEqual([
-      'packages/server/package.json:1:1 dep-spec dependencies.vite is "^8.3.4"; use catalog:, catalog:ts-next, workspace:*',
+      'packages/server/package.json:1:1 dep-spec dependencies.vite is "^8.3.4"; use catalog:, catalog:ts-next, catalog:peers, workspace:*',
       'packages/server/package.json:1:1 dep-spec peerDependencies.typescript: catalog:ts-next is for C10 consumers',
+    ]);
+  });
+
+  it('allows catalog:peers in peerDependencies only', () => {
+    expect(
+      lint({
+        'packages/server/package.json': manifest('server', {
+          devDependencies: { tsdown: 'catalog:peers' },
+          peerDependencies: { vitest: 'catalog:peers' },
+        }),
+      }),
+    ).toEqual([
+      'packages/server/package.json:1:1 dep-spec devDependencies.tsdown: catalog:peers is for peerDependencies',
     ]);
   });
 

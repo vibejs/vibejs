@@ -11,6 +11,10 @@ export default {
       // the contract package is imported only by the dev fixture app.
       ignoreDependencies: ['oxlint', 'oxfmt', '@vibejs-org/contract'],
     },
+    'packages/ui': {
+      // An optional peer by design: only the `./testing` entry imports it, inside the user's tests.
+      ignoreDependencies: ['vitest'],
+    },
     'packages/language-tools': {
       // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.
       ignoreDependencies: ['@vibejs-org/ui'],
