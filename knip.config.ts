@@ -8,8 +8,15 @@ export default {
     'packages/*': {},
     'packages/cli': {
       // Run, never imported, by the check tool-contract test from packages/cli/node_modules;
-      // the contract package is imported only by the dev fixture app.
-      ignoreDependencies: ['oxlint', 'oxfmt', '@vibejs-org/contract'],
+      // the contract package is imported only by the dev fixture app; the mapper and ui are
+      // loaded only by tsc on the .vibe fixtures, through the linked node_modules.
+      ignoreDependencies: [
+        'oxlint',
+        'oxfmt',
+        '@vibejs-org/contract',
+        '@vibejs-org/language-tools',
+        '@vibejs-org/ui',
+      ],
     },
     'packages/ui': {
       // An optional peer by design: only the `./testing` entry imports it, inside the user's tests.

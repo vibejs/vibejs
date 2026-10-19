@@ -35,18 +35,28 @@ function install(pkg: string, version: string, bin?: string): void {
 
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'vibejs-check-'));
-  // broken/ holds the sources the recorded output points into (TS1241 reads its line).
-  cpSync(new URL('broken', fixtures), root, { recursive: true });
+  // broken/ holds the sources the recorded output points into (TS1241 reads its line). Its .vibe
+  // files, which the compile step reads, join only the tests that call vibeSeeds().
+  cpSync(new URL('broken', fixtures), root, {
+    recursive: true,
+    filter: (src) => !src.endsWith('.vibe'),
+  });
   install('typescript', '7.1.0-dev.20261015.1', 'bin/tsc');
   install('oxlint', '1.88.0', 'bin/oxlint');
   install('oxfmt', '0.73.0', 'bin/oxfmt');
   install('vitest', '5.0.5', 'vitest.mjs');
   install('@vitest/coverage-v8', '5.0.5');
+  install('@vibejs-org/language-tools', '0.0.0');
+  install('@vibejs-org/compiler', '0.0.0');
 });
 
 afterEach(() => {
   rmSync(root, { recursive: true, force: true });
 });
+
+/** Adds the .vibe files of broken/: src/App.vibe (a TS2322 in tsc.txt) and src/Macro.vibe (VIBE3005). */
+const vibeSeeds = () =>
+  cpSync(new URL('broken/src', fixtures), join(root, 'src'), { recursive: true });
 
 const result = (stdout: string, code = 0, stderr = ''): ExecResult => ({ code, stdout, stderr });
 
@@ -111,10 +121,14 @@ async function run(
 }
 
 describe('the recorded output of broken/', () => {
-  it('gives exactly the six seeded diagnostics, enriched, in order, with exit 1', async () => {
+  beforeEach(vibeSeeds);
+
+  it('gives exactly the eight seeded diagnostics, enriched, in order, with exit 1', async () => {
     const { r } = await run();
     expect(exitCode(r)).toBe(1);
     expect(r.diagnostics.map((d) => [d.source, d.code, d.loc])).toEqual([
+      ['vibejs', 'VIBE3005', 'src/Macro.vibe:3:1'],
+      ['tsc', 'TS2322', 'src/App.vibe:6:11'],
       ['tsc', 'TS1241', 'src/handler.ts:29:4'],
       ['tsc', 'TS2322', 'src/math.ts:1:14'],
       ['vitest', 'test-failed', 'src/app.test.ts:10:1'],
@@ -174,6 +188,8 @@ describe('enrich', () => {
     expect(enrich(unknown, [entry])).toBe(unknown);
     const lint = { ...ts1241, code: 'eslint(no-debugger)' };
     expect(enrich(lint, [entry], '@Handle(')).toBe(lint);
+    const compiled = { ...vibe, fixes: ['Remove `v-bogus`.'] };
+    expect(enrich(compiled, [entry])).toBe(compiled);
   });
 
   it('does not enrich TS1241 when its file cannot be read', async () => {
@@ -278,6 +294,83 @@ describe('required tools', () => {
   it.each(['7.1.0-dev.20261015.1', '7.1.0', '8.0.0'])('lets typescript %s pass', async (v) => {
     install('typescript', v, 'bin/tsc');
     expect((await run({ only: 'types' }, CLEAN)).r.ok).toBe(true);
+  });
+});
+
+const uninstall = (pkg: string) => rmSync(join(root, 'node_modules', pkg), { recursive: true });
+
+describe('.vibe files', () => {
+  it.each([
+    [['@vibejs-org/language-tools']],
+    [['@vibejs-org/compiler']],
+    [['@vibejs-org/language-tools', '@vibejs-org/compiler']],
+  ])('need %j: VIBE8005 with one install command, exit 2, nothing run', async (pkgs) => {
+    vibeSeeds();
+    pkgs.forEach(uninstall);
+    write('pnpm-lock.yaml', '');
+    const { r, calls } = await run();
+    const command = `pnpm add -D ${pkgs.join(' ')}`;
+    expect(calls).toEqual([]);
+    expect(exitCode(r)).toBe(2);
+    expect(r).toMatchObject({ ok: false, next: [command], error: { code: 'VIBE8005' } });
+    expect(r.error!.message).toContain(`\`${pkgs.join(', ')}\``);
+    expect(r.error!.fixes).toEqual([`Run \`${command}\` in the project root.`]);
+  });
+
+  it('are not needed without .vibe files outside node_modules, dist and dot directories', async () => {
+    for (const dir of ['node_modules/x', 'dist', '.cache']) write(`${dir}/A.vibe`, '<template>');
+    uninstall('@vibejs-org/language-tools');
+    uninstall('@vibejs-org/compiler');
+    expect((await run({}, CLEAN)).r.ok).toBe(true);
+  });
+
+  it('are not needed by --only lint', async () => {
+    vibeSeeds();
+    uninstall('@vibejs-org/language-tools');
+    expect((await run({ only: 'lint' }, CLEAN)).r.ok).toBe(true);
+  });
+
+  it('--only types runs tsc and the compile step, which counts in steps.types', async () => {
+    vibeSeeds();
+    const { r, calls } = await run({ only: 'types' });
+    expect(calls.map(([name]) => name)).toEqual(['tsc']);
+    expect(r.diagnostics.map((d) => [d.source, d.code])).toEqual([
+      ['vibejs', 'VIBE3005'],
+      ['tsc', 'TS2322'],
+      ['tsc', 'TS1241'],
+      ['tsc', 'TS2322'],
+    ]);
+    expect(r.steps.types).toEqual({ status: 'failed', errors: 4, warnings: 0, ms: 0 });
+    expect(r.steps.lint.status).toBe('skipped');
+    expect(r.steps.tests.status).toBe('skipped');
+  });
+
+  it('reports a forwarded parse error once, from tsc, with the suppression fix', async () => {
+    const [, vibe1102] = tool('tsc-vibe.txt').split('\n');
+    write(
+      'src/Hello.vibe',
+      `<script setup lang="ts">\nconst id = 'a'\n</script>\n\n<template>\n  <div :id="id" :id="id"></div>\n</template>\n`,
+    );
+    const { r } = await run({ only: 'types' }, { ...CLEAN, tsc: () => result(`${vibe1102}\n`, 2) });
+    expect(exitCode(r)).toBe(1);
+    expect(r.diagnostics).toHaveLength(1);
+    expect(r.diagnostics[0]).toMatchObject({
+      source: 'tsc',
+      code: 'VIBE1102',
+      loc: 'src/Hello.vibe:6:17',
+      docs: 'https://vibejs.org/v0/errors/VIBE1102',
+    });
+    expect(r.diagnostics[0].fixes!.at(-1)).toBe(
+      'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
+    );
+  });
+
+  it('gives a mapper code outside the catalog only the suppression fix', async () => {
+    const { r } = await run(
+      { only: 'types' },
+      { ...CLEAN, tsc: () => result('a.vibe(1,1): error VIBE6999: X.\n', 2) },
+    );
+    expect(r.diagnostics[0].fixes).toHaveLength(1);
   });
 });
 
@@ -466,7 +559,7 @@ describe('options', () => {
     const { r, calls } = await run({ only: 'types' });
     expect(calls.map(([name]) => name)).toEqual(['tsc']);
     expect(r.steps).toEqual({
-      types: { status: 'failed', errors: 2, warnings: 0, ms: 0 },
+      types: { status: 'failed', errors: 3, warnings: 0, ms: 0 },
       lint: { status: 'skipped', errors: 0, warnings: 0, ms: 0 },
       format: { status: 'skipped', errors: 0, warnings: 0, ms: 0 },
       tests: { status: 'skipped', errors: 0, warnings: 0, ms: 0, passed: 0, failed: 0, skipped: 0 },

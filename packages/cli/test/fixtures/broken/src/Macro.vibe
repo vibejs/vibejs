@@ -1,0 +1,8 @@
+<script setup lang="ts">
+defineProps<{ a: string }>()
+defineProps<{ b: string }>()
+</script>
+
+<template>
+  <p>macro</p>
+</template>

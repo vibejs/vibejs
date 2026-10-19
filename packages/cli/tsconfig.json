@@ -1,6 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2024"], "types": ["node"], "rootDir": "." },
-  "references": [{ "path": "../contract" }, { "path": "../errors" }, { "path": "../server" }],
+  "references": [
+    { "path": "../compiler" },
+    { "path": "../contract" },
+    { "path": "../errors" },
+    { "path": "../language-tools" },
+    { "path": "../server" },
+    { "path": "../ui" }
+  ],
   "include": ["src", "test/*.ts", "package.json"]
 }

@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@vibejs-org/cli": "0.0.0"
+    "@vibejs-org/cli": "0.0.0",
+    "@vibejs-org/compiler": "0.0.0",
+    "@vibejs-org/language-tools": "0.0.0"
   }
 }

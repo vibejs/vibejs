@@ -1,19 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`the recorded output of broken/ > gives exactly the six seeded diagnostics, enriched, in order, with exit 1 1`] = `
+exports[`the recorded output of broken/ > gives exactly the eight seeded diagnostics, enriched, in order, with exit 1 1`] = `
 "{
   "ok": false,
   "command": "check",
   "version": "1.2.3",
   "next": [
-    "vibejs explain VIBE8303",
+    "vibejs explain VIBE3005",
     "vibejs check --fix"
   ],
   "durationMs": 0,
   "steps": {
     "types": {
       "status": "failed",
-      "errors": 2,
+      "errors": 4,
       "warnings": 0,
       "ms": 0
     },
@@ -51,6 +51,46 @@ exports[`the recorded output of broken/ > gives exactly the six seeded diagnosti
     }
   },
   "diagnostics": [
+    {
+      "source": "vibejs",
+      "code": "VIBE3005",
+      "severity": "error",
+      "file": "src/Macro.vibe",
+      "loc": "src/Macro.vibe:3:1",
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 0
+        },
+        "end": {
+          "line": 2,
+          "character": 11
+        }
+      },
+      "message": "\`defineProps()\` is called more than once.",
+      "docs": "https://vibejs.org/v0/errors/VIBE3005",
+      "fixes": [
+        "Merge both declarations into the first \`defineProps()\` call and remove the second one."
+      ]
+    },
+    {
+      "source": "tsc",
+      "code": "TS2322",
+      "severity": "error",
+      "file": "src/App.vibe",
+      "loc": "src/App.vibe:6:11",
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 10
+        },
+        "end": {
+          "line": 5,
+          "character": 10
+        }
+      },
+      "message": "Type 'number' is not assignable to type 'string'."
+    },
     {
       "source": "tsc",
       "code": "TS1241",
@@ -180,7 +220,9 @@ exports[`the recorded output of broken/ > gives exactly the six seeded diagnosti
 `;
 
 exports[`the recorded output of broken/ > renders each diagnostic with its continuation lines and one line per step for people 1`] = `
-"src/handler.ts:29:4  error  TS1241  Unable to resolve signature of method decorator when called as an expression.
+"src/Macro.vibe:3:1  error  VIBE3005  \`defineProps()\` is called more than once.
+src/App.vibe:6:11  error  TS2322  Type 'number' is not assignable to type 'string'.
+src/handler.ts:29:4  error  TS1241  Unable to resolve signature of method decorator when called as an expression.
       Argument of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number>' is not assignable to parameter of type 'TypedPropertyDescriptor<(ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }>'.
         Types of property 'value' are incompatible.
           Type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => number) | undefined' is not assignable to type '((ctx: Ctx<{ path: string; sample: { id: string; name: string; }; }>) => Promise<{ id: string; name: string; }> | { id: string; name: string; }) | undefined'.
@@ -191,7 +233,7 @@ src/app.test.ts:10:1  error  test-failed  AssertionError: expected 1 to be 2 // 
 src/math.ts:2:22  error  unicorn(no-useless-spread)  Using a spread operator here creates a new array unnecessarily.
 src/math.ts  error  VIBE8303  \`src/math.ts\` is not formatted.
 src/math.ts:5:3  warning  VIBE8302  \`src/math.ts\` is not fully covered: statements 5:14; branches 5:3.
-types: failed (2 errors, 0 warnings, 0 ms)
+types: failed (4 errors, 0 warnings, 0 ms)
 lint: failed (1 errors, 0 warnings, 0 ms)
 format: failed (1 errors, 0 warnings, 0 ms)
 tests: failed (1 errors, 0 warnings, 0 ms, passed 1, failed 1, skipped 0)
