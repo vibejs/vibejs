@@ -25,8 +25,11 @@ const MESSAGES = {
   VIBE9403: ["listen() was called on an app that already listens or is closing (server: {url}).","Call `listen()` once per app; create another app with `VibeFactory.create()` for a second server."],
   VIBE9404: ["cors() was called with `origin: '*'` and `credentials: true`, which browsers reject.","List the allowed origins explicitly, such as `origin: ['https://app.example.com']`.","Remove `credentials: true` when the requests carry no cookies or authorization headers."],
   VIBE9405: ["The base path {basePath} is not empty and not of the form `/segment` or `/a/b`.","Pass `''` for no prefix, or a path such as `/api` without a trailing slash."],
+  VIBE9501: ["The value that {route} returned does not match its response schema: {issues}.","Change the handler so that it returns a value that matches the `response` schema, or update the schema in the contract.","Pass `validateResponses: false` to `VibeFactory.create()` only to diagnose; the client then receives the value unchecked."],
+  VIBE9502: ["{route} answered with the error code {code}, which the route does not declare.","Add the code with the status it answers to the route's `errors`.","Use a built-in code such as `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN` or `NOT_FOUND` when it fits."],
   VIBE9503: ["A request failed with an unexpected error, so the client received 500 INTERNAL_ERROR.","Read the logged `cause` and fix the code that threw it.","Throw an `HttpError`, or call `ctx.fail()` with a declared error code, when the error is meant for the client."],
   VIBE9504: ["The cookie name \"{name}\" is not a valid token.","Use a name made of letters, digits and ``!#$%&'*+-.^_`|~``."],
+  VIBE9505: ["{route} declares a raw response but returned a value of type {type}.","Return a `Response`, or a `string`, `Blob`, `ArrayBuffer`, typed array, `ReadableStream`, `URLSearchParams` or `FormData` from the handler."],
   VIBE9601: ["The environment variables do not match the config schema: {issues}.","Set the listed environment variables to values that match their schemas."],
   VIBE9602: ["The config schema of {key} validates asynchronously, but a config is validated synchronously.","Use a synchronous schema for {key}, without async checks or transforms."],
 } as const;
