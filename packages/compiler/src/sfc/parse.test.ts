@@ -142,7 +142,7 @@ describe('compiler:sfc', () => {
     test('should only allow single script element', () => {
       expect(
         parse(`<script>console.log(1)</script><script>console.log(1)</script>`).errors,
-      ).toContain('VIBE1003');
+      ).toContain('VIBE1004');
     });
 
     test('should only allow single script setup element', () => {
@@ -154,7 +154,15 @@ describe('compiler:sfc', () => {
     test('a plain script beside script setup is rejected', () => {
       expect(
         parse(`<script setup>console.log(1)</script><script>console.log(1)</script>`).errors,
-      ).toStrictEqual(['VIBE1001', 'VIBE1005', 'VIBE1003', 'VIBE1004', 'VIBE1005']);
+      ).toStrictEqual(['VIBE1001', 'VIBE1005', 'VIBE1004', 'VIBE1005']);
+    });
+
+    test('a script setup after a plain script is kept', () => {
+      const { descriptor, errors } = parse(
+        `<template></template><script lang="ts">a</script><script setup lang="ts">b</script>`,
+      );
+      expect(errors).toStrictEqual(['VIBE1004']);
+      expect(descriptor.scriptSetup).toMatchObject({ content: 'b', attrs: { setup: true } });
     });
 
     // # 6676
@@ -211,6 +219,57 @@ describe('descriptor', () => {
     expect(diagnostics.map((d) => d.code)).toStrictEqual(['VIBE1002', 'VIBE1007', 'VIBE1009']);
     expect(descriptor.template!.content).toBe('a');
     expect(descriptor.styles).toMatchObject([{ content: 'c', lang: 'css', scoped: false }]);
+  });
+
+  test('reads a duplicate lang from its first occurrence', () => {
+    const { descriptor, diagnostics } = parseSFC(
+      '<template></template><script setup lang="js" lang="ts"></script><style lang="x" lang="css"></style>',
+      { filename: 'A.vibe' },
+    );
+    expect(diagnostics.map((d) => d.code)).toStrictEqual([
+      'VIBE1005',
+      'VIBE1102',
+      'VIBE1009',
+      'VIBE1102',
+    ]);
+    expect(descriptor.scriptSetup!.attrs.lang).toBe('js');
+  });
+
+  test('rejects v-pre on every block', () => {
+    const { descriptor, diagnostics } = parseSFC(
+      '<template v-pre><p v-if="a">{{ b }}</p></template><script setup lang="ts" v-pre></script><style v-pre></style>',
+      { filename: 'A.vibe' },
+    );
+    expect(diagnostics.map((d) => [d.code, d.start.offset, d.end.offset])).toStrictEqual([
+      ['VIBE1010', 10, 15],
+      ['VIBE1010', 74, 79],
+      ['VIBE1010', 96, 101],
+    ]);
+    expect(descriptor.template!.content).toBe('<p v-if="a">{{ b }}</p>');
+  });
+
+  test('reports a root tag named after an Object.prototype member as a custom block', () => {
+    for (const file of [
+      '<template></template><constructor x></constructor>',
+      '<template></template><constructor lang="css">a{}</constructor>',
+      '<template></template><constructor></constructor>',
+    ]) {
+      const { descriptor, errors } = parse(file);
+      expect(errors).toStrictEqual(['VIBE1011']);
+      expect(descriptor.styles).toStrictEqual([]);
+    }
+  });
+
+  test('a block left open at the end of the file covers its content', () => {
+    const { template } = parse('<template>hello').descriptor;
+    expect(template!.content).toBe('hello');
+    expect(template!.loc.end.offset).toBe(15);
+    expect(template!.ast.children).toMatchObject([{ loc: { start: { offset: 10 } } }]);
+    expect(parse('<template><div>hi</div>').descriptor.template!.content).toBe('<div>hi</div>');
+    expect(parse('<script setup lang="ts">const a = 1').descriptor.scriptSetup!.content).toBe(
+      'const a = 1',
+    );
+    expect(parse('<template></template><style>a{}').descriptor.styles[0].content).toBe('a{}');
   });
 
   test('rejects directives and a valueless lang on blocks', () => {
@@ -309,5 +368,9 @@ describe('style text checks', () => {
     expect(codes('scss', '// v-bind(x)\n:slotted(a)')).toStrictEqual([['VIBE4002', 13]]);
     expect(codes('stylus', '// >>>')).toStrictEqual([]);
     expect(codes('css', '// >>>')).toStrictEqual([['VIBE4004', 3]]);
+  });
+
+  test('allows the standard ::slotted() pseudo-element', () => {
+    expect(codes('css', 'a::slotted(b) :slotted(c)')).toStrictEqual([['VIBE4002', 14]]);
   });
 });

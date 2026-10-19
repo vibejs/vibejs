@@ -25,6 +25,15 @@
 // - a comment's loc runs from its `<` to its `>` or the end of the file, because bogus comments
 //   (`</1>`) and comments cut by the end of the file have no `<!--` and `-->`; `dirToAttr`
 //   updates the `source` of the value loc it widens to the quotes;
+// - state left by an input cut inside a tag is cleared: `reset` also resets `inPre`, `inVPre`
+//   (with `tokenizer.inVPre`) and `currentVPreBoundary`;
+// - a blank interpolation (`{{ }}`) gets a zero-width content loc after its whitespace instead of
+//   an inverted one;
+// - the `prop` modifier of the `.foo` shorthand has a zero-width loc at the `.` instead of the
+//   location stub;
+// - a root tag keeps its `v-pre` directive in `props`, so the SFC rules can reject it;
+// - `onCloseTag` resolves the inner end of every element with an `innerLoc` (the root tags), so a
+//   root tag closed at the end of the file covers its content;
 // - `cloneLoc` is deleted, `extend` is `Object.assign`, and imports use `.ts` extensions.
 import type { VibeError } from '@vibejs-org/errors'
 import { decodeHTML } from 'entities/decode'
@@ -98,6 +107,8 @@ const tokenizer = new Tokenizer(stack, {
     while (isWhitespace(currentInput.charCodeAt(innerEnd - 1))) {
       innerEnd--
     }
+    // a blank interpolation is a zero-width range after its whitespace
+    if (innerEnd < innerStart) innerEnd = innerStart
     let exp = getSlice(innerStart, innerEnd)
     // decode entities for backwards compat
     if (exp.includes('&')) {
@@ -209,7 +220,8 @@ const tokenizer = new Tokenizer(stack, {
         rawName: raw,
         exp: undefined,
         arg: undefined,
-        modifiers: raw === '.' ? [createSimpleExpression('prop')] : [],
+        modifiers:
+          raw === '.' ? [createSimpleExpression('prop', false, getLoc(start, start))] : [],
         loc: getLoc(start),
       }
       if (name === 'pre') {
@@ -349,7 +361,8 @@ const tokenizer = new Tokenizer(stack, {
       }
       if (
         currentProp.type !== NodeTypes.DIRECTIVE ||
-        currentProp.name !== 'pre'
+        currentProp.name !== 'pre' ||
+        tokenizer.inSFCRoot
       ) {
         currentOpenTag.props.push(currentProp)
       }
@@ -562,7 +575,7 @@ function onCloseTag(el: ElementNode, end: number, isImplied = false) {
     setLocEnd(el.loc, lookAhead(end, CharCodes.Gt) + 1)
   }
 
-  if (tokenizer.inSFCRoot) {
+  if (el.innerLoc) {
     // SFC root tag, resolve inner end
     if (el.children.length) {
       el.innerLoc!.end = Object.assign(
@@ -863,6 +876,9 @@ function reset() {
   currentAttrStartIndex = -1
   currentAttrEndIndex = -1
   currentAttrDuplicate = null
+  inPre = 0
+  inVPre = tokenizer.inVPre = false
+  currentVPreBoundary = null
   stack.length = 0
 }
 

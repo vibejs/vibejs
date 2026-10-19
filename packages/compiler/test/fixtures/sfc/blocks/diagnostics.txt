@@ -36,14 +36,6 @@ error[VIBE1005]: The `<script setup>` block needs `lang="ts"` but has `lang="js"
 fix: Write the block as `<script setup lang="ts">`.
 docs: https://vibejs.org/v0/errors/VIBE1005
 
-error[VIBE1003]: The component has a second `<script>` block, and only the first one is used.
-  --> sfc/blocks/input.vibe:8:1
-8 | <script setup lang="ts" generic="T" foo>
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-fix: Merge the code of both blocks into the first `<script setup lang="ts">` block.
-fix: Move shared code into a `.ts` module and import it.
-docs: https://vibejs.org/v0/errors/VIBE1003
-
 error[VIBE1013]: The `<script setup>` block has a `generic` attribute, and generic components are not supported.
   --> sfc/blocks/input.vibe:8:25
 8 | <script setup lang="ts" generic="T" foo>

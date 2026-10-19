@@ -21,11 +21,11 @@ A component has exactly one template. The compiler keeps the first `<template>` 
 - Merge the markup of both blocks into the first `<template>` block.
 - Move the second template into its own `.vibe` file and use it as a component.
 
-## VIBE1003: Second script block
+## VIBE1003: Second script setup block
 
-> The component has a second `<script>` block, and only the first one is used.
+> The component has a second `<script setup>` block, and only the first one is used.
 
-All of a component's code lives in one `<script setup lang="ts">` block. The compiler keeps the first `<script>` block and ignores the others.
+All of a component's code lives in one `<script setup lang="ts">` block. The compiler keeps the first `<script setup>` block and ignores the others.
 
 ### Fix
 

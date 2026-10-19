@@ -47,7 +47,7 @@ const BLOCK_COMMENT = /\/\*[\s\S]*?(?:\*\/|$)/g;
 const ANY_COMMENT = /\/\*[\s\S]*?(?:\*\/|$)|\/\/.*/g;
 const LINE_COMMENT_LANGS = new Set(['scss', 'sass', 'less', 'styl', 'stylus']);
 const STYLE_CHECKS: [RegExp, (selector: string) => VibeError][] = [
-  [/::v-slotted|:slotted(?=\()/g, (selector) => vibeError('VIBE4002', { selector })],
+  [/::v-slotted|(?<!:):slotted(?=\()/g, (selector) => vibeError('VIBE4002', { selector })],
   [/v-bind(?=\()/g, () => vibeError('VIBE4003')],
   [/>>>|\/deep\/|::v-deep|::v-global/g, (selector) => vibeError('VIBE4004', { selector })],
 ];
@@ -87,7 +87,7 @@ export function parse(
     }
     const { tag } = node;
     const startTag: [number, number] = [node.loc.start.offset, node.innerLoc!.start.offset];
-    if (!(tag in BLOCK_ATTRS)) {
+    if (!Object.hasOwn(BLOCK_ATTRS, tag)) {
       report(vibeError('VIBE1011', { tag }), ...startTag);
       continue;
     }
@@ -117,9 +117,13 @@ export function parse(
         descriptor.template = { ...block, ast };
       }
     } else if (tag === 'script') {
-      if (descriptor.scriptSetup) report(vibeError('VIBE1003'), ...startTag);
-      else descriptor.scriptSetup = block;
-      if (!attr('setup')) report(vibeError('VIBE1004'), ...startTag);
+      // The first `<script setup>` is kept, else the first plain `<script>`.
+      const setup = attr('setup') !== undefined;
+      const kept = descriptor.scriptSetup;
+      const keptSetup = kept !== null && 'setup' in kept.attrs;
+      if (!setup) report(vibeError('VIBE1004'), ...startTag);
+      else if (keptSetup) report(vibeError('VIBE1003'), ...startTag);
+      if (!kept || (setup && !keptSetup)) descriptor.scriptSetup = block;
       const lang = attr('lang');
       if (!lang) report(vibeError('VIBE1005', { lang: 'no `lang`' }), ...startTag);
       else if (block.attrs.lang !== 'ts') {
@@ -153,7 +157,10 @@ function createBlock(node: ElementNode, source: string): SFCBlock {
   const loc = node.innerLoc!;
   const attrs: Record<string, string | true> = {};
   for (const p of node.props) {
-    if (p.type === NodeTypes.ATTRIBUTE) attrs[p.name] = p.value?.content || true;
+    // The first of duplicate attributes wins, as in HTML.
+    if (p.type === NodeTypes.ATTRIBUTE && !Object.hasOwn(attrs, p.name)) {
+      attrs[p.name] = p.value?.content || true;
+    }
   }
   return { content: source.slice(loc.start.offset, loc.end.offset), loc, attrs };
 }

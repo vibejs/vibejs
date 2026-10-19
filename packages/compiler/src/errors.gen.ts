@@ -4,7 +4,7 @@ import { defineErrors, type VibeErrorFactory } from '@vibejs-org/errors';
 const MESSAGES = {
   VIBE1001: ["The component has no `<template>` block.","Add a `<template>` block with the markup of the component."],
   VIBE1002: ["The component has a second `<template>` block, and only the first one is used.","Merge the markup of both blocks into the first `<template>` block.","Move the second template into its own `.vibe` file and use it as a component."],
-  VIBE1003: ["The component has a second `<script>` block, and only the first one is used.","Merge the code of both blocks into the first `<script setup lang=\"ts\">` block.","Move shared code into a `.ts` module and import it."],
+  VIBE1003: ["The component has a second `<script setup>` block, and only the first one is used.","Merge the code of both blocks into the first `<script setup lang=\"ts\">` block.","Move shared code into a `.ts` module and import it."],
   VIBE1004: ["The `<script>` block has no `setup` attribute.","Write the block as `<script setup lang=\"ts\">`.","Move component options into a `defineOptions()` call inside `<script setup lang=\"ts\">`."],
   VIBE1005: ["The `<script setup>` block needs `lang=\"ts\"` but has {lang}.","Write the block as `<script setup lang=\"ts\">`."],
   VIBE1006: ["The `<{block}>` block has a `src` attribute.","Move the content of the referenced file into the `<{block}>` block and remove `src`.","Import TypeScript from another module inside `<script setup lang=\"ts\">`, or CSS with `@import` inside `<style>`."],

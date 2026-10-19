@@ -18,8 +18,19 @@ const rows: [string, string, string, string[]?][] = [
     '1:55-1:79',
   ],
   ['VIBE1004', '<template></template><script lang="ts"></script>', '1:22-1:40'],
+  [
+    'VIBE1004',
+    '<template></template><script lang="ts"></script><script setup lang="ts"></script>',
+    '1:22-1:40',
+  ],
   ['VIBE1005', '<template></template><script setup></script>', '1:22-1:36'],
   ['VIBE1005', '<template></template><script setup lang="js"></script>', '1:36-1:45'],
+  [
+    'VIBE1005',
+    '<template></template><script setup lang="js" lang="ts"></script>',
+    '1:36-1:45',
+    ['VIBE1102 1:46-1:55'],
+  ],
   ['VIBE1006', '<template src="a.html"></template>', '1:11-1:23'],
   ['VIBE1006', '<template></template><style src="a.css"></style>', '1:29-1:40'],
   ['VIBE1007', '<template></template><style module></style>', '1:29-1:35'],
@@ -27,7 +38,9 @@ const rows: [string, string, string, string[]?][] = [
   ['VIBE1009', '<template></template><style lang="sass2"></style>', '1:29-1:41'],
   ['VIBE1010', '<template functional></template>', '1:11-1:21'],
   ['VIBE1010', '<template></template><style vars="{}"></style>', '1:29-1:38'],
+  ['VIBE1010', '<template v-pre></template>', '1:11-1:16'],
   ['VIBE1011', '<template></template><docs></docs>', '1:22-1:28'],
+  ['VIBE1011', '<template></template><constructor x></constructor>', '1:22-1:37'],
   ['VIBE1012', '<template></template>\n  stray text\n', '2:3-2:13'],
   ['VIBE1013', '<template></template><script setup lang="ts" generic="T"></script>', '1:46-1:57'],
   ['VIBE1101', T('<![CDATA[x]]>'), '1:11-1:11'],
@@ -72,6 +85,7 @@ describe('diagnostic locations', () => {
     S('/* ::v-deep :slotted( v-bind( /deep/ */'),
     S('// v-bind(x)\na {}', ' lang="scss"'),
     S('a {} // >>>', ' lang="sass"'),
+    S('a::slotted(b) {}'),
   ])('reports nothing for the commented-out form in %j', (source) => {
     expect(parse(source, { filename: 'A.vibe' }).diagnostics).toStrictEqual([]);
   });

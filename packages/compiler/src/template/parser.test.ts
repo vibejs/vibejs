@@ -64,8 +64,6 @@ function baseParse(
     seen.add(value);
     if ('offset' in value && 'line' in value && 'column' in value) {
       const pos = value as Position;
-      // the shared location stub of modifiers such as `.prop` stays at 0
-      if (pos.offset < WRAPPER.length) return;
       if (pos.line === 1) pos.column -= WRAPPER.length;
       pos.offset -= WRAPPER.length;
       return;
@@ -1521,15 +1519,15 @@ describe('compiler: parse', () => {
             isStatic: false,
             loc: {
               end: {
-                column: 1,
+                column: 6,
                 line: 1,
-                offset: 0,
+                offset: 5,
               },
               source: '',
               start: {
-                column: 1,
+                column: 6,
                 line: 1,
-                offset: 0,
+                offset: 5,
               },
             },
             type: 4,
@@ -3019,5 +3017,25 @@ describe('additions', () => {
       ['12', '</12>'],
       [' a', '<!-- a'],
     ]);
+  });
+
+  test('an input cut inside a v-pre start tag leaves no v-pre state behind', () => {
+    const clean = '<div v-if="ok">{{ msg }}</div>';
+    for (const cut of ['<div v-pre ', '<div v-pre x', '<div v-pre="', '<pre v-pre ']) {
+      children(cut);
+      const div = first(clean);
+      expect(div.props.map((p) => [p.type, p.name])).toStrictEqual([[NodeTypes.DIRECTIVE, 'if']]);
+      expect(div.children.map((c) => c.type)).toStrictEqual([NodeTypes.INTERPOLATION]);
+    }
+  });
+
+  test('a blank interpolation has a zero-width content loc after its whitespace', () => {
+    const locs = (input: string) => {
+      const { content } = first(`<p>${input}</p>`).children[0] as InterpolationNode;
+      return [content.content, content.loc.start.offset, content.loc.end.offset];
+    };
+    expect(locs('{{ }}')).toStrictEqual(['', 6, 6]);
+    expect(locs('{{  }}')).toStrictEqual(['', 7, 7]);
+    expect(locs('{{}}')).toStrictEqual(['', 5, 5]);
   });
 });
