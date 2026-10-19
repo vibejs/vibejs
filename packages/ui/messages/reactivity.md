@@ -65,3 +65,14 @@ A cleanup belongs to the effect scope or watcher that is running when it is regi
 
 - Call {api}() synchronously inside `effectScope().run()`, a component's setup or a watcher.
 - Pass `true` as the second argument of {api}() when running without an owner is expected.
+
+## VIBE5007: Invalid watch source
+
+> watch() cannot watch a source of type {type}: it is not a ref, a getter, a reactive object or an array of these.
+
+`watch()` tracks what its source reads. A plain value, or an object that is not reactive, has nothing to track, so the watcher never fires. In an array of sources, each invalid item reads as `undefined`.
+
+### Fix
+
+- Pass a getter that reads the value, as in `watch(() => state.count, callback)`.
+- Pass the object through `reactive()` before watching it, or watch a ref.

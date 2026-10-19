@@ -1,8 +1,7 @@
 // @vitest-environment node
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/reactivity/__tests__/computed.spec.ts (MIT)
 //
-// Cases that need the scheduler and components move to RR-3 and RR-5; onTrack/onTrigger are not
-// part of this API.
+// Cases that need components move to RR-5; onTrack/onTrigger are not part of this API.
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 import { vibeError } from '../errors.gen.ts';
 import { computed, ComputedRefImpl, type ComputedRef } from './computed.ts';

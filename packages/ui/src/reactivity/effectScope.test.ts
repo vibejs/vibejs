@@ -1,7 +1,7 @@
 // @vitest-environment node
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/reactivity/__tests__/effectScope.spec.ts (MIT)
 //
-// The cases built on watch() and nextTick() move to RR-3; on()/off() are not part of this API.
+// on()/off() are not part of this API.
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 import { vibeError } from '../errors.gen.ts';
 import { computed } from './computed.ts';
@@ -15,6 +15,8 @@ import {
 } from './effectScope.ts';
 import { isProxy, reactive } from './reactive.ts';
 import { ref } from './ref.ts';
+import { nextTick } from '../runtime/scheduler.ts';
+import { watch, watchEffect } from '../runtime/watch.ts';
 
 function effect(fn: () => unknown): ReactiveEffect {
   const e = new ReactiveEffect(fn);
@@ -251,11 +253,12 @@ describe('reactivity/effect/scope', () => {
     expect(parent.scopes.includes(impl(child))).toBe(false);
   });
 
-  it('test with higher level APIs', () => {
+  it('test with higher level APIs', async () => {
     const r = ref(1);
 
     const computedSpy = vi.fn<(value?: unknown) => void>();
-    const effectSpy = vi.fn<(value?: unknown) => void>();
+    const watchSpy = vi.fn<(value?: unknown) => void>();
+    const watchEffectSpy = vi.fn<(value?: unknown) => void>();
 
     const scope = effectScope();
     scope.run(() => {
@@ -264,26 +267,32 @@ describe('reactivity/effect/scope', () => {
         return r.value + 1;
       });
 
-      effect(() => {
-        effectSpy();
+      watch(r, watchSpy);
+      watchEffect(() => {
+        watchEffectSpy();
         void r.value;
         void c.value;
       });
     });
 
     expect(computedSpy).toHaveBeenCalledTimes(1);
-    expect(effectSpy).toHaveBeenCalledTimes(1);
+    expect(watchSpy).toHaveBeenCalledTimes(0);
+    expect(watchEffectSpy).toHaveBeenCalledTimes(1);
 
     r.value++;
+    await nextTick();
     expect(computedSpy).toHaveBeenCalledTimes(2);
-    expect(effectSpy).toHaveBeenCalledTimes(2);
+    expect(watchSpy).toHaveBeenCalledTimes(1);
+    expect(watchEffectSpy).toHaveBeenCalledTimes(2);
 
     scope.stop();
 
     r.value++;
+    await nextTick();
     // should not trigger anymore
     expect(computedSpy).toHaveBeenCalledTimes(2);
-    expect(effectSpy).toHaveBeenCalledTimes(2);
+    expect(watchSpy).toHaveBeenCalledTimes(1);
+    expect(watchEffectSpy).toHaveBeenCalledTimes(2);
   });
 
   it('getCurrentScope() stays valid when running a detached nested EffectScope', () => {
@@ -323,7 +332,46 @@ describe('reactivity/effect/scope', () => {
     expect(fnSpy).toHaveBeenCalledTimes(3);
   });
 
-  // Upstream watches the stage inside the scope; an effect stands in until watch() exists.
+  test('removing a watcher while stopping its effectScope', async () => {
+    const count = ref(0);
+    const scope = effectScope();
+    let watcherCalls = 0;
+    let cleanupCalls = 0;
+
+    scope.run(() => {
+      const stop1 = watch(count, () => {
+        watcherCalls++;
+      });
+      watch(count, (val, old, onCleanup) => {
+        watcherCalls++;
+        onCleanup(() => {
+          cleanupCalls++;
+          stop1();
+        });
+      });
+      watch(count, () => {
+        watcherCalls++;
+      });
+    });
+
+    expect(watcherCalls).toBe(0);
+    expect(cleanupCalls).toBe(0);
+
+    count.value++;
+    await nextTick();
+    expect(watcherCalls).toBe(3);
+    expect(cleanupCalls).toBe(0);
+
+    scope.stop();
+    count.value++;
+    await nextTick();
+    expect(watcherCalls).toBe(3);
+    expect(cleanupCalls).toBe(1);
+
+    expect(impl(scope).effects.length).toBe(0);
+    expect(impl(scope).cleanups.length).toBe(0);
+  });
+
   it('should still trigger updates after stopping scope stored in reactive object', () => {
     const rs = ref({
       stage: 0,
@@ -341,7 +389,7 @@ describe('reactivity/effect/scope', () => {
       status.stage = 1;
       status.scope = effectScope();
       status.scope.run(() => {
-        effect(() => status.stage);
+        watch([() => status.stage], () => {});
       });
     };
 
@@ -393,25 +441,25 @@ describe('reactivity/effect/scope', () => {
     expect(sibling.active).toBe(false);
   });
 
-  it('should resume effects when an effect stops a sibling effect', () => {
+  it('should resume effects when a watcher stops a sibling watcher', () => {
     const count = ref(0);
     const scope = effectScope();
+    let stopSecond: (() => void) | undefined;
+    const firstSpy = vi.fn<(value?: unknown) => void>(() => stopSecond?.());
     const secondSpy = vi.fn<(value?: unknown) => void>();
-    let second: ReactiveEffect | undefined;
 
     scope.run(() => {
-      effect(() => {
-        void count.value;
-        second?.stop();
-      });
-      second = effect(() => secondSpy(count.value));
+      watch(count, firstSpy, { flush: 'sync' });
+      stopSecond = watch(count, secondSpy, { flush: 'sync' });
     });
 
     scope.pause();
     count.value++;
 
     expect(() => scope.resume()).not.toThrow();
-    expect(secondSpy).toHaveBeenCalledTimes(1);
+    expect(firstSpy).toHaveBeenCalledTimes(1);
+    expect(secondSpy).not.toHaveBeenCalled();
+    expect(impl(scope).effects).toHaveLength(1);
   });
 });
 
