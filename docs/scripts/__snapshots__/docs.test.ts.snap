@@ -1,0 +1,251 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cliPages > writes cli/index and one page per command of the recorded help 1`] = `
+{
+  "cli/check": "---
+title: "vibejs check"
+description: "Type-check, lint, format-check and test the project with coverage, concurrently."
+---
+
+# vibejs check
+
+Type-check, lint, format-check and test the project with coverage, concurrently.
+
+\`\`\`sh
+vibejs check [--only types,lint,format,test] [--fix] [--max N]
+\`\`\`
+
+## Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| \`--only\` | string | Run only these steps: types, lint, format, test. |
+| \`--fix\` | boolean | Apply lint fixes and format the files first. |
+| \`--max\` | string | Show at most N diagnostics (default 20). |
+
+## Examples
+
+\`\`\`sh
+vibejs check
+vibejs check --only types,lint
+vibejs check --fix --max 50
+\`\`\`
+",
+  "cli/docs": "---
+title: "vibejs docs"
+description: "Look up a VIBE code, open a docs page by path, or search the bundled docs, offline."
+---
+
+# vibejs docs
+
+Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.
+
+\`\`\`sh
+vibejs docs <query...>
+\`\`\`
+
+## Arguments
+
+| Name | Required | Values |
+| --- | --- | --- |
+| \`query\` | yes |  |
+
+## Examples
+
+\`\`\`sh
+vibejs docs VIBE8003
+vibejs docs errors/VIBE8004
+vibejs docs "unknown option"
+\`\`\`
+",
+  "cli/explain": "---
+title: "vibejs explain"
+description: "Explain a VIBE error code from the bundled catalog, offline."
+---
+
+# vibejs explain
+
+Explain a VIBE error code from the bundled catalog, offline.
+
+\`\`\`sh
+vibejs explain <code>
+\`\`\`
+
+## Arguments
+
+| Name | Required | Values |
+| --- | --- | --- |
+| \`code\` | yes |  |
+
+## Examples
+
+\`\`\`sh
+vibejs explain VIBE8003
+\`\`\`
+",
+  "cli/index": "---
+title: "CLI reference"
+description: "Every vibejs command, its options and examples."
+---
+
+# CLI reference
+
+Run \`vibejs <command> --help --json\` for the same reference as JSON.
+
+| Command | Summary |
+| --- | --- |
+| [\`vibejs explain\`](./explain.md) | Explain a VIBE error code from the bundled catalog, offline. |
+| [\`vibejs docs\`](./docs.md) | Look up a VIBE code, open a docs page by path, or search the bundled docs, offline. |
+| [\`vibejs check\`](./check.md) | Type-check, lint, format-check and test the project with coverage, concurrently. |
+
+## Global options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| \`--json\` | boolean | Print one JSON object (on by default in agent mode). |
+| \`--help\`, \`-h\` | boolean | Describe the commands and their options. |
+| \`--version\` | boolean | Print the vibejs version. |
+",
+}
+`;
+
+exports[`llms > writes llms.txt: title, disambiguation, every non-error page once, no error codes 1`] = `
+"# vibe.js
+
+> vibe.js: npm scope \`@vibejs-org\`, CLI \`vibejs\` (never \`vibe\`). Not monday.com Vibe (\`@vibe/*\`), not the npm packages \`vibejs\` or \`vibe.js\`.
+
+Offline docs for the installed version: \`node_modules/@vibejs-org/cli/dist/docs/\`. Explain an error code with \`vibejs explain VIBE####\`.
+
+- [Fixture home](https://vibejs.org/v0/): The fixture landing page.
+
+## Guides
+
+- [guides/no-title](https://vibejs.org/v0/guides/no-title)
+- [Getting: started](https://vibejs.org/v0/guides/start): Start here.
+
+## Server
+
+- [Handlers](https://vibejs.org/v0/server/handlers)
+
+## Zeta
+
+- [Notes](https://vibejs.org/v0/zeta/notes)
+
+## Optional
+
+- [Error codes](https://vibejs.org/v0/errors/): every VIBE error code with its message and fixes
+- [Full docs](https://vibejs.org/v0/llms-full.txt): every page, error pages included, in one file
+"
+`;
+
+exports[`llms > writes llms-full.txt: every page once, error pages last 1`] = `
+"# Fixture home
+
+Read [the guide](https://vibejs.org/v0/guides/start) or [an error](https://vibejs.org/v0/errors/VIBE0001).
+
+Source: https://vibejs.org/v0/
+
+---
+
+# guides/no-title
+
+Just prose.
+
+Source: https://vibejs.org/v0/guides/no-title
+
+---
+
+# Getting: started
+
+Intro without a title heading; see [the handlers](https://vibejs.org/v0/server/handlers#ctx).
+
+> **Tip:**
+> Use the CLI.
+
+> **Careful now:**
+> Do not cast.
+>
+> \`\`\`ts
+> const one: number = 1;
+> \`\`\`
+>
+
+\`\`\`ts {2}
+export const base: string = DOCS_BASE;
+\`\`\`
+
+\`\`\`sh
+# not a title
+\`\`\`
+
+Source: https://vibejs.org/v0/guides/start
+
+---
+
+# Handlers
+
+See [the home page](https://vibejs.org/v0/), [an external page](https://example.com) and [the context](#ctx).
+
+## Ctx
+
+Each handler receives one typed context.
+
+Source: https://vibejs.org/v0/server/handlers
+
+---
+
+# Notes
+
+Source: https://vibejs.org/v0/zeta/notes
+
+---
+
+# Error codes
+
+| Code                      | Title         | Package | Status |
+| ------------------------- | ------------- | ------- | ------ |
+| [VIBE0001](https://vibejs.org/v0/errors/VIBE0001) | Fixture error | errors  |        |
+
+Source: https://vibejs.org/v0/errors/
+
+---
+
+# VIBE0001: Fixture error
+
+> The fixture failed.
+
+### Example
+
+\`\`\`ts
+const broken: number = 'not checked';
+\`\`\`
+
+Source: https://vibejs.org/v0/errors/VIBE0001
+"
+`;
+
+exports[`toAgentMarkdown > renders the fixture guide in both modes 1`] = `
+"# Getting: started
+
+Intro without a title heading; see [the handlers](https://vibejs.org/v0/server/handlers#ctx).
+
+> **Tip:**
+> Use the CLI.
+
+> **Careful now:**
+> Do not cast.
+>
+> \`\`\`ts
+> const one: number = 1;
+> \`\`\`
+>
+
+\`\`\`ts {2}
+export const base: string = DOCS_BASE;
+\`\`\`
+
+\`\`\`sh
+# not a title
+\`\`\`
+"
+`;

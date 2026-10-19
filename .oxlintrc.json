@@ -117,7 +117,7 @@
       }
     },
     {
-      "files": ["packages/cli/src/**", "scripts/**", "packages/ui/src/warn.ts"],
+      "files": ["packages/cli/src/**", "scripts/**", "docs/scripts/**", "packages/ui/src/warn.ts"],
       "rules": { "eslint/no-console": "off" }
     },
     {
@@ -149,7 +149,7 @@
       }
     },
     {
-      "files": ["**/*.config.ts"],
+      "files": ["**/*.config.ts", "docs/.vitepress/config.ts"],
       "rules": { "import/no-default-export": "off" }
     }
   ],

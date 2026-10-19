@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "command": "help",
+  "version": "0.0.0",
+  "globalOptions": [
+    {
+      "name": "json",
+      "type": "boolean",
+      "description": "Print one JSON object (on by default in agent mode)."
+    },
+    {
+      "name": "help",
+      "type": "boolean",
+      "short": "h",
+      "description": "Describe the commands and their options."
+    },
+    {
+      "name": "version",
+      "type": "boolean",
+      "description": "Print the vibejs version."
+    }
+  ],
+  "commands": [
+    {
+      "name": "explain",
+      "aliases": [],
+      "summary": "Explain a VIBE error code from the bundled catalog, offline.",
+      "usage": "vibejs explain <code>",
+      "examples": ["vibejs explain VIBE8003"],
+      "options": [],
+      "positionals": [
+        {
+          "name": "code",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "docs",
+      "aliases": [],
+      "summary": "Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.",
+      "usage": "vibejs docs <query...>",
+      "examples": [
+        "vibejs docs VIBE8003",
+        "vibejs docs errors/VIBE8004",
+        "vibejs docs \"unknown option\""
+      ],
+      "options": [],
+      "positionals": [
+        {
+          "name": "query",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "check",
+      "aliases": [],
+      "summary": "Type-check, lint, format-check and test the project with coverage, concurrently.",
+      "usage": "vibejs check [--only types,lint,format,test] [--fix] [--max N]",
+      "examples": ["vibejs check", "vibejs check --only types,lint", "vibejs check --fix --max 50"],
+      "options": [
+        {
+          "name": "only",
+          "type": "string",
+          "description": "Run only these steps: types, lint, format, test."
+        },
+        {
+          "name": "fix",
+          "type": "boolean",
+          "description": "Apply lint fixes and format the files first."
+        },
+        {
+          "name": "max",
+          "type": "string",
+          "description": "Show at most N diagnostics (default 20)."
+        }
+      ],
+      "positionals": []
+    }
+  ]
+}

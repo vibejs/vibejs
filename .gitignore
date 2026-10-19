@@ -14,6 +14,11 @@ playwright-report/
 test-results/
 .playwright-mcp/
 packages/cli/src/catalog.gen.ts
+docs/errors/
+docs/cli/
+docs/.snippets/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 
 # Local maintainer material
 .planning/

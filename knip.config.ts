@@ -10,6 +10,7 @@ export default {
       // Run, never imported, by the check tool-contract test from packages/cli/node_modules.
       ignoreDependencies: ['oxlint', 'oxfmt'],
     },
+    docs: { entry: ['scripts/*.ts'] },
   },
   ignore: ['packages/create-vibejs/templates/**', '**/test/fixtures/**'],
 } satisfies KnipConfig;

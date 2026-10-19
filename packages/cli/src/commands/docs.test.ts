@@ -20,8 +20,6 @@ beforeAll(() => {
   docsDir = join(root, 'docs');
   write(docsDir, 'server/di.md', '# Dependency injection\n\nGizmos and `inject()`.\n');
   write(docsDir, 'guide/no-title.md', 'Just prose about gizmos.\n');
-  // At the path of a catalog page: the catalog entry wins.
-  write(docsDir, 'errors/VIBE0001.md', '# VIBE0001: Stale copy\n');
   // Outside docsDir: never a page, never searched.
   write(root, 'secret.md', '# Secret\n\nproviders\n');
 });
