@@ -85,6 +85,7 @@ function setupComponent(instance: ComponentInstance): ComponentInstance {
         let state: Record<string, unknown> | void;
         try {
           state = def.setup?.(instance.props, instance.ctx);
+          if (!(state instanceof Promise)) instance.setupState = proxyRefs(state ?? {});
         } catch (err) {
           handleError(err, instance, 'setup function');
           return;
@@ -92,7 +93,6 @@ function setupComponent(instance: ComponentInstance): ComponentInstance {
         if (state instanceof Promise) {
           throw vibeError('VIBE5204', { name: instance.name ?? 'Anonymous' });
         }
-        instance.setupState = proxyRefs(state ?? {});
         renderComponent(instance);
       }),
     ),
@@ -128,16 +128,28 @@ function renderComponent(instance: ComponentInstance): void {
 
 /**
  * HMR: renders `instance` again with the current `def.render` and the same setup state, props and
- * context, and puts the new block where the old one was. Child components are created again.
+ * context, and puts the new block where the old one was. Child components are created again. A
+ * block with no node (an empty template) has no position, so the instance is recreated instead.
  */
 export function rerenderComponent(instance: ComponentInstance): void {
   if (instance.isUnmounted) return;
   const old = instance.block;
+  const anchor = firstNode(old);
+  if (!anchor?.parentNode) {
+    recreateComponent(instance);
+    return;
+  }
   instance.renderScope?.stop();
   untracked(() => withInstance(instance, () => renderComponent(instance)));
-  const anchor = firstNode(old);
-  if (anchor?.parentNode) insert(instance.block, anchor.parentNode, anchor);
+  insert(instance.block, anchor.parentNode, anchor);
   removeNodes(old);
+}
+
+/** HMR: creates `instance` again by rerendering its parent, remounts a root, or reloads the page. */
+export function recreateComponent(instance: ComponentInstance): void {
+  if (instance.parent) rerenderComponent(instance.parent);
+  else if (instance.appContext.remount) instance.appContext.remount();
+  else location.reload();
 }
 
 /** Unmounts `instance`: `beforeUnmount` hooks, then its scope stops (and with it its children), then `unmounted` hooks are queued. */

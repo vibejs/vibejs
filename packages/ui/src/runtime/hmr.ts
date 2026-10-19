@@ -3,7 +3,7 @@
 import { vibeError } from '../errors.gen.ts';
 import type { ComponentDef } from '../internal.ts';
 import { warn } from '../warn.ts';
-import { rerenderComponent } from './component.ts';
+import { recreateComponent, rerenderComponent } from './component.ts';
 import { hmrRecords as records, type ComponentInstance, type HmrRecord } from './instance.ts';
 
 /** The record of `id`; when there is none, warns VIBE5501 and reloads the page. */
@@ -46,8 +46,7 @@ export const hmr: {
     const parents = new Set<ComponentInstance>();
     for (const instance of Array.from(found.instances)) {
       if (instance.parent) parents.add(instance.parent);
-      else if (instance.appContext.remount) instance.appContext.remount();
-      else location.reload();
+      else recreateComponent(instance);
     }
     for (const parent of parents) rerenderComponent(parent);
   },

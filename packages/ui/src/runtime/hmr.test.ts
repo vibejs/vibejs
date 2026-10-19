@@ -120,6 +120,31 @@ test('rerender recreates child components and stops the old render effects', asy
   expect(log).toEqual(['old effect 0', 'old mounted', 'old unmounted', 'new mounted']);
 });
 
+test('rerender of a block with no node recreates the instance through its parent or the app', () => {
+  const { def, id } = recorded('child');
+  def.render = emptyRender;
+  const parent = recorded('parent', () => [def]);
+  const { host } = mount(parent.def);
+  hmr.rerender(id, renderLabel('child'));
+  expect(host.innerHTML).toBe('<p>parent:0</p><p>child:0</p>');
+  hmr.rerender(parent.id, emptyRender);
+  expect(host.innerHTML).toBe('');
+  hmr.rerender(parent.id, renderLabel('root'));
+  expect(host.innerHTML).toBe('<p>root:0</p>');
+});
+
+test('rerender of a parentless block with no node outside an app reloads the page', () => {
+  const reload = vi.fn<() => void>();
+  vi.stubGlobal('location', { reload });
+  const { def, id } = recorded('detached');
+  def.render = emptyRender;
+  const scope = effectScope();
+  scope.run(() => createComponent(def));
+  hmr.rerender(id, renderLabel('new'));
+  expect(reload).toHaveBeenCalledTimes(1);
+  scope.stop();
+});
+
 test('rerender skips an instance that an earlier rerender unmounted', () => {
   let renders = 0;
   const def: ComponentDef = {

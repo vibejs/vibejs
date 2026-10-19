@@ -8,6 +8,7 @@ import { createApp } from './app.ts';
 import { createComponent } from './component.ts';
 import { renderEffect } from './renderEffect.ts';
 import { nextTick } from './scheduler.ts';
+import { watch } from './watch.ts';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -138,4 +139,27 @@ test.each([
     args: { component },
   });
   expect(details).toBe('at src/Loop.vibe:3:1');
+});
+
+test('in dev, VIBE5101 of a watcher of a component names the component', async () => {
+  const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const n = ref(0);
+  const app = createApp({
+    name: 'Looping',
+    setup: () => {
+      watch(n, () => {
+        n.value++;
+      });
+    },
+    render: () => [],
+  });
+  app.mount(document.createElement('div'));
+  n.value++;
+  await nextTick();
+  app.unmount();
+  const [[logged]] = spy.mock.calls;
+  expect(isVibeError(logged, 'VIBE5102') && logged.cause).toMatchObject({
+    code: 'VIBE5101',
+    args: { component: '<Looping>' },
+  });
 });

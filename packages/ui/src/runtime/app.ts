@@ -52,6 +52,8 @@ export interface App {
    * Renders the root component into `container` (an element or a selector), replacing its
    * content, and returns the root's exposed values once the `mounted` hooks ran. Other pending
    * post-flush work, such as `flush: 'post'` watchers, runs then too, before pending updates.
+   * A dev reload of the root mounts a new instance: a later `mount()` returns its exposed values,
+   * while an object returned before still reads the old instance.
    */
   mount(container: Element | string): Record<string, unknown>;
   /** Unmounts the root component and removes its nodes, then runs the `onUnmount` callbacks. */
@@ -140,6 +142,7 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
         rootScope.stop();
         removeNodes(instance!);
         instance = render();
+        exposed = proxyRefs(instance.exposed ?? {});
       };
       context.remount = __DEV__ ? remount : undefined;
       exposed = proxyRefs(instance.exposed ?? {});

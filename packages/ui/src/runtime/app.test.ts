@@ -415,6 +415,23 @@ describe('remount', () => {
     expect(log).toEqual(['setup', 'setup', 'unmounted', 'unmounted']);
   });
 
+  test('in dev, a later mount returns the exposed values of the remounted root', () => {
+    let instance: ComponentInstance | null = null;
+    let setups = 0;
+    const app = createApp({
+      setup: (_props, ctx) => {
+        instance = currentInstance;
+        ctx.expose({ setup: ++setups });
+      },
+      render: () => [],
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const host = document.createElement('div');
+    expect(app.mount(host)).toEqual({ setup: 1 });
+    instance!.appContext.remount!();
+    expect(app.mount(host)).toEqual({ setup: 2 });
+  });
+
   test('in prod, the app context has no remount', () => {
     vi.stubGlobal('__DEV__', false);
     expect(mountLogged([]).context.remount).toBeUndefined();

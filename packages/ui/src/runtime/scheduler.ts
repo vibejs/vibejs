@@ -14,7 +14,7 @@ export interface SchedulerJob {
   id?: number;
   order?: number;
   flags?: number;
-  /** Dev only: the instance and the source position of a render effect, for VIBE5101. */
+  /** The instance of a watcher or a render effect (render effects set it in dev only), and the dev-only source position of a render effect, for VIBE5101. */
   instance?: ComponentInstance | null;
   loc?: string | undefined;
 }
@@ -161,7 +161,7 @@ function tooManyRuns(seen: Map<SchedulerJob, number>, job: SchedulerJob): boolea
   const count = seen.get(job) ?? 0;
   if (count >= RECURSION_LIMIT) {
     const { instance } = job;
-    const component = instance ? `<${instance.name ?? 'Anonymous'}>` : 'no component';
+    const component = instance ? `<${instance.name ?? 'Anonymous'}>` : 'outside a component';
     handleError(vibeError('VIBE5101', { component }), null, 'scheduler flush', job.loc);
     return true;
   }
