@@ -1,11 +1,20 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { portOf } from '../../test/app.ts';
-import { readLiveLock, removeLock, writeLock, type DevLock } from './lock.ts';
+import { claimLock, readLiveLock, removeLock, writeLock, type DevLock } from './lock.ts';
 
 let root: string;
 let server: Server | undefined;
@@ -57,9 +66,26 @@ describe('readLiveLock', () => {
     expect(existsSync(LOCK())).toBe(false);
   });
 
+  it('deletes a lock of a live process whose server does not answer', async () => {
+    writeLock(root, lock(process.pid));
+    expect(await readLiveLock(root)).toBeUndefined();
+    expect(existsSync(LOCK())).toBe(false);
+  });
+
   it('deletes a lock whose process has exited', async () => {
     const { pid } = spawnSync(process.execPath, ['-e', '']);
     writeLock(root, lock(pid, await health(pid)));
+    expect(await readLiveLock(root)).toBeUndefined();
+    expect(existsSync(LOCK())).toBe(false);
+  });
+
+  it('keeps the claim of a live process that is still starting, not of an exited one', async () => {
+    expect(claimLock(root, process.pid)).toBe(true);
+    expect(await readLiveLock(root)).toBeUndefined();
+    expect(existsSync(LOCK())).toBe(true);
+    rmSync(LOCK());
+    const { pid } = spawnSync(process.execPath, ['-e', '']);
+    expect(claimLock(root, pid)).toBe(true);
     expect(await readLiveLock(root)).toBeUndefined();
     expect(existsSync(LOCK())).toBe(false);
   });
@@ -108,6 +134,26 @@ for (let i = 0; i < 300; i++) writeLock(${JSON.stringify(root)}, { ...${JSON.str
     expect(await exited).toBe(0);
     expect(lengths.length).toBeGreaterThan(0);
     expect(new Set(lengths)).toEqual(new Set([big.version.length]));
+  });
+});
+
+describe('claimLock', () => {
+  it('succeeds only while no lock exists, and leaves no temporary file', () => {
+    expect(claimLock(root, 7)).toBe(true);
+    expect(claimLock(root, 8)).toBe(false);
+    expect(JSON.parse(readFileSync(LOCK(), 'utf8'))).toEqual({ pid: 7 });
+    expect(readdirSync(join(root, '.vibejs'))).toEqual(['dev.lock']);
+  });
+
+  // Windows ignores a read-only mode on directories.
+  it.skipIf(process.platform === 'win32')('rethrows when it cannot write the lock', () => {
+    mkdirSync(join(root, '.vibejs'));
+    chmodSync(join(root, '.vibejs'), 0o500);
+    try {
+      expect(() => claimLock(root, 7)).toThrow(/EACCES/);
+    } finally {
+      chmodSync(join(root, '.vibejs'), 0o700);
+    }
   });
 });
 

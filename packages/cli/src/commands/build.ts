@@ -1,6 +1,6 @@
 import { relative } from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
-import { build as viteBuild, type InlineConfig, type Rollup } from 'vite';
+import type { InlineConfig, Rollup } from 'vite';
 import type { CommandDef } from '../command.ts';
 import { vibeError } from '../errors.gen.ts';
 import { envelopeError, type JsonEnvelope } from '../output.ts';
@@ -49,6 +49,8 @@ export const build: CommandDef<BuildResult> = {
         },
       ],
     ];
+    // Loaded here, so the other commands start without Vite.
+    const { build: viteBuild } = await import('vite');
     const ms: number[] = [];
     for (const [part, config] of parts) {
       const at = ctx.now();

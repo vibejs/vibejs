@@ -11,6 +11,7 @@ const MESSAGES = {
   VIBE8202: ["`server/src/app.module.ts` must export `AppModule` (a module class) and `appOptions` (an object); found {found}.","Export `AppModule` and `appOptions` as in the template."],
   VIBE8203: ["The backend failed to start: {reason}.","Fix the error at the logged location; the backend restarts on save.","Run `vibejs errors` to see the error with its stack."],
   VIBE8204: ["Port {port} is already in use.","Pass `--port <free port>` or stop the other process.","Run `vibejs dev` without `--port` to let it pick a free port."],
+  VIBE8205: ["`appOptions.basePath` in `server/src/app.module.ts` is empty.","Set a base path such as `basePath: '/api'` in `appOptions`, as in the template."],
   VIBE8301: ["`{tool}` exited with code {exitCode} and output that vibejs check cannot read.","Run the tool directly in the project root to see its full output.","Fix the configuration or the installation the output points to."],
   VIBE8302: ["`{file}` is not fully covered: {uncovered}.","Add tests for the listed ranges; never add coverage-ignore comments."],
   VIBE8303: ["`{file}` is not formatted.","Run `vibejs check --fix`."],

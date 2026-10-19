@@ -140,15 +140,17 @@ export function vibejsDev(o: {
         const found = names.length ? `the exports ${names.join(', ')}` : 'no exports';
         throw vibeError('VIBE8202', { found });
       }
-      const server: typeof Server = await runner.import('@vibejs-org/server');
       const options: Server.AppOptions = appOptions;
+      // The UI is served at the root, so a root-mounted backend would shadow it.
+      if (!options.basePath) throw vibeError('VIBE8205');
+      const server: typeof Server = await runner.import('@vibejs-org/server');
       const logger = serverLogger(server.Logger, o.log);
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- create() rejects a class that is not a module
       app = await server.VibeFactory.create(AppModule as Server.ModuleImport, {
         ...options,
         logger,
       });
-      basePath = options.basePath ?? '';
+      basePath = options.basePath;
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Vite middlewares receive HTTP/1 requests
       handler = toNodeHandler(app.fetch) as NodeHttp1Handler;
       failure = undefined;
@@ -158,9 +160,10 @@ export function vibejsDev(o: {
       return true;
     } catch (error) {
       const reason = String(error).split('\n', 1)[0];
-      failure = isVibeError(error, 'VIBE8202')
-        ? error
-        : vibeError('VIBE8203', { reason }, { cause: error });
+      failure =
+        isVibeError(error, 'VIBE8202') || isVibeError(error, 'VIBE8205')
+          ? error
+          : vibeError('VIBE8203', { reason }, { cause: error });
       o.log.write({
         level: 'error',
         source: 'vibejs',

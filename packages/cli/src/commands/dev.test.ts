@@ -97,16 +97,19 @@ describe('one port', () => {
     );
   });
 
-  it('mounts the backend at the root when appOptions has no basePath', async () => {
-    const r = await start(app((at) => edit(at, APP_MODULE, "{ basePath: '/api' }", '{}')));
-    expect(await text(r, '/health')).toBe('ok');
-    expect((await get(r, '/')).headers.get('content-type')).toBe('application/problem+json');
-    expect(readLock(r.root).apiPrefix).toBe('');
+  it('rejects an empty base path with VIBE8205 and keeps serving the UI', async () => {
+    const r = await start(app((at) => edit(at, APP_MODULE, "basePath: '/api'", "basePath: ''")));
+    expect(r.events()[0]).toMatchObject({ event: 'log', code: 'VIBE8205', file: APP_MODULE });
+    expect(await text(r, '/')).toContain('<script type="module" src="/src/main.ts">');
+    expect(await problem(r)).toMatchObject({ code: 'VIBE8205' });
+    expect(readLock(r.root)).not.toHaveProperty('apiPrefix');
   });
 });
 
 describe('lock', () => {
   it('writes the C9 lock when ready and removes it on the signal', async () => {
+    // Loading Vite adds a listener that re-raises a signal only when it is the last one.
+    await import('vite');
     const sigterm = process.listenerCount('SIGTERM');
     const r = await start();
     // Vite's own SIGTERM listener, which would exit before the lock is removed, is gone.
@@ -163,6 +166,56 @@ describe('reuse', () => {
     expect(
       dev.human({ ok: true, command: 'dev', version: '', url: r.url, pid: 7, reused: true }),
     ).toBe(`vibejs dev is already running at ${r.url} (pid 7). Stop it with: kill 7`);
+  });
+  it('starts one server when two start at the same time', async () => {
+    const root = app();
+    const ctxs = [testCtx(root), testCtx(root)];
+    const runs = ctxs.map((t) => dev.run({ values: { port: '0' }, positionals: [] }, t.ctx));
+    try {
+      // The one that waited for the other returns first.
+      const reused = await Promise.race(runs);
+      expect(reused).toMatchObject({ ok: true, reused: true, url: readLock(root).url });
+    } finally {
+      for (const t of ctxs) t.stop();
+    }
+    const results = await Promise.all(runs);
+    expect(results.filter((r) => r.reused)).toHaveLength(1);
+    expect(existsSync(join(root, '.vibejs/dev.lock'))).toBe(false);
+  });
+});
+
+describe('ready', () => {
+  it('does not wait more than 10 s for a backend that is slow to start', async () => {
+    let release!: () => void;
+    Reflect.set(globalThis, 'hold', new Promise<void>((resolve) => (release = resolve)));
+    const root = app((at) =>
+      edit(
+        at,
+        APP_MODULE,
+        'class HealthController {',
+        "class HealthController {\n  onModuleInit() {\n    return Reflect.get(globalThis, 'hold');\n  }",
+      ),
+    );
+    const t = testCtx(root);
+    const result = dev.run({ values: { port: '0' }, positionals: [] }, t.ctx);
+    try {
+      await vi.waitFor(() => expect(t.out.join('')).toContain('ready'), { timeout: 20_000 });
+      const { url } = readLock(root);
+      expect(readLock(root)).not.toHaveProperty('apiPrefix');
+      expect(JSON.parse(t.out[0])).toEqual({
+        event: 'ready',
+        url,
+        pid: process.pid,
+        logFile: '.vibejs/dev.log',
+      });
+      release();
+      // Requests wait for the start.
+      expect(await (await fetch(new URL('/api/health', url))).text()).toBe('ok');
+    } finally {
+      release();
+      t.stop();
+    }
+    expect(await result).toMatchObject({ ok: true });
   });
 });
 

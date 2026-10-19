@@ -97,6 +97,16 @@ Loading the server modules or creating the application threw. The dev server kee
 - Pass `--port <free port>` or stop the other process.
 - Run `vibejs dev` without `--port` to let it pick a free port.
 
+## VIBE8205: Empty base path
+
+> `appOptions.basePath` in `server/src/app.module.ts` is empty.
+
+`vibejs dev` serves the UI and the backend on one port: the UI at the root and the backend under `appOptions.basePath`. With an empty base path the backend would answer every request, including the UI's. Until the base path is set, every request under the previous base path (`/api` before the first start) is answered with a 503 problem response.
+
+### Fix
+
+- Set a base path such as `basePath: '/api'` in `appOptions`, as in the template.
+
 ## VIBE8301: Unreadable tool output
 
 > `{tool}` exited with code {exitCode} and output that vibejs check cannot read.

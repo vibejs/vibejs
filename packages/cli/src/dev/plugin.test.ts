@@ -64,7 +64,7 @@ describe('viteLogger', () => {
     const { logger, entries } = setup();
     const located = {
       code: 'VIBE1001',
-      id: `${ROOT}/ui/src/A.vibe?vue`,
+      id: `${ROOT}/ui/src/A.vibe?vibe&type=style`,
       loc: { line: 2, column: 5 },
     };
     logger.error('x', { error: Object.assign(new Error('x'), located) });

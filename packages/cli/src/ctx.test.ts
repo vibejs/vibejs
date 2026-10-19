@@ -100,24 +100,24 @@ describe('exec', () => {
 });
 
 describe('untilSignal', () => {
-  it.each(['SIGINT', 'SIGTERM'])(
-    'resolves with %s and then removes both listeners',
+  it.each(['SIGINT', 'SIGTERM'] as const)(
+    'resolves on a real %s and then removes both listeners',
     async (signal) => {
-      // Spies, so the runner's own signal listeners are never involved.
-      const once = vi.spyOn(process, 'once').mockReturnThis();
-      const off = vi.spyOn(process, 'off').mockReturnThis();
-      const ctx = nodeCtx();
-      expect(once).not.toHaveBeenCalled();
-      const waiting = ctx.untilSignal();
-      const [[first, listener], [second, same]] = once.mock.calls;
-      expect([first, second, same]).toEqual(['SIGINT', 'SIGTERM', listener]);
-      // Node passes the signal name to its listeners.
-      listener(signal);
-      expect(await waiting).toBe(signal);
-      expect(off.mock.calls).toEqual([
-        ['SIGINT', listener],
-        ['SIGTERM', listener],
-      ]);
+      // Set aside, so the runner's own signal listeners never see the emitted signal.
+      const others = { SIGINT: process.listeners('SIGINT'), SIGTERM: process.listeners('SIGTERM') };
+      process.removeAllListeners('SIGINT').removeAllListeners('SIGTERM');
+      try {
+        const waiting = nodeCtx().untilSignal();
+        expect([process.listenerCount('SIGINT'), process.listenerCount('SIGTERM')]).toEqual([1, 1]);
+        // Node passes the signal name to its listeners.
+        process.emit(signal, signal);
+        expect(await waiting).toBe(signal);
+        expect([process.listenerCount('SIGINT'), process.listenerCount('SIGTERM')]).toEqual([0, 0]);
+      } finally {
+        for (const [name, listeners] of Object.entries(others)) {
+          for (const listener of listeners) process.on(name, listener);
+        }
+      }
     },
   );
 });
