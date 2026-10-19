@@ -1,0 +1,78 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`describes the routes and modules without constructing anything 1`] = `
+{
+  "modules": [
+    {
+      "exports": [
+        "TodosService",
+      ],
+      "global": false,
+      "imports": [],
+      "path": "AppModule > TodosModule",
+      "providers": [
+        "TodosService",
+      ],
+    },
+    {
+      "exports": [],
+      "global": false,
+      "imports": [],
+      "path": "AppModule > HealthModule",
+      "providers": [],
+    },
+    {
+      "exports": [],
+      "global": false,
+      "imports": [
+        "TodosModule",
+        "HealthModule",
+      ],
+      "path": "AppModule",
+      "providers": [],
+    },
+  ],
+  "routes": [
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "TodosController.list",
+      "interceptors": [],
+      "method": "GET",
+      "path": "/api/todos",
+    },
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "TodosController.create",
+      "interceptors": [],
+      "method": "POST",
+      "path": "/api/todos",
+    },
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "TodosController.toggle",
+      "interceptors": [],
+      "method": "PATCH",
+      "path": "/api/todos/:id",
+    },
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "TodosController.remove",
+      "interceptors": [],
+      "method": "DELETE",
+      "path": "/api/todos/:id",
+    },
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "HealthController.check",
+      "interceptors": [],
+      "method": "GET",
+      "path": "/api/health",
+    },
+  ],
+}
+`;

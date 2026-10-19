@@ -39,11 +39,35 @@ it('lists, creates and toggles todos over app.fetch', async () => {
   expect(toggled).toMatchObject({ ok: true, data: { id: created.data.id, done: true } });
 });
 
-it('resolves a declared error as a problem', async () => {
+it('removes a todo with 204', async () => {
+  const created = await api.todos.create({ body: { title: 'a' } });
+  if (!created.ok) throw new Error(created.error.code);
+  const removed = await api.todos.remove({ params: { id: created.data.id } });
+  expect(removed).toMatchObject({ ok: true, data: undefined });
+  expect(removed.response?.status).toBe(204);
+  expect(await api.todos.list()).toMatchObject({ ok: true, data: [] });
+});
+
+it('resolves toggle of an unknown id as a problem', async () => {
   const r = await api.todos.toggle({ params: { id: 'missing' } });
   expect(r).toMatchObject({
     ok: false,
     error: { code: 'TODO_NOT_FOUND', status: 404, requestId: expect.any(String) },
+  });
+  expect(r.response?.headers.get('content-type')).toMatch(/^application\/problem\+json/);
+});
+
+it('narrows remove of an unknown id to TODO_NOT_FOUND with status 404', async () => {
+  const r = await api.todos.remove({ params: { id: 'missing' } });
+  if (r.ok || r.error.code !== 'TODO_NOT_FOUND') throw new Error('expected TODO_NOT_FOUND');
+  expectTypeOf(r.error.status).toEqualTypeOf<404>();
+  expect(r.error).toEqual({
+    type: 'about:blank',
+    title: 'Not Found',
+    status: 404,
+    code: 'TODO_NOT_FOUND',
+    detail: 'No todo missing',
+    requestId: expect.any(String),
   });
   expect(r.response?.headers.get('content-type')).toMatch(/^application\/problem\+json/);
 });
