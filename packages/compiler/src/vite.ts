@@ -13,7 +13,7 @@ import { compileStyle } from './style/compileStyle.ts';
 interface Entry {
   descriptor: SFCDescriptor;
   id: string;
-  /** The descriptor before the last hot update, consumed by the next transform of the main module. */
+  /** The descriptor before the oldest hot update not yet seen by a transform of the main module. */
   prev?: SFCDescriptor;
 }
 
@@ -28,9 +28,13 @@ ${rerenderOnly ? '_sfc.__rerenderOnly = true\n' : ''}if (import.meta.hot) {
 
 /** The main module (`index` undefined) or a style module of a `.vibe` file, from a module id. */
 function match(id: string): { file: string; index?: number } | undefined {
-  const [file, query] = id.split('?', 2);
-  if (!file.endsWith('.vibe')) return undefined;
+  const [path, query] = id.split('?', 2);
+  if (!path.endsWith('.vibe')) return undefined;
+  const file = normalizePath(path);
   const params = new URLSearchParams(query);
+  // Asset-style imports (`?raw`, `?url`, ...) belong to Vite.
+  if (['raw', 'url', 'worker', 'sharedworker', 'inline'].some((k) => params.has(k)))
+    return undefined;
   if (!params.has('vibe')) return { file };
   if (params.get('type') === 'style' && params.has('index'))
     return { file, index: Number(params.get('index')) };
@@ -195,13 +199,16 @@ export function vibe(): Plugin {
       if (!entry) return undefined;
       const prev = entry.descriptor;
       const { descriptor } = parse(await ctx.read(), { filename: prev.filename });
-      cache.set(ctx.file, { descriptor, id: entry.id, prev });
+      // Several saves before the next transform compare against the oldest unserved descriptor.
+      cache.set(ctx.file, { descriptor, id: entry.id, prev: entry.prev ?? prev });
       const main =
         !sameBlock(prev.scriptSetup, descriptor.scriptSetup) ||
         prev.template?.content !== descriptor.template?.content ||
         styleShape(prev) !== styleShape(descriptor);
       return ctx.modules.filter((mod) => {
-        const { index } = match(mod.id!)!;
+        const m = match(mod.id!);
+        if (!m) return true;
+        const { index } = m;
         if (index === undefined) return main;
         return prev.styles[index]?.content !== descriptor.styles[index]?.content;
       });

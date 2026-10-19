@@ -112,9 +112,33 @@ describe('vibe() main module', () => {
     );
   });
 
-  it('gives a dev id from the root-relative POSIX path', async () => {
-    const { code } = (await server.environments.client.transformRequest('/src/App.vibe'))!;
-    expect(code).toContain(`__hmrId: "${devId('src/App.vibe')}"`);
+  it('gives the same dev id for POSIX and Windows separators', async () => {
+    const source = await readFile(`${fixture}/src/App.vibe`, 'utf8');
+    // A backslash is a separator only on Windows, so the Windows CI job adds those ids.
+    const ids = [`${fixture}/src/App.vibe`];
+    if (process.platform === 'win32')
+      ids.push(`${fixture}/src\\App.vibe`, `${fixture.replaceAll('/', '\\')}\\src\\App.vibe`);
+    for (const id of ids) {
+      // The hooks are called directly, so the module id reaches the plugin as written.
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- vibe() defines both hooks as plain functions
+      const plugin = vibe() as {
+        configResolved: (config: object) => void;
+        transform: (this: object, code: string, id: string) => Promise<{ code: string }>;
+      };
+      plugin.configResolved({ root: fixture, isProduction: false, command: 'serve' });
+      const ctx = { environment: { config: { consumer: 'client' } } };
+      const { code } = await plugin.transform.call(ctx, source, id);
+      expect(code).toContain(`__hmrId: "${devId('src/App.vibe')}"`);
+    }
+  });
+
+  it('leaves ?raw and ?url imports of a .vibe file to Vite', async () => {
+    const client = server.environments.client;
+    const source = await readFile(`${fixture}/src/App.vibe`, 'utf8');
+    const raw = (await client.transformRequest('/src/App.vibe?raw'))!;
+    expect(raw.code).toContain(JSON.stringify(source));
+    const url = (await client.transformRequest('/src/App.vibe?url'))!;
+    expect(url.code).toContain('export default');
   });
 
   it('reports compile errors in the C2 shape', async () => {
@@ -233,10 +257,14 @@ describe('vibe() hot updates', () => {
   let source: string;
   // A plugin after vibe() receives the modules that vibe() returned from handleHotUpdate.
   let handled: (modules: ModuleNode[]) => void;
+  // An extra listener for the modules of the next hot update.
+  let onUpdate: ((modules: ModuleNode[]) => void) | undefined;
   const probe: Plugin = {
     name: 'probe',
     handleHotUpdate(ctx) {
       handled(ctx.modules);
+      onUpdate?.(ctx.modules);
+      onUpdate = undefined;
     },
   };
 
@@ -308,6 +336,30 @@ describe('vibe() hot updates', () => {
     expect((await save(`${source}\n<style>\np { margin: 0; }\n</style>\n`)).sent).toStrictEqual([
       main,
     ]);
+  });
+
+  it('rerenders only when every save since the last transform touched only the template', async () => {
+    const client = dev.environments.client;
+    await client.transformRequest('/src/App.vibe');
+    for (const next of [
+      source.replace(/ref\(\d+\)/, 'ref(3)'),
+      source.replace(/ref\(\d+\)/, 'ref(3)').replace('{{ count }}', 'm: {{ count }}'),
+    ]) {
+      await writeFile(file, next);
+      source = next;
+      await change(file);
+    }
+    const { code } = (await client.transformRequest('/src/App.vibe'))!;
+    expect(code).not.toContain('_sfc.__rerenderOnly = true');
+  });
+
+  it('keeps a ?raw import of the file in the hot update', async () => {
+    await dev.environments.client.transformRequest('/src/App.vibe?raw');
+    const modules = new Promise<ModuleNode[]>((resolve) => {
+      onUpdate = resolve;
+    });
+    await save(source.replace('margin', 'padding'));
+    expect((await modules).map((mod) => mod.url)).toContain('/src/App.vibe?raw');
   });
 
   it('sends nothing for a save without changes or for a file it never served', async () => {
