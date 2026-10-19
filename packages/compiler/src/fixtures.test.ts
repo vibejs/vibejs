@@ -3,30 +3,29 @@ import { fileURLToPath } from 'node:url';
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
 import { fixtureFile, fixtures, locations } from '../test/walk.ts';
+import { compile } from './compile.ts';
 import { formatDiagnostic } from './diagnostics.ts';
 import { analyze } from './script/analyze.ts';
 import { compileScript } from './script/compile.ts';
 import { parse } from './sfc/parse.ts';
-import { transform } from './transform/index.ts';
 
 const parsed = fixtures.map(([name, source]) => {
-  const { descriptor, diagnostics } = parse(source, { filename: `${name}/input.vibe` });
+  const result = compile(source, { filename: `${name}/input.vibe`, id: '0a1b2c3d', dev: false });
+  const { descriptor, diagnostics } = result;
   const analysis = analyze(descriptor);
-  const { ir, diagnostics: template } = transform(descriptor, analysis, { id: '0a1b2c3d' });
-  const all = [...diagnostics, ...analysis.diagnostics, ...template];
-  return {
-    name,
-    source,
-    descriptor,
-    analysis,
-    ir,
-    scriptClean: diagnostics.length + analysis.diagnostics.length === 0,
-    diagnostics: all.toSorted((a, b) => a.start.offset - b.start.offset),
-  };
+  const parseClean = parse(source, { filename: name }).diagnostics.length === 0;
+  const scriptClean = parseClean && analysis.diagnostics.length === 0;
+  return { name, source, descriptor, analysis, result, scriptClean, diagnostics };
 });
 const snapshot = (name: string) => fileURLToPath(fixtureFile(name, 'diagnostics.txt'));
 const scriptSnapshot = (name: string) => fileURLToPath(fixtureFile(name, 'script.ts'));
-const irSnapshot = (name: string) => fileURLToPath(fixtureFile(name, 'ir.json'));
+const outputSnapshot = (name: string, file = 'output.ts') => fileURLToPath(fixtureFile(name, file));
+
+/** Asserts that generated code parses as TypeScript. */
+const expectParses = (code: string) =>
+  expect(
+    parseSync('output.ts', code, { lang: 'ts', showSemanticErrors: true }).errors,
+  ).toStrictEqual([]);
 
 /** The codes and every `line:column` of a source's descriptor, AST and diagnostics. */
 function linesOf(source: string) {
@@ -54,39 +53,54 @@ describe('fixtures', () => {
     },
   );
 
-  // The script compiles whenever parse and analysis are clean; template diagnostics do not matter.
-  const compiled = parsed.filter((f) => f.scriptClean && f.descriptor.scriptSetup);
-
-  it.each(compiled.map((f) => [f.name, f] as const))(
-    '%s compiles its script to script.ts',
-    async (_, { name, descriptor, analysis }) => {
-      const code = compileScript(descriptor, analysis).s.toString();
-      expect(parseSync('script.ts', code, { lang: 'ts' }).errors).toStrictEqual([]);
-      await expect(code).toMatchFileSnapshot(scriptSnapshot(name));
-    },
-  );
-
-  it.each(parsed.filter((f) => !compiled.includes(f)).map((f) => f.name))(
-    '%s has no script.ts',
-    (name) => {
-      expect(existsSync(scriptSnapshot(name))).toBe(false);
-    },
-  );
-
   const clean = parsed.filter((f) => f.diagnostics.length === 0);
 
   it.each(clean.map((f) => [f.name, f] as const))(
-    '%s transforms its template to ir.json',
-    async (_, { name, ir }) => {
-      const json = JSON.stringify(ir, (_key, v: unknown) => (v instanceof Set ? [...v] : v), 2);
-      await expect(`${json}\n`).toMatchFileSnapshot(irSnapshot(name));
+    '%s compiles to output.ts',
+    async (_, { name, result }) => {
+      expectParses(result.code);
+      await expect(result.code).toMatchFileSnapshot(outputSnapshot(name));
     },
   );
 
   it.each(parsed.filter((f) => !clean.includes(f)).map((f) => f.name))(
-    '%s has no ir.json',
+    '%s has no output.ts',
     (name) => {
-      expect(existsSync(irSnapshot(name))).toBe(false);
+      expect(existsSync(outputSnapshot(name))).toBe(false);
+    },
+  );
+
+  it('compiles template/todo-list in dev mode to output.dev.ts', async () => {
+    const name = 'template/todo-list';
+    const { source } = clean.find((f) => f.name === name)!;
+    const { code } = compile(source, { filename: `${name}/input.vibe`, id: '0a1b2c3d', dev: true });
+    expectParses(code);
+    await expect(code).toMatchFileSnapshot(outputSnapshot(name, 'output.dev.ts'));
+  });
+
+  it('has at least 10 output.ts fixtures', () => {
+    expect(clean.length).toBeGreaterThanOrEqual(10);
+  });
+
+  // A fixture with output.ts shows its script there; script.ts covers files whose script
+  // compiles while the template reports diagnostics.
+  const scripts = parsed.filter(
+    (f) => f.scriptClean && f.descriptor.scriptSetup && !clean.includes(f),
+  );
+
+  it.each(scripts.map((f) => [f.name, f] as const))(
+    '%s compiles its script to script.ts',
+    async (_, { name, descriptor, analysis }) => {
+      const code = compileScript(descriptor, analysis).s.toString();
+      expectParses(code);
+      await expect(code).toMatchFileSnapshot(scriptSnapshot(name));
+    },
+  );
+
+  it.each(parsed.filter((f) => !scripts.includes(f)).map((f) => f.name))(
+    '%s has no script.ts',
+    (name) => {
+      expect(existsSync(scriptSnapshot(name))).toBe(false);
     },
   );
 

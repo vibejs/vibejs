@@ -1,3 +1,5 @@
+export { compile } from './compile.ts';
+export type { CompileOptions, CompileResult } from './compile.ts';
 export { formatDiagnostic } from './diagnostics.ts';
 export {
   camelize,

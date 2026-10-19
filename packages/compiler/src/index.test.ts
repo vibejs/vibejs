@@ -26,13 +26,14 @@ type TemplateNode =
   | SimpleExpressionNode;
 
 describe('@vibejs-org/compiler', () => {
-  it('exports formatDiagnostic, compileStyle, parse, analyzeScript, the AST enums, the expression helpers and resolveComponentTag at runtime', () => {
+  it('exports compile, formatDiagnostic, compileStyle, parse, analyzeScript, the AST enums, the expression helpers and resolveComponentTag at runtime', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
       'NodeTypes',
       'analyzeScript',
       'camelize',
       'capitalize',
+      'compile',
       'compileStyle',
       'forEachIdentifier',
       'formatDiagnostic',
