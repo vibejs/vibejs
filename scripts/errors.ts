@@ -219,12 +219,18 @@ function write(file: string, text: string): void {
   writeFileSync(file, text);
 }
 
-/** Concatenated texts of a package's non-test sources (src, or its bins) and of its tests. */
+/**
+ * Concatenated texts of a package's non-test sources (src, or its bins) and of its tests, with the
+ * shared suites (`*.suite.ts`) that several test files run.
+ */
 function packageTexts(dir: string): { sources: string; tests: string } {
   const files = existsSync(join(dir, 'src'))
     ? globSync('src/**/*.ts', { cwd: dir }).filter((file) => !/\.(test|test-d|gen)\.ts$/.test(file))
     : Object.values(manifest(dir).bin ?? {});
-  const tests = globSync('**/*.test.ts', { cwd: dir, exclude: ['node_modules/**'] });
+  const tests = globSync(['**/*.test.ts', '**/*.suite.ts'], {
+    cwd: dir,
+    exclude: ['node_modules/**'],
+  });
   const concat = (list: string[]) =>
     list.map((file) => readFileSync(join(dir, file), 'utf8')).join('\n');
   return { sources: concat(files), tests: concat(tests) };
@@ -324,7 +330,7 @@ export function main(root: string, argv: string[]): number {
         }
         if (!texts.tests.includes(`'${code}'`)) {
           problems.push(
-            `${code} is never asserted: no '${code}' in a *.test.ts of packages/${pkg}`,
+            `${code} is never asserted: no '${code}' in a *.test.ts or *.suite.ts of packages/${pkg}`,
           );
         }
       }
