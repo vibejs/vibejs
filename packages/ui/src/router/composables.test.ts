@@ -140,6 +140,21 @@ describe('install', () => {
       ['afterEach', 'v', true],
     ]);
   });
+
+  it('moves to a still-mounted app when the first one unmounts', async () => {
+    const { router } = setup();
+    const seen: unknown[] = [];
+    router.beforeEach(() => {
+      seen.push(inject('k'));
+    });
+    const first = mountComposable(() => {}, { plugins: [router], provide: { k: 'first' } });
+    await router.isReady();
+    mountComposable(() => {}, { plugins: [router], provide: { k: 'second' } });
+    first.unmount();
+    seen.length = 0;
+    await router.push('/a');
+    expect(seen).toEqual(['second']);
+  });
 });
 
 describe('useRouter and useRoute', () => {

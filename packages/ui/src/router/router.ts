@@ -161,14 +161,13 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
   /** The history steps taken by history-driven navigations since `currentRoute` was committed. */
   let offset = 0;
   let unlisten: (() => void) | undefined;
-  /** The first installed app: guards, redirects, loaders and hooks run in its injection context. */
-  let app: App | undefined;
-  let installs = 0;
+  /** The mounted apps: guards, redirects, loaders and hooks run in the oldest one's injection context. */
+  const apps: App[] = [];
   /** Once installed, only `install` starts listening: a later navigation must not outlive the app. */
   let installed = false;
 
-  /** Calls `fn` in the injection context of the installed app. */
-  const inContext = <T>(fn: () => T): T => (app ? app.runWithContext(fn) : fn());
+  /** Calls `fn` in the injection context of the oldest mounted app. */
+  const inContext = <T>(fn: () => T): T => (apps[0] ? apps[0].runWithContext(fn) : fn());
 
   function resolve(raw: AnyLocationRaw, current = currentRoute.value): AnyLocation {
     if (typeof raw === 'string') return locate(parseLocation(raw, current.path));
@@ -244,7 +243,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
             else if (to !== first) history.replace(to.fullPath);
             resolveReady();
             afterEach(to, from);
-            scroll?.apply(to, from, pop || initial, app?.config).catch(logError);
+            scroll?.apply(to, from, pop || initial, apps[0]?.config).catch(logError);
             return undefined;
           }
           next = result;
@@ -318,14 +317,13 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       // A router of literal routes is any router once built (see types.test-d.ts).
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- R is generic here
       target.provide(routerKey, router as AnyRouter);
-      app ??= target;
-      installs++;
+      apps.push(target);
       installed = true;
       target.onUnmount(() => {
-        if (--installs) return;
+        apps.splice(apps.indexOf(target), 1);
+        if (apps.length) return;
         unlisten!();
         unlisten = undefined;
-        app = undefined;
       });
       listen();
       // It replaces the entry the page was loaded with, and reports its errors to onError and isReady().
