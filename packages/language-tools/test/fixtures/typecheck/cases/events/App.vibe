@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const text = ref('')
+const clicks = ref(0)
+function reset() {
+  text.value = ''
+}
+function set(value: string) {
+  text.value = value
+}
+</script>
+
+<template>
+  <button @click="reset">Reset</button>
+  <button @click="clicks++">{{ clicks }}</button>
+  <input @input="set(($event.target as HTMLInputElement).value)" @keydown.enter="(e) => e.key">
+  <button v-on:dblclick="() => reset()">Twice</button>
+</template>

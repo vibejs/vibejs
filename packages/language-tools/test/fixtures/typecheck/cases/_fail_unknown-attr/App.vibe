@@ -1,0 +1,3 @@
+<template>
+  <div bogus="1"></div>
+</template>

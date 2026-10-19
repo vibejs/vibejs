@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const total = 1
+</script>
+
+<template>
+  <button @click="total = 2">{{ total }}</button>
+</template>

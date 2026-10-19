@@ -1,0 +1,10 @@
+<script setup lang="ts">
+const value = 1 as number | string | null
+</script>
+
+<template>
+  <p v-if="typeof value === 'number'">{{ value.toFixed() }}</p>
+  <!-- a comment -->
+  <p v-else-if="typeof value === 'string'">{{ value.toUpperCase() }}</p>
+  <p v-else>{{ value }}</p>
+</template>

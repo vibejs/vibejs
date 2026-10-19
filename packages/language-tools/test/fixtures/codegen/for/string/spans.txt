@@ -1,0 +1,5 @@
+#0 Verbatim EXPR o[24,25) "c" → v[89,90) "c"
+#1 Verbatim EXPR o[29,34) "'abc'" → v[107,112) "'abc'"
+#2 Atom BOUND o[14,16) "li" → v[143,145) "li"
+#3 Verbatim EXPR o[39,40) "c" → v[160,161) "c"
+#4 Atom ANCHOR o[0,0) "" → v[264,372) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

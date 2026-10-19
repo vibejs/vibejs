@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import { expectType } from '../../expect.ts'
+const items = ['a', 'b']
+const scores = { ada: 1, alan: 2 }
+</script>
+
+<template>
+  <p v-for="(item, i) in items">{{ expectType<string>()(item) }}{{ expectType<number>()(i) }}</p>
+  <p v-for="n in 3">{{ expectType<number>()(n) }}</p>
+  <p v-for="c in 'abc'">{{ expectType<string>()(c) }}</p>
+  <p v-for="(score, name, index) in scores">
+    {{ expectType<number>()(score) }}{{ expectType<'ada' | 'alan'>()(name) }}{{ expectType<number>()(index) }}
+  </p>
+  <p v-for="{ length } in items">{{ expectType<number>()(length) }}</p>
+</template>

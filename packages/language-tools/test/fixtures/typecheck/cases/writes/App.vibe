@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const count = ref(0)
+let label = 'a'
+</script>
+
+<template>
+  <button @click="count++; label = 'b'">{{ count }} {{ label }}</button>
+</template>

@@ -1,0 +1,9 @@
+<script setup lang="ts">
+function set(value: string) {
+  return value
+}
+</script>
+
+<template>
+  <input @input="set(($event.target as HTMLInputElement).value)" @click="$event.preventDefault()" @click="set('dup')">
+</template>

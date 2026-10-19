@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const id = 'x'
+const size = 5
+</script>
+
+<template>
+  <input :id="id" :maxlength="size" :aria-label="id" v-bind:name="id" :title.prop="id" :key="id" v-show="size" v-show="">
+  <p id="a" :id="id" :class="id" class="c">dup</p>
+</template>

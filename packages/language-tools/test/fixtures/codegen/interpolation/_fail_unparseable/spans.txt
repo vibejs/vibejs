@@ -1,0 +1,4 @@
+#0 Verbatim EXPR o[24,54) "\nconst user = { name: 'Ada' }\n" → v[0,30) "\nconst user = { name: 'Ada' }\n"
+#1 Atom BOUND o[79,80) "p" → v[130,131) "p"
+#2 Verbatim EXPR o[84,89) "user." → v[144,149) "user."
+#3 Atom ANCHOR o[0,0) "" → v[248,356) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

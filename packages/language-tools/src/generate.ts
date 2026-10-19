@@ -1,0 +1,107 @@
+import { analyzeScript, parse, type Diagnostic } from '@vibejs-org/compiler';
+import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
+import type { Names } from './expression.ts';
+import { script, setupBindings } from './script.ts';
+import { children } from './template.ts';
+
+/** A forwarded compiler diagnostic; `code` is the numeric part of VIBE####. */
+export interface LanguageDiagnostic {
+  code: number;
+  message: string;
+  start: number;
+  length: number;
+}
+
+export interface GeneratedFile {
+  text: string;
+  spans: SpanMapping[];
+  diagnostics: LanguageDiagnostic[];
+}
+
+const CTX = ['$attrs', '$slots', '$emit', '$props'];
+/** Macro calls; comments and strings match first, so a macro named in them is not a call. */
+// ponytail: regex scan, misses a call inside a template literal `${}`; use the script AST if needed.
+const MACROS =
+  /\/\/[^\n]*|\/\*[\s\S]*?\*\/|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`|\b(define(?:Props|Emits|Slots|Model|Expose|Options))\s*[<(]/g;
+const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
+
+/**
+ * The virtual TypeScript of a `.vibe` file and its spans into `text` (UTF-16 offsets). Never throws
+ * on user input; `text` is not changed (CRLF passes through).
+ */
+export function generate(fileName: string, text: string): GeneratedFile {
+  const { descriptor, diagnostics } = parse(text, { filename: fileName });
+  const analysis = analyzeScript(descriptor);
+  const b = new CodeBuilder(text);
+  script(b, descriptor, analysis);
+
+  const setup = setupBindings(analysis);
+  const ctx = new Map<string, [number, number] | null>(CTX.map((name) => [name, null]));
+  for (const { name, decl } of analysis.propKeys) if (!setup.has(name)) ctx.set(name, decl);
+  const names: Names = { setup, ctx, usedSetup: new Set(), usedCtx: new Set(), writes: false };
+  const body = new CodeBuilder(text);
+  const nodes = descriptor.template?.ast.children ?? [];
+  children(nodes, { b: body, names, source: text, depth: 1 }, new Set());
+
+  const used = [...names.usedSetup];
+  b.add(`const __vibe_setup = { ${used.join(', ')} };\n{`);
+  /** `const { a, b } = from;` with LINK spans to the declarations. */
+  const destructure = (
+    list: string[],
+    decls: ReadonlyMap<string, [number, number] | null>,
+    from: string,
+  ) => {
+    if (list.length === 0) return;
+    b.add('\n  const { ');
+    list.forEach((name, i) => {
+      const decl = decls.get(name);
+      if (i > 0) b.add(', ');
+      if (decl) b.atom(name, ...decl, Preset.LINK);
+      else b.add(name);
+    });
+    b.add(` } = ${from};`);
+  };
+  destructure(used, setup, '__vibe.unrefs(__vibe_setup)');
+  if (names.usedCtx.size > 0) b.add(`\n  const __vibe_ctx = __vibe.ctx<${TYPES}>();`);
+  destructure([...names.usedCtx], ctx, '__vibe_ctx');
+  if (names.writes) {
+    const lets = used.filter((name) => analysis.bindings.get(name)!.kind === 'let');
+    const letNames = lets.map((name) => `'${name}'`).join(' | ') || 'never';
+    b.add(`\n  const __vibe_w = __vibe.writable<typeof __vibe_setup, ${letNames}>(__vibe_setup);`);
+  }
+  b.append(body).add('\n}\n');
+
+  b.add(
+    'type __VibeSlots = {};\ntype __VibeExposed = {};\ntype __VibeRefs = {};\ntype __VibeModels = {};\n',
+  );
+  b.atom(
+    `export default __vibe.defineComponent<${TYPES}, __VibeExposed, __VibeModels>();`,
+    0,
+    0,
+    Preset.ANCHOR,
+  );
+  b.add("\nimport * as __vibe from '@vibejs-org/ui/tooling';\n");
+  const content = descriptor.scriptSetup?.content ?? '';
+  const macros = new Set([...content.matchAll(MACROS)].map((m) => m[1]).filter(Boolean));
+  if (macros.size > 0)
+    b.add(`import { ${[...macros].join(', ')} } from '@vibejs-org/ui/tooling';\n`);
+
+  return {
+    text: b.text,
+    spans: b.spans,
+    diagnostics: diagnostics.filter(forwarded).map(toLanguage),
+  };
+}
+
+/** Only SFC-structure and HTML parse errors: tsc skips type checking after a mapper diagnostic. */
+const forwarded = (d: Diagnostic) => {
+  const code = Number(d.code.slice(4));
+  return code >= 1000 && code < 1200 && !d.typeChecked;
+};
+
+const toLanguage = (d: Diagnostic): LanguageDiagnostic => ({
+  code: Number(d.code.slice(4)),
+  message: [d.message, ...d.fixes, d.docs].join(' '),
+  start: d.start.offset,
+  length: d.end.offset - d.start.offset,
+});

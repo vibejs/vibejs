@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const label = '🚀'
+</script>
+
+<template>
+  <p title="🚀">🚀 {{ label }} {{ label.length }}</p>
+</template>

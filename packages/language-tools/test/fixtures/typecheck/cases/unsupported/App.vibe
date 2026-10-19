@@ -1,0 +1,13 @@
+<script setup lang="ts">
+const flag = true
+</script>
+
+<template>
+  <Foo :x="1"><template #a><span>{{ missing }}</span></template></Foo>
+  <slot name="a" />
+  <component :is="flag" />
+  <template><span>{{ missing }}</span></template>
+  <input v-model="missing" ref="el">
+  <div v-bind="missing" :[missing]="1"></div>
+  <x-widget foo="1">{{ missing }}</x-widget>
+</template>

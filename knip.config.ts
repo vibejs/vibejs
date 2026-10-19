@@ -10,6 +10,10 @@ export default {
       // Run, never imported, by the check tool-contract test from packages/cli/node_modules.
       ignoreDependencies: ['oxlint', 'oxfmt'],
     },
+    'packages/language-tools': {
+      // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.
+      ignoreDependencies: ['@vibejs-org/ui'],
+    },
     docs: { entry: ['scripts/*.ts'] },
   },
   ignore: ['packages/create-vibejs/templates/**', '**/test/fixtures/**'],

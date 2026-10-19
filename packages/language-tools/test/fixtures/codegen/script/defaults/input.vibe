@@ -1,0 +1,8 @@
+<script setup lang="ts">
+const { items, title = 'List' } = defineProps<{ items: string[]; title?: string }>()
+const emit = defineEmits<{ pick: [id: string] }>()
+</script>
+
+<template>
+  <h1 @click="emit('pick', title)">{{ title }} {{ items.length }}</h1>
+</template>

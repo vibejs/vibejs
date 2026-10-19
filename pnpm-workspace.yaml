@@ -46,6 +46,7 @@ catalog:
   std-env: ^4.3.0
   reactive-framework-test-suite: 0.1.0
   vitepress: 2.0.0-alpha.20
+  vscode-jsonrpc: ^9.0.3
 
 catalogs:
   ts-next:

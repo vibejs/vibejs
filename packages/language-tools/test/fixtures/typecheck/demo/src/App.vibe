@@ -1,0 +1,36 @@
+<script setup lang="ts">
+import { computed, ref } from '@vibejs-org/ui'
+
+const { title = 'Todos' } = defineProps<{ title?: string }>()
+const emit = defineEmits<{ done: [count: number] }>()
+
+interface Todo {
+  id: number
+  text: string
+  done: boolean
+}
+const todos = ref<Todo[]>([{ id: 1, text: 'Write the demo', done: false }])
+const draft = ref('')
+const left = computed(() => todos.value.filter((todo) => !todo.done).length)
+
+function add() {
+  todos.value = [...todos.value, { id: Date.now(), text: draft.value, done: false }]
+  draft.value = ''
+}
+</script>
+
+<template>
+  <h1>{{ title }}</h1>
+  <form @submit.prevent="add">
+    <input :value="draft" placeholder="What next?" @input="draft = ($event.target as HTMLInputElement).value">
+    <button :disabled="!draft">Add</button>
+  </form>
+  <ul v-if="todos.length > 0">
+    <li v-for="todo in todos" :key="todo.id" :class="{ done: todo.done }">
+      <input type="checkbox" :checked="todo.done" @change="todo.done = !todo.done">
+      {{ todo.text }}
+    </li>
+  </ul>
+  <p v-else>Nothing to do.</p>
+  <button @click="emit('done', left)">{{ left }} left</button>
+</template>
