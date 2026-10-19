@@ -4,7 +4,7 @@ import type { ParamKeys, RawBody } from './route.ts';
 
 // The value type of a def key, `undefined` when the def lacks it. A key can also be optional (an
 // annotated `RouteDef`) or `undefined` (a conditional def), so the helpers match on the value.
-type Declared<R extends Route, K extends string> = K extends keyof R['def']
+export type Declared<R extends Route, K extends string> = K extends keyof R['def']
   ? R['def'][K]
   : undefined;
 type Flat<T> = { [K in keyof T]: T[K] };

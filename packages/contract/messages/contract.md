@@ -31,3 +31,13 @@ Param names must be unique in the full path of a route, which is the contract pr
 
 - Build "{key}" with `get`, `post`, `put`, `patch` or `del`, for example `{key}: get('/')`.
 - Pass the route builders' results to `defineContract`, not the routes of another contract.
+
+## VIBE9004: Body on a GET route
+
+> The GET route "{path}" declares a body.
+
+A GET request cannot carry a body: `fetch` rejects it and many servers and proxies drop it. Inputs of a GET route travel in its path params, query and headers.
+
+### Fix
+
+- Move the inputs of "{path}" into `query`, or declare the route with `post` if it needs a body.
