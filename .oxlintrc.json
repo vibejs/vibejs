@@ -147,6 +147,12 @@
       }
     },
     {
+      // ABI twins are compiled output by hand: walkers return Node and models assign unknown,
+      // so a twin narrows with the type assertions that the emitted JavaScript does without.
+      "files": ["packages/ui/test/abi/**"],
+      "rules": { "typescript/no-unsafe-type-assertion": "off" }
+    },
+    {
       "files": ["**/*.config.ts", "docs/.vitepress/config.ts"],
       "rules": { "import/no-default-export": "off" }
     }

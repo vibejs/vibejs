@@ -1,0 +1,25 @@
+<script setup lang="ts">
+import { computed, ref } from '@vibejs-org/ui';
+
+interface Item {
+  id: number;
+  label: string;
+  done: boolean;
+}
+
+const props = defineProps<{ title: string; items: Item[] }>();
+
+const filter = ref('');
+const shown = computed(() => props.items.filter((item) => item.label.includes(filter.value)));
+</script>
+
+<template>
+  <section class="list">
+    <h2>{{ title }}</h2>
+    <input v-model.trim="filter" />
+    <p v-if="!shown.length">Nothing</p>
+    <ul v-else>
+      <li v-for="(item, index) in shown" :key="item.id" :class="{ done: item.done }">{{ index + 1 }}. {{ item.label }}</li>
+    </ul>
+  </section>
+</template>

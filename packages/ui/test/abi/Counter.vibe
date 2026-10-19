@@ -1,0 +1,16 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui';
+
+const props = defineProps<{ start?: number; step?: number }>();
+const emit = defineEmits<{ change: [count: number] }>();
+
+const count = ref(props.start ?? 0);
+function increment() {
+  count.value += props.step ?? 1;
+  emit('change', count.value);
+}
+</script>
+
+<template>
+  <button type="button" @click.prevent="increment">Count: {{ count }}</button>
+</template>

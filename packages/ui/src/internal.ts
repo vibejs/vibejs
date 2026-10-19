@@ -1,9 +1,35 @@
-// The runtime ABI between compiled .vibe modules and @vibejs-org/ui (CONTRACTS C3). It carries no
-// semver promise.
+// The runtime ABI between compiled .vibe modules and @vibejs-org/ui (CONTRACTS C3), draft of v1.
+// It carries no semver promise. The JSDoc of each helper states what codegen emits for it.
 import type { SetupContext } from './component.ts';
+import type { Block } from './runtime/block.ts';
 
-/** What a render function returns and `insert()` places: a node or a list of blocks. */
-export type Block = Node | Block[];
+export type { Block, Fragment } from './runtime/block.ts';
+export { createIf, createKeyed, insert } from './runtime/block.ts';
+export {
+  child,
+  next,
+  nthChild,
+  setAttr,
+  setClass,
+  setDynamicProps,
+  setHtml,
+  setProp,
+  setStyle,
+  setText,
+  template,
+  toDisplayString,
+  txt,
+} from './runtime/dom.ts';
+export { on, withKeys, withModifiers } from './runtime/events.ts';
+export { createFor } from './runtime/for.ts';
+export { renderEffect } from './runtime/renderEffect.ts';
+export {
+  applyCheckboxModel,
+  applyRadioModel,
+  applySelectModel,
+  applyTextModel,
+  applyVShow,
+} from './runtime/vModel.ts';
 
 /** A component as the compiler emits it: the object a `.vibe` module exports by default. */
 export interface ComponentDef {

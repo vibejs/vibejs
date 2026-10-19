@@ -68,6 +68,13 @@ Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`]
   - `packages/ui/src/runtime/errorHandling.test.ts` from `packages/runtime-core/__tests__/errorHandling.spec.ts` (tests, not shipped)
   - `packages/ui/src/runtime/watch.test.ts` from `packages/reactivity/__tests__/watch.spec.ts` and `packages/runtime-core/__tests__/apiWatch.spec.ts` (tests, not shipped)
   - `packages/ui/src/reactivity/collectionShallowReadonly.test.ts` from `packages/reactivity/__tests__/collections/shallowReadonly.spec.ts` (tests, not shipped)
+  - `packages/ui/src/runtime/dom.ts` from `packages/runtime-dom/src/patchProp.ts`, `modules/attrs.ts`, `modules/props.ts` and `modules/style.ts`, and `packages/shared/src/domAttrConfig.ts`, `normalizeProp.ts` and `toDisplayString.ts` (shipped)
+  - `packages/ui/src/runtime/events.ts` from `packages/runtime-dom/src/directives/vOn.ts` (shipped)
+  - `packages/ui/src/runtime/for.ts` from `packages/runtime-core/src/renderer.ts` (keyed reconciliation and `getSequence`) and `packages/runtime-core/src/helpers/renderList.ts` (shipped)
+  - `packages/ui/src/runtime/vModel.ts` from `packages/runtime-dom/src/directives/vModel.ts` and `vShow.ts`, and `packages/shared/src/looseEqual.ts` (shipped)
+  - `packages/ui/src/runtime/dom.test.ts` from `packages/runtime-dom/__tests__/patchClass.spec.ts`, `patchStyle.spec.ts`, `patchAttrs.spec.ts`, `patchProps.spec.ts` and `patchEvents.spec.ts`, and `packages/shared/__tests__/toDisplayString.spec.ts` (tests, not shipped)
+  - `packages/ui/src/runtime/events.test.ts` from `packages/runtime-dom/__tests__/directives/vOn.spec.ts` (tests, not shipped)
+  - `packages/ui/src/runtime/vModel.test.ts` from `packages/runtime-dom/__tests__/directives/vModel.spec.ts` and `vShow.spec.ts` (tests, not shipped)
 - **vuejs/router** v4.6.4 at `47b95baae1ebdeb564bd1adf8168c9e9d6d09d0a`, MIT, Copyright (c) 2019-present Eduardo San Martin Morote.
   - `packages/ui/src/router/path.ts` from `packages/router/src/matcher/pathParserRanker.ts`
   - `packages/ui/src/router/path.test.ts` from `packages/router/__tests__/matcher/pathRanking.spec.ts` and `pathParser.spec.ts` (tests, not shipped)

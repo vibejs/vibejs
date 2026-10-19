@@ -66,7 +66,7 @@ function toReadonly<T>(value: T): T {
 const toReadonlyReactive: Wrap = (value) => toReadonly(toReactive(value));
 
 /** How the items of `array` are wrapped when read through it (it may be readonly(reactive(x))). */
-function wrapperFor(array: unknown[]): Wrap {
+export function wrapperFor(array: unknown[]): Wrap {
   if (isShallow(array)) return identity;
   if (!isReadonly(array)) return toReactive;
   return isReactive(array) ? toReadonlyReactive : toReadonly;

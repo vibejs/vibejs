@@ -22,7 +22,7 @@ function shallowReadArray<T>(array: T[]): T[] {
  * Tracks every item of `array` and returns them as the proxy would (raw for a raw array); `wrap`
  * is the wrap of the proxy, `wrapperFor(array)` in `reactive.ts`.
  */
-function reactiveReadArray<T>(array: T[], wrap: Wrap): T[] {
+export function reactiveReadArray<T>(array: T[], wrap: Wrap): T[] {
   const raw = toRaw(array);
   if (raw === array) return raw;
   track(raw, ARRAY_ITERATE_KEY);

@@ -655,6 +655,18 @@ describe('job order', () => {
     expect(calls).toEqual(['first -1', 'second -1', 'late -1', 'a 3', 'b 3']);
   });
 
+  test('equal ids run in creation order, then jobs without one', async () => {
+    const calls: string[] = [];
+    const ordered = (name: string, order: number) =>
+      Object.assign(() => calls.push(name), { order });
+    for (const queued of [ordered('c', 2), job(() => calls.push('none')), ordered('a', 0)]) {
+      queueJob(queued);
+    }
+    queueJob(ordered('b', 1));
+    await nextTick();
+    expect(calls).toEqual(['a', 'b', 'c', 'none']);
+  });
+
   test('a job queued during the flush lands at its sorted position', async () => {
     const calls: string[] = [];
     const inserted = job(() => calls.push('2'), 2);
