@@ -20,6 +20,14 @@ const MESSAGES = {
   VIBE9305: ["The method {controller}.{method} handles a route that is not part of the contract of {controller}.","Pass a route of this controller's contract to `@Handle()` on {method}.","Move {method} to the controller of the contract that declares its route."],
   VIBE9306: ["More than one controller serves the same contract: {controllers}.","Merge the controllers {controllers} into one.","Split the contract into one contract per controller."],
   VIBE9307: ["{decorator} is on the static method {controller}.{method}, but it needs an instance method.","Remove `static` from {controller}.{method}."],
+  VIBE9401: ["{method} {path} matches the same requests as another route; the handlers are {handlers}.","Rename one of the paths so that the two routes differ in a static segment, or change the method of one of them."],
+  VIBE9402: ["{inFlight} requests were still running after the shutdown timeout of {timeout} ms, so the server was closed with them in flight.","Raise `shutdownTimeout` in the options of `VibeFactory.create()`.","Make long handlers stop early when `ctx.signal` is aborted."],
+  VIBE9403: ["listen() was called on an app that already listens or is closing (server: {url}).","Call `listen()` once per app; create another app with `VibeFactory.create()` for a second server."],
+  VIBE9404: ["cors() was called with `origin: '*'` and `credentials: true`, which browsers reject.","List the allowed origins explicitly, such as `origin: ['https://app.example.com']`.","Remove `credentials: true` when the requests carry no cookies or authorization headers."],
+  VIBE9503: ["A request failed with an unexpected error, so the client received 500 INTERNAL_ERROR.","Read the logged `cause` and fix the code that threw it.","Throw an `HttpError`, or call `ctx.fail()` with a declared error code, when the error is meant for the client."],
+  VIBE9504: ["The cookie name \"{name}\" is not a valid token.","Use a name made of letters, digits and ``!#$%&'*+-.^_`|~``."],
+  VIBE9601: ["The environment variables do not match the config schema: {issues}.","Set the listed environment variables to values that match their schemas."],
+  VIBE9602: ["The config schema of {key} validates asynchronously, but a config is validated synchronously.","Use a synchronous schema for {key}, without async checks or transforms."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

@@ -25,11 +25,17 @@ export type ModuleImport = Class | DynamicModule;
 /** One module of a scanned application. */
 export interface ModuleNode {
   readonly module: ModuleImport;
+  /** The name of the module class. */
+  readonly name: string;
   /** The first import path that reached the module, such as `AppModule > UsersModule`. */
   readonly path: string;
   readonly scope: Scope;
   readonly global: boolean;
   readonly imports: readonly ModuleNode[];
+  /** The token names of the own providers, after last-wins. */
+  readonly providers: readonly string[];
+  /** The names of the exported tokens and modules, as declared. */
+  readonly exports: readonly string[];
   /** Providers (after last-wins), controllers, enhancers and the module class, in that order. */
   readonly hookTargets: readonly ProviderRecord[];
 }
@@ -169,14 +175,14 @@ export function scan(root: ModuleImport): ModuleGraph {
     }
     const exportedTokens = new Set<unknown>();
     const reexports: Node[] = [];
+    const exportNames: string[] = [];
     for (const entry of list('exports')) {
       const index = importList.findIndex((i) => i === entry);
+      const name = isDynamic(entry) ? tokenName(entry.module) : tokenName(entry);
+      exportNames.push(name);
       if (own.has(entry)) exportedTokens.add(entry);
       else if (index >= 0) reexports.push(imports[index]);
-      else {
-        const name = isDynamic(entry) ? tokenName(entry.module) : tokenName(entry);
-        throw vibeError('VIBE9203', { export: name, module: path });
-      }
+      else throw vibeError('VIBE9203', { export: name, module: path });
     }
 
     // Controllers, enhancers and the module class: one record per class, never found by tokens.
@@ -202,10 +208,13 @@ export function scan(root: ModuleImport): ModuleGraph {
     const hookTargets = [...own.values(), ...classes.values()];
     const node: Node = {
       module: imp,
+      name: tokenName(cls),
       path,
       scope,
       global: Boolean(options.global || extra.global),
       imports,
+      providers: [...own.values()].map((rec) => tokenName(rec.token)),
+      exports: exportNames,
       hookTargets,
       own,
       exported: exportedTokens,

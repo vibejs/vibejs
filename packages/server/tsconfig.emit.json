@@ -4,6 +4,7 @@
     "composite": false,
     "incremental": true,
     "isolatedDeclarations": false,
+    "rootDir": "${configDir}/src",
     "emitDeclarationOnly": false,
     "rewriteRelativeImportExtensions": true,
     "customConditions": [],

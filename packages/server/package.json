@@ -52,8 +52,10 @@
     "build": "tsdown"
   },
   "dependencies": {
+    "@standard-schema/spec": "catalog:",
     "@vibejs-org/contract": "workspace:*",
-    "@vibejs-org/errors": "workspace:*"
+    "@vibejs-org/errors": "workspace:*",
+    "srvx": "catalog:"
   },
   "devDependencies": {
     "tsdown": "catalog:",

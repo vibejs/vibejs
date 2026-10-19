@@ -1,5 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "lib": ["es2024"], "types": ["node"], "experimentalDecorators": true },
-  "references": [{ "path": "../contract" }, { "path": "../errors" }]
+  "compilerOptions": {
+    "lib": ["es2024"],
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "rootDir": "."
+  },
+  "references": [{ "path": "../contract" }, { "path": "../errors" }],
+  "include": ["src", "test"]
 }
