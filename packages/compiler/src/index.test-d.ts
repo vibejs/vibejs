@@ -19,7 +19,13 @@ import type {
   StyleLang,
   TemplateChildNode,
   TextNode,
+  camelize,
+  capitalize,
   compileStyle,
+  forEachIdentifier,
+  hyphenate,
+  isAllowedGlobal,
+  isSimpleHandler,
   parse,
 } from './index.ts';
 
@@ -98,3 +104,21 @@ expectTypeOf<typeof compileStyle>().toEqualTypeOf<
     options: { filename: string; id: string },
   ) => { code: string; map: SourceMapV3 | null; diagnostics: Diagnostic[] }
 >();
+
+expectTypeOf<typeof forEachIdentifier>().toEqualTypeOf<
+  (
+    expr: string,
+    offset: number,
+    cb: (
+      name: string,
+      start: number,
+      end: number,
+      info: { local: boolean; writeRoot: boolean },
+    ) => void,
+  ) => void
+>();
+expectTypeOf<typeof isAllowedGlobal>().toEqualTypeOf<(name: string) => boolean>();
+expectTypeOf<typeof isSimpleHandler>().toEqualTypeOf<(expr: string) => boolean>();
+expectTypeOf<typeof camelize>().toEqualTypeOf<(s: string) => string>();
+expectTypeOf<typeof hyphenate>().toEqualTypeOf<(s: string) => string>();
+expectTypeOf<typeof capitalize>().toEqualTypeOf<(s: string) => string>();
