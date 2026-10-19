@@ -4,7 +4,7 @@
 // Ports the PathScore values and the score comparator. The tokenizer and the regex builder are
 // rewritten for a grammar of one token per segment, with named groups and no path options.
 import { vibeError } from '../errors.gen.ts';
-import type { RouteParams, RouteParamsRaw } from './types.ts';
+import type { AnyParams, AnyParamsRaw } from './types.ts';
 
 interface Param {
   name: string;
@@ -119,11 +119,11 @@ export function comparePaths(a: readonly number[], b: readonly number[]): number
 }
 
 /** The decoded params of `path`, or `undefined` when it does not match. */
-export function matchPath(parser: PathParser, path: string): RouteParams | undefined {
+export function matchPath(parser: PathParser, path: string): AnyParams | undefined {
   const match = parser.re.exec(path);
   if (!match) return undefined;
   const groups = match.groups ?? {};
-  const params: RouteParams = {};
+  const params: AnyParams = {};
   parser.segments.forEach((param, i) => {
     if (typeof param === 'string') return;
     // An absent group is `undefined`; an empty match counts as absent too.
@@ -137,10 +137,10 @@ export function matchPath(parser: PathParser, path: string): RouteParams | undef
 /** Builds the encoded path and the normalized params (VIBE7104, VIBE7118). */
 export function buildPath(
   parser: PathParser,
-  raw: RouteParamsRaw,
+  raw: AnyParamsRaw,
   route: string,
-): { path: string; params: RouteParams } {
-  const params: RouteParams = {};
+): { path: string; params: AnyParams } {
+  const params: AnyParams = {};
   const parts: string[] = [];
   for (const param of parser.segments) {
     if (typeof param === 'string') {

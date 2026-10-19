@@ -5,17 +5,19 @@ import { logError } from '../warn.ts';
 import { parseLocation, stringifyQuery, type ParsedLocation } from './location.ts';
 import { checkGuard, checkOptions, createMatcher, type MatchedRoute } from './matcher.ts';
 import type {
+  AnyGuard,
+  AnyGuardResult,
+  AnyLocation,
+  AnyLocationRaw,
+  AnyRouter,
   NavigationFailure,
-  NavigationGuard,
-  NavigationGuardResult,
-  RouteLocation,
-  RouteLocationRaw,
   RouteRecordNormalized,
   Router,
   RouterOptions,
+  RouteRecordRaw,
 } from './types.ts';
 
-export const START_LOCATION: RouteLocation = {
+export const START_LOCATION: AnyLocation = {
   path: '/',
   fullPath: '/',
   name: undefined,
@@ -33,13 +35,13 @@ export const NavigationFailureType: {
   readonly duplicated: 'duplicated';
 } = { aborted: 'aborted', cancelled: 'cancelled', duplicated: 'duplicated' };
 
-class Failure extends Error implements NavigationFailure {
+class Failure extends Error {
   override name = 'NavigationFailure';
   readonly type: NavigationFailure['type'];
-  readonly to: RouteLocation;
-  readonly from: RouteLocation;
+  readonly to: AnyLocation;
+  readonly from: AnyLocation;
 
-  constructor(type: NavigationFailure['type'], to: RouteLocation, from: RouteLocation) {
+  constructor(type: NavigationFailure['type'], to: AnyLocation, from: AnyLocation) {
     super(`Navigation from ${from.fullPath} to ${to.fullPath} was ${type}.`);
     this.type = type;
     this.to = to;
@@ -57,17 +59,17 @@ export function isNavigationFailure(
 interface ViewGuard {
   kind: 'leave' | 'update';
   record: () => RouteRecordNormalized | undefined;
-  guard: NavigationGuard;
+  guard: AnyGuard;
 }
 
-const viewGuards = new WeakMap<Router, Set<ViewGuard>>();
+const viewGuards = new WeakMap<AnyRouter, Set<ViewGuard>>();
 
 /** Registers the guard of a view: it runs while `record()` is leaving or updating. */
 export function addViewGuard(
-  router: Router,
+  router: AnyRouter,
   kind: ViewGuard['kind'],
   record: ViewGuard['record'],
-  guard: NavigationGuard,
+  guard: AnyGuard,
 ): () => void {
   checkGuard(guard);
   const entry = { kind, record, guard };
@@ -116,15 +118,22 @@ const register =
     };
   };
 
-export function createRouter(options: RouterOptions): Router {
+/** Returns `routes` as-is; its literal names and paths type the router. */
+export function defineRoutes<const R extends readonly RouteRecordRaw[]>(routes: R): R {
+  return routes;
+}
+
+export function createRouter<const R extends readonly RouteRecordRaw[]>(
+  options: RouterOptions<R>,
+): Router<R> {
   checkOptions(options, ['history', 'routes'], 'createRouter()');
   const { history } = options;
   const matcher = createMatcher(options.routes);
   const currentRoute = shallowRef(START_LOCATION);
-  const beforeGuards = new Set<NavigationGuard>();
-  const resolveGuards = new Set<NavigationGuard>();
-  const afterHooks = new Set<Parameters<Router['afterEach']>[0]>();
-  const errorHandlers = new Set<Parameters<Router['onError']>[0]>();
+  const beforeGuards = new Set<AnyGuard>();
+  const resolveGuards = new Set<AnyGuard>();
+  const afterHooks = new Set<Parameters<AnyRouter['afterEach']>[0]>();
+  const errorHandlers = new Set<Parameters<AnyRouter['onError']>[0]>();
   const guards = new Set<ViewGuard>();
   let resolveReady!: () => void;
   let rejectReady!: (error: unknown) => void;
@@ -140,7 +149,7 @@ export function createRouter(options: RouterOptions): Router {
   let offset = 0;
   let unlisten: (() => void) | undefined;
 
-  function resolve(raw: RouteLocationRaw, current = currentRoute.value): RouteLocation {
+  function resolve(raw: AnyLocationRaw, current = currentRoute.value): AnyLocation {
     if (typeof raw === 'string') return locate(parseLocation(raw, current.path));
     const hash = raw.hash ?? '';
     const suffix =
@@ -155,7 +164,7 @@ export function createRouter(options: RouterOptions): Router {
   function locate(
     { path, query, hash, fullPath }: ParsedLocation,
     { name, params, matched, meta }: MatchedRoute = matcher.resolvePath(path),
-  ): RouteLocation {
+  ): AnyLocation {
     return { path, fullPath, name, params, query, hash, matched, meta, redirectedFrom: undefined };
   }
 
@@ -167,12 +176,12 @@ export function createRouter(options: RouterOptions): Router {
 
   /** `pop` is a navigation that follows a history move. */
   async function navigate(
-    raw: RouteLocationRaw,
+    raw: AnyLocationRaw,
     replace: boolean,
     pop = false,
-  ): Promise<NavigationFailure | undefined> {
+  ): Promise<Failure | undefined> {
     const from = currentRoute.value;
-    let to: RouteLocation | undefined;
+    let to: AnyLocation | undefined;
     let id = navigations;
     try {
       const first = resolve(raw);
@@ -182,11 +191,11 @@ export function createRouter(options: RouterOptions): Router {
       let redirects = 0;
       for (;;) {
         const redirect: RouteRecordNormalized['redirect'] = to.matched.at(-1)?.redirect;
-        let next: RouteLocationRaw | undefined =
+        let next: AnyLocationRaw | undefined =
           typeof redirect === 'function' ? redirect(to) : redirect;
         if (next === undefined) {
           const result = await run(to, from, id);
-          if (isNavigationFailure(result)) {
+          if (result instanceof Failure) {
             // A cancelled navigation leaves the history position to the newer one.
             if (id === navigations) restore();
             for (const hook of afterHooks) hook(to, from, result);
@@ -233,10 +242,10 @@ export function createRouter(options: RouterOptions): Router {
 
   /** Runs the guards; returns a failure, a redirect, or `undefined` to commit. */
   async function run(
-    to: RouteLocation,
-    from: RouteLocation,
+    to: AnyLocation,
+    from: AnyLocation,
     id: number,
-  ): Promise<NavigationFailure | RouteLocationRaw | undefined> {
+  ): Promise<Failure | AnyLocationRaw | undefined> {
     // A duplicated navigation still cancels a pending one: the latest intent wins.
     if (to.fullPath === from.fullPath && from !== START_LOCATION) {
       return new Failure('duplicated', to, from);
@@ -245,7 +254,7 @@ export function createRouter(options: RouterOptions): Router {
     for (const record of from.matched) if (!to.matched.includes(record)) leaving.unshift(record);
     const updating = from.matched.filter((record) => to.matched.includes(record));
     const entering = to.matched.filter((record) => !from.matched.includes(record));
-    const phases: (() => Promise<NavigationGuardResult>)[] = [
+    const phases: (() => Promise<AnyGuardResult>)[] = [
       ...[
         ...viewGuardsOf('leave', leaving),
         ...beforeGuards,
@@ -270,7 +279,7 @@ export function createRouter(options: RouterOptions): Router {
     return undefined;
   }
 
-  const router: Router = {
+  const router: AnyRouter = {
     currentRoute,
     push: (to) => navigate(to, false),
     replace: (to) => navigate(to, true),

@@ -5,6 +5,7 @@ import { createMemoryHistory } from './history.ts';
 import {
   addViewGuard,
   createRouter,
+  defineRoutes,
   isNavigationFailure,
   NavigationFailureType,
   START_LOCATION,
@@ -75,6 +76,7 @@ describe('@vibejs-org/ui/router', () => {
       'START_LOCATION',
       'createMemoryHistory',
       'createRouter',
+      'defineRoutes',
       'isNavigationFailure',
     ]);
     expect(NavigationFailureType).toEqual({
@@ -82,6 +84,10 @@ describe('@vibejs-org/ui/router', () => {
       cancelled: 'cancelled',
       duplicated: 'duplicated',
     });
+  });
+
+  it('returns the routes as-is from defineRoutes()', () => {
+    expect(defineRoutes(routes)).toBe(routes);
   });
 
   it('starts at START_LOCATION', () => {

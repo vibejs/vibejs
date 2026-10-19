@@ -1,6 +1,7 @@
 export { createMemoryHistory } from './router/history.ts';
 export {
   createRouter,
+  defineRoutes,
   isNavigationFailure,
   NavigationFailureType,
   START_LOCATION,
@@ -11,9 +12,12 @@ export type {
   NavigationFailure,
   NavigationGuard,
   NavigationGuardResult,
+  Register,
   RouteLocation,
+  RouteLocationOf,
   RouteLocationRaw,
   RouteMeta,
+  RouteName,
   RouteParams,
   RouteParamsRaw,
   Router,
