@@ -1,6 +1,7 @@
 // oxlint-disable typescript/no-explicit-any, typescript/no-empty-object-type -- C4 states these signatures
 import type { ComponentDef } from './internal.ts';
-import type { Ref } from './reactivity/ref.ts';
+import type { Ref, ShallowRef } from './reactivity/ref.ts';
+import type { Block } from './runtime/block.ts';
 
 /** The type-only key of a component's signature: its props, slots, exposed values and emits. */
 export declare const ComponentSignature: unique symbol;
@@ -62,3 +63,12 @@ export interface SetupContext<
  */
 export type ModelRef<T, M extends PropertyKey = string> = Ref<T> &
   [ModelRef<T, M>, Record<M, true | undefined>];
+
+/** The ref of `useTemplateRef()`: the element or the component's exposed values, `null` until rendered. */
+export type TemplateRef<T = unknown> = Readonly<ShallowRef<T | null>>;
+
+/** A slot as a component receives it: called with the slot props, it renders the content. */
+export type Slot<P = any> = (props: P) => Block;
+
+/** The slots a component receives, by name. */
+export type Slots = Readonly<Record<string, Slot | undefined>>;

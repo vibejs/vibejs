@@ -147,7 +147,7 @@ describe('handleError', () => {
   test('logs the error once as VIBE5102 naming the info, with the error as its cause', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const err = new Error('boom');
-    handleError(err, 'watcher getter');
+    handleError(err, null, 'watcher getter');
     expect(spy).toHaveBeenCalledTimes(1);
     const [[logged]] = spy.mock.calls;
     expect(logged).toMatchObject({ code: 'VIBE5102', cause: err });
@@ -160,7 +160,7 @@ describe('handleError', () => {
     vi.stubGlobal('__DEV__', false);
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const err = new Error('boom');
-    handleError(err, 'scheduler flush');
+    handleError(err, null, 'scheduler flush');
     const [[logged]] = spy.mock.calls;
     expect(logged).toMatchObject({
       code: 'VIBE5102',
@@ -173,15 +173,19 @@ describe('handleError', () => {
 describe('callWithErrorHandling', () => {
   test('returns the result, or undefined after reporting what fn throws', () => {
     const reported = spyErrors();
-    expect(callWithErrorHandling((a: number, b: number) => a + b, 'watcher getter', [1, 2])).toBe(
-      3,
-    );
-    expect(callWithErrorHandling(() => 'no args', 'watcher getter')).toBe('no args');
+    expect(
+      callWithErrorHandling((a: number, b: number) => a + b, null, 'watcher getter', [1, 2]),
+    ).toBe(3);
+    expect(callWithErrorHandling(() => 'no args', null, 'watcher getter')).toBe('no args');
     const err = new Error('thrown');
     expect(
-      callWithErrorHandling(() => {
-        throw err;
-      }, 'watcher cleanup'),
+      callWithErrorHandling(
+        () => {
+          throw err;
+        },
+        null,
+        'watcher cleanup',
+      ),
     ).toBeUndefined();
     expect(reported()).toEqual([[err, 'watcher cleanup']]);
   });
@@ -189,12 +193,16 @@ describe('callWithErrorHandling', () => {
   test('callWithAsyncErrorHandling reports a rejected promise and returns it', async () => {
     const reported = spyErrors();
     const err = new Error('rejected');
-    const promise = callWithAsyncErrorHandling(async () => {
-      throw err;
-    }, 'watcher callback');
+    const promise = callWithAsyncErrorHandling(
+      async () => {
+        throw err;
+      },
+      null,
+      'watcher callback',
+    );
     expect(promise).toBeInstanceOf(Promise);
     await expect(promise).rejects.toBe(err);
     expect(reported()).toEqual([[err, 'watcher callback']]);
-    expect(callWithAsyncErrorHandling(() => 1, 'watcher callback')).toBe(1);
+    expect(callWithAsyncErrorHandling(() => 1, null, 'watcher callback')).toBe(1);
   });
 });

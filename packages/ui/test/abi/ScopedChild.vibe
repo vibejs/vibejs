@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import Item from './Item.vibe';
+</script>
+
+<template>
+  <div class="child">
+    <Item :index="0" label="first" :done="false" />
+  </div>
+</template>
+
+<style scoped>
+li {
+  margin: 0;
+}
+</style>

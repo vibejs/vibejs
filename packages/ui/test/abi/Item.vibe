@@ -1,0 +1,7 @@
+<script setup lang="ts">
+defineProps<{ index: number; label: string; done: boolean }>();
+</script>
+
+<template>
+  <li :class="{ done }">{{ index + 1 }}. {{ label }}</li>
+</template>

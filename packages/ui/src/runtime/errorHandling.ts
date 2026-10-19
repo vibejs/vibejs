@@ -1,24 +1,43 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/runtime-core/src/errorHandling.ts (MIT)
 import { vibeError } from '../errors.gen.ts';
 import { logError } from '../warn.ts';
+import type { ComponentInstance, LifecycleHook } from './instance.ts';
 
 /** Where an error was thrown; the same strings in dev and prod builds. */
 export type ErrorInfo =
+  | 'setup function'
+  | 'render effect'
   | 'watcher getter'
   | 'watcher callback'
   | 'watcher cleanup'
   | 'scheduler flush'
-  | 'render effect'
-  | 'native event handler';
+  | 'native event handler'
+  | 'component event handler'
+  | `${LifecycleHook} hook`
+  | 'template ref';
 
-/** The one place errors of user code end up. It reports them and never rethrows. */
-export function handleError(err: unknown, info: ErrorInfo): void {
-  logError(vibeError('VIBE5102', { info }, { cause: err }));
+/**
+ * The one place errors of user code end up. The `onErrorCaptured` hooks of the ancestors of
+ * `instance` see it first, nearest first, and one that returns `false` stops it; then the app's
+ * `config.errorHandler`; else it is logged as VIBE5102. It never rethrows.
+ */
+export function handleError(
+  err: unknown,
+  instance: ComponentInstance | null,
+  info: ErrorInfo,
+): void {
+  for (let cur = instance?.parent; cur; cur = cur.parent) {
+    for (const hook of cur.errorCaptured) if (hook(err, instance, info) === false) return;
+  }
+  const handler = instance?.appContext.config.errorHandler;
+  if (handler) handler(err, instance, info);
+  else logError(vibeError('VIBE5102', { info }, { cause: err }));
 }
 
 /** Calls `fn`; an error it throws goes to `handleError` and the call returns `undefined`. */
 export function callWithErrorHandling<A extends unknown[], R>(
   fn: (...args: A) => R,
+  instance: ComponentInstance | null,
   info: ErrorInfo,
   args?: A,
 ): R | undefined {
@@ -26,7 +45,7 @@ export function callWithErrorHandling<A extends unknown[], R>(
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- without args, `fn` takes none
     return fn(...(args ?? ([] as unknown[] as A)));
   } catch (err) {
-    handleError(err, info);
+    handleError(err, instance, info);
     return undefined;
   }
 }
@@ -34,13 +53,14 @@ export function callWithErrorHandling<A extends unknown[], R>(
 /** Like `callWithErrorHandling`; the rejection of a returned promise goes to `handleError` too. */
 export function callWithAsyncErrorHandling<A extends unknown[], R>(
   fn: (...args: A) => R,
+  instance: ComponentInstance | null,
   info: ErrorInfo,
   args?: A,
 ): R | undefined {
-  const result = callWithErrorHandling(fn, info, args);
+  const result = callWithErrorHandling(fn, instance, info, args);
   if (result instanceof Promise) {
     result.catch((err: unknown) => {
-      handleError(err, info);
+      handleError(err, instance, info);
     });
   }
   return result;

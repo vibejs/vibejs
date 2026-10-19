@@ -1,0 +1,27 @@
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui';
+import Counter from './Counter.vibe';
+
+const items = ref([1, 2, 3]);
+const show = ref(true);
+const input = useTemplateRef<HTMLInputElement>('input');
+const counter = useTemplateRef('counter');
+const rows = useTemplateRef<HTMLLIElement[]>('rows');
+const seen: unknown[] = [];
+function track(el: unknown) {
+  seen.push(el);
+}
+
+defineExpose({ items, show, input, counter, rows, seen });
+</script>
+
+<template>
+  <div>
+    <input v-if="show" ref="input" />
+    <Counter ref="counter" />
+    <ul>
+      <li v-for="item in items" :key="item" ref="rows">{{ item }}</li>
+    </ul>
+    <p :ref="track"></p>
+  </div>
+</template>

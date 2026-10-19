@@ -24,13 +24,15 @@ export const Counter: ComponentDef = {
   __file: 'test/abi/Counter.vibe',
   __propKeys: ['start', 'step'],
   __emits: ['change'],
-  setup(__props: Props, __ctx: SetupContext) {
+  __defaults: { start: () => 0, step: () => 1 },
+  setup(__props: Required<Props>, __ctx: SetupContext) {
     const { emit } = __ctx;
-    const count = ref(__props.start ?? 0);
+    const count = ref(__props.start);
     function increment() {
-      count.value += __props.step ?? 1;
+      count.value += __props.step;
       emit('change', count.value);
     }
+    __ctx.expose({ count });
     return { count, increment };
   },
   render($setup: { count: number; increment: () => void }) {

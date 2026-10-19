@@ -1,0 +1,27 @@
+<script setup lang="ts">
+import {
+  onBeforeMount,
+  onBeforeUnmount,
+  onBeforeUpdate,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+} from '@vibejs-org/ui';
+
+const { log } = defineProps<{ log: string[]; count: number }>();
+
+onBeforeMount(() => log.push('leaf beforeMount'));
+onMounted(() => log.push('leaf mounted'));
+onBeforeUpdate(() => log.push('leaf beforeUpdate'));
+onUpdated(() => log.push('leaf updated'));
+onBeforeUnmount(() => log.push('leaf beforeUnmount'));
+onUnmounted(() => log.push('leaf unmounted'));
+
+function fail() {
+  throw new Error('leaf failed');
+}
+</script>
+
+<template>
+  <span @click="fail">{{ count }}</span>
+</template>

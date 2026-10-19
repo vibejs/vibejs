@@ -1,0 +1,13 @@
+<script setup lang="ts">
+import ScopedChild from './ScopedChild.vibe';
+</script>
+
+<template>
+  <ScopedChild />
+</template>
+
+<style scoped>
+.child {
+  padding: 0;
+}
+</style>

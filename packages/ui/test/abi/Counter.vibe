@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref } from '@vibejs-org/ui';
 
-const props = defineProps<{ start?: number; step?: number }>();
+const { start = 0, step = 1 } = defineProps<{ start?: number; step?: number }>();
 const emit = defineEmits<{ change: [count: number] }>();
 
-const count = ref(props.start ?? 0);
+const count = ref(start);
 function increment() {
-  count.value += props.step ?? 1;
+  count.value += step;
   emit('change', count.value);
 }
+
+defineExpose({ count });
 </script>
 
 <template>

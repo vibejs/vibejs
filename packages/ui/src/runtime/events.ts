@@ -1,12 +1,14 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/runtime-dom/src/directives/vOn.ts (MIT)
 import { hyphenate } from '../shared.ts';
 import { callWithAsyncErrorHandling } from './errorHandling.ts';
+import { currentInstance } from './instance.ts';
 
 /**
  * Adds a listener to `el`, directly (no delegation) and for the element's lifetime. A throw or a
- * rejected promise of `fn` goes to the error handler as `'native event handler'`. Codegen passes
- * the `once`, `passive` and `capture` modifiers as `o`, and an inline expression as a function
- * that evaluates it when the event fires, so the listener never needs rebinding.
+ * rejected promise of `fn` goes to the error handler of the current instance as `'native event
+ * handler'`. Codegen passes the `once`, `passive` and `capture` modifiers as `o`, and an inline
+ * expression as a function that evaluates it when the event fires, so the listener never needs
+ * rebinding.
  */
 export function on(
   el: EventTarget,
@@ -14,7 +16,12 @@ export function on(
   fn: (e: Event) => unknown,
   o?: AddEventListenerOptions,
 ): void {
-  el.addEventListener(ev, (e) => callWithAsyncErrorHandling(fn, 'native event handler', [e]), o);
+  const instance = currentInstance;
+  el.addEventListener(
+    ev,
+    (e) => callWithAsyncErrorHandling(fn, instance, 'native event handler', [e]),
+    o,
+  );
 }
 
 const systemModifiers = ['ctrl', 'shift', 'alt', 'meta'];

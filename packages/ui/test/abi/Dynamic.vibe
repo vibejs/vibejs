@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import type { Component } from '@vibejs-org/ui';
+
+defineProps<{ is: Component | null | undefined; label: string }>();
+</script>
+
+<template>
+  <component :is="is" :label="label" />
+</template>
