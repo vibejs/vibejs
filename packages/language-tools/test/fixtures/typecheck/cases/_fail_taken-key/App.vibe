@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const active = true
+</script>
+
+<template>
+  <p class="x" :class="{ active: typoo }">{{ active }}</p>
+</template>

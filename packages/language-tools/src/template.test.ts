@@ -43,7 +43,7 @@ it('breaks a chain at text and interpolations', () => {
 });
 
 it('keeps the condition of an untyped branch, so the chain still narrows', () => {
-  expect(emit('<C v-if="a" /><p v-else-if="b" /><template v-else>x</template>')).toEqual([
+  expect(emit('<C v-if="a" /><p v-else-if="b" /><slot v-else />')).toEqual([
     'if (a) {',
     '}',
     'else if (b) {',
@@ -71,5 +71,29 @@ it('emits nothing for a v-for without aliases or an empty interpolation', () => 
 it('quotes static values on one line', () => {
   expect(emit(`<p title="it's\n\\" />`)).toEqual([
     "__vibe.el(__vibe.tags.p)({ title: 'it\\u0027s\\u000a\\u005c' });",
+  ]);
+});
+
+it('walks a v-if or v-for fragment, not a slot wrapper', () => {
+  expect(
+    emit('<template v-for="x in xs" :key="x">{{ x }}</template><template #a>{{ a }}</template>'),
+  ).toEqual(['for (const [x] of __vibe.vFor(xs)) {', '(x);', '}']);
+});
+
+it('checks a value whose key is taken as a statement, and camelizes .camel', () => {
+  expect(
+    emit('<svg class="x" :class="a" :view-box.camel="v" @click="f" @click.once="g()" />'),
+  ).toEqual([
+    "__vibe.el(__vibe.tags.svg)({ class: 'x', viewBox: v, onClick: f });",
+    '(a);',
+    '(($event) => { g() });',
+  ]);
+});
+
+it('binds the names read by a v-for alias default, not the ones it declares', () => {
+  expect(emit('<i v-for="{ a = d, b: [c] } in xs" />', ['a', 'c', 'd'])).toEqual([
+    'for (const [{ a = d, b: [c] }] of __vibe.vFor(xs)) {',
+    '__vibe.el(__vibe.tags.i)({ });',
+    '}',
   ]);
 });

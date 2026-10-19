@@ -9,7 +9,7 @@ const value = 1
   </Comp>
   <component :is="Comp" />
   <slot name="a" :value="value" />
-  <template v-if="value"><p>{{ value }}</p></template>
+  <template><p>{{ value }}</p></template>
   <x-widget :value="value">{{ value }}</x-widget>
   <ns.Comp />
 </template>

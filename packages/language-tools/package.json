@@ -50,6 +50,7 @@
     "vscode-jsonrpc": "catalog:"
   },
   "devDependencies": {
+    "@vibejs-org/ui": "workspace:*",
     "oxc-parser": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:ts-next"

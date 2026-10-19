@@ -20,4 +20,5 @@
 #19 Atom BOUND o[207,210) "\"a\"" → v[319,322) "'a'"
 #20 Verbatim BOUND o[221,226) "class" → v[324,329) "class"
 #21 Verbatim BOUND o[228,230) "id" → v[331,333) "id"
-#22 Atom ANCHOR o[0,0) "" → v[434,542) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
+#22 Verbatim BOUND o[216,218) "id" → v[341,343) "id"
+#23 Atom ANCHOR o[0,0) "" → v[442,550) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

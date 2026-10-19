@@ -4,11 +4,8 @@ const value = 1
 
 type __VibeProps = {};
 type __VibeEmits = {};
-const __vibe_setup = { value };
+const __vibe_setup = {  };
 {
-  const { value } = __vibe.unrefs(__vibe_setup);
-  if (value) {
-  }
 }
 type __VibeSlots = {};
 type __VibeExposed = {};

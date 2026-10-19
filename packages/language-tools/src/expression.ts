@@ -17,7 +17,8 @@ export interface Names {
  * Emits the template expression at the original range [start, end), verbatim. Names bound to setup
  * bindings or props get BOUND spans; write roots among them are written through `__vibe_w` (setup)
  * or `__vibe_ctx` (props), so readonly targets fail at the template. `locals` are template-local
- * names (v-for aliases, `$event`). An expression that does not parse is emitted as it is.
+ * names (v-for aliases, `$event`). An expression that does not parse is emitted as it is. With
+ * `pattern`, the range is a v-for alias: only names read by its default values are bound.
  */
 export function expression(
   b: CodeBuilder,
@@ -25,10 +26,14 @@ export function expression(
   source: string,
   [start, end]: [number, number],
   locals: ReadonlySet<string>,
+  pattern = false,
 ): void {
   let at = start;
-  forEachIdentifier(source.slice(start, end), start, (name, from, to, { local, writeRoot }) => {
-    if (local || locals.has(name)) return;
+  const text = source.slice(start, end);
+  // A pattern (a v-for alias) is walked as an assignment target; the names it declares stay as they are.
+  const walked = pattern ? ([`[${text}] = []`, start - 1] as const) : ([text, start] as const);
+  forEachIdentifier(...walked, (name, from, to, { local, writeRoot }) => {
+    if (local || locals.has(name) || (pattern && writeRoot)) return;
     const setup = names.setup.has(name);
     if (!setup && !names.ctx.has(name)) return;
     (setup ? names.usedSetup : names.usedCtx).add(name);
@@ -42,7 +47,7 @@ export function expression(
   });
   b.verbatim(at, end, Preset.EXPR);
   // A line comment would swallow the synthesized code that follows.
-  if (source.slice(start, end).includes('//')) b.add('\n');
+  if (text.includes('//')) b.add('\n');
 }
 
 /** The names that a v-for alias (`item`, `{ id, name }`, `[a, b]`) declares. */

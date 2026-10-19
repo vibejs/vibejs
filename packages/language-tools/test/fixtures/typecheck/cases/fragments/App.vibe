@@ -1,0 +1,14 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import { expectType } from '../../expect.ts'
+const value = 1 as number | null
+const fallback = ref(1)
+const rows = [{ id: 1 }, {}] as { id?: number }[]
+const box = '0 0 10 10'
+</script>
+
+<template>
+  <template v-if="value !== null"><p>{{ value.toFixed() }}</p></template>
+  <template v-for="{ id = fallback } in rows"><p>{{ expectType<number>()(id) }}</p></template>
+  <svg :view-box.camel="box"></svg>
+</template>

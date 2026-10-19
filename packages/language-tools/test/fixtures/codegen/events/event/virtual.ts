@@ -9,6 +9,7 @@ const __vibe_setup = { set };
 {
   const { set } = __vibe.unrefs(__vibe_setup);
   __vibe.el(__vibe.tags.input)({ onInput: ($event) => { set(($event.target as HTMLInputElement).value) }, onClick: ($event) => { $event.preventDefault() } });
+  (($event) => { set('dup') });
 }
 type __VibeSlots = {};
 type __VibeExposed = {};

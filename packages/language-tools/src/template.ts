@@ -40,9 +40,14 @@ const directive = (el: ElementNode, name: string) =>
 const filled = (exp: SimpleExpressionNode | undefined) =>
   exp && exp.content.trim() ? exp : undefined;
 
-/** Only intrinsic elements are typed yet: not components, slots, `<template>` or custom elements. */
+/**
+ * Typed yet: intrinsic elements and `<template v-if/v-for>` fragments. Not components, slots, slot
+ * wrappers, a plain `<template>` or custom elements.
+ */
 const typed = (el: ElementNode) =>
-  el.tagType === ElementTypes.ELEMENT && el.tag !== 'template' && !el.tag.includes('-');
+  el.tagType === ElementTypes.TEMPLATE
+    ? !directive(el, 'slot')
+    : el.tagType === ElementTypes.ELEMENT && el.tag !== 'template' && !el.tag.includes('-');
 
 /** Emits the template children as statements, with `v-if` chains as `if`/`else` statements. */
 export function children(nodes: TemplateChildNode[], w: Walk, locals: Locals): void {
@@ -104,7 +109,7 @@ function element(el: ElementNode, w: Walk, outer: Locals): void {
   aliases.slice(0, last + 1).forEach((alias, i) => {
     if (i > 0) w.b.add(', ');
     if (!alias) return;
-    w.b.verbatim(...range(alias), Preset.EXPR);
+    expression(w.b, w.names, w.source, range(alias), outer, true);
     for (const name of aliasNames(w.source, range(alias))) locals.add(name);
   });
   w.b.add('] of __vibe.vFor(');
@@ -114,23 +119,27 @@ function element(el: ElementNode, w: Walk, outer: Locals): void {
   line(w, '}');
 }
 
-/** `__vibe.el(__vibe.tags.div)({ … });`, then the children. */
+/** `__vibe.el(__vibe.tags.div)({ … });`, then the children; a fragment emits only its children. */
 function emit(el: ElementNode, w: Walk, locals: Locals): void {
+  if (el.tagType === ElementTypes.TEMPLATE) return children(el.children, w, locals);
   const { b } = w;
   const start = el.loc.start.offset + 1;
   line(w, '__vibe.el(__vibe.tags.');
   b.atom(el.tag, start, start + el.tag.length, Preset.BOUND).add(')({');
   const seen = new Set<string>();
-  const shows: SimpleExpressionNode[] = [];
+  // `v-show` and values whose key is taken are still checked, as statements after the element.
+  const loose: (() => void)[] = [];
   for (const prop of el.props) {
     if (prop.type === NodeTypes.ATTRIBUTE) attribute(prop, w, seen);
-    else if (prop.name === 'show' && filled(prop.exp)) shows.push(prop.exp!);
-    else if (!STRUCTURE.has(prop.name)) bound(prop, w, seen, locals);
+    else if (prop.name === 'show' && filled(prop.exp)) {
+      const exp = prop.exp!;
+      loose.push(() => expression(b, w.names, w.source, range(exp), locals));
+    } else if (!STRUCTURE.has(prop.name)) bound(prop, w, seen, locals, loose);
   }
   b.add(' });');
-  for (const exp of shows) {
+  for (const value of loose) {
     line(w, '(');
-    expression(b, w.names, w.source, range(exp), locals);
+    value();
     b.add(');');
   }
   block(w, () => children(el.children, w, locals));
@@ -159,18 +168,31 @@ function attribute(attr: AttributeNode, w: Walk, seen: Set<string>): void {
   else w.b.atom('true', ...name, Preset.BOUND);
 }
 
-/** `:id="e"` -> `id: e`; `@click="h"` -> `onClick: h`, inline statements in an arrow. */
-function bound(dir: DirectiveNode, w: Walk, seen: Set<string>, locals: Locals): void {
+/**
+ * `:id="e"` -> `id: e`, `:view-box.camel` -> `viewBox`; `@click="h"` -> `onClick: h`, inline
+ * statements in an arrow. A value whose key is taken goes to `loose`.
+ */
+function bound(
+  dir: DirectiveNode,
+  w: Walk,
+  seen: Set<string>,
+  locals: Locals,
+  loose: (() => void)[],
+): void {
   const { arg } = dir;
   const exp = filled(dir.exp);
   if (!arg?.isStatic || !exp || (dir.name !== 'bind' && dir.name !== 'on')) return;
-  if (dir.name === 'bind') {
-    if (arg.content === 'ref' || !property(w, seen, arg.content, range(arg))) return;
-    return expression(w.b, w.names, w.source, range(exp), locals);
-  }
-  if (!property(w, seen, `on${capitalize(camelize(arg.content))}`, range(arg), true)) return;
-  if (isSimpleHandler(exp.content)) return expression(w.b, w.names, w.source, range(exp), locals);
-  w.b.add('($event) => { ');
-  expression(w.b, w.names, w.source, range(exp), new Set([...locals, '$event']));
-  w.b.add(' }');
+  if (dir.name === 'bind' && arg.content === 'ref') return;
+  const on = dir.name === 'on';
+  const camel = on || dir.modifiers.some((m) => m.content === 'camel');
+  const name = camel ? camelize(arg.content) : arg.content;
+  const value = () => {
+    if (!on || isSimpleHandler(exp.content))
+      return expression(w.b, w.names, w.source, range(exp), locals);
+    w.b.add('($event) => { ');
+    expression(w.b, w.names, w.source, range(exp), new Set([...locals, '$event']));
+    w.b.add(' }');
+  };
+  if (property(w, seen, on ? `on${capitalize(name)}` : name, range(arg), on)) value();
+  else loose.push(value);
 }

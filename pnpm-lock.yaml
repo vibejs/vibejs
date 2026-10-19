@@ -467,13 +467,13 @@ importers:
       '@vibejs-org/errors':
         specifier: workspace:*
         version: link:../errors
-      '@vibejs-org/ui':
-        specifier: workspace:*
-        version: link:../ui
       vscode-jsonrpc:
         specifier: 'catalog:'
         version: 9.0.3
     devDependencies:
+      '@vibejs-org/ui':
+        specifier: workspace:*
+        version: link:../ui
       oxc-parser:
         specifier: 'catalog:'
         version: 0.154.0
