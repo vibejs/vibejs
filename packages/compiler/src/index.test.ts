@@ -14,6 +14,7 @@ import {
 import { describe, expect, it } from 'vitest';
 import { fixtures, objects } from '../test/walk.ts';
 import { formatDiagnostic } from './diagnostics.ts';
+import { compileStyle } from './style/compileStyle.ts';
 
 type TemplateNode =
   | RootNode
@@ -23,14 +24,21 @@ type TemplateNode =
   | SimpleExpressionNode;
 
 describe('@vibejs-org/compiler', () => {
-  it('exports formatDiagnostic, parse, NodeTypes and ElementTypes at runtime', () => {
+  it('exports formatDiagnostic, compileStyle, parse, NodeTypes and ElementTypes at runtime', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
       'NodeTypes',
+      'compileStyle',
       'formatDiagnostic',
       'parse',
     ]);
     expect(compiler.formatDiagnostic).toBe(formatDiagnostic);
+    expect(compiler.compileStyle).toBe(compileStyle);
+  });
+
+  it('scopes CSS through the package entry', () => {
+    const { code } = compiler.compileStyle('.a {}', { filename: 'A.vibe', id: '7a1c2e3f' });
+    expect(code).toBe('.a[data-vb-7a1c2e3f] {}');
   });
 
   it('gives language tools what they walk in a template', () => {

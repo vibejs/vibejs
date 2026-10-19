@@ -2,6 +2,7 @@ import { expectTypeOf } from 'vitest';
 import type {
   AttributeNode,
   CommentNode,
+  Diagnostic,
   DirectiveNode,
   ElementNode,
   ElementTypes,
@@ -14,9 +15,11 @@ import type {
   SFCDescriptor,
   SimpleExpressionNode,
   SourceLocation,
+  SourceMapV3,
   StyleLang,
   TemplateChildNode,
   TextNode,
+  compileStyle,
   parse,
 } from './index.ts';
 
@@ -39,7 +42,7 @@ expectTypeOf<typeof parse>().toEqualTypeOf<
   (
     source: string,
     options: { filename: string },
-  ) => { descriptor: SFCDescriptor; diagnostics: import('./index.ts').Diagnostic[] }
+  ) => { descriptor: SFCDescriptor; diagnostics: Diagnostic[] }
 >();
 
 expectTypeOf<NodeTypes>().toEqualTypeOf<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7>();
@@ -77,3 +80,21 @@ expectTypeOf<DirectiveNode>().toEqualTypeOf<{
 expectTypeOf<InterpolationNode['content']>().toEqualTypeOf<SimpleExpressionNode>();
 expectTypeOf<AttributeNode['value']>().toEqualTypeOf<TextNode | undefined>();
 expectTypeOf<CommentNode['content']>().toEqualTypeOf<string>();
+
+// The signature and map shape of the CV6 spec.
+interface SpecSourceMapV3 {
+  version: 3;
+  file?: string;
+  sources: string[];
+  sourcesContent?: (string | null)[];
+  names: string[];
+  mappings: string;
+}
+
+expectTypeOf<SourceMapV3>().toEqualTypeOf<SpecSourceMapV3>();
+expectTypeOf<typeof compileStyle>().toEqualTypeOf<
+  (
+    css: string,
+    options: { filename: string; id: string },
+  ) => { code: string; map: SourceMapV3 | null; diagnostics: Diagnostic[] }
+>();

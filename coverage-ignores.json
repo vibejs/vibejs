@@ -10,5 +10,9 @@
   {
     "file": "packages/compiler/src/template/parser.ts",
     "reason": "upstream-defensive: a non-empty index alias is never blank"
+  },
+  {
+    "file": "packages/compiler/src/style/pluginScoped.ts",
+    "reason": "upstream-defensive: a clone of a selector that holds the pseudo has a first node"
   }
 ]
