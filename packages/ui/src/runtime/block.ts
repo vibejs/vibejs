@@ -75,7 +75,8 @@ export function firstNode(b: Block): Node | undefined {
 
 /**
  * Runs `render` untracked in a new effect scope, a child of `owner` (the scope that was active
- * when the fragment was created), and returns the scope and the block.
+ * when the fragment was created), and returns the scope and the block. If `render` throws, the
+ * new scope stops before the error propagates.
  */
 export function build(
   owner: EffectScopeImpl | undefined,
@@ -84,7 +85,12 @@ export function build(
   const prevSub = setActiveSub(undefined);
   try {
     const scope = owner ? owner.run(() => new EffectScopeImpl())! : new EffectScopeImpl();
-    return [scope, scope.run(render)!];
+    try {
+      return [scope, scope.run(render)!];
+    } catch (e) {
+      scope.stop();
+      throw e;
+    }
   } finally {
     setActiveSub(prevSub);
   }
