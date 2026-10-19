@@ -1,0 +1,8 @@
+<script setup lang="ts">
+defineEmits<{ a: [] }>()
+defineEmits<{ b: [] }>()
+</script>
+
+<template>
+  <p>{{ $emit }}</p>
+</template>

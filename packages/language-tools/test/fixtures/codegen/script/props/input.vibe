@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import type { Item } from './types'
+const props = defineProps<{ items: Item[]; title?: string }>()
+</script>
+
+<template>
+  <h1>{{ title }} {{ props.items.length }} {{ items }}</h1>
+</template>

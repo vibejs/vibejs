@@ -1,0 +1,2 @@
+#0 Verbatim EXPR o[24,72) "\nimport Comp from './Comp.vibe'\nconst value = 1\n" → v[0,48) "\nimport Comp from './Comp.vibe'\nconst value = 1\n"
+#1 Atom ANCHOR o[0,0) "" → v[220,328) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

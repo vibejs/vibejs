@@ -28,19 +28,34 @@
     ".": {
       "vibejs-source": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./server": {
+      "vibejs-source": "./src/server.ts",
+      "default": "./dist/server.js"
     }
   },
   "publishConfig": {
     "exports": {
-      ".": "./dist/index.js"
+      ".": "./dist/index.js",
+      "./server": "./dist/server.js"
     },
     "access": "public"
   },
   "scripts": {
     "build": "tsdown"
   },
+  "dependencies": {
+    "@vibejs-org/compiler": "workspace:*",
+    "@vibejs-org/errors": "workspace:*",
+    "vscode-jsonrpc": "catalog:"
+  },
   "devDependencies": {
-    "tsdown": "catalog:"
+    "oxc-parser": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:ts-next"
+  },
+  "peerDependencies": {
+    "@vibejs-org/ui": "workspace:*"
   },
   "typescript": {
     "contentMapper": {

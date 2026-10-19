@@ -1,0 +1,17 @@
+<script setup lang="ts">
+const value = 1 as number | string | null
+</script>
+
+<template>
+  <p v-if="typeof value === 'number'">{{ value }}</p>
+  <!-- kept -->
+  <p v-else-if="typeof value === 'string'">{{ value }}</p>
+  <p v-else>none</p>
+  <p v-else>orphan</p>
+  <p v-if="value">a</p>
+  text
+  <p v-else-if="value">orphan else-if</p>
+  <p v-if>no condition</p>
+  <Comp v-if="value" />
+  <p v-else>after a component</p>
+</template>

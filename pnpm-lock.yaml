@@ -285,6 +285,9 @@ catalogs:
     vitest:
       specifier: 5.0.5
       version: 5.0.5
+    vscode-jsonrpc:
+      specifier: ^9.0.3
+      version: 9.0.3
     vscode-tmgrammar-test:
       specifier: 0.1.3
       version: 0.1.3
@@ -457,10 +460,29 @@ importers:
         version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.0.2)
 
   packages/language-tools:
+    dependencies:
+      '@vibejs-org/compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@vibejs-org/errors':
+        specifier: workspace:*
+        version: link:../errors
+      '@vibejs-org/ui':
+        specifier: workspace:*
+        version: link:../ui
+      vscode-jsonrpc:
+        specifier: 'catalog:'
+        version: 9.0.3
     devDependencies:
+      oxc-parser:
+        specifier: 'catalog:'
+        version: 0.154.0
       tsdown:
         specifier: 'catalog:'
-        version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.0.2)
+        version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.1.0-dev.20261015.1)
+      typescript:
+        specifier: catalog:ts-next
+        version: 7.1.0-dev.20261015.1
 
   packages/server:
     dependencies:
@@ -3464,6 +3486,10 @@ packages:
       jsdom:
         optional: true
 
+  vscode-jsonrpc@9.0.3:
+    resolution: {integrity: sha512-qETYf9PCl1lVfwR+oBmMfc4vP2nqLNA35ABxorw3j06+xlKRgDVxbLgKm4Y/xPL0YWdeDjLoI4ImICIT3nB0zQ==}
+    engines: {node: '>=14.0.0'}
+
   vscode-oniguruma@1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
 
@@ -6082,6 +6108,8 @@ snapshots:
       jsdom: 30.1.3
     transitivePeerDependencies:
       - msw
+
+  vscode-jsonrpc@9.0.3: {}
 
   vscode-oniguruma@1.7.0: {}
 

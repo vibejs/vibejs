@@ -1,0 +1,8 @@
+<script setup lang="ts">
+function go() {}
+const handlers = { go }
+</script>
+
+<template>
+  <button @click="go" @dblclick="handlers.go" @keydown="() => go()" @keyup="function () { go() }">Go</button>
+</template>

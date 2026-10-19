@@ -1,0 +1,3 @@
+<template>
+  <li v-for="c of 'abc'">{{ c }}</li>
+</template>

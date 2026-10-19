@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const scores = { ada: 1, alan: 2 }
+</script>
+
+<template>
+  <li v-for="(score, name, index) in scores">{{ name.toFixed(index) }}</li>
+</template>

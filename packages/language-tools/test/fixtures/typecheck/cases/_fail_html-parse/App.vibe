@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const id = 'a'
+</script>
+
+<template>
+  <div :id="id" :id="id"></div>
+</template>

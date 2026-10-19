@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const count = ref(0)
+// defineProps is not called
+</script>
+
+<template>
+  <p>{{ count }}</p>
+</template>

@@ -1,0 +1,10 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const count = ref(0)
+const total = 1
+defineProps<{ limit: number }>()
+</script>
+
+<template>
+  <button @click="count += 1; total = 2; limit++; $props = {}; missing = 1">{{ count }}</button>
+</template>

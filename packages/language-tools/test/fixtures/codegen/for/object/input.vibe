@@ -1,0 +1,10 @@
+<script setup lang="ts">
+const scores = { ada: 1 }
+const items = [1]
+</script>
+
+<template>
+  <li v-for="(score, name, index) in scores">{{ name }} {{ score }} {{ index }}</li>
+  <li v-for="(, key) in scores">{{ key }}</li>
+  <li v-for="(items, i) in items" v-if="items">{{ items }} {{ i }}</li>
+</template>

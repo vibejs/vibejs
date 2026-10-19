@@ -1,0 +1,12 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import { expectType } from '../../expect.ts'
+const user = ref<{ name: string } | null>(null)
+</script>
+
+<template>
+  <section v-if="user">
+    <p>{{ user.name.toUpperCase() }}</p>
+    <button @click="expectType<string>()(user.name)">Check</button>
+  </section>
+</template>

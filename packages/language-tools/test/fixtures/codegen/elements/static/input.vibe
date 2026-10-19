@@ -1,0 +1,4 @@
+<template>
+  <label for="x" class="a  b" aria-label="It's
+here" data-test="x">Label</label>
+</template>

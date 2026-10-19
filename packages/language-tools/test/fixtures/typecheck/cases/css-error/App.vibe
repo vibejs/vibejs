@@ -1,0 +1,11 @@
+<script setup lang="ts">
+const label = 'a'
+</script>
+
+<template>
+  <p class="label">{{ label }}</p>
+</template>
+
+<style>
+.label {
+</style>

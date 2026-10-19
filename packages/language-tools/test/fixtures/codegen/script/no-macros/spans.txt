@@ -1,0 +1,5 @@
+#0 Verbatim EXPR o[24,112) "\nimport { ref } from '@vibejs-org/ui'\nconst count = ref(0)\n// defineProps is not called\n" → v[0,88) "\nimport { ref } from '@vibejs-org/ui'\nconst count = ref(0)\n// defineProps is not called\n"
+#1 Atom LINK o[68,73) "count" → v[179,184) "count"
+#2 Atom BOUND o[137,138) "p" → v[242,243) "p"
+#3 Verbatim BOUND o[142,147) "count" → v[256,261) "count"
+#4 Atom ANCHOR o[0,0) "" → v[360,468) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

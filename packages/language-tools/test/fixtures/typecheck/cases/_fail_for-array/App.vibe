@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const items = [{ id: 1 }]
+</script>
+
+<template>
+  <li v-for="item in items">{{ item.name }}</li>
+</template>

@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const items = [{ id: 1, name: 'a' }]
+</script>
+
+<template>
+  <li v-for="(item, i) in items" :key="item.id">{{ i }}: {{ item.name }}</li>
+  <li v-for="{ id, name = 'x' } in items">{{ id }} {{ name }}</li>
+  <li v-for="items">no alias</li>
+</template>

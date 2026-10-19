@@ -1,0 +1,3 @@
+<template>
+  <li v-for="n in 3">{{ n.toUpperCase() }}</li>
+</template>
