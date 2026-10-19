@@ -130,6 +130,8 @@ export async function createApp(
     shutdownTimeout = 10_000,
     validateResponses = true,
   } = options;
+  // Checked before any provider runs, so a bad option leaves nothing to shut down.
+  if (!/^(?:\/[^/]+)*$/.test(basePath)) throw vibeError('VIBE9405', { basePath });
   const dynamic: DynamicModule = typeof root === 'function' ? { module: root } : root;
   const internal = loggerModule(logger);
   const graph = scan({ ...dynamic, imports: [internal, ...(dynamic.imports ?? [])] }, overrides);
@@ -193,8 +195,11 @@ export async function createApp(
     headers: Headers,
     started: number,
   ) {
-    // A copy has mutable headers, even for `Response.redirect()`; HEAD drops the body.
-    const out = new Response(req.method === 'HEAD' ? null : res.body, res);
+    // A copy has mutable headers, even for `Response.redirect()`; HEAD drops the body and stops
+    // its producer.
+    const head = req.method === 'HEAD';
+    if (head) res.body?.cancel().catch(() => {});
+    const out = new Response(head ? null : res.body, res);
     for (const [name, value] of headers) {
       if (name === 'set-cookie') out.headers.append(name, value);
       else out.headers.set(name, value);
