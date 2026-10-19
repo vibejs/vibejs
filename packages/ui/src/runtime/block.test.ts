@@ -224,3 +224,26 @@ test('a branch effect queued before the swap that disposes it does not run on st
   expect(error).not.toHaveBeenCalled();
   expect(frag.nodes).toEqual([]);
 });
+
+test('a branch that throws while it builds stops the effects it created', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const ok = ref(true);
+  const tick = ref(0);
+  const runs: number[] = [];
+  const parent = el('div');
+  const frag = createIf(
+    () => ok.value,
+    () => {
+      renderEffect(() => runs.push(tick.value));
+      throw new Error('boom');
+    },
+    () => el('b', 'else'),
+  );
+  insert(frag, parent);
+  ok.value = false;
+  await nextTick();
+  expect(parent.innerHTML).toBe('<b>else</b><!---->');
+  tick.value++;
+  await nextTick();
+  expect(runs).toEqual([0]);
+});
