@@ -225,7 +225,7 @@ function doWatch(
   };
   // A callback may write what its source reads; it then runs again in the same flush.
   if (cb) job.flags = SchedulerJobFlags.ALLOW_RECURSE;
-  job.instance = instance;
+  if (__DEV__) job.instance = instance;
   if (flush === 'sync') {
     effect.scheduler = job;
   } else if (flush === 'post') {

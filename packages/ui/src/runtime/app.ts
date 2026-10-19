@@ -138,13 +138,15 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
         return created;
       };
       instance = render();
-      const remount = (): void => {
-        rootScope.stop();
-        removeNodes(instance!);
-        instance = render();
-        exposed = proxyRefs(instance.exposed ?? {});
-      };
-      context.remount = __DEV__ ? remount : undefined;
+      // Built only in dev, so prod builds drop the closure.
+      context.remount = __DEV__
+        ? () => {
+            rootScope.stop();
+            removeNodes(instance!);
+            instance = render();
+            exposed = proxyRefs(instance.exposed ?? {});
+          }
+        : undefined;
       exposed = proxyRefs(instance.exposed ?? {});
       return exposed;
     },

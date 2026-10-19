@@ -228,6 +228,22 @@ test('reload of a parentless instance outside an app reloads the page', () => {
   scope.stop();
 });
 
+test('rerender and reload update instances of a later def object with the same id', () => {
+  const { id } = recorded('a');
+  // A re-executed module exports a new def under the known id; createRecord keeps the first.
+  const later: ComponentDef = {
+    __hmrId: id,
+    setup: () => ({ count: ref(0) }),
+    render: renderLabel('b'),
+  };
+  expect(hmr.createRecord(id, later)).toBe(false);
+  const { host } = mount({ render: () => createComponent(later) });
+  hmr.rerender(id, renderLabel('c'));
+  expect(host.innerHTML).toBe('<p>c:0</p>');
+  hmr.reload(id, { __hmrId: id, setup: () => ({ count: ref(7) }), render: renderLabel('d') });
+  expect(host.innerHTML).toBe('<p>d:7</p>');
+});
+
 test('rerender and reload of an unknown id warn VIBE5501 and reload the page', () => {
   const reload = vi.fn<() => void>();
   vi.stubGlobal('location', { reload });
