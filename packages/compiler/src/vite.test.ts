@@ -146,6 +146,15 @@ describe('vibe() main module', () => {
     expect(url.code).toContain('export default');
   });
 
+  it('serves a style block for a style id that carries ?inline', async () => {
+    const { code } = (await server.environments.client.transformRequest(
+      '/src/App.vibe?vibe&type=style&index=0&inline&lang.css',
+    ))!;
+    expect(code).toContain('export default');
+    expect(code).toContain('.btn[data-vb-');
+    expect(code).not.toContain('<template>');
+  });
+
   it('reports compile errors in the C2 shape', async () => {
     const file = `${fixture}/src/Broken.vibe`;
     const source = await readFile(file, 'utf8');
@@ -334,7 +343,10 @@ describe('vibe() hot updates', () => {
   });
 
   it('reloads when a block flips scoped or lang, or a block is added', async () => {
-    expect((await save(source.replace('<style scoped>', '<style>'))).sent).toStrictEqual([main]);
+    expect((await save(source.replace('<style scoped>', '<style>'))).sent).toStrictEqual([
+      main,
+      { type: 'js-update', path: `/src/App.vibe${style(0)}` },
+    ]);
     expect((await save(source.replace('<style>', '<style lang="postcss">'))).sent).toStrictEqual([
       main,
     ]);
