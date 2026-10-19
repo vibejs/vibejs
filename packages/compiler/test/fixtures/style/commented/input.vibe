@@ -1,0 +1,14 @@
+<template>
+  <p>clean</p>
+</template>
+
+<style lang="scss">
+// .a >>> .b { color: v-bind(color); }
+/* ::v-deep(.c) :slotted(.d) /deep/ */
+p { color: red; }
+</style>
+
+<style>
+/* v-bind(color) */
+p { margin: 0; }
+</style>

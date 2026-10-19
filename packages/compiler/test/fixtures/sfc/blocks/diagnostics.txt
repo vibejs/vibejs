@@ -1,0 +1,97 @@
+error[VIBE1002]: The component has a second `<template>` block, and only the first one is used.
+  --> sfc/blocks/input.vibe:4:1
+4 | <template lang="pug" src="./other.pug"></template>
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+fix: Merge the markup of both blocks into the first `<template>` block.
+fix: Move the second template into its own `.vibe` file and use it as a component.
+docs: https://vibejs.org/v0/errors/VIBE1002
+
+error[VIBE1008]: The `<template>` block has `lang="pug"`, but templates are plain HTML.
+  --> sfc/blocks/input.vibe:4:11
+4 | <template lang="pug" src="./other.pug"></template>
+  |           ^^^^^^^^^^
+fix: Remove `lang` and write the template in HTML.
+docs: https://vibejs.org/v0/errors/VIBE1008
+
+error[VIBE1006]: The `<template>` block has a `src` attribute.
+  --> sfc/blocks/input.vibe:4:22
+4 | <template lang="pug" src="./other.pug"></template>
+  |                      ^^^^^^^^^^^^^^^^^
+fix: Move the content of the referenced file into the `<template>` block and remove `src`.
+fix: Import TypeScript from another module inside `<script setup lang="ts">`, or CSS with `@import` inside `<style>`.
+docs: https://vibejs.org/v0/errors/VIBE1006
+
+error[VIBE1004]: The `<script>` block has no `setup` attribute.
+  --> sfc/blocks/input.vibe:5:1
+5 | <script lang="js">
+  | ^^^^^^^^^^^^^^^^^^
+fix: Write the block as `<script setup lang="ts">`.
+fix: Move component options into a `defineOptions()` call inside `<script setup lang="ts">`.
+docs: https://vibejs.org/v0/errors/VIBE1004
+
+error[VIBE1005]: The `<script setup>` block needs `lang="ts"` but has `lang="js"`.
+  --> sfc/blocks/input.vibe:5:9
+5 | <script lang="js">
+  |         ^^^^^^^^^
+fix: Write the block as `<script setup lang="ts">`.
+docs: https://vibejs.org/v0/errors/VIBE1005
+
+error[VIBE1003]: The component has a second `<script>` block, and only the first one is used.
+  --> sfc/blocks/input.vibe:8:1
+8 | <script setup lang="ts" generic="T" foo>
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+fix: Merge the code of both blocks into the first `<script setup lang="ts">` block.
+fix: Move shared code into a `.ts` module and import it.
+docs: https://vibejs.org/v0/errors/VIBE1003
+
+error[VIBE1013]: The `<script setup>` block has a `generic` attribute, and generic components are not supported.
+  --> sfc/blocks/input.vibe:8:25
+8 | <script setup lang="ts" generic="T" foo>
+  |                         ^^^^^^^^^^^
+fix: Remove `generic` and give the props a concrete type, such as a union of the supported types.
+docs: https://vibejs.org/v0/errors/VIBE1013
+
+error[VIBE1010]: The `<script>` block does not accept the attribute `foo`.
+  --> sfc/blocks/input.vibe:8:37
+8 | <script setup lang="ts" generic="T" foo>
+  |                                     ^^^
+fix: Remove `foo` from the `<script>` block.
+docs: https://vibejs.org/v0/errors/VIBE1010
+
+error[VIBE1007]: The `<style>` block has a `module` attribute, and CSS modules are not supported.
+  --> sfc/blocks/input.vibe:10:8
+10 | <style module scoped lang="sass2" title="x"></style>
+   |        ^^^^^^
+fix: Remove `module` and use `<style scoped>` to keep the styles local to the component.
+docs: https://vibejs.org/v0/errors/VIBE1007
+
+error[VIBE1009]: The `<style>` block has `lang="sass2"`, which is not one of `css`, `scss`, `sass`, `less`, `styl`, `stylus` or `postcss`.
+  --> sfc/blocks/input.vibe:10:22
+10 | <style module scoped lang="sass2" title="x"></style>
+   |                      ^^^^^^^^^^^^
+fix: Use one of `css`, `scss`, `sass`, `less`, `styl`, `stylus` or `postcss` as `lang`.
+fix: Remove `lang` for plain CSS.
+docs: https://vibejs.org/v0/errors/VIBE1009
+
+error[VIBE1010]: The `<style>` block does not accept the attribute `title`.
+  --> sfc/blocks/input.vibe:10:35
+10 | <style module scoped lang="sass2" title="x"></style>
+   |                                   ^^^^^^^^^
+fix: Remove `title` from the `<style>` block.
+docs: https://vibejs.org/v0/errors/VIBE1010
+
+error[VIBE1011]: `<docs>` is not a component block.
+  --> sfc/blocks/input.vibe:11:1
+11 | <docs>Custom block</docs>
+   | ^^^^^^
+fix: Move `<docs>` into the `<template>` block if it is markup.
+fix: Remove the `<docs>` block.
+docs: https://vibejs.org/v0/errors/VIBE1011
+
+error[VIBE1012]: Text is outside of every block.
+  --> sfc/blocks/input.vibe:12:1
+12 | Stray text
+   | ^^^^^^^^^^
+fix: Move the text into the `<template>` block.
+fix: Wrap the text in an HTML comment `<!-- -->`.
+docs: https://vibejs.org/v0/errors/VIBE1012

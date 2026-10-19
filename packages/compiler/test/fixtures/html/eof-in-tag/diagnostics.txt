@@ -1,0 +1,15 @@
+error[VIBE1124]: The element `<template>` has no end tag.
+  --> html/eof-in-tag/input.vibe:1:1
+1 | <template>
+  | ^^^^^^^^^^
+fix: Add `</template>` where the element ends.
+fix: Write `<template />` for an element without content.
+docs: https://vibejs.org/v0/errors/VIBE1124
+
+error[VIBE1109]: The file ends inside a tag that has no `>`.
+  --> html/eof-in-tag/input.vibe:2:21
+2 |   <div class="a" id=
+  |                     ^
+fix: Close the tag with `>`.
+fix: Close the quote of the last attribute value.
+docs: https://vibejs.org/v0/errors/VIBE1109

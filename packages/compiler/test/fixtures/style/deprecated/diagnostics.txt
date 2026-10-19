@@ -1,0 +1,55 @@
+error[VIBE4004]: `>>>` is not supported in component styles.
+  --> style/deprecated/input.vibe:7:4
+7 | .a >>> .b { color: red; }
+  |    ^^^
+fix: Write `:deep(.child)` to style `.child` inside child components.
+fix: Write `:global(.name)` for a rule that is not scoped.
+docs: https://vibejs.org/v0/errors/VIBE4004
+
+error[VIBE4004]: `/deep/` is not supported in component styles.
+  --> style/deprecated/input.vibe:8:4
+8 | .a /deep/ .b { color: v-bind(color); }
+  |    ^^^^^^
+fix: Write `:deep(.child)` to style `.child` inside child components.
+fix: Write `:global(.name)` for a rule that is not scoped.
+docs: https://vibejs.org/v0/errors/VIBE4004
+
+error[VIBE4003]: `v-bind()` is not supported in component styles.
+  --> style/deprecated/input.vibe:8:23
+8 | .a /deep/ .b { color: v-bind(color); }
+  |                       ^^^^^^
+fix: Set a CSS custom property such as `--color` with `:style` in the template, and read it with `var(--color)`.
+fix: Bind a class or style in the template with `:class` or `:style`.
+docs: https://vibejs.org/v0/errors/VIBE4003
+
+error[VIBE4004]: `::v-deep` is not supported in component styles.
+  --> style/deprecated/input.vibe:9:1
+9 | ::v-deep(.c), ::v-global(.d) { margin: 0; }
+  | ^^^^^^^^
+fix: Write `:deep(.child)` to style `.child` inside child components.
+fix: Write `:global(.name)` for a rule that is not scoped.
+docs: https://vibejs.org/v0/errors/VIBE4004
+
+error[VIBE4004]: `::v-global` is not supported in component styles.
+  --> style/deprecated/input.vibe:9:15
+9 | ::v-deep(.c), ::v-global(.d) { margin: 0; }
+  |               ^^^^^^^^^^
+fix: Write `:deep(.child)` to style `.child` inside child components.
+fix: Write `:global(.name)` for a rule that is not scoped.
+docs: https://vibejs.org/v0/errors/VIBE4004
+
+error[VIBE4002]: `:slotted` is not supported in component styles.
+  --> style/deprecated/input.vibe:10:1
+10 | :slotted(.e), ::v-slotted(.f) { padding: 0; }
+   | ^^^^^^^^
+fix: Style the slot content in the `<style scoped>` block of the component that passes it.
+fix: Wrap the selector in `:global()` to write a global rule.
+docs: https://vibejs.org/v0/errors/VIBE4002
+
+error[VIBE4002]: `::v-slotted` is not supported in component styles.
+  --> style/deprecated/input.vibe:10:15
+10 | :slotted(.e), ::v-slotted(.f) { padding: 0; }
+   |               ^^^^^^^^^^^
+fix: Style the slot content in the `<style scoped>` block of the component that passes it.
+fix: Wrap the selector in `:global()` to write a global rule.
+docs: https://vibejs.org/v0/errors/VIBE4002

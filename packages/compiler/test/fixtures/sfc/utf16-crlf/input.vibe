@@ -1,0 +1,8 @@
+<template>
+  <p>😀 <b id="smile">{{ label }}</b></p>
+  <span title="x" title="y">🎉</span>
+</template>
+
+<script setup lang="ts">
+const label = "😀";
+</script>

@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "file": "packages/compiler/src/template/parser.ts",
+    "reason": "upstream-defensive: the tokenizer reads no interpolation in v-pre"
+  },
+  {
+    "file": "packages/compiler/src/template/parser.ts",
+    "reason": "upstream-defensive: attributes end only inside an open tag"
+  },
+  {
+    "file": "packages/compiler/src/template/parser.ts",
+    "reason": "upstream-defensive: a non-empty index alias is never blank"
+  }
+]
