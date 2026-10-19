@@ -183,7 +183,9 @@ describe('docs command', () => {
   it('searches the catalog and the docs files', async () => {
     const r = await run('gizmos');
     expect(r.mode).toBe('search');
-    expect(r.hits!.map((hit) => hit.path)).toEqual(['guide/no-title', 'server/di']);
+    // Only the fixture files: what the real catalog contains must not change this test.
+    const files = r.hits!.map((hit) => hit.path).filter((path) => !path.startsWith('errors/'));
+    expect(files).toEqual(['guide/no-title', 'server/di']);
     expect(r.truncated).toBeUndefined();
   });
 
