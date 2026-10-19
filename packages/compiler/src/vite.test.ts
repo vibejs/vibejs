@@ -54,7 +54,12 @@ async function copyApp(): Promise<string> {
 }
 
 async function buildApp(root: string): Promise<{ css: string; js: string }> {
-  const result = await build({ ...config(root), build: { write: false } });
+  // The ui dist reads `__DEV__` from NODE_ENV; the source it resolves to here reads the global.
+  const result = await build({
+    ...config(root),
+    define: { __DEV__: 'false' },
+    build: { write: false },
+  });
   if (!('output' in result)) throw new Error('Expected a single build output.');
   const { output } = result;
   const css = output.flatMap((f) => (f.type === 'asset' ? [String(f.source)] : []));

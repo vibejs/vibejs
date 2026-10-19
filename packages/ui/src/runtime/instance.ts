@@ -100,7 +100,7 @@ export class ComponentInstance {
   ) {
     this.def = def;
     this.name = def.name;
-    this.file = def.__file;
+    this.file = __DEV__ ? def.__file : undefined;
     this.parent = parent;
     this.owner = owner;
     this.rawProps = rawProps;
