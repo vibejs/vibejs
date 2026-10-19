@@ -3,6 +3,7 @@
 import { readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { gzipSync } from 'node:zlib';
 import { build } from 'tsdown';
 import { afterAll, expect, it } from 'vitest';
 
@@ -20,7 +21,7 @@ const sentences = [...generated.matchAll(/^ {2}VIBE5\d{3}: \["((?:[^"\\]|\\.)*)"
   ([, message]) => message.split(/\{\w+\}/).reduce((a, b) => (b.length > a.length ? b : a)),
 );
 
-it('bundles the counter for prod without HMR code or dev messages, and it still counts', async () => {
+it('bundles the counter for prod in at most 7 kB gzip, without HMR code or dev messages, and it still counts', async () => {
   await build({
     config: false,
     entry: [fixture],
@@ -36,6 +37,9 @@ it('bundles the counter for prod without HMR code or dev messages, and it still 
     (name) => name.endsWith('.js') || name.endsWith('.mjs'),
   );
   const code = readFileSync(join(outDir, file), 'utf8');
+  // The size budget (CONTRACTS C10): 7 kB gzip.
+  const gzip = gzipSync(code, { level: 9 }).length;
+  expect(gzip).toBeLessThanOrEqual(7168);
   expect(sentences.length).toBeGreaterThan(20);
   expect(sentences.every((text) => text.length >= 10)).toBe(true);
   for (const text of [

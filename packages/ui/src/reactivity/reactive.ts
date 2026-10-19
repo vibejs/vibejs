@@ -7,7 +7,7 @@ import { createArrayInstrumentations, type Wrap } from './arrayInstrumentations.
 import { createBaseHandler } from './baseHandlers.ts';
 import { createCollectionHandler } from './collectionHandlers.ts';
 import { flag, isReactive, isReadonly, isShallow } from './dep.ts';
-import type { Builtin, RawSymbol, Ref, ShallowReactiveMarker, UnwrapRefSimple } from './ref.ts';
+import type { Builtin, RawSymbol, Ref, ShallowReactiveBrand, UnwrapRefSimple } from './ref.ts';
 
 declare const ReactiveMarkerSymbol: unique symbol;
 
@@ -19,7 +19,7 @@ export interface ReactiveMarker {
 /** Unwraps the refs nested in `T`, but not `T` itself. */
 export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>;
 export type Reactive<T> = UnwrapNestedRefs<T> & (T extends readonly any[] ? ReactiveMarker : {});
-export type ShallowReactive<T> = T & { [ShallowReactiveMarker]?: true };
+export type ShallowReactive<T> = T & ShallowReactiveBrand;
 export type Raw<T> = T & { [RawSymbol]?: true };
 export type DeepReadonly<T> = T extends Builtin | ((...args: any[]) => unknown)
   ? T

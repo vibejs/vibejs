@@ -80,3 +80,28 @@ expectTypeOf(model).toExtend<Ref<string>>();
 const [value, modifiers] = model;
 expectTypeOf(value).toEqualTypeOf<ModelRef<string, 'trim' | 'number'>>();
 expectTypeOf(modifiers).toEqualTypeOf<Record<'trim' | 'number', true | undefined>>();
+
+// ComponentProps checks the props and the on* handlers a parent passes.
+type ItemSig = (
+  props: { id: string; label?: string } & EmitsToProps<{ pick: [id: string] }>,
+) => Handle<{}, {}, { pick: [id: string] }>;
+declare const Item: Component<ItemSig>;
+type ItemProps = ComponentProps<typeof Item>;
+const itemProps: ItemProps = {
+  id: 'a',
+  onPick: (id) => {
+    expectTypeOf(id).toEqualTypeOf<string>();
+  },
+};
+expectTypeOf(itemProps.label).toEqualTypeOf<string | undefined>();
+// @ts-expect-error id is required
+const missingProp: ItemProps = {};
+// @ts-expect-error id is a string
+const wrongProp: ItemProps = { id: 1 };
+// @ts-expect-error size is not a prop
+const unknownProp: ItemProps = { id: 'a', size: 1 };
+// @ts-expect-error pick passes a string id
+const wrongPayload: ItemProps = { id: 'a', onPick: (_id: number) => {} };
+// @ts-expect-error open is not an event
+const unknownEvent: ItemProps = { id: 'a', onOpen: () => {} };
+expectTypeOf([missingProp, wrongProp, unknownProp, wrongPayload, unknownEvent]).toBeArray();
