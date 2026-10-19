@@ -14,7 +14,13 @@
     "packages/*/tsdown.config.ts",
     "packages/ui/vitest.setup.ts",
     "packages/ui/src/globals.d.ts",
-    "packages/ui/src/**/*.integration.test.ts"
+    "packages/ui/src/**/*.integration.test.ts",
+    "packages/contract/src/**/*.integration.test.ts",
+    "packages/contract/test/fixtures/ui-bundle"
   ],
-  "references": [{ "path": "packages/errors" }, { "path": "packages/ui" }]
+  "references": [
+    { "path": "packages/errors" },
+    { "path": "packages/ui" },
+    { "path": "packages/contract" }
+  ]
 }

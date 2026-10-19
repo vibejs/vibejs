@@ -48,6 +48,7 @@
     "arktype": "catalog:",
     "tsdown": "catalog:",
     "valibot": "catalog:",
+    "vite": "catalog:",
     "zod": "catalog:"
   },
   "engines": {

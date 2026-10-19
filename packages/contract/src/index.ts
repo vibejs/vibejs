@@ -1,3 +1,14 @@
+export { createClient } from './client.ts';
+export type {
+  ApiError,
+  ApiResult,
+  CallFn,
+  CallInput,
+  CallOptions,
+  Client,
+  ClientErrorCode,
+  ClientOptions,
+} from './client.ts';
 export { defineContract, isRoute } from './contract.ts';
 export type { Contract, Route } from './contract.ts';
 export { del, get, patch, post, put, raw } from './route.ts';

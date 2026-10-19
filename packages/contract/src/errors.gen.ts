@@ -5,6 +5,7 @@ const MESSAGES = {
   VIBE9001: ["The path \"{path}\" has the invalid segment \"{segment}\".","Write the path as `/` or as segments such as `/users/:userId/posts`.","Remove the trailing slash, the empty segment or the unsupported characters from \"{path}\"."],
   VIBE9002: ["The path \"{path}\" declares the param \":{param}\" more than once.","Rename one of the \":{param}\" params so that every param name in the prefix and the route path is unique."],
   VIBE9003: ["The contract entry \"{key}\" is not a route built with get, post, put, patch or del.","Build \"{key}\" with `get`, `post`, `put`, `patch` or `del`, for example `{key}: get('/')`.","Pass the route builders' results to `defineContract`, not the routes of another contract."],
+  VIBE9091: ["The call to \"{path}\" is missing the path param \"{param}\".","Pass `params.{param}` in the call input.","Check that the route path \"{path}\" is the one you meant to call."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);
