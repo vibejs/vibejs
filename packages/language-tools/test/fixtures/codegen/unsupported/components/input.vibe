@@ -4,12 +4,8 @@ const value = 1
 </script>
 
 <template>
-  <Comp :value="value" @change="value = 2">
-    <p>{{ value }}</p>
-  </Comp>
-  <component :is="Comp" />
+  <Comp><template #a="{ item }"><p ref="inSlot">{{ item }}</p></template></Comp>
+  <Comp v-slot="{ item }">{{ item }}</Comp>
   <slot name="a" :value="value" />
   <template><p>{{ value }}</p></template>
-  <x-widget :value="value">{{ value }}</x-widget>
-  <ns.Comp />
 </template>

@@ -1,0 +1,6 @@
+<script setup lang="ts">
+</script>
+
+<template>
+  <component :is="'Child'" />
+</template>

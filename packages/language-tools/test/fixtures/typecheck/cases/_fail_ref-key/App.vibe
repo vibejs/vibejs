@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import { useTemplateRef } from '@vibejs-org/ui'
+const input = useTemplateRef('inptu')
+</script>
+
+<template>
+  <input ref="input">
+</template>

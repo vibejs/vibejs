@@ -1,0 +1,3 @@
+#0 Verbatim EXPR o[24,51) "\nfunction focus(): void {}\n" → v[0,27) "\nfunction focus(): void {}\n"
+#1 Verbatim EXPR o[51,75) "defineExpose({ focus })\n" → v[50,74) "defineExpose({ focus })\n"
+#2 Atom ANCHOR o[0,0) "" → v[265,373) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

@@ -1,0 +1,7 @@
+<script setup lang="ts">
+defineExpose({ focus: (): void => {} })
+</script>
+
+<template>
+  <p>row</p>
+</template>

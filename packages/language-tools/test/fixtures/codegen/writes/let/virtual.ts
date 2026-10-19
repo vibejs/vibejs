@@ -8,7 +8,7 @@ const __vibe_setup = { label, other };
 {
   const { label, other } = __vibe.unrefs(__vibe_setup);
   const __vibe_w = __vibe.writable<typeof __vibe_setup, 'label' | 'other'>(__vibe_setup);
-  __vibe.el(__vibe.tags.button)({ onClick: ($event) => { __vibe_w.label = 'b' } });
+  __vibe.el(__vibe.tags.button)({ onClick: () => { __vibe_w.label = 'b' } });
     (label);
     (other);
 }

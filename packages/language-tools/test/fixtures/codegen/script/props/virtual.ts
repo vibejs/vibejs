@@ -7,7 +7,7 @@ type __VibeEmits = {};
 const __vibe_setup = { props };
 {
   const { props } = __vibe.unrefs(__vibe_setup);
-  const __vibe_ctx = __vibe.ctx<__VibeProps, __VibeEmits, __VibeSlots>();
+  const __vibe_ctx = __vibe.ctx<__VibeProps & __VibeModels, __VibeEmits, __VibeSlots>();
   const { title, items } = __vibe_ctx;
   __vibe.el(__vibe.tags.h1)({ });
     (title);

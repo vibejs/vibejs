@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const active = true
+const color = 'red'
+</script>
+
+<template>
+  <p class="a" :class="{ active }" :style="{ color }" style="margin: 0" title="t"></p>
+  <p :class="active" style="color: red"></p>
+</template>

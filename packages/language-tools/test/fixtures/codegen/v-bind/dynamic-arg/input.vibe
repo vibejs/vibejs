@@ -1,0 +1,8 @@
+<script setup lang="ts">
+const name = 'title'
+function go() {}
+</script>
+
+<template>
+  <p :[name]="name" @[name]="go()" @[name].once="go($event)"></p>
+</template>

@@ -7,7 +7,7 @@ type __VibeEmits = { pick: [id: string] };
 const __vibe_setup = { emit, title, items };
 {
   const { emit, title, items } = __vibe.unrefs(__vibe_setup);
-  __vibe.el(__vibe.tags.h1)({ onClick: ($event) => { emit('pick', title) } });
+  __vibe.el(__vibe.tags.h1)({ onClick: () => { emit('pick', title) } });
     (title);
     (items.length);
 }

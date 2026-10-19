@@ -1,0 +1,8 @@
+#0 Verbatim EXPR o[24,51) "\nconst attrs = { id: 'a' }\n" → v[0,27) "\nconst attrs = { id: 'a' }\n"
+#1 Atom LINK o[31,36) "attrs" → v[118,123) "attrs"
+#2 Atom BOUND o[76,77) "p" → v[181,182) "p"
+#3 Verbatim BOUND o[86,91) "attrs" → v[189,194) "attrs"
+#4 Verbatim BOUND o[93,98) "title" → v[196,201) "title"
+#5 Atom BOUND o[99,102) "\"t\"" → v[203,206) "'t'"
+#6 Verbatim EXPR o[109,128) "{ click: () => {} }" → v[214,233) "{ click: () => {} }"
+#7 Atom ANCHOR o[0,0) "" → v[332,440) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

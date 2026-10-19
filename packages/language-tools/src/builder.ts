@@ -28,7 +28,9 @@ export const Feature = {
 } as const;
 
 /** The span presets. Formatting is off everywhere. */
-export const Preset: Readonly<Record<'EXPR' | 'BOUND' | 'ALIAS' | 'LINK' | 'ANCHOR', number>> = {
+export const Preset: Readonly<
+  Record<'EXPR' | 'BOUND' | 'ALIAS' | 'LINK' | 'ANCHOR' | 'NONE', number>
+> = {
   /** The script and the template expressions. */
   EXPR: Feature.All & ~Feature.Formatting,
   /** Template names bound to setup bindings or props, tags and attribute keys: no rename. */
@@ -45,6 +47,8 @@ export const Preset: Readonly<Record<'EXPR' | 'BOUND' | 'ALIAS' | 'LINK' | 'ANCH
   LINK: Feature.Definition | Feature.References | Feature.DocumentHighlights,
   /** The default export -> the start of the file. */
   ANCHOR: Feature.Definition,
+  /** Duplicate projections, such as the write side of `v-model`: diagnostics only. */
+  NONE: Feature.None,
 };
 
 /** UTF-16 offsets; the protocol's tuple layout. */

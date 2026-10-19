@@ -1,16 +1,42 @@
 cases/_fail_bound-attr-type/App.vibe(6,11): error TS2322: Type 'number' is not assignable to type 'string'.
+cases/_fail_event-payload/App.vibe(6,36): error TS2551: Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?
 cases/_fail_event-type/App.vibe(8,25): error TS2345: Argument of type 'PointerEvent' is not assignable to parameter of type 'string'.
 cases/_fail_for-array/App.vibe(6,37): error TS2339: Property 'name' does not exist on type '{ id: number; }'.
 cases/_fail_for-number/App.vibe(2,27): error TS2339: Property 'toUpperCase' does not exist on type 'number'.
 cases/_fail_for-object/App.vibe(6,54): error TS2551: Property 'toFixed' does not exist on type '"ada" | "alan"'. Did you mean 'fixed'?
   Property 'toFixed' does not exist on type '"ada"'.
 cases/_fail_for-string/App.vibe(2,31): error TS2551: Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?
-cases/_fail_fragment/App.vibe(2,34): error TS2304: Cannot find name 'missing'.
+cases/_fail_fragment/App.vibe(2,34): error TS2339: Property 'missing' does not exist on type '{}'.
+cases/_fail_globals/App.vibe(5,14): error TS2339: Property 'alert' does not exist on type '{}'.
+cases/_fail_globals/App.vibe(5,30): error TS2339: Property 'window' does not exist on type '{}'.
 cases/_fail_html-parse/App.vibe(6,17): error VIBE1102: The attribute `:id` appears more than once on this element. Remove the second `:id`. Merge both values into one `:id` attribute. https://vibejs.org/v0/errors/VIBE1102
+cases/_fail_missing-prop/App.vibe(6,4): error TS2345: Argument of type '{ count: number; }' is not assignable to parameter of type 'PropsOf<__VibeProps, __VibeEmits, __VibeModels>'.
+  Property 'title' is missing in type '{ count: number; }' but required in type '__VibeProps'.
+cases/_fail_model-checkbox/App.vibe(7,26): error TS2322: Type 'string' is not assignable to type 'any[] | Set<any> | Booleanish | undefined'.
+cases/_fail_model-checkbox/App.vibe(7,35): error TS1360: Type 'string' does not satisfy the expected type 'boolean | unknown[] | Set<unknown>'.
+cases/_fail_model-component/App.vibe(8,10): error TS2322: Type 'boolean' is not assignable to type 'string'.
+cases/_fail_model-component/App.vibe(8,19): error TS2322: Type 'string' is not assignable to type 'boolean'.
+cases/_fail_model-const/App.vibe(6,19): error TS2540: Cannot assign to 'label' because it is a read-only property.
+cases/_fail_model-number/App.vibe(7,26): error TS2322: Type 'number' is not assignable to type 'string'.
+cases/_fail_model-prop/App.vibe(6,19): error TS2540: Cannot assign to 'label' because it is a read-only property.
+cases/_fail_prop-type/App.vibe(6,21): error TS2322: Type 'string' is not assignable to type 'number'.
 cases/_fail_props-import-wrong-prop/main.ts(4,19): error TS2322: Type 'string' is not assignable to type 'number'.
-cases/_fail_taken-key/App.vibe(6,34): error TS2304: Cannot find name 'typoo'.
+cases/_fail_ref-key/App.vibe(3,30): error TS2339: Property 'inptu' does not exist on type '__VibeRefs'.
+cases/_fail_ref-use/App.vibe(5,16): error TS2339: Property 'play' does not exist on type 'HTMLInputElement'.
+cases/_fail_spread-type/App.vibe(7,4): error TS2345: Argument of type '{ count: string; title: string; }' is not assignable to parameter of type 'PropsOf<__VibeProps, __VibeEmits, __VibeModels>'.
+  Type '{ count: string; title: string; }' is not assignable to type '__VibeProps'.
+    Types of property 'count' are incompatible.
+      Type 'string' is not assignable to type 'number'.
+cases/_fail_static-number-prop/App.vibe(6,20): error TS2322: Type 'string' is not assignable to type 'number'.
+cases/_fail_string-is/App.vibe(5,19): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Component<any>'.
+  Type 'string' is not assignable to type 'ComponentDef'.
+cases/_fail_taken-key/App.vibe(6,31): error TS2339: Property 'typoo' does not exist on type '{}'.
 cases/_fail_unknown-attr/App.vibe(2,8): error TS2353: Object literal may only specify known properties, and 'bogus' does not exist in type 'HTMLAttributes & EventHandlers<Events> & ReservedProps'.
-cases/_fail_unknown-identifier/App.vibe(2,9): error TS2304: Cannot find name 'missing'.
-cases/_fail_utf16-crlf/App.vibe(6,24): error TS2304: Cannot find name 'mising'.
+cases/_fail_unknown-event/App.vibe(7,21): error TS2353: Object literal may only specify known properties, and 'bogus' does not exist in type 'PropsOf<__VibeProps, __VibeEmits, __VibeModels>'.
+cases/_fail_unknown-identifier/App.vibe(2,9): error TS2339: Property 'missing' does not exist on type '{}'.
+cases/_fail_unknown-prop/App.vibe(6,20): error TS2353: Object literal may only specify known properties, and 'bogus' does not exist in type 'PropsOf<__VibeProps, __VibeEmits, __VibeModels>'.
+cases/_fail_unresolved-tag/App.vibe(5,4): error TS2304: Cannot find name 'Missing'.
+cases/_fail_utf16-crlf/App.vibe(6,24): error TS2339: Property 'mising' does not exist on type '{}'.
+cases/_fail_v-text/App.vibe(6,6): error TS2322: Type 'number' is not assignable to type 'string'.
 cases/_fail_write-const/App.vibe(6,19): error TS2540: Cannot assign to 'total' because it is a read-only property.
 cases/_fail_write-prop/App.vibe(6,19): error TS2540: Cannot assign to 'count' because it is a read-only property.

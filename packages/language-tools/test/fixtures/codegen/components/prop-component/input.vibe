@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import type { Component } from '@vibejs-org/ui'
+defineProps<{ Inner: Component }>()
+</script>
+
+<template>
+  <Inner />
+</template>

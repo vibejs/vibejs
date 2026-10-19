@@ -1,0 +1,8 @@
+<script setup lang="ts">
+const items = [1]
+</script>
+
+<template>
+  <p :title="String(items.length)" @click="alert(window.innerWidth)">{{ Math.max(...items) }} {{ { items, missing } }}</p>
+  <p v-for="{ a = fallback } in items">{{ a }}</p>
+</template>

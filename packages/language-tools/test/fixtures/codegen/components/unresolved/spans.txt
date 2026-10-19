@@ -1,0 +1,5 @@
+#0 Verbatim BOUND o[14,21) "Missing" → v[110,117) "Missing"
+#1 Atom NONE o[14,21) "Missing" → v[119,120) "{"
+#2 Verbatim BOUND o[22,27) "title" → v[121,126) "title"
+#3 Atom BOUND o[28,31) "\"a\"" → v[128,131) "'a'"
+#4 Atom ANCHOR o[0,0) "" → v[232,340) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

@@ -1,0 +1,20 @@
+<script setup lang="ts">
+import { ref, shallowRef } from '@vibejs-org/ui'
+import { expectType } from '../../expect.ts'
+import Child from './Child.vibe'
+import * as Ns from './ns.ts'
+const n = ref(1)
+const extra = { count: 2, title: 'spread' }
+const current = shallowRef(Child)
+</script>
+
+<template>
+  <Child v-bind="extra" title="Static" :count="n" is-open :max-items="3" class="a" id="b" data-x="1" aria-label="c" @click="n++" />
+  <Child title="Events" @select="expectType<string>()($event)" @toggle="n++" />
+  <Child title="Simple" @select="console.log" />
+  <Ns.Child title="Dotted">
+    <p>{{ n }}</p>
+  </Ns.Child>
+  <x-widget tone="info" @dismiss="expectType<Event>()($event)" />
+  <component :is="current" title="Dynamic" anything="goes" />
+</template>

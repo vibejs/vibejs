@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const tone = 'info'
+</script>
+
+<template>
+  <x-widget :tone="tone" flag @dismiss="$event.preventDefault()">{{ tone }}</x-widget>
+</template>

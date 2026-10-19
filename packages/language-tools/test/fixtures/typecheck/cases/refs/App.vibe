@@ -1,0 +1,29 @@
+<script setup lang="ts">
+import { useTemplateRef, type ComponentExposed, type TemplateRef } from '@vibejs-org/ui'
+import { expectType } from '../../expect.ts'
+import Row from './Row.vibe'
+const input = useTemplateRef('input')
+const row = useTemplateRef('row')
+const items = useTemplateRef('items')
+const circle = useTemplateRef('circle')
+const slotted = useTemplateRef('slotted')
+const typed = useTemplateRef<HTMLElement>('input')
+expectType<TemplateRef<HTMLInputElement>>()(input)
+expectType<TemplateRef<ComponentExposed<typeof Row>>>()(row)
+expectType<TemplateRef<HTMLLIElement[]>>()(items)
+expectType<TemplateRef<SVGCircleElement>>()(circle)
+expectType<TemplateRef<unknown>>()(slotted)
+expectType<TemplateRef<HTMLElement>>()(typed)
+function setEl(el: unknown): void {
+  void el
+}
+</script>
+
+<template>
+  <input ref="input">
+  <Row ref="row" />
+  <ul><li v-for="n in 3" ref="items" :key="n">{{ n }}</li></ul>
+  <svg><circle ref="circle" /></svg>
+  <slot><p ref="slotted" /></slot>
+  <p :ref="setEl" />
+</template>

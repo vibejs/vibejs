@@ -1,13 +1,11 @@
 <script setup lang="ts">
-const flag = true
+import Child from './Child.vibe'
 </script>
 
 <template>
-  <Foo :x="1"><template #a><span>{{ missing }}</span></template></Foo>
-  <slot name="a" />
-  <component :is="flag" />
+  <Child title="a"><template #a><span>{{ missing }}</span></template></Child>
+  <Child title="b" v-slot="{ item }">{{ item.missing }}</Child>
+  <slot name="a" :x="missing" />
   <template><span>{{ missing }}</span></template>
-  <input v-model="missing" ref="el">
-  <div v-bind="missing" :[missing]="1"></div>
-  <x-widget foo="1">{{ missing }}</x-widget>
+  <App :x="missing" />
 </template>

@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import { expectType } from '../../expect.ts'
+const model = defineModel<string>({ required: true })
+const count = defineModel<number>('count', { default: () => 0 })
+const [title, titleModifiers] = defineModel<string, 'trim'>('title')
+</script>
+
+<template>
+  <label>{{ expectType<string>()(model) }} {{ expectType<number>()(count) }}</label>
+  <input v-model="title" :placeholder="titleModifiers.trim ? 'trimmed' : 'raw'">
+</template>

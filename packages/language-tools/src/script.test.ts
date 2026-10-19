@@ -1,6 +1,6 @@
 import { analyzeScript, parse } from '@vibejs-org/compiler';
 import { expect, it } from 'vitest';
-import { CodeBuilder } from './builder.ts';
+import { CodeBuilder, Preset, SpanKind } from './builder.ts';
 import { script, setupBindings } from './script.ts';
 
 function run(source: string) {
@@ -40,4 +40,27 @@ const { a, b: c } = defineProps<{ a: string; b: string; d: string }>()
 let e = ref(0)
 </script>`);
   expect([...setupBindings(analysis).keys()]).toEqual(['ref', 'a', 'c', 'e']);
+});
+
+it('captures defineExpose and types useTemplateRef by its key, in source order', () => {
+  const source = `<script setup lang="ts">
+const a = useTemplateRef('a')
+defineExpose({ a })
+const b = useTemplateRef<HTMLElement>('b')
+</script>`;
+  const { descriptor } = parse(source, { filename: 'A.vibe' });
+  const b = new CodeBuilder(source);
+  expect(script(b, descriptor, analyzeScript(descriptor))).toBe(true);
+  expect(b.text).toContain(`const a = useTemplateRef<__VibeRefs["a"]>('a')
+const __vibe_exposed = defineExpose({ a })
+const b = useTemplateRef<HTMLElement>('b')`);
+  // The inserted type argument stands for the key.
+  const at = source.indexOf("'a'");
+  expect(b.spans).toContainEqual([25, 17, at, 3, SpanKind.Atom, Preset.NONE]);
+});
+
+it('does not capture an assigned defineExpose', () => {
+  const source = '<script setup lang="ts">\nconst x = defineExpose({})\n</script>';
+  const { descriptor } = parse(source, { filename: 'A.vibe' });
+  expect(script(new CodeBuilder(source), descriptor, analyzeScript(descriptor))).toBe(false);
 });

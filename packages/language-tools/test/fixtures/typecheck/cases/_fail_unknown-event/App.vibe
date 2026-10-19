@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import Child from './Child.vibe'
+function go() {}
+</script>
+
+<template>
+  <Child title="a" @bogus="go" />
+</template>

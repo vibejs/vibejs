@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const text = 'a'
+</script>
+
+<template>
+  <input v-model="text + 1">
+  <input v-model>
+  <input v-model:[text]="text">
+</template>

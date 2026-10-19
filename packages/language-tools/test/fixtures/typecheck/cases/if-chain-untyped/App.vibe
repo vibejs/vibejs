@@ -5,7 +5,7 @@ const user = null as { name: string } | null
 <template>
   <template v-if="!user">Loading</template>
   <p v-else>{{ user.name }}</p>
-  <Spinner v-if="!user" />
+  <slot v-if="!user" />
   <p v-else>{{ user.name }}</p>
   <p v-if="!user">none</p>
   <x-card v-else-if="user.name === ''" />

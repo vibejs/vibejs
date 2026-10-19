@@ -1,0 +1,7 @@
+#0 Verbatim EXPR o[24,55) "\nimport * as Ns from './ns.ts'\n" → v[0,31) "\nimport * as Ns from './ns.ts'\n"
+#1 Atom LINK o[37,39) "Ns" → v[119,121) "Ns"
+#2 Verbatim BOUND o[80,87) "Ns.Comp" → v[190,197) "Ns.Comp"
+#3 Atom NONE o[80,87) "Ns.Comp" → v[199,200) "{"
+#4 Verbatim BOUND o[88,93) "title" → v[201,206) "title"
+#5 Atom BOUND o[94,97) "\"a\"" → v[208,211) "'a'"
+#6 Atom ANCHOR o[0,0) "" → v[312,420) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

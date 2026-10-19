@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const text = ref('')
+</script>
+
+<template>
+  <input type="checkbox" v-model="text">
+</template>

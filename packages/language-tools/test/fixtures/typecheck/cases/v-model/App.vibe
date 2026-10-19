@@ -1,0 +1,28 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import Field from './Field.vibe'
+const text = ref('')
+const amount = ref(0)
+const done = ref(false)
+const picked = ref<string[]>([])
+const tags = ref(new Set<string>())
+const choice = ref('a')
+const form = ref({ name: '' })
+const note = ref<string>()
+let draft = ''
+</script>
+
+<template>
+  <input v-model="text">
+  <input v-model.trim="form.name">
+  <input v-model.number="amount">
+  <input type="number" v-model="amount">
+  <textarea v-model="draft"></textarea>
+  <input type="checkbox" v-model="done">
+  <input type="checkbox" value="a" v-model="picked">
+  <select v-model="choice"><option>a</option></select>
+  <select multiple v-model="tags"><option>a</option></select>
+  <input type="radio" value="a" v-model="choice">
+  <Field v-model="text" />
+  <Field v-model="text" v-model:count="amount" v-model:title.trim="note" />
+</template>

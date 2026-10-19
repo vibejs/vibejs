@@ -1,0 +1,6 @@
+<script setup lang="ts">
+</script>
+
+<template>
+  <p @click="alert('hi')">{{ window.innerWidth }}</p>
+</template>
