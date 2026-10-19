@@ -82,10 +82,9 @@ interface ContextInit {
   readonly responseHeaders: Headers;
 }
 
-/** The context of a routed request; `parts` adds the parsed parts the route declares (`body`). */
+/** The context of a routed request with its raw params; the pipeline adds the validated parts. */
 export function createContext(
   init: ContextInit,
-  parts: Readonly<Record<string, unknown>> = {},
 ): RequestContext & { fail(code: string, detail?: string): never } {
   const { binding, ...rest } = init;
   const { req, responseHeaders } = rest;
@@ -94,7 +93,6 @@ export function createContext(
   const def = binding.route.def as RouteDef;
   return {
     ...rest,
-    ...parts,
     route: binding.route,
     ip: typeof ip === 'string' ? ip : undefined,
     signal: req.signal,
