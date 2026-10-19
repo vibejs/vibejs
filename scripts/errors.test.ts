@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -224,6 +232,24 @@ retired: true
       'retired: false\n---\n\n# VIBE9101: Missing provider\n\n> No provider',
     );
     expect(get('site/VIBE8101.md')).toContain('package: create-vibejs');
+  });
+
+  it('writes exactly one page per catalog code plus index.md with --docs', () => {
+    expect(run('--docs', join(root, 'site'))).toBe(0);
+    expect(readdirSync(join(root, 'site')).toSorted()).toEqual([
+      'VIBE8101.md',
+      'VIBE9101.md',
+      'VIBE9102.md',
+      'index.md',
+    ]);
+    expect(get('site/index.md')).toBe(`# Error codes
+
+| Code | Title | Package | Status |
+| --- | --- | --- | --- |
+| [VIBE8101](./VIBE8101.md) | Bad name | create-vibejs |  |
+| [VIBE9101](./VIBE9101.md) | Missing provider | server |  |
+| [VIBE9102](./VIBE9102.md) | Old error | server | retired |
+`);
   });
 
   it('rejects unknown arguments', () => {

@@ -56,7 +56,11 @@ export default defineConfig({
         test: {
           name: 'integration',
           environment: 'node',
-          include: ['packages/*/src/**/*.integration.test.ts', '**/*.vibe.test.ts'],
+          include: [
+            'packages/*/src/**/*.integration.test.ts',
+            'docs/scripts/**/*.integration.test.ts',
+            '**/*.vibe.test.ts',
+          ],
         },
       },
     ],

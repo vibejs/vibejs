@@ -27,6 +27,7 @@ This is the planned design for v0.1. Today only the error code runtime in `@vibe
 | `packages/server`         | Modules, dependency injection, HTTP pipeline, OpenAPI       |
 | `packages/cli`            | The `vibejs` command line                                   |
 | `packages/create-vibejs`  | Project scaffolder                                          |
+| `docs/`                   | Docs site, its generators and the snippet checker           |
 | `scripts/`                | Repository tooling: error generation, repo lint, CI helpers |
 | `docs/decisions/`         | Architecture decision records                               |
 

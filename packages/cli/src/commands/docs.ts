@@ -22,17 +22,16 @@ const toPage = (path: string, markdown: string): Page => ({
 
 /**
  * The corpus: catalog entries as `errors/VIBE####` pages, then every Markdown file in docsDir.
- * A file at the path of a catalog page is skipped: the bundled catalog is the source of truth.
+ * The bundled docs have no `errors/` dir, so the catalog is the only source of error pages.
  */
 export function loadPages(docsDir: string, catalog: readonly CatalogEntry[] = CATALOG): Page[] {
   const entries = catalog.map((entry) => toPage(`errors/${entry.code}`, entryMarkdown(entry)));
-  const paths = new Set(entries.map((page) => page.path));
   // A missing docsDir (before the docs build fills dist/docs) globs to nothing.
   const files = globSync('**/*.md', { cwd: docsDir })
     .toSorted()
-    .map((file) => [file, file.slice(0, -3).replaceAll(sep, '/')] as const)
-    .filter(([, path]) => !paths.has(path))
-    .map(([file, path]) => toPage(path, readFileSync(join(docsDir, file), 'utf8')));
+    .map((file) =>
+      toPage(file.slice(0, -3).replaceAll(sep, '/'), readFileSync(join(docsDir, file), 'utf8')),
+    );
   return [...entries, ...files];
 }
 

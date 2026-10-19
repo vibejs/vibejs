@@ -2,7 +2,7 @@
 // Parses packages/*/messages/*.md and writes the generated error files (see CONTRIBUTING.md).
 // --check writes no committed file: it rewrites only the gitignored CLI catalog and fails on
 // format, range, duplicate, stale-file and "thrown and tested" problems.
-// --docs <dir> also writes one Markdown page per code, retired codes included.
+// --docs <dir> also writes one Markdown page per code, retired codes included, and index.md.
 import {
   existsSync,
   globSync,
@@ -201,6 +201,14 @@ ${entry.source}
 `;
 }
 
+function docsIndex(entries: readonly Entry[]): string {
+  const rows = entries.map(
+    (entry) =>
+      `| [${entry.code}](./${entry.code}.md) | ${entry.title} | ${entry.package} | ${entry.retired ? 'retired' : ''} |\n`,
+  );
+  return `# Error codes\n\n| Code | Title | Package | Status |\n| --- | --- | --- | --- |\n${rows.join('')}`;
+}
+
 const read = (file: string): string | null =>
   existsSync(file) ? readFileSync(file, 'utf8') : null;
 const manifest = (dir: string): Manifest =>
@@ -300,8 +308,9 @@ export function main(root: string, argv: string[]): number {
   }
   write(join(packagesDir, 'cli/src/catalog.gen.ts'), catalogGen(all, base));
   if (options.docs) {
-    for (const entry of all)
-      write(join(resolve(options.docs), `${entry.code}.md`), docsPage(entry));
+    const dir = resolve(options.docs);
+    for (const entry of all) write(join(dir, `${entry.code}.md`), docsPage(entry));
+    write(join(dir, 'index.md'), docsIndex(all));
   }
 
   if (options.check) {
