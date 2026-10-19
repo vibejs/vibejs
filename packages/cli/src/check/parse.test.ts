@@ -97,9 +97,9 @@ const diagnostic = (code: Diagnostic['code'], typeChecked?: true): Diagnostic =>
 
 describe('parseCompiler', () => {
   it.each([
-    ['VIBE1000', undefined, false],
-    ['VIBE1102', undefined, false],
-    ['VIBE1199', undefined, false],
+    ['VIBE1000', undefined, true],
+    ['VIBE1102', undefined, true],
+    ['VIBE1199', undefined, true],
     ['VIBE1200', undefined, true],
     ['VIBE1201', true, false],
     ['VIBE2001', true, false],

@@ -5,10 +5,12 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CatalogEntry } from '../catalog.gen.ts';
 import type { Ctx, ExecResult } from '../ctx.ts';
@@ -33,6 +35,18 @@ function install(pkg: string, version: string, bin?: string): void {
   write(`node_modules/${pkg}/package.json`, JSON.stringify({ name: pkg, version, bin }));
 }
 
+/**
+ * Installs @vibejs-org/compiler as a link to a package that re-exports the workspace compiler's
+ * source. The link target is outside node_modules, so Vitest transforms the TypeScript it loads.
+ */
+function installCompiler(): void {
+  const src = fileURLToPath(new URL('../../../compiler/src/index.ts', import.meta.url));
+  write('compiler/package.json', JSON.stringify({ version: '0.0.0', exports: './index.js' }));
+  write('compiler/index.js', `export * from ${JSON.stringify(src.replaceAll('\\', '/'))};\n`);
+  mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
+  symlinkSync(join(root, 'compiler'), join(root, 'node_modules/@vibejs-org/compiler'), 'junction');
+}
+
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'vibejs-check-'));
   // broken/ holds the sources the recorded output points into (TS1241 reads its line). Its .vibe
@@ -47,7 +61,7 @@ beforeEach(() => {
   install('vitest', '5.0.5', 'vitest.mjs');
   install('@vitest/coverage-v8', '5.0.5');
   install('@vibejs-org/language-tools', '0.0.0');
-  install('@vibejs-org/compiler', '0.0.0');
+  installCompiler();
 });
 
 afterEach(() => {
@@ -190,6 +204,12 @@ describe('enrich', () => {
     expect(enrich(lint, [entry], '@Handle(')).toBe(lint);
     const compiled = { ...vibe, fixes: ['Remove `v-bogus`.'] };
     expect(enrich(compiled, [entry])).toBe(compiled);
+  });
+
+  it('drops catalog fixes that still hold a {placeholder}', () => {
+    const vibe = { ...ts1241, code: 'VIBE6001' };
+    const templated = { ...entry, fixes: ['Remove `{name}`.', 'Remove it.'] };
+    expect(enrich(vibe, [templated]).fixes).toEqual(['Remove it.']);
   });
 
   it('does not enrich TS1241 when its file cannot be read', async () => {
@@ -359,10 +379,13 @@ describe('.vibe files', () => {
       code: 'VIBE1102',
       loc: 'src/Hello.vibe:6:17',
       docs: 'https://vibejs.org/v0/errors/VIBE1102',
+      message: 'The attribute `:id` appears more than once on this element.',
+      fixes: [
+        'Remove the second `:id`.',
+        'Merge both values into one `:id` attribute.',
+        'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
+      ],
     });
-    expect(r.diagnostics[0].fixes!.at(-1)).toBe(
-      'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
-    );
   });
 
   it('gives a mapper code outside the catalog only the suppression fix', async () => {

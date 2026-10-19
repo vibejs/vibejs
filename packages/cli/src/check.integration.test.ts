@@ -163,15 +163,27 @@ it(
     writeFileSync(join(dir, 'src/bad.ts'), "export const n: number = 'x';\n");
     const { status, r } = check(dir, '--only', 'types');
     expect(status).toBe(1);
+    // The recorded line, with the message the compile step gives it.
     const [, vibe1102] = tool('tsc-vibe.txt').split('\n');
-    expect(plain(r.diagnostics)).toEqual(plain(parseTsc(out(`${vibe1102}\n`, 2), '/project')!));
+    const [recorded] = parseTsc(out(`${vibe1102}\n`, 2), '/project')!;
+    expect(plain(r.diagnostics)).toEqual(
+      plain([
+        { ...recorded, message: 'The attribute `:id` appears more than once on this element.' },
+      ]),
+    );
     expect(r.diagnostics[0]).toMatchObject({
       source: 'tsc',
       code: 'VIBE1102',
       loc: 'src/Hello.vibe:6:17',
     });
-    expect(r.diagnostics[0].fixes).toContain(
-      'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
-    );
+    expect(r.diagnostics[0]).toMatchObject({
+      message: 'The attribute `:id` appears more than once on this element.',
+      docs: 'https://vibejs.org/v0/errors/VIBE1102',
+      fixes: [
+        'Remove the second `:id`.',
+        'Merge both values into one `:id` attribute.',
+        'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
+      ],
+    });
   },
 );

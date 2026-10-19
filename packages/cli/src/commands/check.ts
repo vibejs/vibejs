@@ -1,5 +1,7 @@
 import { globSync, readFileSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { DOCS_BASE, type VibeError } from '@vibejs-org/errors';
 import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
 import {
@@ -97,12 +99,23 @@ export function enrich(
   sourceLine?: string,
 ): CheckDiagnostic {
   const entry = !d.fixes && /^VIBE\d{4}$/.test(d.code) && catalog.find((e) => e.code === d.code);
-  if (entry) return { ...d, docs: entry.docs, fixes: [...entry.fixes] };
+  // A fix with a `{placeholder}` left in it is a template, not advice.
+  if (entry)
+    return { ...d, docs: entry.docs, fixes: entry.fixes.filter((f) => !/\{\w+\}/.test(f)) };
   if (d.code === 'TS1241' && sourceLine?.trimStart().startsWith('@Handle(')) {
     return { ...d, docs: new URL('../server/handlers', DOCS_BASE).href, fixes: [TS1241_FIX] };
   }
   return d;
 }
+
+/** VIBE1000-1199: the mapper forwards them to tsc, which flattens their fixes and docs into the message. */
+const forwarded = (d: CheckDiagnostic) => /^VIBE1[01]\d\d$/.test(d.code);
+
+const sameStart = (a: CheckDiagnostic, b: CheckDiagnostic) =>
+  a.file === b.file &&
+  a.code === b.code &&
+  a.range.start.line === b.range.start.line &&
+  a.range.start.character === b.range.start.character;
 
 const SEVERITY = ['error', 'warning', 'info'];
 const SOURCE = ['vibejs', 'tsc', 'vitest', 'oxlint', 'coverage', 'oxfmt'];
@@ -243,10 +256,15 @@ export const check: CommandDef<CheckResult> = {
         return { r, ms: ctx.now() - at };
       }),
     );
-    // The compile step reports the compiler diagnostics that the mapper does not forward to tsc.
+    // The compile step reports the compiler diagnostics that the mapper does not forward to tsc,
+    // and the unflattened message, docs and fixes of those it does.
     const compiled: CheckDiagnostic[] = [];
     if (vibe.length) {
-      const { compile } = await import('@vibejs-org/compiler');
+      // The project's compiler, the one the gate found and the mapper uses, not one next to the CLI.
+      const entry = createRequire(join(root, 'package.json')).resolve('@vibejs-org/compiler');
+      const { compile }: typeof import('@vibejs-org/compiler') = await import(
+        pathToFileURL(entry).href
+      );
       for (const file of vibe) {
         const filename = join(root, file);
         const source = readFileSync(filename, 'utf8');
@@ -263,7 +281,15 @@ export const check: CommandDef<CheckResult> = {
       errors.push(e);
       return [d];
     };
-    const tsc = types && [...or8301('tsc', types.r, parseTsc(types.r, root)), ...compiled];
+    // A forwarded diagnostic takes its message, docs and fixes from the compile step.
+    const unflatten = (d: CheckDiagnostic) => {
+      const c = compiled.find((x) => forwarded(x) && sameStart(x, d));
+      return c ? { ...d, message: c.message, docs: c.docs, fixes: c.fixes } : d;
+    };
+    const tsc = types && [
+      ...or8301('tsc', types.r, parseTsc(types.r, root)).map(unflatten),
+      ...compiled.filter((d) => !forwarded(d)),
+    ];
     const oxlint = lint && or8301('oxlint', lint.r, parseOxlint(lint.r, root));
     const oxfmt = format && or8301('oxfmt', format.r, parseOxfmt(format.r, root));
     const report = tests && parseVitest(read(join(root, OUT, 'vitest.json')), root);
