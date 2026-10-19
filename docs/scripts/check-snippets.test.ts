@@ -102,7 +102,12 @@ describe('main', () => {
     const tsconfig = JSON.parse(readFileSync(join(dir, 'tsconfig.json'), 'utf8'));
     expect(tsconfig).toMatchObject({
       extends: fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url)),
-      compilerOptions: { composite: false, noEmit: true, customConditions: [] },
+      compilerOptions: {
+        composite: false,
+        noEmit: true,
+        customConditions: [],
+        experimentalDecorators: true,
+      },
       include: ['*.ts'],
     });
     expect(out).toEqual(['check-snippets: 2 ts snippets type-check']);

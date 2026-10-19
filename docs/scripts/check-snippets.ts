@@ -76,6 +76,8 @@ export function main(docsDir: string, tsc = TSC): number {
       rootDir: '.',
       lib: ['es2024', 'dom'],
       customConditions: [],
+      // The server pages use the server decorators, as a server tsconfig does.
+      experimentalDecorators: true,
     },
     include: ['*.ts'],
   };

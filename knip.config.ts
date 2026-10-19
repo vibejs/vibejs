@@ -28,7 +28,11 @@ export default {
     },
     // The app entry (CONTRACTS C7); the Vitest config and tests come from the knip plugin.
     'examples/*': { entry: ['server/src/app.module.ts'] },
-    docs: { entry: ['scripts/*.ts'] },
+    docs: {
+      entry: ['scripts/*.ts'],
+      // Imported only by the ts snippets of the pages, which check-snippets type-checks.
+      ignoreDependencies: ['@vibejs-org/contract', '@vibejs-org/server', 'valibot'],
+    },
   },
   ignore: ['packages/create-vibejs/templates/**', '**/test/fixtures/**'],
 } satisfies KnipConfig;

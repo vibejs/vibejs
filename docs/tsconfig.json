@@ -7,5 +7,9 @@
     "rootDir": "."
   },
   "include": ["scripts", "scripts/fixtures/*.json", ".vitepress/config.ts"],
-  "references": [{ "path": "../packages/errors" }]
+  "references": [
+    { "path": "../packages/contract" },
+    { "path": "../packages/errors" },
+    { "path": "../packages/server" }
+  ]
 }
