@@ -48,6 +48,7 @@
   "dependencies": {
     "@vibejs-org/errors": "workspace:*",
     "entities": "catalog:",
+    "oxc-parser": "catalog:",
     "postcss": "catalog:",
     "postcss-selector-parser": "catalog:"
   },

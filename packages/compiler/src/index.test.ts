@@ -24,12 +24,18 @@ type TemplateNode =
   | SimpleExpressionNode;
 
 describe('@vibejs-org/compiler', () => {
-  it('exports formatDiagnostic, compileStyle, parse, NodeTypes and ElementTypes at runtime', () => {
+  it('exports formatDiagnostic, compileStyle, parse, the AST enums and the expression helpers at runtime', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
       'NodeTypes',
+      'camelize',
+      'capitalize',
       'compileStyle',
+      'forEachIdentifier',
       'formatDiagnostic',
+      'hyphenate',
+      'isAllowedGlobal',
+      'isSimpleHandler',
       'parse',
     ]);
     expect(compiler.formatDiagnostic).toBe(formatDiagnostic);

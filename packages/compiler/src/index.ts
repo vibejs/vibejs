@@ -1,4 +1,12 @@
 export { formatDiagnostic } from './diagnostics.ts';
+export {
+  camelize,
+  capitalize,
+  forEachIdentifier,
+  hyphenate,
+  isAllowedGlobal,
+  isSimpleHandler,
+} from './expr/index.ts';
 export type { Diagnostic, Position } from './diagnostics.ts';
 export { compileStyle } from './style/compileStyle.ts';
 export type { SourceMapV3 } from './style/compileStyle.ts';

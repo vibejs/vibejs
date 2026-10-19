@@ -397,6 +397,9 @@ importers:
       entities:
         specifier: 'catalog:'
         version: 8.1.0
+      oxc-parser:
+        specifier: 'catalog:'
+        version: 0.154.0
       postcss:
         specifier: 'catalog:'
         version: 8.5.30
