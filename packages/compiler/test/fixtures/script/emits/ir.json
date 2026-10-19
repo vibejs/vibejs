@@ -1,0 +1,59 @@
+{
+  "templates": [
+    {
+      "html": "<button>Save</button>"
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "tpl",
+        "id": 0,
+        "tpl": 0
+      },
+      {
+        "op": "once",
+        "call": {
+          "fn": "on",
+          "args": [
+            {
+              "ref": 0
+            },
+            {
+              "value": "click"
+            },
+            {
+              "handler": {
+                "expr": {
+                  "kind": "statements",
+                  "parts": [
+                    "$setup.",
+                    {
+                      "code": "emit",
+                      "offset": 29
+                    },
+                    {
+                      "code": "('save', 1)",
+                      "offset": 33
+                    }
+                  ],
+                  "scopes": []
+                },
+                "mods": [],
+                "keys": [],
+                "options": {}
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "returns": [
+      0
+    ]
+  },
+  "abi": [
+    "template",
+    "on"
+  ]
+}

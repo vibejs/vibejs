@@ -1,0 +1,59 @@
+error[VIBE2101]: `v-if` needs a condition.
+  --> template/control-flow-errors/input.vibe:2:6
+2 |   <p v-if></p>
+  |      ^^^^
+fix: Write the condition, as in `v-if="items.length"`.
+fix: Write `v-else` for the last branch of a chain.
+docs: https://vibejs.org/v0/errors/VIBE2101
+
+error[VIBE2103]: `v-if` and `v-for` cannot be on the same element.
+  --> template/control-flow-errors/input.vibe:5:18
+5 |   <p v-if="text" v-for="i in items" :key="i.id"></p>
+  |                  ^^^^^^^^^^^^^^^^^^
+fix: Wrap the element in `<template v-for="…">` and keep `v-if` on the element.
+fix: Filter the list in a `computed` value and loop over that.
+docs: https://vibejs.org/v0/errors/VIBE2103
+
+error[VIBE2104]: `v-else` takes no value.
+  --> template/control-flow-errors/input.vibe:7:6
+7 |   <p v-else="text"></p>
+  |      ^^^^^^^^^^^^^
+fix: Remove the value of `v-else`.
+fix: Write `v-else-if` to test a condition.
+docs: https://vibejs.org/v0/errors/VIBE2104
+
+error[VIBE2102]: `v-else` has no `v-if` or `v-else-if` element right before it.
+  --> template/control-flow-errors/input.vibe:8:13
+8 |   <i></i><b v-else></b>
+  |             ^^^^^^
+fix: Move the element right after the element with `v-if` or `v-else-if`.
+fix: Replace `v-else` with `v-if` to start a new chain.
+docs: https://vibejs.org/v0/errors/VIBE2102
+
+error[VIBE2201]: `v-for` needs an expression.
+  --> template/control-flow-errors/input.vibe:9:6
+9 |   <p v-for></p>
+  |      ^^^^^
+fix: Write the loop, as in `v-for="item in items"`.
+docs: https://vibejs.org/v0/errors/VIBE2201
+
+error[VIBE2202]: The `v-for` expression must have the form `alias in source`.
+  --> template/control-flow-errors/input.vibe:10:13
+10 |   <p v-for="items"></p>
+   |             ^^^^^
+fix: Write the loop as `item in items` or `(item, index) in items`.
+docs: https://vibejs.org/v0/errors/VIBE2202
+
+error[VIBE2203]: Elements rendered by `v-for` need a `:key`.
+  --> template/control-flow-errors/input.vibe:11:6
+11 |   <p v-for="i in items"></p>
+   |      ^^^^^^^^^^^^^^^^^^
+fix: Add a unique, stable key, as in `:key="item.id"`.
+docs: https://vibejs.org/v0/errors/VIBE2203
+
+error[VIBE2204]: `:key` belongs on the `<template v-for>`, not on its child.
+  --> template/control-flow-errors/input.vibe:12:47
+12 |   <template v-for="i in items" :key="i.id"><p :key="i.id"></p></template>
+   |                                               ^^^^^^^^^^^
+fix: Move `:key` to the `<template v-for>` element.
+docs: https://vibejs.org/v0/errors/VIBE2204

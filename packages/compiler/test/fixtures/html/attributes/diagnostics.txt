@@ -14,6 +14,17 @@ fix: Write the directive name after `v-`, as in `v-if="ok"`.
 fix: Remove the attribute.
 docs: https://vibejs.org/v0/errors/VIBE1126
 
+error[VIBE2007]: `key` is not defined in the template.
+  --> html/attributes/input.vibe:2:33
+2 |   <input id="a" id="b" v-="x" :[key="y" =z a"b c=d'e>
+  |                                 ^^^
+fix: Write `Set`, the closest name in scope.
+fix: Fix the spelling of `key`.
+fix: Declare or import `key` in `<script setup lang="ts">`.
+fix: Declare `key` as a prop in `defineProps`.
+fix: Read another global, such as `window`, in `<script setup lang="ts">` and use that binding in the template.
+docs: https://vibejs.org/v0/errors/VIBE2007
+
 error[VIBE1127]: The dynamic argument has no closing `]`.
   --> html/attributes/input.vibe:2:36
 2 |   <input id="a" id="b" v-="x" :[key="y" =z a"b c=d'e>
@@ -21,6 +32,16 @@ error[VIBE1127]: The dynamic argument has no closing `]`.
 fix: Close the argument with `]`.
 fix: Remove the spaces from the argument, or compute the name in the script.
 docs: https://vibejs.org/v0/errors/VIBE1127
+
+error[VIBE2007]: `y` is not defined in the template.
+  --> html/attributes/input.vibe:2:38
+2 |   <input id="a" id="b" v-="x" :[key="y" =z a"b c=d'e>
+  |                                      ^
+fix: Fix the spelling of `y`.
+fix: Declare or import `y` in `<script setup lang="ts">`.
+fix: Declare `y` as a prop in `defineProps`.
+fix: Read another global, such as `window`, in `<script setup lang="ts">` and use that binding in the template.
+docs: https://vibejs.org/v0/errors/VIBE2007
 
 error[VIBE1119]: An attribute name starts with `=`.
   --> html/attributes/input.vibe:2:41

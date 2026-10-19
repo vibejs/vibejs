@@ -1,0 +1,22 @@
+<template>
+  <p v-if></p>
+  <p v-else-if="text"></p>
+  <p v-else></p>
+  <p v-if="text" v-for="i in items" :key="i.id"></p>
+  <p v-if="text"></p>
+  <p v-else="text"></p>
+  <i></i><b v-else></b>
+  <p v-for></p>
+  <p v-for="items"></p>
+  <p v-for="i in items"></p>
+  <template v-for="i in items" :key="i.id"><p :key="i.id"></p></template>
+</template>
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+import Item from './Item.vibe'
+const { label } = defineProps<{ label: string }>()
+const text = ref('')
+const items = ref([{ id: 1, done: false }])
+const fixed = { a: 1 }
+let count = 0
+</script>

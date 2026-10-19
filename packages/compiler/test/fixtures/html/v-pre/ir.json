@@ -1,0 +1,22 @@
+{
+  "templates": [
+    {
+      "html": "<div :a=\"x\" @b=\"y\" v-if>{{ raw }} <p :c.d=\"e\"></p></div>"
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "tpl",
+        "id": 0,
+        "tpl": 0
+      }
+    ],
+    "returns": [
+      0
+    ]
+  },
+  "abi": [
+    "template"
+  ]
+}

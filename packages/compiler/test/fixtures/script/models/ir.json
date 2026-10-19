@@ -1,0 +1,66 @@
+{
+  "templates": [
+    {
+      "html": "<input>"
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "tpl",
+        "id": 0,
+        "tpl": 0
+      },
+      {
+        "op": "once",
+        "call": {
+          "fn": "applyTextModel",
+          "args": [
+            {
+              "ref": 0
+            },
+            {
+              "getter": {
+                "kind": "expression",
+                "parts": [
+                  "$setup.",
+                  {
+                    "code": "value",
+                    "offset": 29
+                  }
+                ],
+                "scopes": []
+              }
+            },
+            {
+              "handler": {
+                "expr": {
+                  "kind": "statements",
+                  "parts": [
+                    "$setup.",
+                    {
+                      "code": "value",
+                      "offset": 29
+                    },
+                    " = $event"
+                  ],
+                  "scopes": []
+                },
+                "mods": [],
+                "keys": [],
+                "options": {}
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "returns": [
+      0
+    ]
+  },
+  "abi": [
+    "template",
+    "applyTextModel"
+  ]
+}

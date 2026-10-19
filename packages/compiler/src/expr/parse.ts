@@ -23,7 +23,7 @@ export interface Failure {
   end: number;
 }
 
-const TYPE_CHECKED = new Set(['VIBE1201', 'VIBE1202', 'VIBE1203', 'VIBE2007']);
+const TYPE_CHECKED = new Set(['VIBE1201', 'VIBE1202', 'VIBE1203', 'VIBE2001', 'VIBE2007']);
 
 /** Pushes `error` at the file range [start, end) and returns the diagnostic. */
 export function report(ctx: ExprContext, error: VibeError, start: number, end: number): Diagnostic {

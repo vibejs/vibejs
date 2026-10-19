@@ -1,0 +1,61 @@
+{
+  "templates": [
+    {
+      "html": "<p> </p>"
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "tpl",
+        "id": 1,
+        "tpl": 0
+      },
+      {
+        "op": "walk",
+        "id": 0,
+        "from": 1,
+        "steps": [
+          "txt"
+        ]
+      },
+      {
+        "op": "effect",
+        "call": {
+          "fn": "setText",
+          "args": [
+            {
+              "ref": 0
+            },
+            {
+              "expr": {
+                "kind": "expression",
+                "parts": [
+                  "_toDisplayString(",
+                  "$setup.",
+                  {
+                    "code": "total",
+                    "offset": 19
+                  },
+                  ")"
+                ],
+                "scopes": []
+              }
+            }
+          ]
+        },
+        "loc": 16
+      }
+    ],
+    "returns": [
+      1
+    ]
+  },
+  "abi": [
+    "toDisplayString",
+    "template",
+    "txt",
+    "renderEffect",
+    "setText"
+  ]
+}

@@ -1,0 +1,103 @@
+error[VIBE2001]: `<Missing>` is not a component of this file.
+  --> template/elements/input.vibe:2:4
+2 |   <Missing />
+  |    ^^^^^^^
+fix: Import the component in `<script setup lang="ts">`, as in `import Missing from './Missing.vibe'`.
+fix: Fix the spelling of `<Missing>`.
+docs: https://vibejs.org/v0/errors/VIBE2001
+
+error[VIBE2002]: `<item>` refers to the component `Item`, and component tags are written in PascalCase.
+  --> template/elements/input.vibe:3:4
+3 |   <item />
+  |    ^^^^
+fix: Write the tag as `<Item>`.
+docs: https://vibejs.org/v0/errors/VIBE2002
+
+error[VIBE2003]: `<foo>` is not an HTML, SVG or MathML element.
+  --> template/elements/input.vibe:4:4
+4 |   <foo></foo>
+  |    ^^^
+fix: Fix the spelling of `<foo>`.
+fix: Write a component tag in PascalCase and import the component.
+fix: Give a custom element a name with a hyphen, as in `<my-foo>`.
+docs: https://vibejs.org/v0/errors/VIBE2003
+
+error[VIBE2004]: A `<template>` element needs `v-if`, `v-else-if`, `v-else`, `v-for` or `v-slot`.
+  --> template/elements/input.vibe:5:9
+5 |   <div><template>loose</template></div>
+  |         ^^^^^^^^
+fix: Add the directive that the group needs, as in `<template v-if="ok">`.
+fix: Replace `<template>` with an element such as `<div>`, or remove it and keep its children.
+docs: https://vibejs.org/v0/errors/VIBE2004
+
+error[VIBE2005]: Text cannot be a direct child of `<table>`.
+  --> template/elements/input.vibe:6:10
+6 |   <table>text</table>
+  |          ^^^^
+fix: Move the text into a cell, as in `<td>`, or into an `<option>`.
+fix: Remove the text.
+docs: https://vibejs.org/v0/errors/VIBE2005
+
+error[VIBE2006]: `<component>` needs a bound `:is` with a component value.
+  --> template/elements/input.vibe:7:14
+7 |   <component is="Item" />
+  |              ^^^^^^^^^
+fix: Import the component and bind it, as in `<component :is="Item" />`.
+fix: Write the component tag directly, as in `<Item />`, when it never changes.
+docs: https://vibejs.org/v0/errors/VIBE2006
+
+error[VIBE2009]: The `is` attribute is not supported on `<div>`.
+  --> template/elements/input.vibe:8:8
+8 |   <div is="x"></div>
+  |        ^^^^^^
+fix: Write the component tag directly, as in `<Item />`.
+fix: Use `<component :is="Item" />` for a component chosen at runtime.
+docs: https://vibejs.org/v0/errors/VIBE2009
+
+error[VIBE2011]: `<script>` cannot appear inside the template.
+  --> template/elements/input.vibe:9:9
+9 |   <div><script></script></div>
+  |         ^^^^^^
+fix: Move the code into `<script setup lang="ts">`.
+fix: Move the styles into a `<style>` or `<style scoped>` block of the file.
+docs: https://vibejs.org/v0/errors/VIBE2011
+
+error[VIBE2901]: `<Teleport>` is not supported.
+  --> template/elements/input.vibe:10:4
+10 |   <Teleport />
+   |    ^^^^^^^^
+fix: Render the content where it belongs, or move it with `document.body.append` from a template ref in `onMounted`.
+fix: Import a component named `Teleport` if the file should render one.
+docs: https://vibejs.org/v0/errors/VIBE2901
+
+error[VIBE2902]: `<KeepAlive>` is not supported.
+  --> template/elements/input.vibe:11:4
+11 |   <KeepAlive />
+   |    ^^^^^^^^^
+fix: Keep the state in a parent component or a shared module and render the children with `v-if`.
+fix: Import a component named `KeepAlive` if the file should render one.
+docs: https://vibejs.org/v0/errors/VIBE2902
+
+error[VIBE2903]: `<Transition>` is not supported.
+  --> template/elements/input.vibe:12:4
+12 |   <Transition />
+   |    ^^^^^^^^^^
+fix: Animate with CSS transitions or animations on a class bound with `:class`.
+fix: Import a component named `Transition` if the file should render one.
+docs: https://vibejs.org/v0/errors/VIBE2903
+
+error[VIBE2904]: `<TransitionGroup>` is not supported.
+  --> template/elements/input.vibe:13:4
+13 |   <TransitionGroup />
+   |    ^^^^^^^^^^^^^^^
+fix: Animate list items with CSS animations on their class.
+fix: Import a component named `TransitionGroup` if the file should render one.
+docs: https://vibejs.org/v0/errors/VIBE2904
+
+error[VIBE2905]: `<Suspense>` is not supported.
+  --> template/elements/input.vibe:14:4
+14 |   <Suspense />
+   |    ^^^^^^^^
+fix: Load async data with `useAsync` and render a loading state with `v-if`.
+fix: Import a component named `Suspense` if the file should render one.
+docs: https://vibejs.org/v0/errors/VIBE2905

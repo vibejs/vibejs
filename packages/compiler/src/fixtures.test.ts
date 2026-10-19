@@ -7,21 +7,26 @@ import { formatDiagnostic } from './diagnostics.ts';
 import { analyze } from './script/analyze.ts';
 import { compileScript } from './script/compile.ts';
 import { parse } from './sfc/parse.ts';
+import { transform } from './transform/index.ts';
 
 const parsed = fixtures.map(([name, source]) => {
   const { descriptor, diagnostics } = parse(source, { filename: `${name}/input.vibe` });
   const analysis = analyze(descriptor);
-  const all = [...diagnostics, ...analysis.diagnostics];
+  const { ir, diagnostics: template } = transform(descriptor, analysis, { id: '0a1b2c3d' });
+  const all = [...diagnostics, ...analysis.diagnostics, ...template];
   return {
     name,
     source,
     descriptor,
     analysis,
+    ir,
+    scriptClean: diagnostics.length + analysis.diagnostics.length === 0,
     diagnostics: all.toSorted((a, b) => a.start.offset - b.start.offset),
   };
 });
 const snapshot = (name: string) => fileURLToPath(fixtureFile(name, 'diagnostics.txt'));
 const scriptSnapshot = (name: string) => fileURLToPath(fixtureFile(name, 'script.ts'));
+const irSnapshot = (name: string) => fileURLToPath(fixtureFile(name, 'ir.json'));
 
 /** The codes and every `line:column` of a source's descriptor, AST and diagnostics. */
 function linesOf(source: string) {
@@ -49,7 +54,8 @@ describe('fixtures', () => {
     },
   );
 
-  const compiled = parsed.filter((f) => f.diagnostics.length === 0 && f.descriptor.scriptSetup);
+  // The script compiles whenever parse and analysis are clean; template diagnostics do not matter.
+  const compiled = parsed.filter((f) => f.scriptClean && f.descriptor.scriptSetup);
 
   it.each(compiled.map((f) => [f.name, f] as const))(
     '%s compiles its script to script.ts',
@@ -64,6 +70,23 @@ describe('fixtures', () => {
     '%s has no script.ts',
     (name) => {
       expect(existsSync(scriptSnapshot(name))).toBe(false);
+    },
+  );
+
+  const clean = parsed.filter((f) => f.diagnostics.length === 0);
+
+  it.each(clean.map((f) => [f.name, f] as const))(
+    '%s transforms its template to ir.json',
+    async (_, { name, ir }) => {
+      const json = JSON.stringify(ir, (_key, v: unknown) => (v instanceof Set ? [...v] : v), 2);
+      await expect(`${json}\n`).toMatchFileSnapshot(irSnapshot(name));
+    },
+  );
+
+  it.each(parsed.filter((f) => !clean.includes(f)).map((f) => f.name))(
+    '%s has no ir.json',
+    (name) => {
+      expect(existsSync(irSnapshot(name))).toBe(false);
     },
   );
 
