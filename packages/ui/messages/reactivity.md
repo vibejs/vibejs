@@ -1,5 +1,27 @@
 # Reactivity
 
+## VIBE5001: Value cannot be made reactive
+
+> {api}() received {value}, which is not an object, so it was returned as-is.
+
+Only objects can be wrapped in a reactive or readonly proxy. A primitive value is returned unchanged and nothing tracks it.
+
+### Fix
+
+- Wrap a primitive value in `ref()` instead of {api}().
+- Pass an object, an array, a `Map` or a `Set` to {api}().
+
+## VIBE5002: Mutation of a readonly target
+
+> Cannot {operation} {key}: the target is readonly.
+
+A proxy created by `readonly()` or `shallowReadonly()` ignores writes, deletes and collection mutations, so the target keeps its value and nothing is triggered. The message quotes the key, or says `all entries` for `clear()`.
+
+### Fix
+
+- Mutate the reactive source that the readonly proxy wraps.
+- Pass the source to `reactive()` instead of `readonly()` where it must be writable.
+
 ## VIBE5003: Write to a readonly computed
 
 > Cannot assign to the value of a computed ref that was created with a getter only.
@@ -10,6 +32,17 @@ A computed ref created with `computed(getter)` derives its value from the refs i
 
 - Write to the refs that the getter reads instead.
 - Pass an object with `get` and `set` functions to `computed()` when it must be writable.
+
+## VIBE5004: toRefs on a non-reactive object
+
+> toRefs() received a plain object, so its refs will not track changes.
+
+`toRefs()` creates one ref per key that reads and writes the source object. Without a reactive source, nothing tracks reads, so a change made through the object directly does not update readers of the refs.
+
+### Fix
+
+- Pass the object to `reactive()` first and call `toRefs()` on the result.
+- Use `ref()` for each value when the object does not need to stay in sync.
 
 ## VIBE5005: Run on a stopped effect scope
 

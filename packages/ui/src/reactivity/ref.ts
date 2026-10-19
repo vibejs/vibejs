@@ -1,13 +1,29 @@
 // oxlint-disable typescript/no-explicit-any -- the public signatures default to `any` on purpose
-import { hasChanged, isFunction, isObject } from '../shared.ts';
+import { vibeError } from '../errors.gen.ts';
+import { hasChanged, isFunction, isIntegerKey, isObject } from '../shared.ts';
+import { warn } from '../warn.ts';
 import { ComputedRefImpl, type ComputedRef, type WritableComputedRef } from './computed.ts';
 import { activeSub, batchDepth, cycle, flush, runDepth, system, type Dependency } from './core.ts';
+import {
+  flag,
+  getDepFromReactive,
+  isReactive,
+  isReadonly,
+  isRef,
+  isShallow,
+  toRaw,
+} from './dep.ts';
+import { isProxy, toReactive } from './reactive.ts';
 import { ReactiveFlags, type Link } from './system.ts';
 
 const { link, propagate, shallowPropagate } = system;
 
 declare const RefSymbol: unique symbol;
 declare const ShallowRefMarker: unique symbol;
+/** The type-only brand of `markRaw()` values, which are never unwrapped. */
+export declare const RawSymbol: unique symbol;
+/** The type-only brand of `shallowReactive()` values, which are never unwrapped. */
+export declare const ShallowReactiveMarker: unique symbol;
 
 export interface Ref<T = any, S = T> {
   get value(): T;
@@ -25,7 +41,7 @@ export type MaybeRef<T = any> = T | Ref<T> | ShallowRef<T> | WritableComputedRef
 export type MaybeRefOrGetter<T = any> = MaybeRef<T> | ComputedRef<T> | (() => T);
 
 type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N;
-type Builtin =
+export type Builtin =
   | string
   | number
   | boolean
@@ -45,21 +61,27 @@ export type UnwrapRef<T> =
       ? UnwrapRefSimple<V>
       : UnwrapRefSimple<T>;
 
-type UnwrapRefSimple<T> = T extends Builtin | Ref | ((...args: any[]) => unknown)
+export type UnwrapRefSimple<T> = T extends
+  | Builtin
+  | Ref
+  | ((...args: any[]) => unknown)
+  | { [RawSymbol]?: true }
   ? T
-  : T extends Map<infer K, infer V>
-    ? Map<K, UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof Map<any, any>>>
-    : T extends WeakMap<infer K, infer V>
-      ? WeakMap<K, UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof WeakMap<any, any>>>
-      : T extends Set<infer V>
-        ? Set<UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof Set<any>>>
-        : T extends WeakSet<infer V>
-          ? WeakSet<UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof WeakSet<any>>>
-          : T extends readonly any[]
-            ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
-            : T extends object
-              ? { [P in keyof T]: P extends symbol ? T[P] : UnwrapRef<T[P]> }
-              : T;
+  : T extends { [ShallowReactiveMarker]?: true }
+    ? T
+    : T extends Map<infer K, infer V>
+      ? Map<K, UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof Map<any, any>>>
+      : T extends WeakMap<infer K, infer V>
+        ? WeakMap<K, UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof WeakMap<any, any>>>
+        : T extends Set<infer V>
+          ? Set<UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof Set<any>>>
+          : T extends WeakSet<infer V>
+            ? WeakSet<UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof WeakSet<any>>>
+            : T extends readonly any[]
+              ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
+              : T extends object
+                ? { [P in keyof T]: P extends symbol ? T[P] : UnwrapRef<T[P]> }
+                : T;
 
 type DistributeRef<T> = T extends Ref<infer V, unknown> ? V : T;
 export type ShallowUnwrapRef<T> = { [K in keyof T]: DistributeRef<T[K]> };
@@ -68,18 +90,24 @@ export type ToRefs<T = any> = { [K in keyof T]: ToRef<T[K]> };
 
 /**
  * A mutable value that its readers track. It keeps the written value apart from the current one
- * until a reader pulls it, so writing A, B, then A again in a batch changes nothing.
+ * until a reader pulls it, so writing A, B, then A again in a batch changes nothing. Unless it is
+ * shallow, it holds an object as its reactive proxy and compares writes by their raw value.
  */
 export class RefImpl<T = unknown> implements Dependency {
   subs: Link | undefined = undefined;
   subsTail: Link | undefined = undefined;
   flags: number = ReactiveFlags.Mutable;
+  /** The last written value, unwrapped from its proxy unless stored as-is. */
+  rawValue: T;
   currentValue: T;
   pendingValue: T;
   readonly __v_isRef = true;
+  readonly __v_isShallow: boolean;
 
-  constructor(value: T) {
-    this.currentValue = this.pendingValue = value;
+  constructor(value: T, shallow = false) {
+    this.__v_isShallow = shallow;
+    this.rawValue = shallow ? value : toRaw(value);
+    this.currentValue = this.pendingValue = shallow ? value : toReactive(value);
   }
 
   get value(): T {
@@ -91,8 +119,12 @@ export class RefImpl<T = unknown> implements Dependency {
   }
 
   set value(value: T) {
-    if (!hasChanged(value, this.pendingValue)) return;
-    this.pendingValue = value;
+    // A shallow or readonly proxy is stored as-is, so that it keeps its mode.
+    const asIs = this.__v_isShallow || isShallow(value) || isReadonly(value);
+    const raw = asIs ? value : toRaw(value);
+    if (!hasChanged(raw, this.rawValue)) return;
+    this.rawValue = raw;
+    this.pendingValue = asIs ? raw : toReactive(raw);
     this.flags = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
     if (this.subs === undefined) return;
     propagate(this.subs, runDepth > 0);
@@ -107,27 +139,47 @@ export class RefImpl<T = unknown> implements Dependency {
   unwatched(): void {}
 }
 
-/** The ref of `toRef(object, key)`: reads and writes `object[key]`, through a ref stored there. */
+/**
+ * The ref of `toRef(object, key)`: reads and writes `object[key]` through the object, so a proxy
+ * tracks and guards each access. Where the proxy layers would not unwrap a ref stored at the key
+ * (a plain or shallow object), this ref unwraps it itself.
+ */
 class PropertyRef {
   readonly __v_isRef = true;
   readonly object: Record<PropertyKey, unknown>;
   readonly key: PropertyKey;
   readonly defaultValue: unknown;
+  /** The raw object, whose key `triggerRef()` notifies. */
+  readonly raw: Record<PropertyKey, unknown>;
+  /** Whether no proxy layer unwraps a ref at the key. */
+  readonly shallow: boolean;
 
   constructor(object: Record<PropertyKey, unknown>, key: PropertyKey, defaultValue?: unknown) {
     this.object = object;
-    this.key = key;
+    // The proxy tracks the key as JS converts it, e.g. `0` and `[0]` as '0'.
+    this.key = typeof key === 'symbol' ? key : String(key);
     this.defaultValue = defaultValue;
+    this.raw = toRaw(object);
+    let shallow = true;
+    // Array items are never unwrapped; other keys are by the first deep layer.
+    if (!Array.isArray(object) || !isIntegerKey(this.key)) {
+      let layer: unknown = object;
+      do shallow = !isProxy(layer) || isShallow(layer);
+      while (shallow && (layer = flag(layer, '__v_raw')));
+    }
+    this.shallow = shallow;
   }
 
   get value(): unknown {
-    const value = unref(this.object[this.key]);
+    let value = this.object[this.key];
+    if (this.shallow) value = unref(value);
     return value === undefined ? this.defaultValue : value;
   }
 
   set value(value: unknown) {
-    const current = this.object[this.key];
-    if (isRef(current)) current.value = value;
+    // Read through the object, so that a proxy tracks the key, only when a ref is stored there.
+    const nested = this.shallow && isRef(this.raw[this.key]) ? this.object[this.key] : undefined;
+    if (isRef(nested)) nested.value = value;
     else this.object[this.key] = value;
   }
 }
@@ -159,13 +211,7 @@ export function shallowRef<T>(
 ): Ref extends T ? (T extends Ref ? IfAny<T, ShallowRef<T>, T> : ShallowRef<T>) : ShallowRef<T>;
 export function shallowRef<T = any>(): ShallowRef<T | undefined>;
 export function shallowRef(value?: unknown): any {
-  return ref(value);
-}
-
-// oxlint-disable-next-line typescript/no-redundant-type-constituents -- `Ref<T>` infers `T`
-export function isRef<T>(r: Ref<T> | unknown): r is Ref<T>;
-export function isRef(r: unknown): boolean {
-  return isObject(r) && r.__v_isRef === true;
+  return isRef(value) ? value : new RefImpl(value, true);
 }
 
 export function unref<T>(maybeRef: MaybeRef<T> | ComputedRef<T>): T {
@@ -196,15 +242,18 @@ export function toRef(source: unknown, key?: PropertyKey, defaultValue?: unknown
 
 export function toRefs<T extends object>(object: T): ToRefs<T>;
 export function toRefs(object: Record<PropertyKey, unknown>): any {
-  if (Array.isArray(object)) return object.map((_, index) => new PropertyRef(object, index));
-  const refs: Record<string, PropertyRef> = {};
+  if (!isReactive(object) && !isReadonly(object)) warn(vibeError('VIBE5004'));
+  const refs: any = Array.isArray(object) ? Array.from({ length: object.length }) : {};
   for (const key in object) refs[key] = new PropertyRef(object, key);
   return refs;
 }
 
 /** Notifies the readers of a ref as if its value changed, e.g. after mutating a `shallowRef`. */
-export function triggerRef(target: Ref): void {
-  // Property and getter refs have no readers of their own.
+export function triggerRef(source: Ref): void {
+  // A readonly proxy of a ref triggers the ref itself.
+  const target = toRaw(source);
+  // A property ref notifies the readers of its key; a getter ref has no readers of its own.
+  if (target instanceof PropertyRef) return getDepFromReactive(target.raw, target.key)?.trigger();
   if (!(target instanceof RefImpl || target instanceof ComputedRefImpl)) return;
   const subs = target.subs;
   if (subs === undefined) return;

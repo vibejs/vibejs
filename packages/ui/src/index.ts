@@ -3,16 +3,23 @@ export { computed } from './reactivity/computed.ts';
 export type { ComputedRef, WritableComputedRef } from './reactivity/computed.ts';
 export { effectScope, getCurrentScope, onScopeDispose } from './reactivity/effectScope.ts';
 export type { EffectScope } from './reactivity/effectScope.ts';
+export { isReactive, isReadonly, isRef, isShallow, toRaw } from './reactivity/dep.ts';
 export {
-  isRef,
-  ref,
-  shallowRef,
-  toRef,
-  toRefs,
-  toValue,
-  triggerRef,
-  unref,
-} from './reactivity/ref.ts';
+  isProxy,
+  markRaw,
+  reactive,
+  readonly,
+  shallowReactive,
+  shallowReadonly,
+} from './reactivity/reactive.ts';
+export type {
+  DeepReadonly,
+  Raw,
+  Reactive,
+  ShallowReactive,
+  UnwrapNestedRefs,
+} from './reactivity/reactive.ts';
+export { ref, shallowRef, toRef, toRefs, toValue, triggerRef, unref } from './reactivity/ref.ts';
 export type {
   MaybeRef,
   MaybeRefOrGetter,

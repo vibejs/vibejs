@@ -1,13 +1,14 @@
 // @vitest-environment node
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/reactivity/__tests__/computed.spec.ts (MIT)
 //
-// Sources that upstream builds with reactive() are refs here. Cases that need reactive() itself,
-// isReadonly() or the scheduler and components move to RR-2, RR-3 and RR-5; onTrack/onTrigger
-// are not part of this API.
+// Cases that need the scheduler and components move to RR-3 and RR-5; onTrack/onTrigger are not
+// part of this API.
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 import { vibeError } from '../errors.gen.ts';
 import { computed, ComputedRefImpl, type ComputedRef } from './computed.ts';
 import { endBatch, ReactiveEffect, setActiveSub, startBatch } from './core.ts';
+import { isReadonly } from './dep.ts';
+import { reactive } from './reactive.ts';
 import { ref, RefImpl, shallowRef, triggerRef } from './ref.ts';
 import { ReactiveFlags } from './system.ts';
 
@@ -28,10 +29,10 @@ afterEach(() => {
 
 describe('reactivity/computed', () => {
   it('should return updated value', () => {
-    const value = ref<number>();
-    const cValue = computed(() => value.value);
+    const value = reactive<{ foo?: number }>({});
+    const cValue = computed(() => value.foo);
     expect(cValue.value).toBe(undefined);
-    value.value = 1;
+    value.foo = 1;
     expect(cValue.value).toBe(1);
   });
 
@@ -50,8 +51,8 @@ describe('reactivity/computed', () => {
   });
 
   it('should compute lazily', () => {
-    const value = ref<number>();
-    const getter = vi.fn<() => number | undefined>(() => value.value);
+    const value = reactive<{ foo?: number }>({});
+    const getter = vi.fn<() => number | undefined>(() => value.foo);
     const cValue = computed(getter);
 
     // lazy
@@ -65,7 +66,7 @@ describe('reactivity/computed', () => {
     expect(getter).toHaveBeenCalledTimes(1);
 
     // should not compute until needed
-    value.value = 1;
+    value.foo = 1;
     expect(getter).toHaveBeenCalledTimes(1);
 
     // now it should compute
@@ -78,31 +79,31 @@ describe('reactivity/computed', () => {
   });
 
   it('should trigger effect', () => {
-    const value = ref<number>();
-    const cValue = computed(() => value.value);
+    const value = reactive<{ foo?: number }>({});
+    const cValue = computed(() => value.foo);
     let dummy;
     effect(() => {
       dummy = cValue.value;
     });
     expect(dummy).toBe(undefined);
-    value.value = 1;
+    value.foo = 1;
     expect(dummy).toBe(1);
   });
 
   it('should work when chained', () => {
-    const value = ref(0);
-    const c1 = computed(() => value.value);
+    const value = reactive({ foo: 0 });
+    const c1 = computed(() => value.foo);
     const c2 = computed(() => c1.value + 1);
     expect(c2.value).toBe(1);
     expect(c1.value).toBe(0);
-    value.value++;
+    value.foo++;
     expect(c2.value).toBe(2);
     expect(c1.value).toBe(1);
   });
 
   it('should trigger effect when chained', () => {
-    const value = ref(0);
-    const getter1 = vi.fn<() => number>(() => value.value);
+    const value = reactive({ foo: 0 });
+    const getter1 = vi.fn<() => number>(() => value.foo);
     const getter2 = vi.fn<() => number>(() => {
       return c1.value + 1;
     });
@@ -116,7 +117,7 @@ describe('reactivity/computed', () => {
     expect(dummy).toBe(1);
     expect(getter1).toHaveBeenCalledTimes(1);
     expect(getter2).toHaveBeenCalledTimes(1);
-    value.value++;
+    value.foo++;
     expect(dummy).toBe(2);
     // should not result in duplicate calls
     expect(getter1).toHaveBeenCalledTimes(2);
@@ -124,8 +125,8 @@ describe('reactivity/computed', () => {
   });
 
   it('should trigger effect when chained (mixed invocations)', () => {
-    const value = ref(0);
-    const getter1 = vi.fn<() => number>(() => value.value);
+    const value = reactive({ foo: 0 });
+    const getter1 = vi.fn<() => number>(() => value.foo);
     const getter2 = vi.fn<() => number>(() => {
       return c1.value + 1;
     });
@@ -140,11 +141,29 @@ describe('reactivity/computed', () => {
 
     expect(getter1).toHaveBeenCalledTimes(1);
     expect(getter2).toHaveBeenCalledTimes(1);
-    value.value++;
+    value.foo++;
     expect(dummy).toBe(3);
     // should not result in duplicate calls
     expect(getter1).toHaveBeenCalledTimes(2);
     expect(getter2).toHaveBeenCalledTimes(2);
+  });
+
+  it('should be readonly', () => {
+    let a = { a: 1 };
+    const x = computed(() => a);
+    expect(isReadonly(x)).toBe(true);
+    expect(isReadonly(x.value)).toBe(false);
+    expect(isReadonly(x.value.a)).toBe(false);
+    const z = computed<typeof a>({
+      get() {
+        return a;
+      },
+      set(v) {
+        a = v;
+      },
+    });
+    expect(isReadonly(z)).toBe(false);
+    expect(isReadonly(z.value.a)).toBe(false);
   });
 
   it('should support setter', () => {
@@ -701,34 +720,49 @@ describe('reactivity/computed', () => {
   });
 
   test('computed should remain live after losing all subscribers', () => {
-    const state = ref(1);
-    const p = computed(() => state.value + 1);
+    const state = reactive({ a: 1 });
+    const p = computed(() => state.a + 1);
     const e = effect(() => p.value);
     e.stop();
 
     expect(p.value).toBe(2);
-    state.value++;
+    state.a++;
     expect(p.value).toBe(3);
+  });
+
+  // #11995
+  test('computed dep cleanup should not cause property dep to be deleted', () => {
+    const toggle = ref(true);
+    const state = reactive({ a: 1 });
+    const p = computed(() => {
+      return toggle.value ? state.a : 111;
+    });
+    const pp = computed(() => state.a);
+    effect(() => p.value);
+
+    expect(pp.value).toBe(1);
+    toggle.value = false;
+    state.a++;
+    expect(pp.value).toBe(2);
   });
 
   // #12020
   test('computed value updates correctly after dep cleanup', () => {
-    const foo = ref(1);
-    const flag = ref(1);
-    const c1 = computed(() => foo.value);
+    const obj = reactive({ foo: 1, flag: 1 });
+    const c1 = computed(() => obj.foo);
 
-    let value;
+    let foo;
     effect(() => {
-      value = flag.value ? (foo.value, c1.value) : 0;
+      foo = obj.flag ? (obj.foo, c1.value) : 0;
     });
-    expect(value).toBe(1);
+    expect(foo).toBe(1);
 
-    flag.value = 0;
-    expect(value).toBe(0);
+    obj.flag = 0;
+    expect(foo).toBe(0);
 
-    foo.value = 2;
-    flag.value = 1;
-    expect(value).toBe(2);
+    obj.foo = 2;
+    obj.flag = 1;
+    expect(foo).toBe(2);
   });
 
   // #11928. Upstream bounds the wall-clock time; counting getter calls proves the same without

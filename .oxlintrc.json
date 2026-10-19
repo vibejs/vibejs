@@ -4,7 +4,20 @@
   "categories": { "correctness": "error", "suspicious": "error" },
   "options": { "typeAware": true },
   "rules": {
-    "eslint/no-underscore-dangle": ["error", { "allow": ["__DEV__", "__v_isRef"] }],
+    "eslint/no-underscore-dangle": [
+      "error",
+      {
+        "allow": [
+          "__DEV__",
+          "__v_isRef",
+          "__v_isReactive",
+          "__v_isReadonly",
+          "__v_isShallow",
+          "__v_raw",
+          "__v_skip"
+        ]
+      }
+    ],
     "eslint/no-console": "error",
     "eslint/no-restricted-imports": [
       "error",

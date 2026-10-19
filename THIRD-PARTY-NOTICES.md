@@ -38,10 +38,25 @@ Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`]
   - `packages/ui/src/reactivity/system.ts` from `src/system.ts`
   - `packages/ui/src/reactivity/system.test.ts` from `tests/effect.spec.ts`, `tests/effectScope.spec.ts` and `tests/trigger.spec.ts` (tests, not shipped)
   - `packages/ui/src/reactivity/conformance.test.ts` from `tests/conformance.spec.ts` (tests, not shipped)
-- **vuejs/core** v3.5.44 at `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`, MIT, Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors (tests, not shipped).
-  - `packages/ui/src/reactivity/ref.test.ts` from `packages/reactivity/__tests__/ref.spec.ts`
-  - `packages/ui/src/reactivity/computed.test.ts` from `packages/reactivity/__tests__/computed.spec.ts`
-  - `packages/ui/src/reactivity/effectScope.test.ts` from `packages/reactivity/__tests__/effectScope.spec.ts`
+- **vuejs/core** v3.5.44 at `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`, MIT, Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors.
+  - `packages/ui/src/reactivity/reactive.ts` from `packages/reactivity/src/reactive.ts` (shipped)
+  - `packages/ui/src/reactivity/baseHandlers.ts` from `packages/reactivity/src/baseHandlers.ts` (shipped)
+  - `packages/ui/src/reactivity/collectionHandlers.ts` from `packages/reactivity/src/collectionHandlers.ts` (shipped)
+  - `packages/ui/src/reactivity/arrayInstrumentations.ts` from `packages/reactivity/src/arrayInstrumentations.ts` (shipped)
+  - `packages/ui/src/reactivity/dep.ts` from `packages/reactivity/src/dep.ts` (shipped)
+  - `packages/ui/src/reactivity/ref.test.ts` from `packages/reactivity/__tests__/ref.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/computed.test.ts` from `packages/reactivity/__tests__/computed.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/effectScope.test.ts` from `packages/reactivity/__tests__/effectScope.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/reactive.test.ts` from `packages/reactivity/__tests__/reactive.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/reactiveArray.test.ts` from `packages/reactivity/__tests__/reactiveArray.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/readonly.test.ts` from `packages/reactivity/__tests__/readonly.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/shallowReactive.test.ts` from `packages/reactivity/__tests__/shallowReactive.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/shallowReadonly.test.ts` from `packages/reactivity/__tests__/shallowReadonly.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/collectionMap.test.ts` from `packages/reactivity/__tests__/collections/Map.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/collectionSet.test.ts` from `packages/reactivity/__tests__/collections/Set.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/collectionWeakMap.test.ts` from `packages/reactivity/__tests__/collections/WeakMap.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/collectionWeakSet.test.ts` from `packages/reactivity/__tests__/collections/WeakSet.spec.ts` (tests, not shipped)
+  - `packages/ui/src/reactivity/collectionShallowReadonly.test.ts` from `packages/reactivity/__tests__/collections/shallowReadonly.spec.ts` (tests, not shipped)
 - **vuejs/router** v4.6.4 at `47b95baae1ebdeb564bd1adf8168c9e9d6d09d0a`, MIT, Copyright (c) 2019-present Eduardo San Martin Morote.
   - `packages/ui/src/router/path.ts` from `packages/router/src/matcher/pathParserRanker.ts`
   - `packages/ui/src/router/path.test.ts` from `packages/router/__tests__/matcher/pathRanking.spec.ts` and `pathParser.spec.ts` (tests, not shipped)

@@ -1,28 +1,25 @@
 // @vitest-environment node
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/reactivity/__tests__/ref.spec.ts (MIT)
+// oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-type-assertion, unicorn/consistent-function-scoping -- ported as upstream wrote it
 //
-// The cases that need reactive(), readonly(), isReactive(), isShallow() or deep conversion in
-// ref() move to RR-2; customRef() moves to RR-5.
-import { describe, expect, it, test, vi } from 'vitest';
+// customRef() and its value cache case move to RR-5.
+import { afterEach, describe, expect, it, test, vi } from 'vitest';
+import { vibeError } from '../errors.gen.ts';
 import { computed } from './computed.ts';
 import { endBatch, ReactiveEffect, startBatch } from './core.ts';
-import {
-  isRef,
-  ref,
-  shallowRef,
-  toRef,
-  toRefs,
-  toValue,
-  triggerRef,
-  unref,
-  type Ref,
-} from './ref.ts';
+import { isReactive, isRef, isShallow, toRaw } from './dep.ts';
+import { reactive, readonly, shallowReactive, shallowReadonly } from './reactive.ts';
+import { ref, shallowRef, toRef, toRefs, toValue, triggerRef, unref, type Ref } from './ref.ts';
 
 function effect(fn: () => unknown): ReactiveEffect {
   const e = new ReactiveEffect(fn);
   e.run();
   return e;
 }
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('reactivity/ref', () => {
   it('should hold a value', () => {
@@ -49,6 +46,41 @@ describe('reactivity/ref', () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
+  it('ref wrapped in reactive should not track internal _value access', () => {
+    const a = ref(1);
+    const b = reactive(a);
+    let dummy;
+    const fn = vi.fn<() => void>(() => {
+      dummy = b.value; // this will observe both b.value and a.value access
+    });
+    effect(fn);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(dummy).toBe(1);
+
+    // mutating a.value should only trigger effect once
+    a.value = 3;
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(dummy).toBe(3);
+
+    // mutating b.value should trigger the effect twice. (once for a.value change and once for b.value change)
+    b.value = 5;
+    expect(fn).toHaveBeenCalledTimes(4);
+    expect(dummy).toBe(5);
+  });
+
+  it('should make nested properties reactive', () => {
+    const a = ref({
+      count: 1,
+    });
+    let dummy;
+    effect(() => {
+      dummy = a.value.count;
+    });
+    expect(dummy).toBe(1);
+    a.value.count = 2;
+    expect(dummy).toBe(2);
+  });
+
   it('should work without initial value', () => {
     const a = ref();
     let dummy;
@@ -60,10 +92,50 @@ describe('reactivity/ref', () => {
     expect(dummy).toBe(2);
   });
 
+  it('should work like a normal property when nested in a reactive object', () => {
+    const a = ref(1);
+    const obj = reactive({
+      a,
+      b: {
+        c: a,
+      },
+    });
+
+    let dummy1 = 0;
+    let dummy2 = 0;
+
+    effect(() => {
+      dummy1 = obj.a;
+      dummy2 = obj.b.c;
+    });
+
+    const assertDummiesEqualTo = (val: number) => {
+      for (const dummy of [dummy1, dummy2]) expect(dummy).toBe(val);
+    };
+
+    assertDummiesEqualTo(1);
+    a.value++;
+    assertDummiesEqualTo(2);
+    obj.a++;
+    assertDummiesEqualTo(3);
+    obj.b.c++;
+    assertDummiesEqualTo(4);
+  });
+
   it('should unwrap nested ref in types', () => {
     const a = ref(0);
     const b = ref(a);
     expect(typeof (b.value + 1)).toBe('number');
+  });
+
+  it('should unwrap nested values in types', () => {
+    const a = {
+      b: ref(0),
+    };
+
+    const c = ref(a);
+
+    expect(typeof (c.value.b + 1)).toBe('number');
   });
 
   it('should NOT unwrap ref types nested inside arrays', () => {
@@ -136,6 +208,19 @@ describe('reactivity/ref', () => {
     for (const key of keys) expect(objRef.value[key]).toStrictEqual(obj[key]);
   });
 
+  it('should unwrap ref types as props of arrays', () => {
+    const arr: any = [ref(0)];
+    const symbolKey = Symbol('');
+    arr[''] = ref(1);
+    arr[symbolKey] = ref(2);
+    const arrRef = ref(arr).value;
+    expect(isRef(arrRef[0])).toBe(true);
+    expect(isRef(arrRef[''])).toBe(false);
+    expect(isRef(arrRef[symbolKey])).toBe(false);
+    expect(arrRef['']).toBe(1);
+    expect(arrRef[symbolKey]).toBe(2);
+  });
+
   test('unref', () => {
     expect(unref(1)).toBe(1);
     expect(unref(ref(1))).toBe(1);
@@ -167,6 +252,10 @@ describe('reactivity/ref', () => {
     // force trigger
     triggerRef(sref);
     expect(dummy).toBe(2);
+  });
+
+  test('shallowRef isShallow', () => {
+    expect(isShallow(shallowRef({ a: 1 }))).toBe(true);
   });
 
   test('isRef', () => {
@@ -217,6 +306,89 @@ describe('reactivity/ref', () => {
     expect(u.value).toBe(7);
   });
 
+  test('toRef on array', () => {
+    const a: any = reactive(['a', 'b']);
+    const r = toRef(a, 1);
+    expect(r.value).toBe('b');
+    r.value = 'c';
+    expect(r.value).toBe('c');
+    expect(a[1]).toBe('c');
+
+    a[1] = ref('d');
+    expect(isRef(a[1])).toBe(true);
+    expect(r.value).toBe('d');
+    r.value = 'e';
+    expect(isRef(a[1])).toBe(true);
+    expect(a[1].value).toBe('e');
+
+    const s = toRef(a, 2, 'def');
+    const len = toRef(a, 'length');
+
+    expect(s.value).toBe('def');
+    expect(len.value).toBe(2);
+
+    a.push('f');
+    expect(s.value).toBe('f');
+    expect(len.value).toBe(3);
+
+    len.value = 2;
+
+    expect(s.value).toBe('def');
+    expect(len.value).toBe(2);
+
+    const symbol = Symbol();
+    const t = toRef(a, 'foo');
+    const u = toRef(a, symbol);
+    expect(t.value).toBeUndefined();
+    expect(u.value).toBeUndefined();
+
+    const foo = ref(3);
+    const bar = ref(5);
+    a.foo = foo;
+    a[symbol] = bar;
+    expect(t.value).toBe(3);
+    expect(u.value).toBe(5);
+
+    t.value = 4;
+    u.value = 6;
+
+    expect(a.foo).toBe(4);
+    expect(foo.value).toBe(4);
+    expect(a[symbol]).toBe(6);
+    expect(bar.value).toBe(6);
+  });
+
+  test('triggerRef on toRef created from array coerces property keys', () => {
+    const assertTriggerRef = (key: unknown) => {
+      const array = reactive(['a']);
+      const first = toRef(array as any, key as any);
+      const fn = vi.fn<(value?: unknown) => void>();
+
+      effect(() => fn(first.value));
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      triggerRef(first);
+      expect(fn).toHaveBeenCalledTimes(2);
+    };
+
+    assertTriggerRef(0);
+    // JS coerces non-symbol property keys like [0] to the string "0".
+    assertTriggerRef([0]);
+  });
+
+  test('triggerRef on toRef created from symbol key preserves the symbol', () => {
+    const key = Symbol();
+    const object = reactive({ [key]: 'a' });
+    const value = toRef(object, key);
+    const fn = vi.fn<(value?: unknown) => void>();
+
+    effect(() => fn(value.value));
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    triggerRef(value);
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
   test('toRef default value', () => {
     const a: { x: number | undefined } = { x: undefined };
     const x = toRef(a, 'x', 1);
@@ -247,6 +419,150 @@ describe('reactivity/ref', () => {
     expect(a.value).toBe(5);
   });
 
+  test('toRef lazy evaluation of properties inside a proxy', () => {
+    const fn = vi.fn<() => number>(() => 5);
+    const num = computed(fn);
+    const a = toRef({ num }, 'num');
+    const b = toRef(reactive({ num }), 'num');
+    const c = toRef(readonly({ num }), 'num');
+    const d = toRef(shallowReactive({ num }), 'num');
+    const e = toRef(shallowReadonly({ num }), 'num');
+
+    expect(fn).not.toHaveBeenCalled();
+
+    expect(a.value).toBe(5);
+    expect(b.value).toBe(5);
+    expect(c.value).toBe(5);
+    expect(d.value).toBe(5);
+    expect(e.value).toBe(5);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  test('toRef with shallowReactive/shallowReadonly', () => {
+    const r = ref(0);
+    const s1 = shallowReactive<{ foo: any }>({ foo: r });
+    const t1 = toRef(s1, 'foo', 2);
+    const s2 = shallowReadonly(s1);
+    const t2 = toRef(s2, 'foo', 3);
+
+    expect(r.value).toBe(0);
+    expect(s1.foo.value).toBe(0);
+    expect(t1.value).toBe(0);
+    expect(s2.foo.value).toBe(0);
+    expect(t2.value).toBe(0);
+
+    s1.foo = ref(1);
+
+    expect(r.value).toBe(0);
+    expect(s1.foo.value).toBe(1);
+    expect(t1.value).toBe(1);
+    expect(s2.foo.value).toBe(1);
+    expect(t2.value).toBe(1);
+
+    s1.foo.value = undefined;
+
+    expect(r.value).toBe(0);
+    expect(s1.foo.value).toBeUndefined();
+    expect(t1.value).toBe(2);
+    expect(s2.foo.value).toBeUndefined();
+    expect(t2.value).toBe(3);
+
+    t1.value = 2;
+
+    expect(r.value).toBe(0);
+    expect(s1.foo.value).toBe(2);
+    expect(t1.value).toBe(2);
+    expect(s2.foo.value).toBe(2);
+    expect(t2.value).toBe(2);
+
+    t2.value = 4;
+
+    expect(r.value).toBe(0);
+    expect(s1.foo.value).toBe(4);
+    expect(t1.value).toBe(4);
+    expect(s2.foo.value).toBe(4);
+    expect(t2.value).toBe(4);
+
+    s1.foo = undefined;
+
+    expect(r.value).toBe(0);
+    expect(s1.foo).toBeUndefined();
+    expect(t1.value).toBe(2);
+    expect(s2.foo).toBeUndefined();
+    expect(t2.value).toBe(3);
+  });
+
+  test('toRef for shallowReadonly around reactive', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const get = vi.fn<() => number>(() => 3);
+    const set = vi.fn<(value: number) => void>();
+    const num = computed({ get, set });
+    const t = toRef(shallowReadonly(reactive({ num })), 'num');
+
+    expect(get).not.toHaveBeenCalled();
+    expect(set).not.toHaveBeenCalled();
+
+    t.value = 1;
+
+    expect(warn).toHaveBeenLastCalledWith(
+      vibeError('VIBE5002', { operation: 'set', key: '"num"' }).message,
+    );
+
+    expect(get).not.toHaveBeenCalled();
+    expect(set).not.toHaveBeenCalled();
+
+    expect(t.value).toBe(3);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(set).not.toHaveBeenCalled();
+  });
+
+  test('toRef for readonly around shallowReactive', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const get = vi.fn<() => number>(() => 3);
+    const set = vi.fn<(value: number) => void>();
+    const num = computed({ get, set });
+    const t: Ref<number> = toRef(readonly(shallowReactive({ num })), 'num');
+
+    expect(get).not.toHaveBeenCalled();
+    expect(set).not.toHaveBeenCalled();
+
+    t.value = 1;
+
+    expect(warn).toHaveBeenLastCalledWith(
+      vibeError('VIBE5002', { operation: 'set', key: '"num"' }).message,
+    );
+
+    expect(get).not.toHaveBeenCalled();
+    expect(set).not.toHaveBeenCalled();
+
+    expect(t.value).toBe(3);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(set).not.toHaveBeenCalled();
+  });
+
+  test(`toRef doesn't bypass the proxy when getting/setting a nested ref`, () => {
+    const r = ref(2);
+    const obj = shallowReactive({ num: r });
+    const t = toRef(obj, 'num');
+
+    expect(t.value).toBe(2);
+
+    effect(() => {
+      t.value = 3;
+    });
+
+    expect(t.value).toBe(3);
+    expect(r.value).toBe(3);
+
+    const s = ref(4);
+    obj.num = s;
+
+    expect(t.value).toBe(3);
+    expect(s.value).toBe(3);
+  });
+
   test('toRefs', () => {
     const a = { x: 1, y: 2 };
     const { x, y } = toRefs(a);
@@ -269,6 +585,18 @@ describe('reactivity/ref', () => {
     expect(a.y).toBe(4);
   });
 
+  test('toRefs should warn on plain object', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    toRefs({});
+    expect(warn).toHaveBeenLastCalledWith(vibeError('VIBE5004').message);
+  });
+
+  test('toRefs should warn on plain array', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    toRefs([]);
+    expect(warn).toHaveBeenLastCalledWith(vibeError('VIBE5004').message);
+  });
+
   test('toRefs array', () => {
     const arr = ['a', 'b', 'c'];
     const refs = toRefs(arr);
@@ -280,6 +608,57 @@ describe('reactivity/ref', () => {
 
     arr[1] = '2';
     expect(refs[1].value).toBe('2');
+  });
+
+  test('toRefs reactive array', () => {
+    const arr = reactive(['a', 'b', 'c']);
+    const refs = toRefs(arr);
+
+    expect(Array.isArray(refs)).toBe(true);
+
+    refs[0].value = '1';
+    expect(arr[0]).toBe('1');
+
+    arr[1] = '2';
+    expect(refs[1].value).toBe('2');
+  });
+
+  test('should not trigger when setting value to same proxy', () => {
+    const obj = reactive({ count: 0 });
+
+    const a = ref(obj);
+    const spy1 = vi.fn<() => unknown>(() => a.value);
+
+    effect(spy1);
+
+    a.value = obj;
+    expect(spy1).toBeCalledTimes(1);
+
+    const b = shallowRef(obj);
+    const spy2 = vi.fn<() => unknown>(() => b.value);
+
+    effect(spy2);
+
+    b.value = obj;
+    expect(spy2).toBeCalledTimes(1);
+  });
+
+  test('ref should preserve value shallow/readonly-ness', () => {
+    const original = {};
+    const r = reactive(original);
+    const s = shallowReactive(original);
+    const rr = readonly(original);
+    const a = ref(original);
+
+    expect(a.value).toBe(r);
+
+    a.value = s;
+    expect(a.value).toBe(s);
+    expect(a.value).not.toBe(r);
+
+    a.value = rr;
+    expect(a.value).toBe(rr);
+    expect(a.value).not.toBe(r);
   });
 
   test('should not trigger when setting the same raw object', () => {
@@ -313,10 +692,52 @@ describe('ref', () => {
     expect(shallowRef(a)).toBe(a);
   });
 
-  test('holds object values as-is', () => {
+  test('ref() holds an object as its reactive proxy; shallowRef() holds it as-is', () => {
     const value = { nested: { n: 1 } };
-    expect(ref(value).value).toBe(value);
+    const deep = ref(value);
+    expect(deep.value).toBe(reactive(value));
+    expect(isReactive(deep.value.nested)).toBe(true);
     expect(shallowRef(value).value).toBe(value);
+
+    // Writing the raw object again, or its proxy, changes nothing.
+    const spy = vi.fn<(value?: unknown) => void>();
+    effect(() => spy(deep.value));
+    deep.value = value;
+    deep.value = reactive(value);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  test('toRefs warns VIBE5004 in dev only, and not for a proxy', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    toRefs(reactive({ a: 1 }));
+    toRefs(readonly({ a: 1 }));
+    // An object that only claims the flags, as the props proxy does.
+    toRefs(Object.defineProperties({ a: 1 }, { __v_isReactive: { get: () => true } }));
+    toRefs(Object.defineProperties({ a: 1 }, { __v_isReadonly: { get: () => true } }));
+    expect(warn).not.toHaveBeenCalled();
+    vi.stubGlobal('__DEV__', false);
+    toRefs({ a: 1 });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  test('triggerRef(toRef(reactive(o), key)) re-runs the readers of the key', () => {
+    const raw = { k: { n: 1 }, other: 1 };
+    const o = reactive(raw);
+    const k = toRef(o, 'k');
+    const readsK = vi.fn<() => void>(() => void o.k);
+    const readsOther = vi.fn<() => void>(() => void o.other);
+    effect(readsK);
+    effect(readsOther);
+    toRaw(o).k.n = 2;
+    triggerRef(k);
+    expect(readsK).toHaveBeenCalledTimes(2);
+    expect(readsOther).toHaveBeenCalledTimes(1);
+    // A readonly proxy of a ref triggers the ref.
+    const s = shallowRef({ n: 1 });
+    const spy = vi.fn<() => void>(() => void s.value.n);
+    effect(spy);
+    triggerRef(readonly(s) as Ref);
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 
   test('uses Object.is: NaN does not trigger, -0 does', () => {
