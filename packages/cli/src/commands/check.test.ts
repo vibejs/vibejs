@@ -10,8 +10,8 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CatalogEntry } from '../catalog.gen.ts';
 import type { Ctx, ExecResult } from '../ctx.ts';
 import { exitCode, type CheckDiagnostic, type CheckResult } from '../output.ts';
@@ -39,13 +39,20 @@ function install(pkg: string, version: string, bin?: string): void {
  * Installs @vibejs-org/compiler as a link to a package that re-exports the workspace compiler's
  * source. The link target is outside node_modules, so Vitest transforms the TypeScript it loads.
  */
+const compilerSrc = fileURLToPath(new URL('../../../compiler/src/index.ts', import.meta.url));
+
 function installCompiler(): void {
-  const src = fileURLToPath(new URL('../../../compiler/src/index.ts', import.meta.url));
   write('compiler/package.json', JSON.stringify({ version: '0.0.0', exports: './index.js' }));
-  write('compiler/index.js', `export * from ${JSON.stringify(src.replaceAll('\\', '/'))};\n`);
+  write(
+    'compiler/index.js',
+    `export * from ${JSON.stringify(compilerSrc.replaceAll('\\', '/'))};\n`,
+  );
   mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
   symlinkSync(join(root, 'compiler'), join(root, 'node_modules/@vibejs-org/compiler'), 'junction');
 }
+
+// Transforming the compiler tree once, here, keeps it out of the first test's timeout.
+beforeAll(() => import(pathToFileURL(compilerSrc).href), 60_000);
 
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'vibejs-check-'));
@@ -386,6 +393,30 @@ describe('.vibe files', () => {
         'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
       ],
     });
+  });
+
+  it('reports a compile error that tsc did not (no mapper, or outside include) once, from vibejs', async () => {
+    write(
+      'src/Hello.vibe',
+      `<script setup lang="ts">\nconst id = 'a'\n</script>\n\n<template>\n  <div :id="id" :id="id"></div>\n</template>\n`,
+    );
+    const { r } = await run({ only: 'types' }, CLEAN);
+    expect(exitCode(r)).toBe(1);
+    expect(r.diagnostics).toHaveLength(1);
+    expect(r.diagnostics[0]).toMatchObject({
+      source: 'vibejs',
+      code: 'VIBE1102',
+      loc: 'src/Hello.vibe:6:17',
+      docs: 'https://vibejs.org/v0/errors/VIBE1102',
+      fixes: ['Remove the second `:id`.', 'Merge both values into one `:id` attribute.'],
+    });
+  });
+
+  it('skips a directory named *.vibe', async () => {
+    mkdirSync(join(root, 'src/assets.vibe'), { recursive: true });
+    uninstall('@vibejs-org/language-tools');
+    uninstall('@vibejs-org/compiler');
+    expect((await run({ only: 'types' }, CLEAN)).r.ok).toBe(true);
   });
 
   it('gives a mapper code outside the catalog only the suppression fix', async () => {
