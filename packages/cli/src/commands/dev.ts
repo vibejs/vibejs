@@ -1,4 +1,3 @@
-import { realpathSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { CommandDef } from '../command.ts';
 import { createDevLog, LOG_FILE, type LogEntry } from '../dev/log.ts';
@@ -44,7 +43,7 @@ export const dev: CommandDef<DevResult> = {
     }
     const found = fullstackRoot(ctx.cwd, 'dev');
     if (typeof found !== 'string') return { ...base, ok: false, error: envelopeError(found) };
-    const root = realpathSync(found);
+    const root = found;
 
     // NDJSON on stdout for agents (C9); text for people, after Vite's own output.
     const stream = values.json === true || ctx.agent.active;

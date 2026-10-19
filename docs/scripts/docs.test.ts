@@ -245,7 +245,9 @@ describe('cliPages', () => {
           summary: 'Generate a | b.',
           usage: 'vibejs generate <kind>',
           examples: ['vibejs g page home'],
-          options: [{ name: 'dry-run', type: 'boolean', short: 'n', description: 'Plan only.' }],
+          options: [
+            { name: 'dry-run', type: 'boolean', short: 'n', description: 'Plan only, in <n>s.' },
+          ],
           positionals: [
             { name: 'kind', required: true, values: ['page', 'component'] },
             { name: 'name', required: false },
@@ -258,7 +260,7 @@ describe('cliPages', () => {
     );
     const generate = pages.get('cli/generate')!;
     expect(generate).toContain('Aliases: `g`.');
-    expect(generate).toContain('| `--dry-run`, `-n` | boolean | Plan only. |');
+    expect(generate).toContain('| `--dry-run`, `-n` | boolean | Plan only, in &lt;n>s. |');
     expect(generate).toContain('| `kind` | yes | page, component |\n| `name` | no |  |');
   });
 });

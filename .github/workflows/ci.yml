@@ -75,6 +75,7 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           cache: true
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:integration
 
   docs:
@@ -100,6 +101,7 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
         env:
           pnpm_config_minimum_release_age: 0
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm typecheck
       - run: pnpm test --run
       - run: pnpm test:integration

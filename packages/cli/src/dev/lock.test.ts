@@ -114,9 +114,11 @@ describe('writeLock', () => {
 
   it('never exposes a partial file to a concurrent reader', async () => {
     // Another process rewrites a large lock 300 times while this one reads it.
-    const big = { ...lock(1), version: 'x'.repeat(256 * 1024) };
+    // The script builds the large value itself: a 256 KiB argument exceeds the OS limit.
+    const size = 256 * 1024;
     const script = `import { writeLock } from ${JSON.stringify(new URL('lock.ts', import.meta.url).href)};
-for (let i = 0; i < 300; i++) writeLock(${JSON.stringify(root)}, { ...${JSON.stringify(big)}, pid: i });`;
+const big = { ...${JSON.stringify(lock(1))}, version: 'x'.repeat(${size}) };
+for (let i = 0; i < 300; i++) writeLock(${JSON.stringify(root)}, { ...big, pid: i });`;
     const writer = spawn(process.execPath, ['--input-type=module', '-e', script]);
     const exited = new Promise((resolve) => writer.on('exit', resolve));
     const lengths: number[] = [];
@@ -133,7 +135,7 @@ for (let i = 0; i < 300; i++) writeLock(${JSON.stringify(root)}, { ...${JSON.str
     }
     expect(await exited).toBe(0);
     expect(lengths.length).toBeGreaterThan(0);
-    expect(new Set(lengths)).toEqual(new Set([big.version.length]));
+    expect(new Set(lengths)).toEqual(new Set([size]));
   });
 });
 

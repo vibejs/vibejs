@@ -23,7 +23,7 @@ const MODULES = fileURLToPath(new URL('../node_modules/', import.meta.url));
 export function copyApp(
   links: string[] = ['vite', '@vibejs-org/server', '@vibejs-org/contract'],
 ): string {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'vibejs-app-')));
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'vibejs-app-')));
   cpSync(new URL('fixtures/app', import.meta.url), root, { recursive: true });
   for (const pkg of links) {
     const link = join(root, 'node_modules', pkg);
