@@ -1,0 +1,24 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui';
+import TodoItem from './TodoItem.vibe';
+
+const { title, items = [] } = defineProps<{ title: string; items?: { id: number; text: string }[] }>();
+const count = ref(0);
+const emit = defineEmits<{ select: [id: number] }>();
+</script>
+
+<template>
+  <h1 :title="`${title} (${items.length})`">{{ title.toUpperCase() }} 😀 {{ count * 2 }}</h1>
+  <ul v-if="items.length > 0 && count !== -1">
+    <TodoItem
+      v-for="({ id, text }, index) in items"
+      :key="id"
+      :todo="{ id, text, index } as const"
+      @select="(value: number) => emit('select', value)"
+      @remove="count++; $emit('remove', $event)"
+    >
+      <template #default="{ done = false }">{{ done ? '✓' : text!.trim() }}</template>
+    </TodoItem>
+  </ul>
+  <p v-else @click="count = Math.max(0, count - 1)">{{ items.map((item) => item.text).join(', ') }}</p>
+</template>

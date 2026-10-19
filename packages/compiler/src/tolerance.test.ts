@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { contextOf, scopeOf, templateExpressions } from '../test/expr.ts';
 import { fixtures, locations } from '../test/walk.ts';
 import { LineIndex, type Position } from './diagnostics.ts';
+import { forEachIdentifier } from './expr/index.ts';
+import { parseParams, rewriteExpr } from './expr/rewrite.ts';
 import { parse } from './sfc/parse.ts';
 
 /** Parses `source` and lists every location of the descriptor, the AST or the diagnostics that is wrong. */
@@ -43,6 +46,36 @@ describe('tolerance', () => {
     const bad: string[] = [];
     for (let i = loc.start.offset; i < loc.end.offset; i++) {
       bad.push(...problems(source.slice(0, i) + source.slice(i + 1)));
+    }
+    expect(bad).toStrictEqual([]);
+  });
+
+  it.each(fixtures)('%s: every prefix of every template expression', (_, source) => {
+    const bad: string[] = [];
+    for (const { exp } of templateExpressions(source)) {
+      const start = exp.loc.start.offset;
+      for (let length = 0; length <= exp.content.length; length++) {
+        const content = exp.content.slice(0, length);
+        const end = start + length;
+        const cut = {
+          ...exp,
+          content,
+          loc: { ...exp.loc, source: exp.loc.source.slice(0, length) },
+        };
+        const ctx = contextOf(source);
+        rewriteExpr(cut, 'expression', scopeOf(), ctx);
+        rewriteExpr(cut, 'handler', scopeOf(), ctx);
+        parseParams(cut, ctx);
+        forEachIdentifier(content, start, (name, from, to) => {
+          if (from < start || to > end)
+            bad.push(`${JSON.stringify(content)}: ${name} at ${from}-${to}`);
+        });
+        for (const d of ctx.diagnostics) {
+          if (!(start <= d.start.offset && d.start.offset <= d.end.offset && d.end.offset <= end)) {
+            bad.push(`${JSON.stringify(content)}: ${d.code} at ${d.start.offset}-${d.end.offset}`);
+          }
+        }
+      }
     }
     expect(bad).toStrictEqual([]);
   });
