@@ -199,7 +199,11 @@ function normalizeStyle(value: unknown, into: Style = {}): Style {
   } else if (Array.isArray(value)) {
     for (const item of value) normalizeStyle(item, into);
   } else if (isObject(value)) {
-    for (const key in value) into[key.startsWith('--') ? key : hyphenate(key)] = value[key];
+    for (const key in value) {
+      // Vendor prefixes keep their leading dash: `WebkitLineClamp`, `msTransform`.
+      const name = key.startsWith('--') ? key : hyphenate(key);
+      into[/^(?:[A-Z]|ms[A-Z])/.test(key) ? `-${name}` : name] = value[key];
+    }
   }
   return into;
 }
@@ -242,7 +246,9 @@ export function setStyle(el: Element, v: unknown, fallthrough = false): void {
   const show = shown.get(el);
   if (show) {
     // v-show restores the bound display and keeps a hidden element hidden.
-    show.display = merged.display == null ? '' : style.display;
+    // An unchanged display keeps its value: the live one may be v-show's `none`.
+    if (merged.display !== applied.display)
+      show.display = merged.display == null ? '' : style.display;
     if (show.hidden) style.display = 'none';
   }
 }

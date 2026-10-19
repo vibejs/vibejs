@@ -771,4 +771,19 @@ describe('runtime-dom: v-show directive', () => {
     await nextTick();
     expect(el.style.display).toEqual('');
   });
+
+  test('a style update while hidden keeps the bound display to restore', async () => {
+    const color = ref('red');
+    const show = ref(true);
+    const el = document.createElement('div');
+    renderEffect(() => setStyle(el, { display: 'flex', color: color.value }));
+    applyVShow(el, () => show.value);
+    show.value = false;
+    await nextTick();
+    color.value = 'blue';
+    await nextTick();
+    show.value = true;
+    await nextTick();
+    expect(el.style.display).toBe('flex');
+  });
 });

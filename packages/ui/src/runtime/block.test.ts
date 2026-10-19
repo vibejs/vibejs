@@ -203,3 +203,24 @@ test('branches are owned by the enclosing scope', async () => {
   await nextTick();
   expect(runs).toEqual([0]);
 });
+
+test('a branch effect queued before the swap that disposes it does not run on stale state', async () => {
+  const user = ref<{ name: string } | null>({ name: 'a' });
+  const other = ref(0);
+  const error = vi.spyOn(console, 'error');
+  const frag = createIf(
+    () => user.value,
+    () => {
+      const text = document.createTextNode('');
+      renderEffect(() => {
+        text.data = `${other.value}${user.value!.name}`;
+      });
+      return text;
+    },
+  );
+  other.value++;
+  user.value = null;
+  await nextTick();
+  expect(error).not.toHaveBeenCalled();
+  expect(frag.nodes).toEqual([]);
+});

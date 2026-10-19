@@ -230,6 +230,17 @@ describe('runtime-dom: style patching', () => {
     expect(setProperty).toHaveBeenCalledWith('--theme', 'red', 'important');
   });
 
+  it('vendor-prefixed camelCase keys keep their leading dash', () => {
+    const el = document.createElement('div');
+    const setProperty = vi.spyOn(el.style, 'setProperty');
+    setStyle(el, { WebkitTransition: 'none', msTransform: 'none', marginRight: '1px' });
+    expect(setProperty.mock.calls.map(([name]) => name)).toEqual([
+      '-webkit-transition',
+      '-ms-transform',
+      'margin-right',
+    ]);
+  });
+
   it('multiple values', () => {
     const el = document.createElement('div');
     setStyle(el, { display: ['-webkit-box', '-ms-flexbox', 'flex'] });
