@@ -36,15 +36,22 @@
   },
   "dependencies": {
     "@vibejs-org/errors": "workspace:*",
+    "srvx": "catalog:",
     "std-env": "catalog:"
   },
   "devDependencies": {
+    "@vibejs-org/contract": "workspace:*",
+    "@vibejs-org/server": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:ts-next",
+    "vite": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "vite": "catalog:"
   },
   "engines": {
     "node": "^24.15.0 || >=26"

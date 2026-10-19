@@ -21,6 +21,8 @@ export interface Ctx {
   exec(file: string, args: string[], options: { cwd: string }): Promise<ExecResult>;
   out(s: string): void;
   err(s: string): void;
+  /** Resolves with the name of the first `SIGINT` or `SIGTERM` after the call. */
+  untilSignal(): Promise<string>;
 }
 
 /** `VIBEJS_AGENT=1` forces agent mode on, `VIBEJS_AGENT=0` off; otherwise std-env decides. */
@@ -49,5 +51,13 @@ export function nodeCtx(): Ctx {
       }),
     out: (s) => process.stdout.write(s),
     err: (s) => process.stderr.write(s),
+    untilSignal: () =>
+      new Promise((resolve) => {
+        const on = (signal: string) => {
+          process.off('SIGINT', on).off('SIGTERM', on);
+          resolve(signal);
+        };
+        process.once('SIGINT', on).once('SIGTERM', on);
+      }),
   };
 }

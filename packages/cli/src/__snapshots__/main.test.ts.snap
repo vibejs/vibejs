@@ -1,14 +1,18 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`command matrix > JSON: vibejs  exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]}]}"`;
+exports[`command matrix > JSON: vibejs  exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]},{"name":"dev","aliases":[],"summary":"Serve the UI and the backend on one port, restarting the backend on server changes.","usage":"vibejs dev [--port N]","examples":["vibejs dev","vibejs dev --port 5173"],"options":[{"name":"port","type":"string","description":"Listen on exactly this port (default: a free one from 5173)."}],"positionals":[]},{"name":"build","aliases":[],"summary":"Build the UI into ui/dist and the server into server/dist/main.js.","usage":"vibejs build","examples":["vibejs build"],"options":[],"positionals":[]},{"name":"errors","aliases":[],"summary":"List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.","usage":"vibejs errors [--limit N]","examples":["vibejs errors","vibejs errors --limit 5"],"options":[{"name":"limit","type":"string","description":"Show at most N runtime errors (default 20)."}],"positionals":[]},{"name":"logs","aliases":[],"summary":"Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.","usage":"vibejs logs [--limit N] [--level error|warn|info|debug] [--source vite|browser|server|vibejs] [--grep TEXT] [--since ISO|<n>s|<n>m|<n>h]","examples":["vibejs logs --level warn","vibejs logs --source server --since 5m"],"options":[{"name":"limit","type":"string","description":"Show at most N entries (default 50)."},{"name":"level","type":"string","description":"The lowest level shown: error, warn, info or debug."},{"name":"source","type":"string","description":"Only this source: vite, browser, server or vibejs."},{"name":"grep","type":"string","description":"Only messages that contain TEXT, ignoring case."},{"name":"since","type":"string","description":"Only entries since an ISO time or <n>s, <n>m, <n>h ago."}],"positionals":[]}]}"`;
 
-exports[`command matrix > JSON: vibejs --help exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]}]}"`;
+exports[`command matrix > JSON: vibejs --help exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]},{"name":"dev","aliases":[],"summary":"Serve the UI and the backend on one port, restarting the backend on server changes.","usage":"vibejs dev [--port N]","examples":["vibejs dev","vibejs dev --port 5173"],"options":[{"name":"port","type":"string","description":"Listen on exactly this port (default: a free one from 5173)."}],"positionals":[]},{"name":"build","aliases":[],"summary":"Build the UI into ui/dist and the server into server/dist/main.js.","usage":"vibejs build","examples":["vibejs build"],"options":[],"positionals":[]},{"name":"errors","aliases":[],"summary":"List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.","usage":"vibejs errors [--limit N]","examples":["vibejs errors","vibejs errors --limit 5"],"options":[{"name":"limit","type":"string","description":"Show at most N runtime errors (default 20)."}],"positionals":[]},{"name":"logs","aliases":[],"summary":"Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.","usage":"vibejs logs [--limit N] [--level error|warn|info|debug] [--source vite|browser|server|vibejs] [--grep TEXT] [--since ISO|<n>s|<n>m|<n>h]","examples":["vibejs logs --level warn","vibejs logs --source server --since 5m"],"options":[{"name":"limit","type":"string","description":"Show at most N entries (default 50)."},{"name":"level","type":"string","description":"The lowest level shown: error, warn, info or debug."},{"name":"source","type":"string","description":"Only this source: vite, browser, server or vibejs."},{"name":"grep","type":"string","description":"Only messages that contain TEXT, ignoring case."},{"name":"since","type":"string","description":"Only entries since an ISO time or <n>s, <n>m, <n>h ago."}],"positionals":[]}]}"`;
 
 exports[`command matrix > JSON: vibejs --version exits 0 > stdout 1`] = `"{"ok":true,"command":"version","version":"1.2.3"}"`;
 
-exports[`command matrix > JSON: vibejs -h exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]}]}"`;
+exports[`command matrix > JSON: vibejs -h exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]},{"name":"dev","aliases":[],"summary":"Serve the UI and the backend on one port, restarting the backend on server changes.","usage":"vibejs dev [--port N]","examples":["vibejs dev","vibejs dev --port 5173"],"options":[{"name":"port","type":"string","description":"Listen on exactly this port (default: a free one from 5173)."}],"positionals":[]},{"name":"build","aliases":[],"summary":"Build the UI into ui/dist and the server into server/dist/main.js.","usage":"vibejs build","examples":["vibejs build"],"options":[],"positionals":[]},{"name":"errors","aliases":[],"summary":"List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.","usage":"vibejs errors [--limit N]","examples":["vibejs errors","vibejs errors --limit 5"],"options":[{"name":"limit","type":"string","description":"Show at most N runtime errors (default 20)."}],"positionals":[]},{"name":"logs","aliases":[],"summary":"Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.","usage":"vibejs logs [--limit N] [--level error|warn|info|debug] [--source vite|browser|server|vibejs] [--grep TEXT] [--since ISO|<n>s|<n>m|<n>h]","examples":["vibejs logs --level warn","vibejs logs --source server --since 5m"],"options":[{"name":"limit","type":"string","description":"Show at most N entries (default 50)."},{"name":"level","type":"string","description":"The lowest level shown: error, warn, info or debug."},{"name":"source","type":"string","description":"Only this source: vite, browser, server or vibejs."},{"name":"grep","type":"string","description":"Only messages that contain TEXT, ignoring case."},{"name":"since","type":"string","description":"Only entries since an ISO time or <n>s, <n>m, <n>h ago."}],"positionals":[]}]}"`;
+
+exports[`command matrix > JSON: vibejs build exits 2 > stdout 1`] = `"{"ok":false,"command":"build","version":"1.2.3","error":{"code":"VIBE8201","message":"\`ui/index.html\` is missing; \`vibejs build\` expects \`ui/index.html\`, \`server/src/app.module.ts\` and \`server/src/main.ts\`.","docs":"https://vibejs.org/v0/errors/VIBE8201","fixes":["Run \`vibejs build\` from a project created with \`create-vibejs\`.","Create \`ui/index.html\` as in the project template."]}}"`;
 
 exports[`command matrix > JSON: vibejs check --only types exits 0 > stdout 1`] = `"{"ok":true,"command":"check","version":"1.2.3","durationMs":0,"steps":{"types":{"status":"passed","errors":0,"warnings":0,"ms":0},"lint":{"status":"skipped","errors":0,"warnings":0,"ms":0},"format":{"status":"skipped","errors":0,"warnings":0,"ms":0},"tests":{"status":"skipped","errors":0,"warnings":0,"ms":0,"passed":0,"failed":0,"skipped":0},"coverage":{"status":"skipped","errors":0,"warnings":0,"ms":0,"lines":0,"branches":0,"functions":0,"statements":0,"filesBelow100":0}},"diagnostics":[]}"`;
+
+exports[`command matrix > JSON: vibejs dev exits 2 > stdout 1`] = `"{"ok":false,"command":"dev","version":"1.2.3","error":{"code":"VIBE8201","message":"\`ui/index.html\` is missing; \`vibejs dev\` expects \`ui/index.html\`, \`server/src/app.module.ts\` and \`server/src/main.ts\`.","docs":"https://vibejs.org/v0/errors/VIBE8201","fixes":["Run \`vibejs dev\` from a project created with \`create-vibejs\`.","Create \`ui/index.html\` as in the project template."]}}"`;
 
 exports[`command matrix > JSON: vibejs docs -h exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]}]}"`;
 
@@ -19,6 +23,8 @@ exports[`command matrix > JSON: vibejs docs errors/VIBE8004 exits 0 > stdout 1`]
 exports[`command matrix > JSON: vibejs docs exits 2 > stdout 1`] = `"{"ok":false,"command":"docs","version":"1.2.3","next":["vibejs docs \\"unknown option\\""],"error":{"code":"VIBE8003","message":"Missing required input \`query\` for \`vibejs docs\`.","docs":"https://vibejs.org/v0/errors/VIBE8003","fixes":["Pass \`query\` as shown in \`vibejs docs --help\`.","Run the command from \`next\` in the JSON output."],"missing":[{"name":"query","example":"vibejs docs \\"unknown option\\""}]}}"`;
 
 exports[`command matrix > JSON: vibejs docs quokka exits 0 > stdout 1`] = `"{"ok":true,"command":"docs","version":"1.2.3","query":"quokka","mode":"search","hits":[{"path":"guide/quokka","title":"Quokka guide","score":6,"excerpt":"A quokka page."}]}"`;
+
+exports[`command matrix > JSON: vibejs errors exits 0 > stdout 1`] = `"{"ok":true,"command":"errors","version":"1.2.3","next":["vibejs dev"],"build":[],"runtime":[]}"`;
 
 exports[`command matrix > JSON: vibejs explain --help exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]}]}"`;
 
@@ -31,6 +37,10 @@ exports[`command matrix > JSON: vibejs explain VIBE8003 exits 0 > stdout 1`] = `
 exports[`command matrix > JSON: vibejs explain exits 2 > stdout 1`] = `"{"ok":false,"command":"explain","version":"1.2.3","next":["vibejs explain VIBE8003"],"error":{"code":"VIBE8003","message":"Missing required input \`code\` for \`vibejs explain\`.","docs":"https://vibejs.org/v0/errors/VIBE8003","fixes":["Pass \`code\` as shown in \`vibejs explain --help\`.","Run the command from \`next\` in the JSON output."],"missing":[{"name":"code","example":"vibejs explain VIBE8003"}]}}"`;
 
 exports[`command matrix > JSON: vibejs g exits 2 > stdout 1`] = `"{"ok":false,"command":"g","version":"1.2.3","next":["vibejs --help"],"error":{"code":"VIBE8004","message":"Unknown command or option \`g\`.","docs":"https://vibejs.org/v0/errors/VIBE8004","fixes":["Run \`vibejs --help\` to list the commands and their options.","Run the command from \`next\` in the JSON output."]}}"`;
+
+exports[`command matrix > JSON: vibejs logs --level fatal exits 2 > stdout 1`] = `"{"ok":false,"command":"logs","version":"1.2.3","next":["vibejs logs --help"],"error":{"code":"VIBE8004","message":"Unknown command or option \`--level fatal\`.","docs":"https://vibejs.org/v0/errors/VIBE8004","fixes":["Run \`vibejs --help\` to list the commands and their options.","Run the command from \`next\` in the JSON output."]},"entries":[]}"`;
+
+exports[`command matrix > JSON: vibejs logs --level warn exits 0 > stdout 1`] = `"{"ok":true,"command":"logs","version":"1.2.3","entries":[]}"`;
 
 exports[`command matrix > human: vibejs  exits 0 > output 1`] = `
 "vibejs 1.2.3
@@ -53,6 +63,32 @@ vibejs check [--only types,lint,format,test] [--fix] [--max N]
   --only  Run only these steps: types, lint, format, test.
   --fix  Apply lint fixes and format the files first.
   --max  Show at most N diagnostics (default 20).
+
+vibejs dev [--port N]
+  Serve the UI and the backend on one port, restarting the backend on server changes.
+  $ vibejs dev
+  $ vibejs dev --port 5173
+  --port  Listen on exactly this port (default: a free one from 5173).
+
+vibejs build
+  Build the UI into ui/dist and the server into server/dist/main.js.
+  $ vibejs build
+
+vibejs errors [--limit N]
+  List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.
+  $ vibejs errors
+  $ vibejs errors --limit 5
+  --limit  Show at most N runtime errors (default 20).
+
+vibejs logs [--limit N] [--level error|warn|info|debug] [--source vite|browser|server|vibejs] [--grep TEXT] [--since ISO|<n>s|<n>m|<n>h]
+  Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.
+  $ vibejs logs --level warn
+  $ vibejs logs --source server --since 5m
+  --limit  Show at most N entries (default 50).
+  --level  The lowest level shown: error, warn, info or debug.
+  --source  Only this source: vite, browser, server or vibejs.
+  --grep  Only messages that contain TEXT, ignoring case.
+  --since  Only entries since an ISO time or <n>s, <n>m, <n>h ago.
 
 Global options:
   --json  Print one JSON object (on by default in agent mode).
@@ -82,6 +118,32 @@ vibejs check [--only types,lint,format,test] [--fix] [--max N]
   --only  Run only these steps: types, lint, format, test.
   --fix  Apply lint fixes and format the files first.
   --max  Show at most N diagnostics (default 20).
+
+vibejs dev [--port N]
+  Serve the UI and the backend on one port, restarting the backend on server changes.
+  $ vibejs dev
+  $ vibejs dev --port 5173
+  --port  Listen on exactly this port (default: a free one from 5173).
+
+vibejs build
+  Build the UI into ui/dist and the server into server/dist/main.js.
+  $ vibejs build
+
+vibejs errors [--limit N]
+  List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.
+  $ vibejs errors
+  $ vibejs errors --limit 5
+  --limit  Show at most N runtime errors (default 20).
+
+vibejs logs [--limit N] [--level error|warn|info|debug] [--source vite|browser|server|vibejs] [--grep TEXT] [--since ISO|<n>s|<n>m|<n>h]
+  Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.
+  $ vibejs logs --level warn
+  $ vibejs logs --source server --since 5m
+  --limit  Show at most N entries (default 50).
+  --level  The lowest level shown: error, warn, info or debug.
+  --source  Only this source: vite, browser, server or vibejs.
+  --grep  Only messages that contain TEXT, ignoring case.
+  --since  Only entries since an ISO time or <n>s, <n>m, <n>h ago.
 
 Global options:
   --json  Print one JSON object (on by default in agent mode).
@@ -117,10 +179,44 @@ vibejs check [--only types,lint,format,test] [--fix] [--max N]
   --fix  Apply lint fixes and format the files first.
   --max  Show at most N diagnostics (default 20).
 
+vibejs dev [--port N]
+  Serve the UI and the backend on one port, restarting the backend on server changes.
+  $ vibejs dev
+  $ vibejs dev --port 5173
+  --port  Listen on exactly this port (default: a free one from 5173).
+
+vibejs build
+  Build the UI into ui/dist and the server into server/dist/main.js.
+  $ vibejs build
+
+vibejs errors [--limit N]
+  List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.
+  $ vibejs errors
+  $ vibejs errors --limit 5
+  --limit  Show at most N runtime errors (default 20).
+
+vibejs logs [--limit N] [--level error|warn|info|debug] [--source vite|browser|server|vibejs] [--grep TEXT] [--since ISO|<n>s|<n>m|<n>h]
+  Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.
+  $ vibejs logs --level warn
+  $ vibejs logs --source server --since 5m
+  --limit  Show at most N entries (default 50).
+  --level  The lowest level shown: error, warn, info or debug.
+  --source  Only this source: vite, browser, server or vibejs.
+  --grep  Only messages that contain TEXT, ignoring case.
+  --since  Only entries since an ISO time or <n>s, <n>m, <n>h ago.
+
 Global options:
   --json  Print one JSON object (on by default in agent mode).
   -h, --help  Describe the commands and their options.
   --version  Print the vibejs version.
+"
+`;
+
+exports[`command matrix > human: vibejs build exits 2 > output 1`] = `
+"[VIBE8201] \`ui/index.html\` is missing; \`vibejs build\` expects \`ui/index.html\`, \`server/src/app.module.ts\` and \`server/src/main.ts\`.
+  Fix: Run \`vibejs build\` from a project created with \`create-vibejs\`.
+  Fix: Create \`ui/index.html\` as in the project template.
+  Docs: https://vibejs.org/v0/errors/VIBE8201
 "
 `;
 
@@ -130,6 +226,14 @@ lint: skipped (0 errors, 0 warnings, 0 ms)
 format: skipped (0 errors, 0 warnings, 0 ms)
 tests: skipped (0 errors, 0 warnings, 0 ms, passed 0, failed 0, skipped 0)
 coverage: skipped (0 errors, 0 warnings, 0 ms, lines 0, branches 0, functions 0, statements 0, filesBelow100 0)
+"
+`;
+
+exports[`command matrix > human: vibejs dev exits 2 > output 1`] = `
+"[VIBE8201] \`ui/index.html\` is missing; \`vibejs dev\` expects \`ui/index.html\`, \`server/src/app.module.ts\` and \`server/src/main.ts\`.
+  Fix: Run \`vibejs dev\` from a project created with \`create-vibejs\`.
+  Fix: Create \`ui/index.html\` as in the project template.
+  Docs: https://vibejs.org/v0/errors/VIBE8201
 "
 `;
 
@@ -196,6 +300,12 @@ exports[`command matrix > human: vibejs docs quokka exits 0 > output 1`] = `
 "
 `;
 
+exports[`command matrix > human: vibejs errors exits 0 > output 1`] = `
+"Build errors: 0
+Runtime errors: 0
+"
+`;
+
 exports[`command matrix > human: vibejs explain --help exits 0 > output 1`] = `
 "vibejs 1.2.3
 
@@ -254,5 +364,19 @@ exports[`command matrix > human: vibejs g exits 2 > output 1`] = `
   Fix: Run the command from \`next\` in the JSON output.
   Docs: https://vibejs.org/v0/errors/VIBE8004
   Next: vibejs --help
+"
+`;
+
+exports[`command matrix > human: vibejs logs --level fatal exits 2 > output 1`] = `
+"[VIBE8004] Unknown command or option \`--level fatal\`.
+  Fix: Run \`vibejs --help\` to list the commands and their options.
+  Fix: Run the command from \`next\` in the JSON output.
+  Docs: https://vibejs.org/v0/errors/VIBE8004
+  Next: vibejs logs --help
+"
+`;
+
+exports[`command matrix > human: vibejs logs --level warn exits 0 > output 1`] = `
+"
 "
 `;

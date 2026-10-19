@@ -1,5 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "lib": ["es2024"], "types": ["node"] },
-  "references": [{ "path": "../errors" }]
+  "compilerOptions": { "lib": ["es2024"], "types": ["node"], "rootDir": "." },
+  "references": [{ "path": "../contract" }, { "path": "../errors" }, { "path": "../server" }],
+  "include": ["src", "test/*.ts", "package.json"]
 }

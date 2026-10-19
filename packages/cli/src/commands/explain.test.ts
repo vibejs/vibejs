@@ -12,6 +12,7 @@ const ctx: Ctx = {
   exec: vi.fn<Ctx['exec']>(),
   out: vi.fn<Ctx['out']>(),
   err: vi.fn<Ctx['err']>(),
+  untilSignal: vi.fn<Ctx['untilSignal']>(),
 };
 const run = (code: string) => explain.run({ values: {}, positionals: [code] }, ctx);
 
