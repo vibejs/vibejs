@@ -69,6 +69,13 @@ describe('compileStyle', () => {
     ['VIBE4005', '.a { color: red; }\n\n/* :deep */ .b :deep {}', '3:16-3:21'],
     ['VIBE4005', '.a /* x */ :deep {}', '1:12-1:17'],
     ['VIBE4005', '.a,\n.b :deep(\n  .c,\n  .d\n),\n.e { color: red; }', '2:4-5:2'],
+    ['VIBE4005', '[x="a\\\nb"] .c\n:deep {}', '3:1-3:6'],
+    ['VIBE4005', '.a :global(:is(.b), [x="\\")"]) {}', '1:4-1:31'],
+    ['VIBE4005', '.a :deep(.b\\), /* ) */ .c) {}', '1:4-1:27'],
+    ['VIBE4005', ':deep( /* x */ ) {}', '1:1-1:17'],
+    ['VIBE4005', ':global(/*x*/) {}', '1:1-1:15'],
+    ['VIBE4005', '\uFEFF.a :deep {}', '1:5-1:10'],
+    ['VIBE4001', '\uFEFF.a {', '1:2-1:2'],
   ])('reports %s in %j at %s', (code, css, at) => {
     const result = compileStyle(css, options);
     expect(result.diagnostics.map((d) => [d.code, range(d)])).toEqual([[code, at]]);

@@ -8,9 +8,10 @@
 // - The `::v-deep`, `::v-slotted`, `:slotted` and `::v-global` pseudos, the `>>>` and `/deep/`
 //   combinators and the argument-less `::v-deep` combinator form are deleted: the parser rejects
 //   them before a style block reaches this plugin.
-// - A `:deep` or `:global` without exactly one non-empty selector argument is passed to
-//   `onMalformed` with its offsets in the input CSS, and its rule is left as it is. Selectors are
-//   checked through the rule, so a selector syntax error is a CssSyntaxError at its position.
+// - A `:deep` or `:global` without exactly one non-empty selector argument (an argument of only
+//   comments is empty) is passed to `onMalformed` with its offsets in the input CSS, and its rule
+//   is left as it is. Selectors are checked through the rule, so a selector syntax error is a
+//   CssSyntaxError at its position.
 // - An empty selector, such as the middle one of `.a, , .b` or the argument of `:is()`, is left
 //   as it is, where upstream throws a TypeError.
 // - Types for erasableSyntaxOnly and isolatedDeclarations. The deep-rule marker is a WeakSet of
@@ -115,20 +116,36 @@ function reportMalformed(rule: Rule, onMalformed: OnMalformed): boolean {
     root.walkPseudos((pseudo) => {
       const { value, nodes } = pseudo;
       if (value !== ':deep' && value !== ':global') return;
-      if (nodes.length === 1 && nodes[0].nodes.length > 0) return;
+      // A comment is not a selector: `:deep(/* x */)` has an empty argument.
+      if (nodes.length === 1 && nodes[0].nodes.some((n) => n.type !== 'comment')) return;
       malformed = true;
-      // `source.end` is the 1-based line and column of the last character in `selector`.
-      const { line, column } = pseudo.source!.end!;
-      let lineStart = 0;
-      for (let l = 1; l < line; l++) lineStart = selector.indexOf('\n', lineStart) + 1;
       const offset = rule.source!.start!.offset;
-      onMalformed(value, offset + pseudo.sourceIndex, offset + lineStart + column);
+      const start = pseudo.sourceIndex;
+      onMalformed(value, offset + start, offset + pseudoEnd(selector, start + value.length));
     });
   }).processSync(
     { selector, error: (message, options) => rule.error(message, options) },
     { updateSelector: false },
   );
   return malformed;
+}
+
+/**
+ * The end of a pseudo whose name ends at `i` in `text`: `i` itself, or the offset after the `)`
+ * that closes its argument. The parser's `source.end` is not used, because it miscounts lines
+ * after a newline escaped in a quoted string. `text` parsed, so its parentheses are balanced.
+ */
+function pseudoEnd(text: string, i: number): number {
+  if (text[i] !== '(') return i;
+  for (let depth = 0; ; i++) {
+    const c = text[i];
+    if (c === '\\') i++;
+    else if (c === '"' || c === "'") {
+      for (i++; text[i] !== c; i++) if (text[i] === '\\') i++;
+    } else if (text.startsWith('/*', i)) i = text.indexOf('*/', i + 2) + 1;
+    else if (c === '(') depth++;
+    else if (c === ')' && --depth === 0) return i + 1;
+  }
 }
 
 function rewriteSelector(

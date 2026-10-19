@@ -25,8 +25,12 @@ export function compileStyle(
   const { filename, id } = options;
   const index = new LineIndex(css);
   const diagnostics: Diagnostic[] = [];
+  // postcss drops a leading BOM, so its offsets are one short of the ones in `css`.
+  const bom = css.charCodeAt(0) === 0xfeff ? 1 : 0;
   const report = (error: VibeError, start: number, end: number) => {
-    diagnostics.push(toDiagnostic(error, filename, index.position(start), index.position(end)));
+    diagnostics.push(
+      toDiagnostic(error, filename, index.position(start + bom), index.position(end + bom)),
+    );
   };
   try {
     const plugin = pluginScoped(id, (escape, start, end) => {

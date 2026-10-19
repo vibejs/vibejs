@@ -2,10 +2,10 @@
 //
 // The `SFC scoped CSS` cases plus the universal selector case, run through compileStyle with the
 // id `test`. Upstream trims the whitespace around rules; this output keeps the source whitespace.
-// The `::v-deep(x)` cases are written as `:deep(x)`. Dropped: the `::v-slotted` and `::v-global`
-// tests, the `::v-deep`, `:slotted`, `::v-global` expectations inside the kept tests, the
-// deprecated `::v-deep`, `>>>` and `/deep/` combinator tests (the parser rejects all of these),
-// and the CSS modules and preprocessor tests (not part of compileStyle).
+// The `::v-deep(x)` cases are written as `:deep(x)` and the `::v-global(x)` cases as `:global(x)`.
+// Dropped: the `::v-slotted` test, the `::v-slotted` and `:slotted` expectations inside the kept
+// tests, the deprecated `::v-deep`, `>>>` and `/deep/` combinator tests (the parser rejects all of
+// these), and the CSS modules and preprocessor tests (not part of compileStyle).
 import { describe, expect, test } from 'vitest';
 import { compileStyle } from './compileStyle.ts';
 
