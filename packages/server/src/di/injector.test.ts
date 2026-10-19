@@ -196,11 +196,22 @@ describe('provider kinds', () => {
     ['two kinds', { provide: Name, useValue: 1, useFactory: () => 2 }],
     ['null', null],
     ['a string', 'Db'],
+    ['an arrow function', () => 1],
+    ['an undefined provide', { provide: undefined, useValue: 1 }],
+    ['a string provide', { provide: 'name', useValue: 1 }],
+    ['an undefined useClass', { provide: Name, useClass: undefined }],
+    ['an arrow function as useClass', { provide: Name, useClass: () => 1 }],
+    ['an undefined useFactory', { provide: Name, useFactory: undefined }],
+    ['an undefined useExisting', { provide: Name, useExisting: undefined }],
   ])('throws VIBE9107 for %s', (_, provider) => {
-    const { scope: self } = scope('AppModule', []);
+    const { scope: self } = scope('AppModule > UsersModule', []);
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- invalid providers on purpose
     expect(() => providerRecord(provider as Provider, self)).toThrow(
-      expect.objectContaining({ code: 'VIBE9107', fixes: nonEmpty }),
+      expect.objectContaining({
+        code: 'VIBE9107',
+        args: { module: 'AppModule > UsersModule' },
+        fixes: nonEmpty,
+      }),
     );
   });
 });
@@ -408,9 +419,14 @@ describe('singletons', () => {
   });
 });
 
-/** Providers whose constructors and factories record their order into `log`. */
+/**
+ * Providers whose constructors and factories record their order into `log`. Each group has
+ * members with no dependency between them, listed in an order that no dependency forces.
+ */
 function recorded(log: string[]): Provider[] {
   const Mixed = token<string>('mixed');
+  const Extra = token<string>('extra');
+  const Quick = token<string>('quick');
   const Slow = token<string>('slow');
   const Fast = token<string>('fast');
   const Port = token<number>('port');
@@ -425,6 +441,11 @@ function recorded(log: string[]): Provider[] {
       log.push('Dep');
     }
   }
+  class Helper {
+    constructor() {
+      log.push('Helper');
+    }
+  }
   class Last {
     constructor() {
       log.push('Last');
@@ -433,6 +454,7 @@ function recorded(log: string[]): Provider[] {
   return [
     First,
     { provide: Mixed, useFactory: () => log.push('Mixed'), inject: [Dep] },
+    { provide: Quick, useFactory: () => log.push('Quick') },
     {
       provide: Slow,
       useFactory: async () => {
@@ -443,12 +465,14 @@ function recorded(log: string[]): Provider[] {
       },
     },
     Last,
+    { provide: Extra, useFactory: () => log.push('Extra'), inject: [Helper] },
     {
       provide: Fast,
       useFactory: (port: number) => log.push(`Fast ${port}`),
       inject: [Port, Slow],
     },
     { provide: Port, useValue: 3000 },
+    Helper,
     Dep,
   ];
 }
@@ -465,7 +489,18 @@ describe('phases', () => {
     const second: string[] = [];
     await boot('AppModule', recorded(first));
     await boot('AppModule', recorded(second));
-    expect(first).toEqual(['Slow start', 'Slow end', 'Fast 3000', 'Dep', 'Mixed', 'First', 'Last']);
+    expect(first).toEqual([
+      'Quick',
+      'Slow start',
+      'Slow end',
+      'Fast 3000',
+      'Dep',
+      'Mixed',
+      'Helper',
+      'Extra',
+      'First',
+      'Last',
+    ]);
     expect(second).toEqual(first);
   });
 
@@ -485,8 +520,8 @@ describe('phases', () => {
       fixes: nonEmpty,
     });
     expect(error).toMatchInlineSnapshot(`
-      [VibeError: [VIBE9106] Dep needs slow before its factory has settled.
-        Fix: Add slow to the factory's \`inject\` list, before Dep.
+      [VibeError: [VIBE9106] Dep needs slow before the factory of slow has settled.
+        Fix: Add slow to the \`inject\` list of the factory that is being built, so that slow settles first.
         Docs: https://vibejs.org/v0/errors/VIBE9106]
     `);
     const fixed = await boot('AppModule', [early([Slow, Dep]), slow, Dep, Other]);
@@ -498,7 +533,7 @@ describe('phases', () => {
     expect(() => get(self, Name)).toThrow(
       expect.objectContaining({
         code: 'VIBE9106',
-        args: { token: 'name', requester: 'AppModule' },
+        args: { token: 'name', requester: 'get()' },
       }),
     );
   });

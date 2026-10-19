@@ -7,8 +7,8 @@ const MESSAGES = {
   VIBE9103: ["Circular dependency in {module}: {cycle}.","Move the part that both providers need into a third provider and inject it in both."],
   VIBE9104: ["The class {token} declares constructor parameters, but the container creates providers with no arguments.","Replace each constructor parameter with an `inject()` field, such as `private db = inject(Db)`."],
   VIBE9105: ["Creating {token} in {module} failed.","Read the `cause` of this error and fix the constructor or factory of {token}."],
-  VIBE9106: ["{requester} needs {token} before its factory has settled.","Add {token} to the factory's `inject` list, before {requester}."],
-  VIBE9107: ["A provider must be a class or an object with `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`.","List the class itself, or set `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`."],
+  VIBE9106: ["{requester} needs {token} before the factory of {token} has settled.","Add {token} to the `inject` list of the factory that is being built, so that {token} settles first."],
+  VIBE9107: ["A provider in {module} is neither a class nor an object with a token in `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`.","List the class itself, or set `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

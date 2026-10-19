@@ -8,6 +8,7 @@ import {
   type Injector,
   type Provider,
 } from '../index.ts';
+import type { ProviderRecord, Scope } from './injector.ts';
 
 class Db {}
 abstract class Repo {
@@ -54,3 +55,7 @@ expectTypeOf(WithParams).toExtend<Provider>();
 expectTypeOf({ provide: Db, useClass: WithParams }).toExtend<Provider>();
 // @ts-expect-error an abstract class cannot be constructed as a provider
 expectTypeOf(Repo).toExtend<Provider>();
+
+declare const scope: Scope;
+// @ts-expect-error only providerRecord() creates a ProviderRecord
+expectTypeOf({ token: Db, scope }).toExtend<ProviderRecord>();

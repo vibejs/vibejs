@@ -1,4 +1,3 @@
-// oxlint-disable typescript/no-unsafe-type-assertion -- providerRecord() creates every record, and a record holds a value of its token's type
 import { isVibeError } from '@vibejs-org/errors';
 import { vibeError } from '../errors.gen.ts';
 import { tokenName, type Token } from './token.ts';
@@ -31,8 +30,11 @@ export interface Scope {
   find(token: Token<unknown>): ProviderRecord | undefined;
 }
 
-/** One provider of one scope; it holds a single instance. */
+const created: unique symbol = Symbol('ProviderRecord');
+
+/** One provider of one scope; it holds a single instance. Only `providerRecord()` creates one. */
 export interface ProviderRecord {
+  readonly [created]: true;
   readonly token: Token<unknown>;
   readonly scope: Scope;
 }
@@ -78,6 +80,7 @@ export function inject<T>(token: Token<T>, options?: InjectOptions): T | undefin
     }
   }
   const rec = context.scope.find(token);
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- providerRecord() creates every record, and a record holds a value of its token's type
   if (rec) return resolveSync(rec as Rec, context.chain) as T;
   if (options) return undefined;
   throw missing(context.scope, token, context.chain);
@@ -88,35 +91,49 @@ export function runInInjectionContext<T>(injector: Injector, fn: () => T): T {
   return within({ injector }, fn);
 }
 
-const KINDS = ['useClass', 'useValue', 'useFactory', 'useExisting'];
+const isToken = (value: unknown): boolean =>
+  typeof value === 'function' || (typeof value === 'object' && value !== null);
+// Arrow functions, async functions and methods have no prototype, so `new` cannot call them.
+const isClass = (value: unknown): boolean =>
+  typeof value === 'function' && value.prototype !== undefined;
+
+const KINDS: Record<string, (value: unknown) => boolean> = {
+  useClass: isClass,
+  useValue: () => true,
+  useFactory: (value) => typeof value === 'function',
+  useExisting: isToken,
+};
+
+function isProvider(value: unknown): boolean {
+  if (typeof value === 'function') return isClass(value);
+  if (typeof value !== 'object' || value === null) return false;
+  const kinds = Object.entries(KINDS).filter(([kind]) => kind in value);
+  return (
+    isToken(Reflect.get(value, 'provide')) &&
+    kinds.length === 1 &&
+    kinds.every(([kind, valid]) => valid(Reflect.get(value, kind)))
+  );
+}
 
 /** Validates one provider entry and turns it into a record declared in `scope`. */
 export function providerRecord(provider: Provider, scope: Scope): ProviderRecord {
+  if (!isProvider(provider)) throw vibeError('VIBE9107', { module: scope.path });
   if (typeof provider === 'function') return classRecord(provider, provider, scope);
-  if (!isProviderObject(provider)) throw vibeError('VIBE9107');
   const { provide: token } = provider;
   if ('useClass' in provider) return classRecord(token, provider.useClass, scope);
+  const base = { [created]: true, token, scope } as const;
   const rec: Rec =
     'useValue' in provider
-      ? { token, scope, deps: [], done: true, value: provider.useValue }
+      ? { ...base, deps: [], done: true, value: provider.useValue }
       : 'useExisting' in provider
-        ? { token, scope, factory: (x: never) => x, deps: [provider.useExisting], done: false }
-        : { token, scope, factory: provider.useFactory, deps: provider.inject ?? [], done: false };
+        ? { ...base, factory: (x: never) => x, deps: [provider.useExisting], done: false }
+        : { ...base, factory: provider.useFactory, deps: provider.inject ?? [], done: false };
   return rec;
-}
-
-function isProviderObject(value: unknown): boolean {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'provide' in value &&
-    KINDS.filter((kind) => kind in value).length === 1
-  );
 }
 
 function classRecord(token: Token<unknown>, cls: new () => unknown, scope: Scope): Rec {
   if (cls.length > 0) throw vibeError('VIBE9104', { token: tokenName(cls) });
-  return { token, scope, cls, deps: [], done: false };
+  return { [created]: true, token, scope, cls, deps: [], done: false };
 }
 
 /**
@@ -124,16 +141,19 @@ function classRecord(token: Token<unknown>, cls: new () => unknown, scope: Scope
  * creates the classes, each in the caller's order. Dependencies are built on demand.
  */
 export async function instantiate(records: readonly ProviderRecord[]): Promise<void> {
-  const factories = (records as readonly Rec[]).filter((rec) => rec.factory);
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- providerRecord() creates every record
+  const recs = records as readonly Rec[];
+  const factories = recs.filter((rec) => rec.factory);
   const classFree = factories.filter((rec) => !rec.deps.some((dep) => typeof dep === 'function'));
   for (const rec of new Set([...classFree, ...factories])) await resolveAsync(rec, []);
-  for (const rec of records as readonly Rec[]) resolveSync(rec, []);
+  for (const rec of recs) resolveSync(rec, []);
 }
 
 /** The instance of `token` as seen from `scope`. */
 export function get<T>(scope: Scope, token: Token<T>): T {
   const rec = scope.find(token);
   if (!rec) throw missing(scope, token, []);
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- providerRecord() creates every record, and a record holds a value of its token's type
   return resolveSync(rec as Rec, []) as T;
 }
 
@@ -170,7 +190,7 @@ function resolveSync(rec: Rec, chain: readonly Rec[]): unknown {
     const requester = chain.at(-1);
     throw vibeError('VIBE9106', {
       token: name(rec),
-      requester: requester ? name(requester) : rec.scope.path,
+      requester: requester ? name(requester) : 'get()',
     });
   }
   try {
@@ -191,9 +211,11 @@ async function resolveAsync(rec: Rec, chain: readonly Rec[]): Promise<unknown> {
     for (const dep of rec.deps) {
       const found = rec.scope.find(dep);
       if (!found) throw missing(rec.scope, dep, next);
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- providerRecord() creates every record
       args.push(await resolveAsync(found as Rec, next));
     }
     rec.value = await within({ scope: rec.scope, chain: next }, () =>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the deps match the factory's parameters
       factory(...(args as never[])),
     );
   } catch (error) {

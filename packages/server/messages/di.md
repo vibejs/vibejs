@@ -72,19 +72,19 @@ The constructor or the factory of the provider threw, or the factory returned a 
 
 ## VIBE9106: Async provider not ready
 
-> {requester} needs {token} before its factory has settled.
+> {requester} needs {token} before the factory of {token} has settled.
 
 All factories are awaited before any other class is created, so a class built earlier on behalf of a factory can only inject factories that have already settled.
 
 ### Fix
 
-- Add {token} to the factory's `inject` list, before {requester}.
+- Add {token} to the `inject` list of the factory that is being built, so that {token} settles first.
 
 ## VIBE9107: Invalid provider
 
-> A provider must be a class or an object with `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`.
+> A provider in {module} is neither a class nor an object with a token in `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`.
 
-A provider entry is either a class with no constructor parameters or an object that names the token in `provide` and says how to create its value.
+A provider entry is either a class with no constructor parameters or an object that names the token in `provide` and says how to create its value: `useClass` takes a class, `useFactory` a function and `useExisting` a token.
 
 ### Fix
 
