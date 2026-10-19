@@ -334,7 +334,8 @@ export function main(root: string): number {
       }
     }
 
-    if (dir !== '.') {
+    // An example consumes its workspace dependencies' dist, so it references only its own projects.
+    if (dir !== '.' && !dir.startsWith('examples/')) {
       const workspaceDeps = Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })
         .filter(([, spec]) => spec.startsWith('workspace:'))
         .map(([name]) => posix.relative(dir, dirOf.get(name)!));

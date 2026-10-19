@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2024", "dom"],
+    "types": ["node", "vitest"],
+    "rootDir": ".",
+    "outDir": "${configDir}/.tsbuild/test",
+    "tsBuildInfoFile": "${configDir}/.tsbuild/test.tsbuildinfo"
+  },
+  // The mapper emits no declarations, so the test project type-checks ui/src itself.
+  "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }],
+  "include": ["test", "ui/src"],
+  "references": [{ "path": "contracts" }, { "path": "server" }, { "path": "ui" }]
+}
