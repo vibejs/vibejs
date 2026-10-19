@@ -7,7 +7,7 @@ import type { ShallowRef } from '../reactivity/ref.ts';
 // oxlint-disable-next-line typescript/no-empty-interface, typescript/no-empty-object-type -- augmentable
 export interface Register {}
 
-/** Any routes: names are `string` and params are loose. */
+/** Any routes: names are `string` and params are loose. The router internals use the `Any` types. */
 type AnyRoutes = readonly RouteRecordRaw[];
 // oxlint-disable-next-line typescript/no-unnecessary-type-arguments -- the default is circular here
 type RegisteredRouter = Register extends { router: infer T } ? T : Router<AnyRoutes>;
@@ -48,8 +48,8 @@ export interface RouteRecordNormalized {
 }
 
 /** An absent optional param is a missing key. */
-type AnyParams = Record<string, string | string[]>;
-type AnyParamsRaw = Record<
+export type AnyParams = Record<string, string | string[]>;
+export type AnyParamsRaw = Record<
   string,
   string | number | readonly (string | number)[] | null | undefined
 >;
@@ -101,34 +101,41 @@ type ParamName<S extends string> = S extends `:${infer N}(${string}`
     : never;
 type Flat<T> = { [K in keyof T]: T[K] };
 
+/** A route without params takes no keys. */
+type NoParams = Record<string, never>;
+
 /** The params of `route.params`. */
 type ParamsOf<P> = string extends P
   ? AnyParams
   : P extends string
-    ? Flat<
-        {
-          [
-            S in ParamSegments<P> as Modifier<S> extends '?' ? never : ParamName<S>
-          ]: Modifier<S> extends '' ? string : string[];
-        } & { [S in ParamSegments<P> as Modifier<S> extends '?' ? ParamName<S> : never]?: string }
-      >
+    ? [ParamSegments<P>] extends [never]
+      ? NoParams
+      : Flat<
+          {
+            [
+              S in ParamSegments<P> as Modifier<S> extends '?' ? never : ParamName<S>
+            ]: Modifier<S> extends '' ? string : string[];
+          } & { [S in ParamSegments<P> as Modifier<S> extends '?' ? ParamName<S> : never]?: string }
+        >
     : never;
 
 /** The params of a location to navigate to. */
 type ParamsRawOf<P> = string extends P
   ? AnyParamsRaw
   : P extends string
-    ? Flat<
-        {
-          [
-            S in ParamSegments<P> as Modifier<S> extends '' | '+' ? ParamName<S> : never
-          ]: Modifier<S> extends '' ? string | number : readonly (string | number)[];
-        } & {
-          [
-            S in ParamSegments<P> as Modifier<S> extends '?' | '*' ? ParamName<S> : never
-          ]?: Modifier<S> extends '?' ? string | number | null : readonly (string | number)[];
-        }
-      >
+    ? [ParamSegments<P>] extends [never]
+      ? NoParams
+      : Flat<
+          {
+            [
+              S in ParamSegments<P> as Modifier<S> extends '' | '+' ? ParamName<S> : never
+            ]: Modifier<S> extends '' ? string | number : readonly (string | number)[];
+          } & {
+            [
+              S in ParamSegments<P> as Modifier<S> extends '?' | '*' ? ParamName<S> : never
+            ]?: Modifier<S> extends '?' ? string | number | null : readonly (string | number)[];
+          }
+        >
     : never;
 
 /** The route names; `string` without a registered router. */
@@ -167,7 +174,7 @@ export type RouteLocationOf<
   R extends AnyRoutes = RegisteredRoutes,
 > = BaseLocation<N, RouteParams<N, R>, R>;
 
-type AnyLocation = BaseLocation<string | undefined, AnyParams, AnyRoutes>;
+export type AnyLocation = BaseLocation<string | undefined, AnyParams, AnyRoutes>;
 
 /** A union by name, narrowed by `route.name === 'user'`; `name` is `undefined` without a named match. */
 export type RouteLocation<R extends AnyRoutes = RegisteredRoutes> =
@@ -183,7 +190,7 @@ interface LocationOptions {
   replace?: boolean;
 }
 
-type AnyLocationRaw =
+export type AnyLocationRaw =
   | string
   | (LocationOptions & { path: string })
   | (LocationOptions & { name: string; params?: AnyParamsRaw })
@@ -208,8 +215,11 @@ export type RouteLocationRaw<R extends AnyRoutes = RegisteredRoutes> =
                 : { params: RouteParamsRaw<N, R> });
           }[RouteName<R>];
 
-type AnyGuardResult = void | boolean | AnyLocationRaw;
-type AnyGuard = (to: AnyLocation, from: AnyLocation) => AnyGuardResult | Promise<AnyGuardResult>;
+export type AnyGuardResult = void | boolean | AnyLocationRaw;
+export type AnyGuard = (
+  to: AnyLocation,
+  from: AnyLocation,
+) => AnyGuardResult | Promise<AnyGuardResult>;
 
 export type NavigationGuardResult<R extends AnyRoutes = RegisteredRoutes> =
   | void
@@ -220,16 +230,16 @@ export type NavigationGuard<R extends AnyRoutes = RegisteredRoutes> = (
   from: RouteLocation<R>,
 ) => NavigationGuardResult<R> | Promise<NavigationGuardResult<R>>;
 
-export interface NavigationFailure extends Error {
+export interface NavigationFailure<R extends AnyRoutes = RegisteredRoutes> extends Error {
   readonly type: 'aborted' | 'cancelled' | 'duplicated';
-  readonly to: RouteLocation;
-  readonly from: RouteLocation;
+  readonly to: RouteLocation<R>;
+  readonly from: RouteLocation<R>;
 }
 
 export interface Router<R extends AnyRoutes = RegisteredRoutes> {
   readonly currentRoute: Readonly<ShallowRef<RouteLocation<R>>>;
-  push(to: RouteLocationRaw<R>): Promise<NavigationFailure | undefined>;
-  replace(to: RouteLocationRaw<R>): Promise<NavigationFailure | undefined>;
+  push(to: RouteLocationRaw<R>): Promise<NavigationFailure<R> | undefined>;
+  replace(to: RouteLocationRaw<R>): Promise<NavigationFailure<R> | undefined>;
   back(): void;
   forward(): void;
   go(delta: number): void;
@@ -238,7 +248,7 @@ export interface Router<R extends AnyRoutes = RegisteredRoutes> {
   beforeEach(guard: NavigationGuard<R>): () => void;
   beforeResolve(guard: NavigationGuard<R>): () => void;
   afterEach(
-    hook: (to: RouteLocation<R>, from: RouteLocation<R>, failure?: NavigationFailure) => void,
+    hook: (to: RouteLocation<R>, from: RouteLocation<R>, failure?: NavigationFailure<R>) => void,
   ): () => void;
   onError(
     handler: (error: unknown, to: RouteLocation<R>, from: RouteLocation<R>) => void,
@@ -246,6 +256,9 @@ export interface Router<R extends AnyRoutes = RegisteredRoutes> {
   isReady(): Promise<void>;
   getRoutes(): readonly RouteRecordNormalized[];
 }
+
+// oxlint-disable-next-line typescript/no-unnecessary-type-arguments -- the default is the registered routes
+export type AnyRouter = Router<AnyRoutes>;
 
 export interface RouterHistory {
   readonly base: string;

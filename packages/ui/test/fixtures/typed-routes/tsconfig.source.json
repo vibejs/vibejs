@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "customConditions": ["vibejs-source"] },
+  "include": ["*.ts", "../../../src/globals.d.ts"]
+}

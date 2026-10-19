@@ -2,17 +2,17 @@ import { vibeError } from '../errors.gen.ts';
 import { warn } from '../warn.ts';
 import { buildPath, comparePaths, matchPath, parsePath, type PathParser } from './path.ts';
 import type {
-  NavigationGuard,
+  AnyGuard,
+  AnyParams,
+  AnyParamsRaw,
   RouteMeta,
-  RouteParams,
-  RouteParamsRaw,
   RouteRecordNormalized,
   RouteRecordRaw,
 } from './types.ts';
 
 export interface MatchedRoute {
   name: string | undefined;
-  params: RouteParams;
+  params: AnyParams;
   matched: readonly RouteRecordNormalized[];
   meta: RouteMeta;
 }
@@ -21,7 +21,7 @@ export interface Matcher {
   /** Matches an encoded path; no match warns VIBE7106 and gives `matched: []`. */
   resolvePath(path: string): MatchedRoute;
   /** Throws VIBE7105 for an unknown name. */
-  resolveName(name: string, params: RouteParamsRaw): MatchedRoute & { path: string };
+  resolveName(name: string, params: AnyParamsRaw): MatchedRoute & { path: string };
   /** Every record, in match order. */
   readonly routes: readonly RouteRecordNormalized[];
 }
@@ -54,13 +54,13 @@ export function checkOptions(options: object, allowed: readonly string[], where:
 }
 
 /** Guards return a result instead of calling a third `next` argument (VIBE7107). */
-export function checkGuard(guard: NavigationGuard): void {
+export function checkGuard(guard: AnyGuard): void {
   if (guard.length >= 3) {
     throw vibeError('VIBE7107', { guard: guard.name || 'anonymous', count: guard.length });
   }
 }
 
-function located(record: RouteRecordNormalized | undefined, params: RouteParams): MatchedRoute {
+function located(record: RouteRecordNormalized | undefined, params: AnyParams): MatchedRoute {
   const matched: RouteRecordNormalized[] = [];
   for (let r = record; r; r = r.parent) matched.unshift(r);
   const meta: RouteMeta = Object.assign({}, ...matched.map((r) => r.meta));

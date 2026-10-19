@@ -55,8 +55,9 @@ expectTypeOf<RouteParams<'user', R>>().toEqualTypeOf<{ id: string }>();
 expectTypeOf<RouteParams<'files', R>>().toEqualTypeOf<{ parts: string[] }>();
 expectTypeOf<RouteParams<'tags', R>>().toEqualTypeOf<{ tags: string[] }>();
 expectTypeOf<RouteParams<'not-found', R>>().toEqualTypeOf<{ pathMatch: string[] }>();
-// oxlint-disable-next-line typescript/no-generated-empty-object-type -- a route without params
-expectTypeOf<keyof RouteParams<'home', R>>().toBeNever();
+// A route without params takes no keys.
+expectTypeOf<RouteParams<'home', R>>().toEqualTypeOf<Record<string, never>>();
+expectTypeOf<Raw<'home'>>().toEqualTypeOf<Record<string, never>>();
 // Children join the parent path: '' is the parent, an absolute child stays absolute, two levels.
 expectTypeOf<RouteParams<'user-index', R>>().toEqualTypeOf<{ id: string }>();
 expectTypeOf<RouteParams<'user-posts', R>>().toEqualTypeOf<{ id: string; postId?: string }>();
@@ -93,6 +94,12 @@ to({ name: 'user' });
 to({ name: 'usr' });
 // @ts-expect-error an unknown param
 to({ name: 'user', params: { id: 1, extra: 2 } });
+// @ts-expect-error a route without params takes no params
+to({ name: 'home', params: { id: 1 } });
+// @ts-expect-error params is an object
+to({ name: 'home', params: 5 });
+// @ts-expect-error params is an object
+to({ name: 'home', params: 'x' as string });
 // @ts-expect-error name and path exclude each other
 to({ name: 'home', path: '/' });
 // @ts-expect-error a required param has the wrong type

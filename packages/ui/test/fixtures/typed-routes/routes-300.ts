@@ -1,6 +1,7 @@
 import { defineRoutes } from '@vibejs-org/ui/router';
 
-// 300 routes (50 groups of 6) that mix every param syntax and nesting level.
+// 300 routes (50 groups of 6) that mix every param syntax and nesting level. Odd groups have an
+// unnamed parent, a regex with a modifier and a splat.
 export const routes300 = defineRoutes([
   {
     path: '/s0/:id(\\d+)',
@@ -14,12 +15,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s1/:id(\\d+)',
-    name: 'r1',
     children: [
       { path: '', name: 'r1-index' },
-      { path: 'opt/:opt?', name: 'r1-opt' },
+      { path: 'edit', name: 'r1-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r1-opt' },
       { path: 'many/:parts+', name: 'r1-many', children: [{ path: ':leaf', name: 'r1-leaf' }] },
-      { path: '/abs1/:rest*', name: 'r1-abs' },
+      { path: '/abs1/:pathMatch(.*)*', name: 'r1-abs' },
     ],
   },
   {
@@ -34,12 +35,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s3/:id(\\d+)',
-    name: 'r3',
     children: [
       { path: '', name: 'r3-index' },
-      { path: 'opt/:opt?', name: 'r3-opt' },
+      { path: 'edit', name: 'r3-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r3-opt' },
       { path: 'many/:parts+', name: 'r3-many', children: [{ path: ':leaf', name: 'r3-leaf' }] },
-      { path: '/abs3/:rest*', name: 'r3-abs' },
+      { path: '/abs3/:pathMatch(.*)*', name: 'r3-abs' },
     ],
   },
   {
@@ -54,12 +55,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s5/:id(\\d+)',
-    name: 'r5',
     children: [
       { path: '', name: 'r5-index' },
-      { path: 'opt/:opt?', name: 'r5-opt' },
+      { path: 'edit', name: 'r5-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r5-opt' },
       { path: 'many/:parts+', name: 'r5-many', children: [{ path: ':leaf', name: 'r5-leaf' }] },
-      { path: '/abs5/:rest*', name: 'r5-abs' },
+      { path: '/abs5/:pathMatch(.*)*', name: 'r5-abs' },
     ],
   },
   {
@@ -74,12 +75,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s7/:id(\\d+)',
-    name: 'r7',
     children: [
       { path: '', name: 'r7-index' },
-      { path: 'opt/:opt?', name: 'r7-opt' },
+      { path: 'edit', name: 'r7-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r7-opt' },
       { path: 'many/:parts+', name: 'r7-many', children: [{ path: ':leaf', name: 'r7-leaf' }] },
-      { path: '/abs7/:rest*', name: 'r7-abs' },
+      { path: '/abs7/:pathMatch(.*)*', name: 'r7-abs' },
     ],
   },
   {
@@ -94,12 +95,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s9/:id(\\d+)',
-    name: 'r9',
     children: [
       { path: '', name: 'r9-index' },
-      { path: 'opt/:opt?', name: 'r9-opt' },
+      { path: 'edit', name: 'r9-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r9-opt' },
       { path: 'many/:parts+', name: 'r9-many', children: [{ path: ':leaf', name: 'r9-leaf' }] },
-      { path: '/abs9/:rest*', name: 'r9-abs' },
+      { path: '/abs9/:pathMatch(.*)*', name: 'r9-abs' },
     ],
   },
   {
@@ -114,12 +115,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s11/:id(\\d+)',
-    name: 'r11',
     children: [
       { path: '', name: 'r11-index' },
-      { path: 'opt/:opt?', name: 'r11-opt' },
+      { path: 'edit', name: 'r11-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r11-opt' },
       { path: 'many/:parts+', name: 'r11-many', children: [{ path: ':leaf', name: 'r11-leaf' }] },
-      { path: '/abs11/:rest*', name: 'r11-abs' },
+      { path: '/abs11/:pathMatch(.*)*', name: 'r11-abs' },
     ],
   },
   {
@@ -134,12 +135,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s13/:id(\\d+)',
-    name: 'r13',
     children: [
       { path: '', name: 'r13-index' },
-      { path: 'opt/:opt?', name: 'r13-opt' },
+      { path: 'edit', name: 'r13-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r13-opt' },
       { path: 'many/:parts+', name: 'r13-many', children: [{ path: ':leaf', name: 'r13-leaf' }] },
-      { path: '/abs13/:rest*', name: 'r13-abs' },
+      { path: '/abs13/:pathMatch(.*)*', name: 'r13-abs' },
     ],
   },
   {
@@ -154,12 +155,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s15/:id(\\d+)',
-    name: 'r15',
     children: [
       { path: '', name: 'r15-index' },
-      { path: 'opt/:opt?', name: 'r15-opt' },
+      { path: 'edit', name: 'r15-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r15-opt' },
       { path: 'many/:parts+', name: 'r15-many', children: [{ path: ':leaf', name: 'r15-leaf' }] },
-      { path: '/abs15/:rest*', name: 'r15-abs' },
+      { path: '/abs15/:pathMatch(.*)*', name: 'r15-abs' },
     ],
   },
   {
@@ -174,12 +175,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s17/:id(\\d+)',
-    name: 'r17',
     children: [
       { path: '', name: 'r17-index' },
-      { path: 'opt/:opt?', name: 'r17-opt' },
+      { path: 'edit', name: 'r17-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r17-opt' },
       { path: 'many/:parts+', name: 'r17-many', children: [{ path: ':leaf', name: 'r17-leaf' }] },
-      { path: '/abs17/:rest*', name: 'r17-abs' },
+      { path: '/abs17/:pathMatch(.*)*', name: 'r17-abs' },
     ],
   },
   {
@@ -194,12 +195,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s19/:id(\\d+)',
-    name: 'r19',
     children: [
       { path: '', name: 'r19-index' },
-      { path: 'opt/:opt?', name: 'r19-opt' },
+      { path: 'edit', name: 'r19-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r19-opt' },
       { path: 'many/:parts+', name: 'r19-many', children: [{ path: ':leaf', name: 'r19-leaf' }] },
-      { path: '/abs19/:rest*', name: 'r19-abs' },
+      { path: '/abs19/:pathMatch(.*)*', name: 'r19-abs' },
     ],
   },
   {
@@ -214,12 +215,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s21/:id(\\d+)',
-    name: 'r21',
     children: [
       { path: '', name: 'r21-index' },
-      { path: 'opt/:opt?', name: 'r21-opt' },
+      { path: 'edit', name: 'r21-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r21-opt' },
       { path: 'many/:parts+', name: 'r21-many', children: [{ path: ':leaf', name: 'r21-leaf' }] },
-      { path: '/abs21/:rest*', name: 'r21-abs' },
+      { path: '/abs21/:pathMatch(.*)*', name: 'r21-abs' },
     ],
   },
   {
@@ -234,12 +235,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s23/:id(\\d+)',
-    name: 'r23',
     children: [
       { path: '', name: 'r23-index' },
-      { path: 'opt/:opt?', name: 'r23-opt' },
+      { path: 'edit', name: 'r23-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r23-opt' },
       { path: 'many/:parts+', name: 'r23-many', children: [{ path: ':leaf', name: 'r23-leaf' }] },
-      { path: '/abs23/:rest*', name: 'r23-abs' },
+      { path: '/abs23/:pathMatch(.*)*', name: 'r23-abs' },
     ],
   },
   {
@@ -254,12 +255,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s25/:id(\\d+)',
-    name: 'r25',
     children: [
       { path: '', name: 'r25-index' },
-      { path: 'opt/:opt?', name: 'r25-opt' },
+      { path: 'edit', name: 'r25-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r25-opt' },
       { path: 'many/:parts+', name: 'r25-many', children: [{ path: ':leaf', name: 'r25-leaf' }] },
-      { path: '/abs25/:rest*', name: 'r25-abs' },
+      { path: '/abs25/:pathMatch(.*)*', name: 'r25-abs' },
     ],
   },
   {
@@ -274,12 +275,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s27/:id(\\d+)',
-    name: 'r27',
     children: [
       { path: '', name: 'r27-index' },
-      { path: 'opt/:opt?', name: 'r27-opt' },
+      { path: 'edit', name: 'r27-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r27-opt' },
       { path: 'many/:parts+', name: 'r27-many', children: [{ path: ':leaf', name: 'r27-leaf' }] },
-      { path: '/abs27/:rest*', name: 'r27-abs' },
+      { path: '/abs27/:pathMatch(.*)*', name: 'r27-abs' },
     ],
   },
   {
@@ -294,12 +295,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s29/:id(\\d+)',
-    name: 'r29',
     children: [
       { path: '', name: 'r29-index' },
-      { path: 'opt/:opt?', name: 'r29-opt' },
+      { path: 'edit', name: 'r29-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r29-opt' },
       { path: 'many/:parts+', name: 'r29-many', children: [{ path: ':leaf', name: 'r29-leaf' }] },
-      { path: '/abs29/:rest*', name: 'r29-abs' },
+      { path: '/abs29/:pathMatch(.*)*', name: 'r29-abs' },
     ],
   },
   {
@@ -314,12 +315,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s31/:id(\\d+)',
-    name: 'r31',
     children: [
       { path: '', name: 'r31-index' },
-      { path: 'opt/:opt?', name: 'r31-opt' },
+      { path: 'edit', name: 'r31-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r31-opt' },
       { path: 'many/:parts+', name: 'r31-many', children: [{ path: ':leaf', name: 'r31-leaf' }] },
-      { path: '/abs31/:rest*', name: 'r31-abs' },
+      { path: '/abs31/:pathMatch(.*)*', name: 'r31-abs' },
     ],
   },
   {
@@ -334,12 +335,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s33/:id(\\d+)',
-    name: 'r33',
     children: [
       { path: '', name: 'r33-index' },
-      { path: 'opt/:opt?', name: 'r33-opt' },
+      { path: 'edit', name: 'r33-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r33-opt' },
       { path: 'many/:parts+', name: 'r33-many', children: [{ path: ':leaf', name: 'r33-leaf' }] },
-      { path: '/abs33/:rest*', name: 'r33-abs' },
+      { path: '/abs33/:pathMatch(.*)*', name: 'r33-abs' },
     ],
   },
   {
@@ -354,12 +355,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s35/:id(\\d+)',
-    name: 'r35',
     children: [
       { path: '', name: 'r35-index' },
-      { path: 'opt/:opt?', name: 'r35-opt' },
+      { path: 'edit', name: 'r35-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r35-opt' },
       { path: 'many/:parts+', name: 'r35-many', children: [{ path: ':leaf', name: 'r35-leaf' }] },
-      { path: '/abs35/:rest*', name: 'r35-abs' },
+      { path: '/abs35/:pathMatch(.*)*', name: 'r35-abs' },
     ],
   },
   {
@@ -374,12 +375,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s37/:id(\\d+)',
-    name: 'r37',
     children: [
       { path: '', name: 'r37-index' },
-      { path: 'opt/:opt?', name: 'r37-opt' },
+      { path: 'edit', name: 'r37-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r37-opt' },
       { path: 'many/:parts+', name: 'r37-many', children: [{ path: ':leaf', name: 'r37-leaf' }] },
-      { path: '/abs37/:rest*', name: 'r37-abs' },
+      { path: '/abs37/:pathMatch(.*)*', name: 'r37-abs' },
     ],
   },
   {
@@ -394,12 +395,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s39/:id(\\d+)',
-    name: 'r39',
     children: [
       { path: '', name: 'r39-index' },
-      { path: 'opt/:opt?', name: 'r39-opt' },
+      { path: 'edit', name: 'r39-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r39-opt' },
       { path: 'many/:parts+', name: 'r39-many', children: [{ path: ':leaf', name: 'r39-leaf' }] },
-      { path: '/abs39/:rest*', name: 'r39-abs' },
+      { path: '/abs39/:pathMatch(.*)*', name: 'r39-abs' },
     ],
   },
   {
@@ -414,12 +415,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s41/:id(\\d+)',
-    name: 'r41',
     children: [
       { path: '', name: 'r41-index' },
-      { path: 'opt/:opt?', name: 'r41-opt' },
+      { path: 'edit', name: 'r41-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r41-opt' },
       { path: 'many/:parts+', name: 'r41-many', children: [{ path: ':leaf', name: 'r41-leaf' }] },
-      { path: '/abs41/:rest*', name: 'r41-abs' },
+      { path: '/abs41/:pathMatch(.*)*', name: 'r41-abs' },
     ],
   },
   {
@@ -434,12 +435,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s43/:id(\\d+)',
-    name: 'r43',
     children: [
       { path: '', name: 'r43-index' },
-      { path: 'opt/:opt?', name: 'r43-opt' },
+      { path: 'edit', name: 'r43-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r43-opt' },
       { path: 'many/:parts+', name: 'r43-many', children: [{ path: ':leaf', name: 'r43-leaf' }] },
-      { path: '/abs43/:rest*', name: 'r43-abs' },
+      { path: '/abs43/:pathMatch(.*)*', name: 'r43-abs' },
     ],
   },
   {
@@ -454,12 +455,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s45/:id(\\d+)',
-    name: 'r45',
     children: [
       { path: '', name: 'r45-index' },
-      { path: 'opt/:opt?', name: 'r45-opt' },
+      { path: 'edit', name: 'r45-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r45-opt' },
       { path: 'many/:parts+', name: 'r45-many', children: [{ path: ':leaf', name: 'r45-leaf' }] },
-      { path: '/abs45/:rest*', name: 'r45-abs' },
+      { path: '/abs45/:pathMatch(.*)*', name: 'r45-abs' },
     ],
   },
   {
@@ -474,12 +475,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s47/:id(\\d+)',
-    name: 'r47',
     children: [
       { path: '', name: 'r47-index' },
-      { path: 'opt/:opt?', name: 'r47-opt' },
+      { path: 'edit', name: 'r47-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r47-opt' },
       { path: 'many/:parts+', name: 'r47-many', children: [{ path: ':leaf', name: 'r47-leaf' }] },
-      { path: '/abs47/:rest*', name: 'r47-abs' },
+      { path: '/abs47/:pathMatch(.*)*', name: 'r47-abs' },
     ],
   },
   {
@@ -494,12 +495,12 @@ export const routes300 = defineRoutes([
   },
   {
     path: '/s49/:id(\\d+)',
-    name: 'r49',
     children: [
       { path: '', name: 'r49-index' },
-      { path: 'opt/:opt?', name: 'r49-opt' },
+      { path: 'edit', name: 'r49-edit' },
+      { path: 'opt/:opt(\\d+)?', name: 'r49-opt' },
       { path: 'many/:parts+', name: 'r49-many', children: [{ path: ':leaf', name: 'r49-leaf' }] },
-      { path: '/abs49/:rest*', name: 'r49-abs' },
+      { path: '/abs49/:pathMatch(.*)*', name: 'r49-abs' },
     ],
   },
 ]);

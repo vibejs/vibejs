@@ -48,12 +48,23 @@ const badParam: RouteLocationRaw = { name: 'user', params: { userId: 1 } };
 const params: RouteParams<'user'> = { id: '1' };
 const ofUser: RouteLocationOf<'user'>['params'] = { id: '1' };
 // @ts-expect-error `id` is a string when read
+const badOf: RouteLocationOf<'user'>['params'] = { id: 1 };
+// @ts-expect-error a route without params takes no params
+const badHome: RouteLocationRaw = { name: 'home', params: { id: 1 } };
+// @ts-expect-error `id` is a string when read
 const numeric: RouteParams<'user'> = { id: 1 };
 
 // 300 routes, with explicit R.
 type R300 = typeof routes300;
 const leaf: RouteParams<'r49-leaf', R300> = { id: '1', parts: ['a'], leaf: '2' };
 const absolute: RouteParams<'r0-abs', R300> = { rest: [] };
+// @ts-expect-error `leaf` is required
+const badLeaf: RouteParams<'r49-leaf', R300> = { id: '1', parts: ['a'] };
+// @ts-expect-error `rest` is an array
+const badAbsolute: RouteParams<'r0-abs', R300> = { rest: 'a' };
+const splat: RouteParams<'r1-abs', R300> = { pathMatch: ['a'] };
+// @ts-expect-error a splat is an array
+const badSplat: RouteParams<'r1-abs', R300> = { pathMatch: 'a' };
 const to300: RouteLocationRaw<R300> = { name: 'r0-abs' };
 const opt: RouteLocationRaw<R300> = { name: 'r25-opt', params: { id: 1, opt: null } };
 // @ts-expect-error the required `id` is missing
@@ -64,9 +75,14 @@ const unknown300: RouteLocationRaw<R300> = { name: 'r50' };
 export {
   absolute,
   bad300,
+  badAbsolute,
   badGuard,
+  badHome,
+  badLeaf,
+  badOf,
   badParam,
   badRaw,
+  badSplat,
   label,
   leaf,
   notNarrowed,
@@ -75,6 +91,7 @@ export {
   opt,
   params,
   registered,
+  splat,
   to300,
   unknown300,
 };
