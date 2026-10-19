@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import ScopedChild from './ScopedChild.vibe';
+
+defineProps<{ open?: boolean }>();
+</script>
+
+<template>
+  <ScopedChild :open="open" />
+</template>
+
+<style scoped>
+.child {
+  padding: 0;
+}
+</style>

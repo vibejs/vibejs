@@ -11,6 +11,7 @@ import type { Ref } from '../reactivity/ref.ts';
 import { hasChanged, isFunction, isObject } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { callWithAsyncErrorHandling, callWithErrorHandling } from './errorHandling.ts';
+import { currentInstance } from './instance.ts';
 import { queueJob, queuePostFlushCb, SchedulerJobFlags, type SchedulerJob } from './scheduler.ts';
 
 export type WatchSource<T = any> = Ref<T, any> | ComputedRef<T> | (() => T);
@@ -123,6 +124,8 @@ function doWatch(
   cb: WatchCallback | undefined,
   { immediate, deep, once, flush }: WatchOptions = {},
 ): WatchHandle {
+  // The owner: its error handlers see the errors, and its updates run after its watchers.
+  const instance = currentInstance;
   // A reactive source is deep, unless `deep` says otherwise or the source is shallow.
   const reactiveGetter = (value: unknown): unknown =>
     deep ? value : traverse(value, isShallow(value) || deep === false || deep === 0 ? 1 : Infinity);
@@ -132,7 +135,7 @@ function doWatch(
   };
   const runCleanups = (): void => {
     const prevSub = setActiveSub(undefined);
-    for (const fn of cleanups.splice(0)) callWithErrorHandling(fn, 'watcher cleanup');
+    for (const fn of cleanups.splice(0)) callWithErrorHandling(fn, instance, 'watcher cleanup');
     setActiveSub(prevSub);
   };
 
@@ -154,17 +157,19 @@ function doWatch(
       source.map((s: unknown) => {
         if (isRef(s)) return s.value;
         if (isReactive(s)) return reactiveGetter(s);
-        if (isFunction(s)) return callWithErrorHandling(s, 'watcher getter');
+        if (isFunction(s)) return callWithErrorHandling(s, instance, 'watcher getter');
         return invalidSource(s);
       });
   } else if (isFunction(source)) {
     getter = cb
-      ? () => callWithErrorHandling(source, 'watcher getter')
+      ? () => callWithErrorHandling(source, instance, 'watcher getter')
       : () => {
           runCleanups();
           const prevCleanups = activeCleanups;
           activeCleanups = cleanups;
-          callWithAsyncErrorHandling<[OnCleanup], unknown>(source, 'watcher callback', [onCleanup]);
+          callWithAsyncErrorHandling<[OnCleanup], unknown>(source, instance, 'watcher callback', [
+            onCleanup,
+          ]);
           activeCleanups = prevCleanups;
         };
   } else {
@@ -213,7 +218,7 @@ function doWatch(
       onCleanup,
     ];
     oldValue = newValue;
-    callWithAsyncErrorHandling(cb, 'watcher callback', args);
+    callWithAsyncErrorHandling(cb, instance, 'watcher callback', args);
     activeCleanups = prevCleanups;
     setActiveSub(prevSub);
     if (once) stop();
@@ -225,7 +230,7 @@ function doWatch(
   } else if (flush === 'post') {
     effect.scheduler = () => queuePostFlushCb(job);
   } else {
-    job.id = -1;
+    job.id = instance ? instance.uid * 2 : -1;
     effect.scheduler = () => queueJob(job);
   }
 

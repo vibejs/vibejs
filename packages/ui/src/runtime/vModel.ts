@@ -4,17 +4,11 @@
 //
 // The model kind is chosen at compile time from the element and its static `type`.
 import { toRaw } from '../reactivity/dep.ts';
-import { isObject, toText } from '../shared.ts';
+import { isObject, looseToNumber, toText } from '../shared.ts';
 import { getValue, shown } from './dom.ts';
 import { on } from './events.ts';
 import { renderEffect } from './renderEffect.ts';
 import { queuePostFlushCb } from './scheduler.ts';
-
-/** `'1.5'` → `1.5`; a string that does not start with a number stays as it is. */
-function looseToNumber(value: string): unknown {
-  const n = Number.parseFloat(value);
-  return Number.isNaN(n) ? value : n;
-}
 
 /** Equality of model values: dates by time, arrays and plain objects by content, others as text. */
 function looseEqual(a: unknown, b: unknown): boolean {

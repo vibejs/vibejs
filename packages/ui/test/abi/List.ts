@@ -3,20 +3,21 @@ import { computed, ref } from '@vibejs-org/ui';
 import {
   applyTextModel,
   child,
+  createComponent,
   createFor,
   createIf,
   insert,
   next,
   renderEffect,
-  setClass,
   setText,
   template,
   toDisplayString,
   txt,
   type ComponentDef,
 } from '@vibejs-org/ui/internal';
+import { Item } from './Item.ts';
 
-type Item = {
+type Entry = {
   id: number;
   label: string;
   done: boolean;
@@ -24,13 +25,12 @@ type Item = {
 
 type Props = {
   title: string;
-  items: Item[];
+  items: Entry[];
 };
 
 const t0 = template('<section class="list"><h2> </h2><input><!----></section>');
 const t1 = template('<p>Nothing</p>');
 const t2 = template('<ul></ul>');
-const t3 = template('<li> </li>');
 
 export const List: ComponentDef = {
   name: 'List',
@@ -41,7 +41,7 @@ export const List: ComponentDef = {
     const shown = computed(() => __props.items.filter((item) => item.label.includes(filter.value)));
     return { filter, shown };
   },
-  render($setup: { filter: string; shown: Item[] }, $props: Props) {
+  render($setup: { filter: string; shown: Entry[] }, $props: Props) {
     const n0 = t0() as Element;
     const n1 = child(n0);
     const x1 = txt(n1);
@@ -61,20 +61,14 @@ export const List: ComponentDef = {
         () => {
           const n3 = t2() as Element;
           insert(
-            createFor<Item>(
+            createFor<Entry>(
               () => $setup.shown,
-              (item, _key, index) => {
-                const n4 = t3() as Element;
-                const x4 = txt(n4);
-                renderEffect(() => setClass(n4, { done: item.value.done }));
-                renderEffect(() =>
-                  setText(
-                    x4,
-                    toDisplayString(index.value + 1) + '. ' + toDisplayString(item.value.label),
-                  ),
-                );
-                return n4;
-              },
+              (item, _key, index) =>
+                createComponent(Item, {
+                  index: () => index.value,
+                  label: () => item.value.label,
+                  done: () => item.value.done,
+                }),
               (item) => item.id,
             ),
             n3,

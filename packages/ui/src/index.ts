@@ -10,6 +10,9 @@ export type {
   Handle,
   ModelRef,
   SetupContext,
+  Slot,
+  Slots,
+  TemplateRef,
 } from './component.ts';
 export type {
   ClassValue,
@@ -49,7 +52,23 @@ export type {
   ToRefs,
   UnwrapRef,
 } from './reactivity/ref.ts';
+export { createApp, useId } from './runtime/app.ts';
+export type { App, AppConfig, ComponentHandle, Plugin } from './runtime/app.ts';
+export { hasInjectionContext, inject, provide } from './runtime/inject.ts';
+export type { InjectionKey } from './runtime/inject.ts';
+export {
+  onBeforeMount,
+  onBeforeUnmount,
+  onBeforeUpdate,
+  onErrorCaptured,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+} from './runtime/lifecycle.ts';
+export { useAttrs } from './runtime/props.ts';
 export { nextTick } from './runtime/scheduler.ts';
+export { useSlots } from './runtime/slots.ts';
+export { useTemplateRef } from './runtime/templateRef.ts';
 export {
   onWatcherCleanup,
   watch,

@@ -79,6 +79,14 @@ Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`]
   - `packages/ui/src/runtime/dom.test.ts` from `packages/runtime-dom/__tests__/patchClass.spec.ts`, `patchStyle.spec.ts`, `patchAttrs.spec.ts`, `patchProps.spec.ts` and `patchEvents.spec.ts`, and `packages/shared/__tests__/toDisplayString.spec.ts` (tests, not shipped)
   - `packages/ui/src/runtime/events.test.ts` from `packages/runtime-dom/__tests__/directives/vOn.spec.ts` (tests, not shipped)
   - `packages/ui/src/runtime/vModel.test.ts` from `packages/runtime-dom/__tests__/directives/vModel.spec.ts` and `vShow.spec.ts` (tests, not shipped)
+  - `packages/ui/src/runtime/app.ts` from `packages/runtime-core/src/apiCreateApp.ts` (shipped)
+  - `packages/ui/src/runtime/props.ts` from `packages/runtime-core/src/componentEmits.ts` and `helpers/useModel.ts` (shipped)
+  - `packages/ui/src/runtime/inject.ts` from `packages/runtime-core/src/apiInject.ts` (shipped)
+  - `packages/ui/src/runtime/lifecycle.ts` from `packages/runtime-core/src/apiLifecycle.ts` (shipped)
+  - `packages/ui/src/runtime/templateRef.ts` from `packages/runtime-core/src/helpers/useTemplateRef.ts` (shipped)
+  - `packages/ui/src/runtime/lifecycle.test.ts` from `packages/runtime-core/__tests__/apiLifecycle.spec.ts` (tests, not shipped)
+  - `packages/ui/src/runtime/inject.test.ts` from `packages/runtime-core/__tests__/apiInject.spec.ts` (tests, not shipped)
+  - `packages/ui/src/runtime/app.test.ts` from `packages/runtime-core/__tests__/apiCreateApp.spec.ts` and `helpers/useId.spec.ts` (tests, not shipped)
 - **vuejs/router** v4.6.4 at `47b95baae1ebdeb564bd1adf8168c9e9d6d09d0a`, MIT, Copyright (c) 2019-present Eduardo San Martin Morote.
   - `packages/ui/src/router/path.ts` from `packages/router/src/matcher/pathParserRanker.ts`
   - `packages/ui/src/router/path.test.ts` from `packages/router/__tests__/matcher/pathRanking.spec.ts` and `pathParser.spec.ts` (tests, not shipped)

@@ -1,10 +1,15 @@
 import { setActiveSub } from '../reactivity/core.ts';
 import { activeEffectScope, EffectScopeImpl } from '../reactivity/effectScope.ts';
 import type { EffectScope } from '../reactivity/effectScope.ts';
+import { callHooks, ComponentInstance } from './instance.ts';
 import { renderEffect } from './renderEffect.ts';
+import { queuePostFlushCb } from './scheduler.ts';
 
-/** What a render function returns and `insert()` places: a node, a fragment or a list of blocks. */
-export type Block = Node | Fragment | Block[];
+/**
+ * What a render function returns and `insert()` places: a node, a fragment, a component or a
+ * list of blocks.
+ */
+export type Block = Node | Fragment | ComponentInstance | Block[];
 
 /**
  * Dynamic content (`v-if`, `v-for`, `:key`): its current nodes, the comment that marks its end
@@ -16,17 +21,33 @@ export class Fragment {
   scope?: EffectScope;
 }
 
+/** A fragment whose content is swapped as a whole: `v-if`, `:key`, a slot or a dynamic component. */
+export class SwitchFragment extends Fragment {
+  /** Runs with the new content, in its scope, after each swap; fallthrough attributes use it. */
+  onSwap?: (nodes: Block) => void;
+}
+
 /**
  * Inserts the nodes of `b` into `parent` before `anchor` (at the end without one); a fragment's
  * nodes go first, then its own anchor. Codegen inserts each dynamic block before the comment
- * that the template holds for it.
+ * that the template holds for it. The first insert of a component mounts it: its `beforeMount`
+ * hooks run before its nodes are inserted, and its `mounted` hooks are queued after the hooks
+ * of the components it holds.
  */
 export function insert(b: Block, parent: ParentNode, anchor: Node | null = null): void {
   if (b instanceof Node) parent.insertBefore(b, anchor);
   else if (Array.isArray(b)) for (const item of b) insert(item, parent, anchor);
-  else {
+  else if (b instanceof Fragment) {
     insert(b.nodes, parent, anchor);
     parent.insertBefore(b.anchor, anchor);
+  } else if (b.isMounted) insert(b.block, parent, anchor);
+  else {
+    callHooks(b, 'beforeMount');
+    insert(b.block, parent, anchor);
+    b.isMounted = true;
+    queuePostFlushCb(() => {
+      if (!b.isUnmounted) callHooks(b, 'mounted');
+    });
   }
 }
 
@@ -34,15 +55,16 @@ export function insert(b: Block, parent: ParentNode, anchor: Node | null = null)
 export function removeNodes(b: Block): void {
   if (b instanceof Node) b.parentNode?.removeChild(b);
   else if (Array.isArray(b)) for (const item of b) removeNodes(item);
-  else {
+  else if (b instanceof Fragment) {
     removeNodes(b.nodes);
     removeNodes(b.anchor);
-  }
+  } else removeNodes(b.block);
 }
 
 /** The first DOM node of `b`, if it has one. */
 export function firstNode(b: Block): Node | undefined {
   if (b instanceof Node) return b;
+  if (b instanceof ComponentInstance) return firstNode(b.block);
   if (!Array.isArray(b)) return firstNode(b.nodes) ?? b.anchor;
   for (const item of b) {
     const node = firstNode(item);
@@ -68,12 +90,15 @@ export function build(
   }
 }
 
-/** A fragment that rebuilds its content with `pick(value)` whenever `get()` changes. */
-function createSwitch(get: () => unknown, pick: (value: unknown) => (() => Block) | undefined) {
-  const frag = new Fragment();
+/** A fragment that rebuilds its content with `pick(value)` whenever `get()` changes (`Object.is`). */
+export function createSwitch<T>(
+  get: () => T,
+  pick: (value: T) => (() => Block) | undefined,
+): SwitchFragment {
+  const frag = new SwitchFragment();
   const owner = activeEffectScope;
   let first = true;
-  let current: unknown;
+  let current: T | undefined;
   renderEffect(() => {
     const value = get();
     if (!first && Object.is(value, current)) return;
@@ -82,7 +107,13 @@ function createSwitch(get: () => unknown, pick: (value: unknown) => (() => Block
     frag.scope?.stop();
     removeNodes(frag.nodes);
     const render = pick(value);
-    [frag.scope, frag.nodes] = render ? build(owner, render) : [undefined, []];
+    [frag.scope, frag.nodes] = render
+      ? build(owner, () => {
+          const nodes = render();
+          frag.onSwap?.(nodes);
+          return nodes;
+        })
+      : [undefined, []];
     const parent = frag.anchor.parentNode;
     if (parent) insert(frag.nodes, parent, frag.anchor);
   });
