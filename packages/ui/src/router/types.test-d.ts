@@ -2,6 +2,7 @@ import { expectTypeOf } from 'vitest';
 import { createMemoryHistory } from './history.ts';
 import { createRouter, defineRoutes } from './router.ts';
 import type {
+  AnyRouter,
   NavigationGuard,
   RouteLocation,
   RouteLocationOf,
@@ -109,6 +110,8 @@ to({ name: 'files', params: { parts: 'a' } });
 const history = createMemoryHistory();
 const router = createRouter({ history, routes });
 expectTypeOf(router).toEqualTypeOf<Router<R>>();
+// A typed router is still any router, for code that takes routers of every route table.
+expectTypeOf(router).toExtend<AnyRouter>();
 const inline = createRouter({ history, routes: [{ path: '/a/:x', name: 'a' }] });
 expectTypeOf(inline).toEqualTypeOf<
   Router<readonly [{ readonly path: '/a/:x'; readonly name: 'a' }]>

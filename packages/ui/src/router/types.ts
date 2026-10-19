@@ -230,11 +230,13 @@ export type NavigationGuard<R extends AnyRoutes = RegisteredRoutes> = (
   from: RouteLocation<R>,
 ) => NavigationGuardResult<R> | Promise<NavigationGuardResult<R>>;
 
-export interface NavigationFailure<R extends AnyRoutes = RegisteredRoutes> extends Error {
+// A type alias, not an interface: TypeScript 7.1 measures an interface's `R` as invariant here,
+// and a `Router<R>` would then not be an `AnyRouter`.
+export type NavigationFailure<R extends AnyRoutes = RegisteredRoutes> = Error & {
   readonly type: 'aborted' | 'cancelled' | 'duplicated';
   readonly to: RouteLocation<R>;
   readonly from: RouteLocation<R>;
-}
+};
 
 export interface Router<R extends AnyRoutes = RegisteredRoutes> {
   readonly currentRoute: Readonly<ShallowRef<RouteLocation<R>>>;
