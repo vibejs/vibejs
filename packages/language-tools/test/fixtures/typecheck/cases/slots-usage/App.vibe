@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useTemplateRef, type TemplateRef } from '@vibejs-org/ui'
+import { useTemplateRef, type Component, type TemplateRef } from '@vibejs-org/ui'
 import { expectType } from '../../expect.ts'
 import List from './List.vibe'
 import type { Item } from './types.ts'
 const rows: Item[] = [{ id: 1, name: 'a' }]
 const loading = false
+const dynamic: Component<any> = List
 const cell = useTemplateRef('cell')
 expectType<TemplateRef<HTMLSpanElement>>()(cell)
 </script>
@@ -13,8 +14,8 @@ expectType<TemplateRef<HTMLSpanElement>>()(cell)
   <List :rows="rows">
     <template v-if="loading" #header>Loading</template>
     <template v-else #header="{ count }">{{ count.toFixed(0) }} rows</template>
-    <template #item="{ item }">
-      <span ref="cell">{{ expectType<Item>()(item) }}{{ item.name }}</span>
+    <template #item="{ item, 'row-index': rowIndex }">
+      <span ref="cell">{{ expectType<Item>()(item) }}{{ expectType<number>()(rowIndex) }}</span>
     </template>
     <template #empty>None</template>
   </List>
@@ -22,4 +23,10 @@ expectType<TemplateRef<HTMLSpanElement>>()(cell)
     <p>Implicit default content</p>
   </List>
   <List :rows="rows" v-slot>Default through v-slot</List>
+  <List :rows="rows" v-slot="{ total }">{{ expectType<number>()(total) }}</List>
+  <component :is="dynamic" :rows="rows">
+    <template #header="{ a, b }">{{ a }}{{ b }}</template>
+    <template #item-row="props">{{ props.anything }}</template>
+    <p>Implicit default content</p>
+  </component>
 </template>

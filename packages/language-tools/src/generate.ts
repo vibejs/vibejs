@@ -61,6 +61,8 @@ export function generate(fileName: string, text: string): GeneratedFile {
     handles: 0,
     outlets: analysis.macros.slots ? undefined : new Map(),
     slots: 0,
+    inSelf: 0,
+    forwarded: new Set(),
     refs: new Map(),
     loops: 0,
   };
@@ -107,10 +109,12 @@ export function generate(fileName: string, text: string): GeneratedFile {
     return `${key(name)}${required ? '' : '?'}: ${value}; ${key(`onUpdate:${name}`)}?: (value: ${value}) => void; ${key(modifiers)}?: (typeof ${binding})[1]`;
   });
   if (w.outlets) {
-    const slots = [...w.outlets].map(
-      ([name, ks]) =>
-        `${key(name)}?: (props: ${ks.map((k) => `typeof __vibe_s${k}`).join(' | ')}) => unknown`,
-    );
+    const slots = [...w.outlets].map(([name, all]) => {
+      // ponytail: a name with only forwarded outlets keeps them, and so its cycle.
+      const direct = all.filter((k) => !w.forwarded.has(k));
+      const ks = direct.length > 0 ? direct : all;
+      return `${key(name)}?: (props: ${ks.map((k) => `typeof __vibe_s${k}`).join(' | ')}) => unknown`;
+    });
     b.add(`type __VibeSlots = ${members(slots)};\n`);
   }
   b.add(`type __VibeExposed = ${exposed ? 'typeof __vibe_exposed' : '{}'};\n`);

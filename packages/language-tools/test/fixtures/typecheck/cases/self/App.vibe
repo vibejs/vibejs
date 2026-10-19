@@ -1,0 +1,12 @@
+<script setup lang="ts">
+import { expectType } from '../../expect.ts'
+import Tree from './Tree.vibe'
+import type { Node } from './types.ts'
+const root: Node = { label: 'root', children: [] }
+</script>
+
+<template>
+  <Tree :node="root">
+    <template #item="{ node }">{{ expectType<Node>()(node) }}{{ node.label }}</template>
+  </Tree>
+</template>

@@ -37,6 +37,13 @@ export interface Walk {
   outlets: Map<string, number[]> | undefined;
   /** The number of inferred outlets (`__vibe_sK`) emitted so far. */
   slots: number;
+  /** The number of self tags whose slot content is being walked. */
+  inSelf: number;
+  /**
+   * The inferred outlets inside the slot content of a self tag. They forward the file's own slots,
+   * so they stay out of `__VibeSlots`: their props would read `__VibeSlots` itself (a type cycle).
+   */
+  forwarded: Set<number>;
   /** The `ref="key"` targets: key -> type. */
   refs: Map<string, string>;
   /** The number of `v-for` loops around the current element. */
@@ -289,6 +296,7 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
     const slot = outletName?.value?.content ?? 'default';
     if (w.outlets) {
       const k = w.slots++;
+      if (w.inSelf > 0) w.forwarded.add(k);
       w.outlets.set(slot, [...(w.outlets.get(slot) ?? []), k]);
       line(w, `var __vibe_s${k} = (`);
     } else {
@@ -348,8 +356,12 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
     line(w);
     statement();
   }
-  if (kind === 'component' || kind === 'dynamic') block(w, () => slots(el, w, locals, tag));
-  else block(w, () => children(el.children, w, locals));
+  if (kind === 'component' || kind === 'dynamic') {
+    const self = el.tag === w.own;
+    if (self) w.inSelf++;
+    block(w, () => slots(el, w, locals, tag));
+    if (self) w.inSelf--;
+  } else block(w, () => children(el.children, w, locals));
 }
 
 /** A directive's value, verbatim. */
@@ -395,13 +407,11 @@ function property(
 }
 
 /**
- * A kebab name on a component or an outlet is its camelCase prop key; `data-*` and `aria-*` stay
- * attributes.
+ * A kebab name on a component is its camelCase prop key; `data-*` and `aria-*` stay attributes. An
+ * outlet passes its keys as written.
  */
 const componentKey = (p: Props, name: string) =>
-  (p.kind === 'component' || p.kind === 'slot') && !/^(?:data|aria)-/.test(name)
-    ? camelize(name)
-    : name;
+  p.kind === 'component' && !/^(?:data|aria)-/.test(name) ? camelize(name) : name;
 
 /** `class="c"` -> `class: 'c'`; a valueless attribute is `true`; `ref="r"` adds a template ref. */
 function attribute(node: AttributeNode, p: Props, el: ElementNode): void {
@@ -500,6 +510,8 @@ function bound(dir: DirectiveNode, p: Props): void {
     w.b.add(']: ');
     return value(dir, w, locals);
   }
+  // An outlet does not pass its `:key`.
+  if (p.kind === 'slot' && arg.content === 'key') return loose(p, () => value(dir, w, locals));
   const camel = on || dir.modifiers.some((m) => m.content === 'camel');
   const name = camel ? camelize(arg.content) : componentKey(p, arg.content);
   const alias = on || (!camel && name !== arg.content);

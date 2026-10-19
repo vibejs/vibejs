@@ -6,8 +6,8 @@ const { rows } = defineProps<{ rows: Item[] }>()
 <template>
   <slot name="header" :count="rows.length" />
   <ul>
-    <li v-for="row in rows" :key="row.id"><slot name="item" :item="row" /></li>
+    <li v-for="row in rows" :key="row.id"><slot name="item" :item="row" :row-index="row.id" /></li>
   </ul>
   <slot name="empty" v-if="rows.length === 0" />
-  <slot />
+  <slot :total="rows.length" />
 </template>

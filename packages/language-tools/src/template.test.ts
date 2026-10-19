@@ -30,6 +30,8 @@ function emit(
     handles: 0,
     outlets: new Map(),
     slots: 0,
+    inSelf: 0,
+    forwarded: new Set<number>(),
     refs,
     loops: 0,
   };
@@ -181,10 +183,11 @@ it('leaves a slot template outside a component untyped', () => {
   ]);
 });
 
-it('collects inferred outlets with camelized props, without the name, and their refs as unknown', () => {
+it('collects inferred outlets with raw keys, without the name or :key, and their refs as unknown', () => {
   const refs = new Map<string, string>();
-  expect(emit('<slot name="n" :item-id="a" ref="r" /><slot />', [], refs)).toEqual([
-    'var __vibe_s0 = ({ itemId: a });',
+  expect(emit('<slot name="n" :item-id="a" :key="a" ref="r" /><slot />', [], refs)).toEqual([
+    "var __vibe_s0 = ({ 'item-id': a });",
+    '(a);',
     'var __vibe_s1 = ({ });',
   ]);
   expect([...refs]).toEqual([['r', 'unknown']]);

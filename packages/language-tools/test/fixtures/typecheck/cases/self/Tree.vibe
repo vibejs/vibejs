@@ -4,8 +4,12 @@ const { node } = defineProps<{ node: Node }>()
 </script>
 
 <template>
-  <p>{{ node.label }}</p>
+  <slot name="item" :node="node">{{ node.label }}</slot>
   <ul>
-    <li v-for="child in node.children" :key="child.label"><Tree :node="child" /></li>
+    <li v-for="child in node.children" :key="child.label">
+      <Tree :node="child">
+        <template #item="{ node: n }"><slot name="item" :node="n" /></template>
+      </Tree>
+    </li>
   </ul>
 </template>
