@@ -1,0 +1,40 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui';
+
+const name = ref('');
+const city = ref('');
+const age = ref<number | string>(0);
+const note = ref('');
+const agree = ref(false);
+const answer = ref<'yes' | 'no'>('no');
+const tags = ref<string[]>([]);
+const flags = ref(new Set<string>());
+const size = ref('m');
+const color = ref('red');
+const counts = ref<number[]>([]);
+</script>
+
+<template>
+  <form>
+    <input v-model="name" />
+    <input v-model.lazy="city" />
+    <input v-model.number="age" type="number" />
+    <textarea v-model.trim="note"></textarea>
+    <input v-model="agree" type="checkbox" />
+    <input v-model="answer" type="checkbox" true-value="yes" false-value="no" />
+    <input v-model="tags" type="checkbox" value="a" />
+    <input v-model="tags" type="checkbox" value="b" />
+    <input v-model="flags" type="checkbox" value="x" />
+    <input v-model="size" type="radio" value="s" />
+    <input v-model="size" type="radio" value="m" />
+    <select v-model="color">
+      <option>red</option>
+      <option>blue</option>
+    </select>
+    <select v-model.number="counts" multiple>
+      <option value="1">one</option>
+      <option value="2">two</option>
+    </select>
+    <p v-show="agree">Thanks</p>
+  </form>
+</template>

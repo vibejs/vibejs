@@ -5,10 +5,13 @@ import { callWithErrorHandling, handleError } from './errorHandling.ts';
 /**
  * A queued function. Jobs run in `id` order (none = `Infinity`): an unowned pre watcher is `-1`, an
  * owned pre watcher `uid * 2` and a render effect `uid * 2 + 1`, so parents run before children.
+ * Equal ids run in `order` (none = `Infinity`), the creation sequence of render effects: an effect
+ * runs before the effects it creates, so a branch swap disposes stale effects before they run.
  */
 export interface SchedulerJob {
   (): void;
   id?: number;
+  order?: number;
   flags?: number;
 }
 
@@ -34,14 +37,21 @@ let currentFlushPromise: Promise<void> | undefined;
 
 const getId = (job: SchedulerJob): number => job.id ?? Infinity;
 
-/** The position after the queued jobs whose id is not greater, so equal ids keep their order. */
-function findInsertionIndex(id: number): number {
+/** Whether `a` runs before `b`: a lower id, or the same id and a lower order. */
+function precedes(a: SchedulerJob, b: SchedulerJob): boolean {
+  const ia = getId(a);
+  const ib = getId(b);
+  return ia < ib || (ia === ib && (a.order ?? Infinity) < (b.order ?? Infinity));
+}
+
+/** The position after the queued jobs that `job` does not precede, so equal keys keep their order. */
+function findInsertionIndex(job: SchedulerJob): number {
   let start = flushIndex + 1;
   let end = queue.length;
   while (start < end) {
     const middle = (start + end) >>> 1;
-    if (getId(queue[middle]) <= id) start = middle + 1;
-    else end = middle;
+    if (precedes(job, queue[middle])) end = middle;
+    else start = middle + 1;
   }
   return start;
 }
@@ -50,10 +60,9 @@ function findInsertionIndex(id: number): number {
 export function queueJob(job: SchedulerJob): void {
   const flags = job.flags ?? 0;
   if (flags & QUEUED) return;
-  const id = getId(job);
   const last = queue.at(-1);
-  if (!last || id >= getId(last)) queue.push(job);
-  else queue.splice(findInsertionIndex(id), 0, job);
+  if (!last || !precedes(job, last)) queue.push(job);
+  else queue.splice(findInsertionIndex(job), 0, job);
   job.flags = flags | QUEUED;
   queueFlush();
 }

@@ -7,7 +7,9 @@ export type ErrorInfo =
   | 'watcher getter'
   | 'watcher callback'
   | 'watcher cleanup'
-  | 'scheduler flush';
+  | 'scheduler flush'
+  | 'render effect'
+  | 'native event handler';
 
 /** The one place errors of user code end up. It reports them and never rethrows. */
 export function handleError(err: unknown, info: ErrorInfo): void {

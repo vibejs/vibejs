@@ -13,3 +13,10 @@ export const isIntegerKey = (key: unknown): boolean =>
   key !== 'NaN' &&
   key[0] !== '-' &&
   String(Number.parseInt(key, 10)) === key;
+
+/** `marginRight` → `margin-right`, `ArrowLeft` → `arrow-left`. */
+export const hyphenate = (value: string): string =>
+  value.replaceAll(/\B([A-Z])/g, '-$1').toLowerCase();
+
+/** The string the DOM would make of `value`. */
+export const toText = (value: unknown): string => String(value);
