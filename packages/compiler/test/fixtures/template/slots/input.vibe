@@ -1,0 +1,20 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import Card from './Card.vibe'
+import List from './List.vibe'
+const open = ref(false)
+const rows = ref([{ id: 1, name: 'a' }])
+</script>
+<template>
+  <Card title="Rows" v-bind="$attrs">
+    <template #header="{ count }">
+      <h3>{{ count }} rows</h3>
+    </template>
+    <template #footer v-if="open">
+      <slot name="footer" :rows="rows">No footer</slot>
+    </template>
+    <List :items="rows">
+      <template #item="{ item }">{{ item.name }}</template>
+    </List>
+  </Card>
+</template>

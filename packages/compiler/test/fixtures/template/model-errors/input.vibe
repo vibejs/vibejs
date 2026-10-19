@@ -1,0 +1,22 @@
+<template>
+  <input v-model>
+  <input v-model="text + 1">
+  <input v-for="i in items" :key="i.id" v-model="i">
+  <input v-model="label">
+  <input v-model="fixed">
+  <div v-model="text"></div>
+  <input :type="text" v-model="text">
+  <input type="file" v-model="text">
+  <input v-model:x="text">
+  <input v-model.foo="text">
+  <input :value="text" v-model="text">
+</template>
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+import Item from './Item.vibe'
+const { label } = defineProps<{ label: string }>()
+const text = ref('')
+const items = ref([{ id: 1, done: false }])
+const fixed = { a: 1 }
+let count = 0
+</script>

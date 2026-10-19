@@ -31,7 +31,8 @@
 //   an inverted one;
 // - the `prop` modifier of the `.foo` shorthand has a zero-width loc at the `.` instead of the
 //   location stub;
-// - a root tag keeps its `v-pre` directive in `props`, so the SFC rules can reject it;
+// - every element keeps its `v-pre` directive in `props`: the SFC rules reject it on a root tag
+//   and the template transform emits the element's subtree as static HTML;
 // - `onCloseTag` resolves the inner end of every element with an `innerLoc` (the root tags), so a
 //   root tag closed at the end of the file covers its content;
 // - `cloneLoc` is deleted, `extend` is `Object.assign`, and imports use `.ts` extensions.
@@ -359,13 +360,7 @@ const tokenizer = new Tokenizer(stack, {
           }
         }
       }
-      if (
-        currentProp.type !== NodeTypes.DIRECTIVE ||
-        currentProp.name !== 'pre' ||
-        tokenizer.inSFCRoot
-      ) {
-        currentOpenTag.props.push(currentProp)
-      }
+      currentOpenTag.props.push(currentProp)
     }
     currentAttrValue = ''
     currentAttrStartIndex = currentAttrEndIndex = -1

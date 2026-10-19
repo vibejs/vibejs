@@ -1,0 +1,519 @@
+{
+  "templates": [
+    {
+      "html": " "
+    },
+    {
+      "html": "<ul><!></ul>"
+    },
+    {
+      "html": "<p> </p>"
+    },
+    {
+      "html": "<h1> </h1>"
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "tpl",
+        "id": 8,
+        "tpl": 3
+      },
+      {
+        "op": "walk",
+        "id": 9,
+        "from": 8,
+        "steps": [
+          "txt"
+        ]
+      },
+      {
+        "op": "effect",
+        "call": {
+          "fn": "setAttr",
+          "args": [
+            {
+              "ref": 8
+            },
+            {
+              "value": "title"
+            },
+            {
+              "expr": {
+                "kind": "expression",
+                "parts": [
+                  {
+                    "code": "`${",
+                    "offset": 320
+                  },
+                  "$props.",
+                  {
+                    "code": "title",
+                    "offset": 323
+                  },
+                  {
+                    "code": "} (${",
+                    "offset": 328
+                  },
+                  "$props.",
+                  {
+                    "code": "items",
+                    "offset": 333
+                  },
+                  {
+                    "code": ".length})`",
+                    "offset": 338
+                  }
+                ],
+                "scopes": []
+              }
+            }
+          ]
+        },
+        "loc": 312
+      },
+      {
+        "op": "effect",
+        "call": {
+          "fn": "setText",
+          "args": [
+            {
+              "ref": 9
+            },
+            {
+              "expr": {
+                "kind": "expression",
+                "parts": [
+                  "_toDisplayString(",
+                  "$props.",
+                  {
+                    "code": "title",
+                    "offset": 353
+                  },
+                  {
+                    "code": ".toUpperCase()",
+                    "offset": 358
+                  },
+                  ")",
+                  " + ",
+                  "\" 😀 \"",
+                  " + ",
+                  "_toDisplayString(",
+                  "$setup.",
+                  {
+                    "code": "count",
+                    "offset": 382
+                  },
+                  {
+                    "code": " * 2",
+                    "offset": 387
+                  },
+                  ")"
+                ],
+                "scopes": []
+              }
+            }
+          ]
+        },
+        "loc": 350
+      },
+      {
+        "op": "block",
+        "id": 5,
+        "parent": null,
+        "anchor": null,
+        "make": {
+          "k": "if",
+          "branches": [
+            {
+              "test": {
+                "kind": "expression",
+                "parts": [
+                  "$props.",
+                  {
+                    "code": "items",
+                    "offset": 412
+                  },
+                  {
+                    "code": ".length > 0 && ",
+                    "offset": 417
+                  },
+                  "$setup.",
+                  {
+                    "code": "count",
+                    "offset": 432
+                  },
+                  {
+                    "code": " !== -1",
+                    "offset": 437
+                  }
+                ],
+                "scopes": []
+              },
+              "block": {
+                "ops": [
+                  {
+                    "op": "tpl",
+                    "id": 3,
+                    "tpl": 1
+                  },
+                  {
+                    "op": "walk",
+                    "id": 4,
+                    "from": 3,
+                    "steps": [
+                      "child"
+                    ]
+                  },
+                  {
+                    "op": "block",
+                    "id": 2,
+                    "parent": 3,
+                    "anchor": 4,
+                    "make": {
+                      "k": "for",
+                      "source": {
+                        "kind": "expression",
+                        "parts": [
+                          "$props.",
+                          {
+                            "code": "items",
+                            "offset": 499
+                          }
+                        ],
+                        "scopes": []
+                      },
+                      "scope": {
+                        "names": [
+                          "id",
+                          "text",
+                          "index"
+                        ]
+                      },
+                      "params": [
+                        {
+                          "code": "{ id, text }",
+                          "offset": 475
+                        },
+                        {
+                          "code": "index",
+                          "offset": 489
+                        },
+                        null
+                      ],
+                      "key": {
+                        "kind": "expression",
+                        "parts": [
+                          {
+                            "code": "id",
+                            "offset": 518
+                          }
+                        ],
+                        "scopes": [
+                          {
+                            "names": [
+                              "id",
+                              "text",
+                              "index"
+                            ]
+                          }
+                        ]
+                      },
+                      "block": {
+                        "ops": [
+                          {
+                            "op": "block",
+                            "id": 0,
+                            "parent": null,
+                            "anchor": null,
+                            "make": {
+                              "k": "component",
+                              "is": "TodoItem",
+                              "props": [
+                                {
+                                  "key": "todo",
+                                  "value": {
+                                    "kind": "expression",
+                                    "parts": [
+                                      {
+                                        "code": "{ id, text, index } as const",
+                                        "offset": 535
+                                      }
+                                    ],
+                                    "scopes": [
+                                      {
+                                        "names": [
+                                          "id",
+                                          "text",
+                                          "index"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "loc": 528
+                                },
+                                {
+                                  "key": "onSelect",
+                                  "value": {
+                                    "expr": {
+                                      "kind": "function",
+                                      "parts": [
+                                        {
+                                          "code": "(value: number) => ",
+                                          "offset": 580
+                                        },
+                                        "$setup.",
+                                        {
+                                          "code": "emit",
+                                          "offset": 599
+                                        },
+                                        {
+                                          "code": "('select', value)",
+                                          "offset": 603
+                                        }
+                                      ],
+                                      "scopes": []
+                                    },
+                                    "mods": [],
+                                    "keys": [],
+                                    "options": {}
+                                  },
+                                  "loc": 571
+                                },
+                                {
+                                  "key": "onRemove",
+                                  "value": {
+                                    "expr": {
+                                      "kind": "statements",
+                                      "parts": [
+                                        "$setup.",
+                                        {
+                                          "code": "count",
+                                          "offset": 637
+                                        },
+                                        {
+                                          "code": "++; ",
+                                          "offset": 642
+                                        },
+                                        "$ctx.emit",
+                                        {
+                                          "code": "('remove', $event)",
+                                          "offset": 651
+                                        }
+                                      ],
+                                      "scopes": []
+                                    },
+                                    "mods": [],
+                                    "keys": [],
+                                    "options": {}
+                                  },
+                                  "loc": 628
+                                }
+                              ],
+                              "spread": null,
+                              "slots": [
+                                {
+                                  "name": "default",
+                                  "scope": {
+                                    "names": [
+                                      "done"
+                                    ]
+                                  },
+                                  "params": {
+                                    "code": "{ done = false }",
+                                    "offset": 703
+                                  },
+                                  "block": {
+                                    "ops": [
+                                      {
+                                        "op": "tpl",
+                                        "id": 1,
+                                        "tpl": 0
+                                      },
+                                      {
+                                        "op": "effect",
+                                        "call": {
+                                          "fn": "setText",
+                                          "args": [
+                                            {
+                                              "ref": 1
+                                            },
+                                            {
+                                              "expr": {
+                                                "kind": "expression",
+                                                "parts": [
+                                                  "_toDisplayString(",
+                                                  {
+                                                    "code": "done ? '✓' : text!.trim()",
+                                                    "offset": 724
+                                                  },
+                                                  ")"
+                                                ],
+                                                "scopes": [
+                                                  {
+                                                    "names": [
+                                                      "done"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "names": [
+                                                      "id",
+                                                      "text",
+                                                      "index"
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        "loc": 721
+                                      }
+                                    ],
+                                    "returns": [
+                                      1
+                                    ]
+                                  },
+                                  "test": null
+                                }
+                              ],
+                              "singleRoot": false
+                            }
+                          }
+                        ],
+                        "returns": [
+                          0
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "returns": [
+                  3
+                ]
+              }
+            },
+            {
+              "test": null,
+              "block": {
+                "ops": [
+                  {
+                    "op": "tpl",
+                    "id": 6,
+                    "tpl": 2
+                  },
+                  {
+                    "op": "walk",
+                    "id": 7,
+                    "from": 6,
+                    "steps": [
+                      "txt"
+                    ]
+                  },
+                  {
+                    "op": "once",
+                    "call": {
+                      "fn": "on",
+                      "args": [
+                        {
+                          "ref": 6
+                        },
+                        {
+                          "value": "click"
+                        },
+                        {
+                          "handler": {
+                            "expr": {
+                              "kind": "statements",
+                              "parts": [
+                                "$setup.",
+                                {
+                                  "code": "count",
+                                  "offset": 808
+                                },
+                                {
+                                  "code": " = Math.max(0, ",
+                                  "offset": 813
+                                },
+                                "$setup.",
+                                {
+                                  "code": "count",
+                                  "offset": 828
+                                },
+                                {
+                                  "code": " - 1)",
+                                  "offset": 833
+                                }
+                              ],
+                              "scopes": []
+                            },
+                            "mods": [],
+                            "keys": [],
+                            "options": {}
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "effect",
+                    "call": {
+                      "fn": "setText",
+                      "args": [
+                        {
+                          "ref": 7
+                        },
+                        {
+                          "expr": {
+                            "kind": "expression",
+                            "parts": [
+                              "_toDisplayString(",
+                              "$props.",
+                              {
+                                "code": "items",
+                                "offset": 843
+                              },
+                              {
+                                "code": ".map((item) => item.text).join(', ')",
+                                "offset": 848
+                              },
+                              ")"
+                            ],
+                            "scopes": []
+                          }
+                        }
+                      ]
+                    },
+                    "loc": 840
+                  }
+                ],
+                "returns": [
+                  6
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "returns": [
+      8,
+      5
+    ]
+  },
+  "abi": [
+    "toDisplayString",
+    "template",
+    "txt",
+    "renderEffect",
+    "setAttr",
+    "setText",
+    "createIf",
+    "child",
+    "insert",
+    "createFor",
+    "createComponent",
+    "on"
+  ]
+}

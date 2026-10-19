@@ -1,0 +1,82 @@
+error[VIBE2501]: `v-model` needs a target.
+  --> template/model-errors/input.vibe:2:10
+2 |   <input v-model>
+  |          ^^^^^^^
+fix: Write the target, as in `v-model="text"`.
+docs: https://vibejs.org/v0/errors/VIBE2501
+
+error[VIBE2502]: The `v-model` target must be a variable or a property.
+  --> template/model-errors/input.vibe:3:19
+3 |   <input v-model="text + 1">
+  |                   ^^^^^^^^
+fix: Bind a `ref` or a property, as in `v-model="form.name"`.
+fix: Use a value binding and an event listener for computed values.
+docs: https://vibejs.org/v0/errors/VIBE2502
+
+error[VIBE2503]: `i` is a `v-for` or `v-slot` local and cannot be assigned.
+  --> template/model-errors/input.vibe:4:50
+4 |   <input v-for="i in items" :key="i.id" v-model="i">
+  |                                                  ^
+fix: Bind a property of the item, as in `v-model="item.text"`.
+docs: https://vibejs.org/v0/errors/VIBE2503
+
+error[VIBE2504]: `label` is a prop and cannot be assigned.
+  --> template/model-errors/input.vibe:5:19
+5 |   <input v-model="label">
+  |                   ^^^^^
+fix: Declare a two-way value with `defineModel()` and bind it.
+fix: Copy the prop into a `ref` and bind that.
+docs: https://vibejs.org/v0/errors/VIBE2504
+
+error[VIBE2505]: `fixed` cannot be assigned, because it is an import or a constant that holds no ref.
+  --> template/model-errors/input.vibe:6:19
+6 |   <input v-model="fixed">
+  |                   ^^^^^
+fix: Hold the value in a `ref`, as in `const fixed = ref(…)`.
+fix: Bind a property of a reactive object.
+docs: https://vibejs.org/v0/errors/VIBE2505
+
+error[VIBE2506]: `v-model` is not supported on `<div>`.
+  --> template/model-errors/input.vibe:7:8
+7 |   <div v-model="text"></div>
+  |        ^^^^^^^^^^^^^^
+fix: Use `<input>`, `<textarea>` or `<select>`.
+fix: Bind the value and listen to the event of the element, as in `:value` and `@input`.
+docs: https://vibejs.org/v0/errors/VIBE2506
+
+error[VIBE2507]: `v-model` cannot be used on an `<input>` with a bound `:type`.
+  --> template/model-errors/input.vibe:8:23
+8 |   <input :type="text" v-model="text">
+  |                       ^^^^^^^^^^^^^^
+fix: Write a static `type`.
+fix: Render one `<input>` per type with `v-if`.
+docs: https://vibejs.org/v0/errors/VIBE2507
+
+error[VIBE2508]: `v-model` cannot be used on `<input type="file">`.
+  --> template/model-errors/input.vibe:9:22
+9 |   <input type="file" v-model="text">
+  |                      ^^^^^^^^^^^^^^
+fix: Listen to `@change` and read `event.target.files`.
+docs: https://vibejs.org/v0/errors/VIBE2508
+
+error[VIBE2509]: The `v-model` argument `x` is allowed only as a static name on a component.
+  --> template/model-errors/input.vibe:10:18
+10 |   <input v-model:x="text">
+   |                  ^
+fix: Remove the argument on native elements.
+fix: Write the model name statically, as in `v-model:title`.
+docs: https://vibejs.org/v0/errors/VIBE2509
+
+error[VIBE2510]: `.foo` is not a `v-model` modifier for this element.
+  --> template/model-errors/input.vibe:11:18
+11 |   <input v-model.foo="text">
+   |                  ^^^
+fix: Remove `.foo`.
+docs: https://vibejs.org/v0/errors/VIBE2510
+
+error[VIBE2511]: `:value` cannot be combined with `v-model` on a text input.
+  --> template/model-errors/input.vibe:12:10
+12 |   <input :value="text" v-model="text">
+   |          ^^^^^^^^^^^^^
+fix: Remove `:value`.
+docs: https://vibejs.org/v0/errors/VIBE2511

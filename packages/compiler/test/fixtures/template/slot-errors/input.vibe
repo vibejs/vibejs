@@ -1,0 +1,19 @@
+<template>
+  <div v-slot></div>
+  <Item v-slot><template #a></template></Item>
+  <Item><template #a></template><template #a></template></Item>
+  <Item>loose<template #default></template></Item>
+  <Item><template #[text]></template></Item>
+  <Item><template #a v-for="i in items"></template></Item>
+  <slot :name="text"></slot>
+  <slot @click="count++"></slot>
+</template>
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+import Item from './Item.vibe'
+const { label } = defineProps<{ label: string }>()
+const text = ref('')
+const items = ref([{ id: 1, done: false }])
+const fixed = { a: 1 }
+let count = 0
+</script>

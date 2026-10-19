@@ -1,0 +1,212 @@
+{
+  "templates": [
+    {
+      "html": "<li> </li>"
+    },
+    {
+      "html": "<ul><!></ul>"
+    }
+  ],
+  "block": {
+    "ops": [
+      {
+        "op": "tpl",
+        "id": 0,
+        "tpl": 1
+      },
+      {
+        "op": "walk",
+        "id": 4,
+        "from": 0,
+        "steps": [
+          "child"
+        ]
+      },
+      {
+        "op": "once",
+        "call": {
+          "fn": "setRef",
+          "args": [
+            {
+              "ref": 0
+            },
+            {
+              "value": "list"
+            },
+            {
+              "value": false
+            }
+          ]
+        }
+      },
+      {
+        "op": "block",
+        "id": 3,
+        "parent": 0,
+        "anchor": 4,
+        "make": {
+          "k": "for",
+          "source": {
+            "kind": "expression",
+            "parts": [
+              "$props.",
+              {
+                "code": "items",
+                "offset": 52
+              }
+            ],
+            "scopes": []
+          },
+          "scope": {
+            "names": [
+              "item"
+            ]
+          },
+          "params": [
+            {
+              "code": "item",
+              "offset": 44
+            },
+            null,
+            null
+          ],
+          "key": {
+            "kind": "expression",
+            "parts": [
+              {
+                "code": "item.id",
+                "offset": 65
+              }
+            ],
+            "scopes": [
+              {
+                "names": [
+                  "item"
+                ]
+              }
+            ]
+          },
+          "block": {
+            "ops": [
+              {
+                "op": "tpl",
+                "id": 1,
+                "tpl": 0
+              },
+              {
+                "op": "walk",
+                "id": 2,
+                "from": 1,
+                "steps": [
+                  "txt"
+                ]
+              },
+              {
+                "op": "once",
+                "call": {
+                  "fn": "on",
+                  "args": [
+                    {
+                      "ref": 1
+                    },
+                    {
+                      "value": "click"
+                    },
+                    {
+                      "handler": {
+                        "expr": {
+                          "kind": "statements",
+                          "parts": [
+                            "$setup.",
+                            {
+                              "code": "pick",
+                              "offset": 82
+                            },
+                            {
+                              "code": "(item.id)",
+                              "offset": 86
+                            }
+                          ],
+                          "scopes": [
+                            {
+                              "names": [
+                                "item"
+                              ]
+                            }
+                          ]
+                        },
+                        "mods": [],
+                        "keys": [],
+                        "options": {}
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "effect",
+                "call": {
+                  "fn": "setText",
+                  "args": [
+                    {
+                      "ref": 2
+                    },
+                    {
+                      "expr": {
+                        "kind": "expression",
+                        "parts": [
+                          "_toDisplayString(",
+                          "$setup.",
+                          {
+                            "code": "label",
+                            "offset": 100
+                          },
+                          ")",
+                          " + ",
+                          "\" \"",
+                          " + ",
+                          "_toDisplayString(",
+                          {
+                            "code": "item.text",
+                            "offset": 112
+                          },
+                          ")"
+                        ],
+                        "scopes": [
+                          {
+                            "names": [
+                              "item"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "loc": 97
+              }
+            ],
+            "returns": [
+              1
+            ]
+          }
+        }
+      }
+    ],
+    "returns": [
+      0
+    ]
+  },
+  "abi": [
+    "toDisplayString",
+    "template",
+    "child",
+    "setRef",
+    "insert",
+    "createFor",
+    "txt",
+    "on",
+    "renderEffect",
+    "setText"
+  ]
+}

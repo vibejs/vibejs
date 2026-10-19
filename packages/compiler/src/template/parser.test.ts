@@ -5,7 +5,8 @@
 // `codegenNode` are dropped from the expected nodes; the `baseParse` below wraps the input in an
 // unclosed `<template>` (the fork parses SFC files only) and shifts the locations back, so the
 // upstream positions hold; `parseMode: 'sfc'` cases parse the input as a whole file. The Errors
-// table checks codes and start positions without the upstream AST snapshots.
+// table checks codes and start positions without the upstream AST snapshots. An element keeps
+// its `v-pre` directive, so the `v-pre` case expects it in `props`.
 //
 // Dropped cases, by category:
 // - deleted options: custom delimiters, `comments: false` (comments option, and the second half
@@ -1777,6 +1778,7 @@ describe('compiler: parse', () => {
 
       const divWithPre = ast.children[0] as ElementNode;
       expect(divWithPre.props).toMatchObject([
+        { type: NodeTypes.DIRECTIVE, name: 'pre' },
         {
           type: NodeTypes.ATTRIBUTE,
           name: `:id`,
@@ -2980,7 +2982,7 @@ describe('additions', () => {
     const p = first('<div v-pre><p :a.b="c"></p></div>').children[0] as ElementNode;
     expect(p.props).toMatchObject([{ type: NodeTypes.ATTRIBUTE, name: ':a.b' }]);
     const div = first('<div v-pre:x.y></div>');
-    expect(div.props).toStrictEqual([]);
+    expect(div.props).toMatchObject([{ type: NodeTypes.DIRECTIVE, name: 'pre' }]);
   });
 
   test('a slot directive without an argument ignores modifiers', () => {

@@ -26,13 +26,17 @@ Details and the full license texts are in [`packages/compiler/THIRD-PARTY-NOTICE
   - `packages/compiler/src/template/ast.ts` from `packages/compiler-core/src/ast.ts`
   - `packages/compiler/src/template/tags.ts` from `packages/shared/src/domTagConfig.ts` and `packages/shared/src/makeMap.ts`
   - `packages/compiler/src/style/pluginScoped.ts` from `packages/compiler-sfc/src/style/pluginScoped.ts`
+  - `packages/compiler/src/transform/nesting.ts` from `packages/compiler-dom/src/htmlNesting.ts`
   - `packages/compiler/src/template/parser.test.ts` from `packages/compiler-core/__tests__/parse.spec.ts` (tests, not shipped)
   - `packages/compiler/src/sfc/parse.test.ts` from `packages/compiler-sfc/__tests__/parse.spec.ts` (tests, not shipped)
   - `packages/compiler/src/style/pluginScoped.test.ts` from `packages/compiler-sfc/__tests__/compileStyle.spec.ts` (tests, not shipped)
   - `packages/compiler/src/expr/transformExpression.test.ts` from `packages/compiler-core/__tests__/transforms/transformExpressions.spec.ts` (tests, not shipped)
   - `packages/compiler/src/script/definePropsDestructure.test.ts` from `packages/compiler-sfc/__tests__/compileScript/definePropsDestructure.spec.ts` (tests, not shipped)
+  - `packages/compiler/src/transform/nesting.test.ts` from `packages/compiler-dom/__tests__/transforms/validateHtmlNesting.spec.ts` (tests, not shipped)
 - **fb55/htmlparser2**, MIT, Copyright 2010, 2011, Chris Winberry, through the vuejs/core tokenizer.
   - `packages/compiler/src/template/tokenizer.ts`
+- **MananTank/validate-html-nesting**, ISC, Copyright (c) Manan Tank, through the vuejs/core nesting check.
+  - `packages/compiler/src/transform/nesting.ts` and `packages/compiler/src/transform/nesting.test.ts`
 
 ## packages/ui
 

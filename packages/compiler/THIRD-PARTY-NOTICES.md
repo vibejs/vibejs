@@ -13,12 +13,14 @@
   - `packages/compiler/src/template/ast.ts` from the template nodes of `packages/compiler-core/src/ast.ts`
   - `packages/compiler/src/template/tags.ts` from `packages/shared/src/domTagConfig.ts` and `packages/shared/src/makeMap.ts`
   - `packages/compiler/src/style/pluginScoped.ts` from `packages/compiler-sfc/src/style/pluginScoped.ts`
+  - `packages/compiler/src/transform/nesting.ts` from `packages/compiler-dom/src/htmlNesting.ts`, which is copied from validate-html-nesting (below)
 - Used in (tests, not shipped):
   - `packages/compiler/src/template/parser.test.ts` from `packages/compiler-core/__tests__/parse.spec.ts`
   - `packages/compiler/src/sfc/parse.test.ts` from `packages/compiler-sfc/__tests__/parse.spec.ts`
   - `packages/compiler/src/style/pluginScoped.test.ts` from `packages/compiler-sfc/__tests__/compileStyle.spec.ts`
   - `packages/compiler/src/expr/transformExpression.test.ts` from `packages/compiler-core/__tests__/transforms/transformExpressions.spec.ts`
   - `packages/compiler/src/script/definePropsDestructure.test.ts` from `packages/compiler-sfc/__tests__/compileScript/definePropsDestructure.spec.ts`
+  - `packages/compiler/src/transform/nesting.test.ts` from `packages/compiler-dom/__tests__/transforms/validateHtmlNesting.spec.ts`
 
 ```text
 The MIT License (MIT)
@@ -69,4 +71,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
+```
+
+## MananTank/validate-html-nesting
+
+- Repository: https://github.com/MananTank/validate-html-nesting
+- License: ISC
+- Used in: `packages/compiler/src/transform/nesting.ts` (shipped) and `packages/compiler/src/transform/nesting.test.ts` (tests, not shipped), through the vuejs/core copy, which keeps its notice verbatim
+
+```text
+ISC License
+
+Copyright (c) Manan Tank
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```

@@ -1,0 +1,45 @@
+error[VIBE2701]: `ref="nope"` has no matching `useTemplateRef('nope')`.
+  --> template/ref-errors/input.vibe:2:8
+2 |   <div ref="nope"></div>
+  |        ^^^^^^^^^^
+fix: Declare it in `<script setup lang="ts">`, as in `const nope = useTemplateRef('nope')`.
+fix: Fix the spelling of the ref name.
+docs: https://vibejs.org/v0/errors/VIBE2701
+
+error[VIBE2702]: A bound `:ref` must be a function or a member path that holds one.
+  --> template/ref-errors/input.vibe:3:14
+3 |   <div :ref="count++"></div>
+  |              ^^^^^^^
+fix: Pass a function, as in `:ref="(el) => (input = el)"`.
+fix: Use a string ref with `useTemplateRef`.
+docs: https://vibejs.org/v0/errors/VIBE2702
+
+error[VIBE2703]: `v-html` needs a value.
+  --> template/ref-errors/input.vibe:4:8
+4 |   <div v-html></div>
+  |        ^^^^^^
+fix: Write the value, as in `v-html="content"`.
+docs: https://vibejs.org/v0/errors/VIBE2703
+
+error[VIBE2704]: `v-text` replaces the content of the element, which must be empty.
+  --> template/ref-errors/input.vibe:5:8
+5 |   <div v-text="text">x</div>
+  |        ^^^^^^^^^^^^^
+fix: Remove the children of the element.
+fix: Remove `v-text` and render the value as a child.
+docs: https://vibejs.org/v0/errors/VIBE2704
+
+error[VIBE2705]: `v-show` needs a condition.
+  --> template/ref-errors/input.vibe:6:8
+6 |   <div v-show></div>
+  |        ^^^^^^
+fix: Write the condition, as in `v-show="open"`.
+docs: https://vibejs.org/v0/errors/VIBE2705
+
+error[VIBE2706]: `v-show` can only be used on an element, not on `<Item>`.
+  --> template/ref-errors/input.vibe:7:9
+7 |   <Item v-show="text" />
+  |         ^^^^^^^^^^^^^
+fix: Wrap the content in an element and put `v-show` on it.
+fix: Use `v-if` instead of `v-show`.
+docs: https://vibejs.org/v0/errors/VIBE2706

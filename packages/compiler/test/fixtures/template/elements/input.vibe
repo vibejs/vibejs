@@ -1,0 +1,24 @@
+<template>
+  <Missing />
+  <item />
+  <foo></foo>
+  <div><template>loose</template></div>
+  <table>text</table>
+  <component is="Item" />
+  <div is="x"></div>
+  <div><script></script></div>
+  <Teleport />
+  <KeepAlive />
+  <Transition />
+  <TransitionGroup />
+  <Suspense />
+</template>
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+import Item from './Item.vibe'
+const { label } = defineProps<{ label: string }>()
+const text = ref('')
+const items = ref([{ id: 1, done: false }])
+const fixed = { a: 1 }
+let count = 0
+</script>

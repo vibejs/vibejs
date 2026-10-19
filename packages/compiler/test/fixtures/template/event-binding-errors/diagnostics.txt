@@ -1,0 +1,52 @@
+error[VIBE2301]: `@click` needs a handler.
+  --> template/event-binding-errors/input.vibe:2:6
+2 |   <p @click></p>
+  |      ^^^^^^
+fix: Write the handler, as in `@click="save"`.
+fix: Remove `@click`.
+docs: https://vibejs.org/v0/errors/VIBE2301
+
+error[VIBE2302]: `v-on` needs an event name and cannot take an object of listeners.
+  --> template/event-binding-errors/input.vibe:3:6
+3 |   <p v-on="fixed"></p>
+  |      ^^^^^^^^^^^^
+fix: Write one `@event="handler"` attribute per event.
+docs: https://vibejs.org/v0/errors/VIBE2302
+
+error[VIBE2303]: The event name of `v-on` must be static.
+  --> template/event-binding-errors/input.vibe:4:7
+4 |   <p @[text]="count++"></p>
+  |       ^^^^^^
+fix: Write a static event name and decide inside the handler what to do.
+fix: Attach the listener with `addEventListener` from a template ref.
+docs: https://vibejs.org/v0/errors/VIBE2303
+
+error[VIBE2304]: `.foo` is not an event modifier.
+  --> template/event-binding-errors/input.vibe:5:13
+5 |   <p @click.foo="count++"></p>
+  |             ^^^
+fix: Fix the spelling of `.foo`.
+fix: Check the key inside the handler.
+docs: https://vibejs.org/v0/errors/VIBE2304
+
+error[VIBE2305]: `.stop` cannot modify a component event.
+  --> template/event-binding-errors/input.vibe:6:15
+6 |   <Item @pick.stop="count++" />
+  |               ^^^^
+fix: Remove `.stop` and handle the case inside the handler.
+docs: https://vibejs.org/v0/errors/VIBE2305
+
+error[VIBE2401]: `:foo-bar` needs a value.
+  --> template/event-binding-errors/input.vibe:7:6
+7 |   <p :foo-bar></p>
+  |      ^^^^^^^^
+fix: Write the value, as in `:foo-bar="value"`.
+fix: Remove the binding.
+docs: https://vibejs.org/v0/errors/VIBE2401
+
+error[VIBE2402]: `.foo` is not a `v-bind` modifier.
+  --> template/event-binding-errors/input.vibe:8:13
+8 |   <p :title.foo="text"></p>
+  |             ^^^
+fix: Remove `.foo`.
+docs: https://vibejs.org/v0/errors/VIBE2402

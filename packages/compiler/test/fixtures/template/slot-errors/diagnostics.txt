@@ -1,0 +1,58 @@
+error[VIBE2601]: `v-slot` can only be used on a component or on a `<template>` that is a direct child of a component.
+  --> template/slot-errors/input.vibe:2:8
+2 |   <div v-slot></div>
+  |        ^^^^^^
+fix: Move `v-slot` to the component or to a `<template>` directly inside it.
+docs: https://vibejs.org/v0/errors/VIBE2601
+
+error[VIBE2602]: `v-slot` on the component cannot be combined with `<template v-slot>` children.
+  --> template/slot-errors/input.vibe:3:9
+3 |   <Item v-slot><template #a></template></Item>
+  |         ^^^^^^
+fix: Move the content of the component slot into a `<template #default>`.
+docs: https://vibejs.org/v0/errors/VIBE2602
+
+error[VIBE2603]: The slot `a` is passed more than once.
+  --> template/slot-errors/input.vibe:4:43
+4 |   <Item><template #a></template><template #a></template></Item>
+  |                                           ^^
+fix: Merge the content of both slots.
+fix: Rename one of the slots.
+docs: https://vibejs.org/v0/errors/VIBE2603
+
+error[VIBE2604]: The default slot is passed both as `<template #default>` and as loose children.
+  --> template/slot-errors/input.vibe:5:24
+5 |   <Item>loose<template #default></template></Item>
+  |                        ^^^^^^^^
+fix: Move the loose children into `<template #default>`.
+docs: https://vibejs.org/v0/errors/VIBE2604
+
+error[VIBE2605]: Slot names must be static.
+  --> template/slot-errors/input.vibe:6:20
+6 |   <Item><template #[text]></template></Item>
+  |                    ^^^^^^
+fix: Write a static name, and use `v-if` on slot templates to choose between them.
+docs: https://vibejs.org/v0/errors/VIBE2605
+
+error[VIBE2606]: `v-for` cannot be used on a slot template.
+  --> template/slot-errors/input.vibe:7:22
+7 |   <Item><template #a v-for="i in items"></template></Item>
+  |                      ^^^^^^^^^^^^^^^^^^
+fix: Loop inside the slot template instead.
+fix: Pass the list as a prop and let the component render its slot per item.
+docs: https://vibejs.org/v0/errors/VIBE2606
+
+error[VIBE2607]: The name of a `<slot>` must be static.
+  --> template/slot-errors/input.vibe:8:9
+8 |   <slot :name="text"></slot>
+  |         ^^^^^^^^^^^^
+fix: Write a static `name`, and use `v-if` to choose between outlets.
+docs: https://vibejs.org/v0/errors/VIBE2607
+
+error[VIBE2608]: `@click` cannot be used on `<slot>`.
+  --> template/slot-errors/input.vibe:9:9
+9 |   <slot @click="count++"></slot>
+  |         ^^^^^^^^^^^^^^^^
+fix: Move `@click` to an element inside the slot content.
+fix: Remove `@click`.
+docs: https://vibejs.org/v0/errors/VIBE2608
