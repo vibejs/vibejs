@@ -16,7 +16,10 @@ it('bundles createClient for the browser from dist without server or node module
   const ids = chunks.flatMap((chunk) => chunk.moduleIds);
   expect(ids).toContainEqual(expect.stringMatching(/\/packages\/contract\/dist\/index\.js$/));
   expect(
-    ids.filter((id) => /@vibejs-org\/server|\/packages\/server\/|srvx|^node:/.test(id)),
+    // Vite replaces a Node builtin with the id __vite-browser-external in a browser build.
+    ids.filter((id) =>
+      /@vibejs-org\/server|\/packages\/server\/|srvx|^node:|__vite-browser-external/.test(id),
+    ),
   ).toEqual([]);
   expect(chunks.map((chunk) => chunk.code).join('\n')).not.toMatch(/["']node:/);
 });

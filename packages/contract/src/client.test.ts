@@ -165,7 +165,32 @@ describe('createClient: requests', () => {
     expect(error).toMatchObject({ args: { param: 'id', path: '/orgs/:orgId/users/:id' } });
     expect(fetch).not.toHaveBeenCalled();
   });
+
+  it('reads only own params, so a param named like a prototype member is still required', async () => {
+    const { fetch } = stub();
+    const api = createClient(defineContract('/z', { one: get('/:constructor') }), {
+      baseUrl: '/',
+      fetch,
+    });
+    // @ts-expect-error the types require every path param
+    const error: unknown = await api.one({ params: {} }).catch((e: unknown) => e);
+    expect(isVibeError(error, 'VIBE9091')).toBe(true);
+    // @ts-expect-error the types require the input
+    const missing: unknown = await api.one().catch((e: unknown) => e);
+    expect(isVibeError(missing, 'VIBE9091')).toBe(true);
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });
+
+/** A response whose body stream fails with an AbortError, as after a mid-body abort. */
+const abortedBody = (init: ResponseInit) =>
+  new Response(
+    new ReadableStream({
+      pull: (controller) =>
+        controller.error(new DOMException('This operation was aborted', 'AbortError')),
+    }),
+    init,
+  );
 
 describe('createClient: results', () => {
   const params = { params: { orgId: 'o', id: 1 } };
@@ -236,6 +261,28 @@ describe('createClient: results', () => {
       expect(result).toMatchObject({ ok: false, error: { code: 'UNEXPECTED_RESPONSE' } });
       expect(!result.ok && result.error.status).toBe(result.response?.status);
       expect(!result.ok && 'detail' in result.error).toBe(false);
+    }
+  });
+
+  it('gives ABORTED with status 0 when the body read aborts after the headers', async () => {
+    const answers = [
+      () => abortedBody({ status: 200 }),
+      () => abortedBody({ status: 404, headers: { 'content-type': 'application/problem+json' } }),
+    ];
+    for (const answer of answers) {
+      const { api } = client(answer);
+      const result = await api.users.one(params);
+      expect(result).toEqual({
+        ok: false,
+        error: {
+          type: 'about:blank',
+          title: 'Request aborted',
+          status: 0,
+          code: 'ABORTED',
+          detail: 'This operation was aborted',
+        },
+        response: expect.any(Response),
+      });
     }
   });
 

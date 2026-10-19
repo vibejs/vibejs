@@ -99,12 +99,16 @@ const isProblem = (value: unknown): value is Problem =>
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
+const aborted = (error: unknown) =>
+  error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError');
+
 function callFn(route: Route, options: ClientOptions) {
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a bound route's def comes from a route builder
   const def = route.def as RouteDef;
   return async (input: Input = {}, call: CallOptions = {}): Promise<Result> => {
     const path = route.path.replace(/:(\w+)/g, (_, param: string) => {
-      const value = input.params?.[param];
+      const params = input.params ?? {};
+      const value = Object.hasOwn(params, param) ? params[param] : undefined;
       if (value === undefined) throw vibeError('VIBE9091', { param, path: route.path });
       return encodeURIComponent(String(value));
     });
@@ -132,14 +136,14 @@ function callFn(route: Route, options: ClientOptions) {
     try {
       response = await (options.fetch ? options.fetch(request) : fetch(request));
     } catch (error) {
-      const name = error instanceof Error ? error.name : '';
-      const code = name === 'AbortError' || name === 'TimeoutError' ? 'ABORTED' : 'NETWORK_ERROR';
-      return fail(code, 0, undefined, message(error));
+      return fail(aborted(error) ? 'ABORTED' : 'NETWORK_ERROR', 0, undefined, message(error));
     }
 
     if (!response.ok) {
       if (/^application\/problem\+json\b/i.test(response.headers.get('content-type') ?? '')) {
-        const problem: unknown = await response.json().catch(() => undefined);
+        // A JSON body is never an Error, so a read failure stays distinguishable from the problem.
+        const problem: unknown = await response.json().catch((error: unknown) => error);
+        if (aborted(problem)) return fail('ABORTED', 0, response, message(problem));
         if (isProblem(problem)) return { ok: false, error: problem, response };
       }
       return fail('UNEXPECTED_RESPONSE', response.status, response);
@@ -150,6 +154,7 @@ function callFn(route: Route, options: ClientOptions) {
     try {
       return { ok: true, data: await response.json(), response };
     } catch (error) {
+      if (aborted(error)) return fail('ABORTED', 0, response, message(error));
       return fail('UNEXPECTED_RESPONSE', response.status, response, message(error));
     }
   };

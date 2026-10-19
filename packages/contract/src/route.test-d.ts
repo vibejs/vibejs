@@ -28,6 +28,8 @@ get('/users', { params: schema<{ id: string }>() });
 get('/users', { status: 204 });
 // @ts-expect-error an error status is a number
 get('/users', { errors: { NOT_FOUND: '404' } });
+// @ts-expect-error a GET route takes no body
+get('/users', { body: schema<{ a: number }>() });
 // @ts-expect-error a response is a schema or raw()
 get('/users', { response: 'text/plain' });
 // An explicit undefined def is a route without a def.

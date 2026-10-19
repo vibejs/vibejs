@@ -52,6 +52,19 @@ describe('route builders', () => {
   });
 });
 
+describe('get', () => {
+  it('rejects a body with VIBE9004', () => {
+    const body = {
+      '~standard': { version: 1, vendor: 'test', validate: () => ({ value: 1 }) },
+    } as const;
+    // @ts-expect-error a GET route takes no body
+    expect(() => get('/search', { body })).toThrow(
+      expect.objectContaining({ code: 'VIBE9004', args: { path: '/search' }, fixes: nonEmpty }),
+    );
+    expect(post('/search', { body }).def.body).toBe(body);
+  });
+});
+
 describe('isRouteSpec', () => {
   it('rejects values that no builder returned', () => {
     for (const value of [undefined, null, 1, { method: 'GET', path: '/', def: {} }]) {

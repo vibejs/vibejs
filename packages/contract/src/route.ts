@@ -74,6 +74,8 @@ export function isRouteSpec(value: unknown): value is RouteSpec {
 
 function route(method: HttpMethod, path: string, def: RouteDef = {}): RouteSpec {
   checkPath(path, false);
+  // A fetch Request rejects a GET with a body, so no client could call the route.
+  if (method === 'GET' && def.body !== undefined) throw vibeError('VIBE9004', { path });
   const spec = Object.freeze({ method, path, def });
   specs.add(spec);
   return spec;
@@ -89,7 +91,7 @@ type Def<P extends string, D> = RouteDef<P> & {
 
 /** Declares a GET route. */
 export function get<const P extends string>(path: P, def?: undefined): RouteSpec<'GET', P, {}>;
-export function get<const P extends string, const D extends Def<P, D>>(
+export function get<const P extends string, const D extends Def<P, D> & { readonly body?: never }>(
   path: P,
   def: D | undefined,
 ): RouteSpec<'GET', P, D>;
