@@ -1,9 +1,13 @@
 import { vibeError } from '../errors.gen.ts';
 import { shallowRef } from '../reactivity/ref.ts';
+import type { App } from '../runtime/app.ts';
+import type { InjectionKey } from '../runtime/inject.ts';
 import { isFunction, isObject } from '../shared.ts';
 import { logError } from '../warn.ts';
 import { parseLocation, stringifyQuery, type ParsedLocation } from './location.ts';
+import { isWebHistory } from './history.ts';
 import { checkGuard, checkOptions, createMatcher, type MatchedRoute } from './matcher.ts';
+import { createScroll } from './scroll.ts';
 import type {
   AnyGuard,
   AnyGuardResult,
@@ -16,6 +20,9 @@ import type {
   RouterOptions,
   RouteRecordRaw,
 } from './types.ts';
+
+/** The key of the installed router: `useRouter()` injects it. */
+export const routerKey: InjectionKey<AnyRouter> = Symbol('router');
 
 export const START_LOCATION: AnyLocation = {
   path: '/',
@@ -127,8 +134,13 @@ export function defineRoutes<const R extends readonly RouteRecordRaw[]>(routes: 
 export function createRouter<const R extends readonly RouteRecordRaw[]>(
   options: RouterOptions<R>,
 ): Router<R> {
-  checkOptions(options, ['history', 'routes'], 'createRouter()');
-  const { history } = options;
+  checkOptions(options, ['history', 'routes', 'scrollBehavior'], 'createRouter()');
+  const { history, scrollBehavior } = options;
+  // Only a web history scrolls: a memory history has no page of its own.
+  const scroll =
+    isWebHistory(history) && scrollBehavior !== false
+      ? createScroll(history, scrollBehavior)
+      : undefined;
   const matcher = createMatcher(options.routes);
   const currentRoute = shallowRef(START_LOCATION);
   const beforeGuards = new Set<AnyGuard>();
@@ -149,6 +161,12 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
   /** The history steps taken by history-driven navigations since `currentRoute` was committed. */
   let offset = 0;
   let unlisten: (() => void) | undefined;
+  /** The first installed app: guards, redirects, loaders and hooks run in its injection context. */
+  let app: App | undefined;
+  let installs = 0;
+
+  /** Calls `fn` in the injection context of the installed app. */
+  const inContext = <T>(fn: () => T): T => (app ? app.runWithContext(fn) : fn());
 
   function resolve(raw: AnyLocationRaw, current = currentRoute.value): AnyLocation {
     if (typeof raw === 'string') return locate(parseLocation(raw, current.path));
@@ -167,6 +185,18 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
     { name, params, matched, meta }: MatchedRoute = matcher.resolvePath(path),
   ): AnyLocation {
     return { path, fullPath, name, params, query, hash, matched, meta, redirectedFrom: undefined };
+  }
+
+  function afterEach(...args: [to: AnyLocation, from: AnyLocation, failure?: Failure]) {
+    for (const hook of afterHooks) inContext(() => hook(...args));
+  }
+
+  function listen() {
+    unlisten ??= history.listen((location, _from, info) => {
+      offset += info.delta;
+      // A failure was handed to afterEach and an error to onError: nothing is left to report.
+      navigate(location, false, true).catch(() => {});
+    });
   }
 
   /** Moves the history back to `currentRoute` after the latest navigation failed. */
@@ -192,23 +222,27 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       let redirects = 0;
       for (;;) {
         const redirect: RouteRecordNormalized['redirect'] = to.matched.at(-1)?.redirect;
+        const target: AnyLocation = to;
         let next: AnyLocationRaw | undefined =
-          typeof redirect === 'function' ? redirect(to) : redirect;
+          typeof redirect === 'function' ? inContext(() => redirect(target)) : redirect;
         if (next === undefined) {
           const result = await run(to, from, id);
           if (result instanceof Failure) {
             // A cancelled navigation leaves the history position to the newer one.
             if (id === navigations) restore();
-            for (const hook of afterHooks) hook(to, from, result);
+            afterEach(to, from, result);
             return result;
           }
           if (result === undefined) {
+            const initial = from === START_LOCATION;
+            if (!initial) scroll?.save(from, offset);
             currentRoute.value = to;
             offset = 0;
             if (!pop) history[replace ? 'replace' : 'push'](to.fullPath);
             else if (to !== first) history.replace(to.fullPath);
             resolveReady();
-            for (const hook of afterHooks) hook(to, from);
+            afterEach(to, from);
+            scroll?.apply(to, from, pop || initial).catch(logError);
             return undefined;
           }
           next = result;
@@ -227,11 +261,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       rejectReady(error);
       throw error;
     } finally {
-      unlisten ??= history.listen((location, _from, info) => {
-        offset += info.delta;
-        // A failure was handed to afterEach and an error to onError: nothing is left to report.
-        navigate(location, false, true).catch(() => {});
-      });
+      listen();
     }
   }
 
@@ -261,15 +291,16 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
         ...beforeGuards,
         ...viewGuardsOf('update', updating),
         ...entering.flatMap((record) => record.beforeEnter),
-      ].map((guard) => async () => guard(to, from)),
+      ].map((guard) => async () => inContext(() => guard(to, from))),
       async () => {
         await Promise.all(
-          entering.flatMap((record) =>
-            isFunction(record.component) ? [load(record, record.component)] : [],
-          ),
+          entering.flatMap((record) => {
+            const { component } = record;
+            return isFunction(component) ? [load(record, () => inContext(component))] : [];
+          }),
         );
       },
-      ...[...resolveGuards].map((guard) => async () => guard(to, from)),
+      ...[...resolveGuards].map((guard) => async () => inContext(() => guard(to, from))),
     ];
     for (const phase of phases) {
       const result = await phase();
@@ -281,6 +312,22 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
   }
 
   const router: Router<R> = {
+    install(target) {
+      // A router of literal routes is any router once built (see types.test-d.ts).
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- R is generic here
+      target.provide(routerKey, router as AnyRouter);
+      app ??= target;
+      installs++;
+      target.onUnmount(() => {
+        if (--installs) return;
+        unlisten!();
+        unlisten = undefined;
+        app = undefined;
+      });
+      listen();
+      // It replaces the entry the page was loaded with, and reports its errors to onError and isReady().
+      if (currentRoute.value === START_LOCATION) navigate(history.location, true).catch(() => {});
+    },
     currentRoute,
     push: (to) => navigate(to, false),
     replace: (to) => navigate(to, true),

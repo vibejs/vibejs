@@ -1,4 +1,5 @@
 import type { ShallowRef } from '../reactivity/ref.ts';
+import type { App } from '../runtime/app.ts';
 
 /**
  * Types the router APIs from the app's routes. Augment it once per app:
@@ -16,6 +17,36 @@ type RegisteredRoutes = RegisteredRouter extends Router<infer R extends AnyRoute
 export interface RouterOptions<R extends AnyRoutes = AnyRoutes> {
   history: RouterHistory;
   routes: R;
+  /**
+   * Where a web history scrolls after a navigation; the default restores the saved position on
+   * back and forward, else scrolls to the hash element, else keeps the position when only the
+   * query changed, else scrolls to the top. `false` leaves scrolling to the browser.
+   */
+  scrollBehavior?: RouterScrollBehavior | false;
+}
+
+/** A position to scroll the window to, or an element to scroll into view (`#id` or a selector). */
+export type ScrollPosition =
+  | { left?: number; top?: number; behavior?: ScrollBehavior }
+  | { el: string | Element; behavior?: ScrollBehavior };
+
+/** `saved` is the position the entry had, on back and forward and after a reload. */
+export type RouterScrollBehavior = (
+  to: RouteLocation,
+  from: RouteLocation,
+  saved: { left: number; top: number } | null,
+) => ScrollPosition | false | void | Promise<ScrollPosition | false | void>;
+
+export interface RouterLinkProps {
+  to: RouteLocationRaw;
+  /** Replaces the current history entry instead of pushing one. */
+  replace?: boolean;
+  /** `router-link-active` by default. */
+  activeClass?: string;
+  /** `router-link-exact-active` by default. */
+  exactActiveClass?: string;
+  /** The `aria-current` value while exact-active; `page` by default. */
+  ariaCurrentValue?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false';
 }
 
 /** Custom data of a route record. Augment it to type `meta`. */
@@ -26,8 +57,15 @@ export interface RouteMeta extends Record<PropertyKey, unknown> {}
 export interface RouteRecordRaw {
   path: string;
   name?: string;
-  /** A component, or a function that loads one lazily. */
+  /**
+   * A component, or a function that loads one lazily: a promise of a component or of a module
+   * whose `default` export is one. Both stay `object` here and are checked at runtime
+   * (VIBE7110): a narrower type makes the routes refer to themselves (TS7022) as soon as a lazy
+   * page types its props with the registered routes.
+   */
   component?: object | (() => Promise<object>);
+  /** The props of the component: `true` passes the params, a function maps the route to them. */
+  props?: boolean | Record<string, unknown> | ((to: AnyLocation) => Record<string, unknown>);
   children?: readonly RouteRecordRaw[];
   redirect?: AnyLocationRaw | ((to: AnyLocation) => AnyLocationRaw);
   meta?: RouteMeta;
@@ -43,6 +81,7 @@ export interface RouteRecordNormalized {
   readonly beforeEnter: readonly AnyGuard[];
   /** A lazy loader is replaced by the loaded component after the first load. */
   readonly component: RouteRecordRaw['component'];
+  readonly props: RouteRecordRaw['props'];
   readonly children: readonly RouteRecordNormalized[];
   readonly parent: RouteRecordNormalized | undefined;
 }
@@ -239,6 +278,11 @@ export type NavigationFailure<R extends AnyRoutes = RegisteredRoutes> = Error & 
 };
 
 export interface Router<R extends AnyRoutes = RegisteredRoutes> {
+  /**
+   * Called by `app.use(router)`: provides the router to the app, starts the first navigation to
+   * the history location and listens to the history until the last app that uses it unmounts.
+   */
+  install(app: App): void;
   readonly currentRoute: Readonly<ShallowRef<RouteLocation<R>>>;
   push(to: RouteLocationRaw<R>): Promise<NavigationFailure<R> | undefined>;
   replace(to: RouteLocationRaw<R>): Promise<NavigationFailure<R> | undefined>;

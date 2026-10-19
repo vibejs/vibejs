@@ -1,4 +1,12 @@
-export { createMemoryHistory } from './router/history.ts';
+export {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useLink,
+  useRoute,
+  useRouter,
+} from './router/composables.ts';
+export { RouterLink, RouterView } from './router/components.ts';
+export { createMemoryHistory, createWebHistory } from './router/history.ts';
 export {
   createRouter,
   defineRoutes,
@@ -22,7 +30,10 @@ export type {
   RouteParamsRaw,
   Router,
   RouterHistory,
+  RouterLinkProps,
   RouterOptions,
   RouteRecordNormalized,
   RouteRecordRaw,
+  RouterScrollBehavior,
+  ScrollPosition,
 } from './router/types.ts';

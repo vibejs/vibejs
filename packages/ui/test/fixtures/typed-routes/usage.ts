@@ -1,3 +1,5 @@
+import type { ComponentProps } from '@vibejs-org/ui';
+import { RouterLink, useLink, useRoute, useRouter } from '@vibejs-org/ui/router';
 import type {
   NavigationGuard,
   RouteLocationOf,
@@ -95,3 +97,20 @@ export {
   to300,
   unknown300,
 };
+
+// The composables and RouterLink take the registered routes.
+const installed: typeof router = useRouter();
+const userRoute = useRoute('user');
+const userId: string = userRoute.params.id;
+// @ts-expect-error an unknown name
+useRoute('usr');
+const current2 = useRoute();
+if (current2.name === 'user-posts') {
+  const postId: string | undefined = current2.params.postId;
+  void postId;
+}
+const linkProps: ComponentProps<typeof RouterLink> = { to: { name: 'user', params: { id: 1 } } };
+// @ts-expect-error an unknown name
+const badLink: ComponentProps<typeof RouterLink> = { to: { name: 'usr' } };
+// @ts-expect-error the required `id` is missing
+useLink({ to: { name: 'user' } });

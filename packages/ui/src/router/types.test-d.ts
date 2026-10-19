@@ -1,8 +1,13 @@
 import { expectTypeOf } from 'vitest';
+import type { ComponentProps, ComponentSlots, Slot } from '../component.ts';
+import type { ComputedRef } from '../reactivity/computed.ts';
+import { RouterLink, RouterView } from './components.ts';
+import { useLink, useRoute, useRouter } from './composables.ts';
 import { createMemoryHistory } from './history.ts';
 import { createRouter, defineRoutes } from './router.ts';
 import type {
   AnyRouter,
+  NavigationFailure,
   NavigationGuard,
   RouteLocation,
   RouteLocationOf,
@@ -11,6 +16,7 @@ import type {
   RouteParams,
   RouteParamsRaw,
   Router,
+  RouterLinkProps,
   RouteRecordRaw,
 } from './types.ts';
 
@@ -169,3 +175,20 @@ const untyped = createRouter({ history, routes: anyRoutes });
 expectTypeOf(untyped).toEqualTypeOf<Router>();
 void untyped.push({ name: 'anything', params: { id: 1 } });
 untyped.beforeEach(guard);
+
+// Without a registered router, the composables and components are loose.
+expectTypeOf(useRouter()).toEqualTypeOf<Router>();
+expectTypeOf(useRoute()).toEqualTypeOf<RouteLocation>();
+expectTypeOf(useRoute('anything').params).toEqualTypeOf<Record<string, string | string[]>>();
+const link = useLink({ to: () => ({ name: 'anything' }), replace: true });
+expectTypeOf(link.href).toEqualTypeOf<ComputedRef<string>>();
+expectTypeOf(link.isActive).toEqualTypeOf<ComputedRef<boolean>>();
+expectTypeOf<ReturnType<typeof link.navigate>>().toEqualTypeOf<
+  Promise<NavigationFailure | undefined>
+>();
+expectTypeOf<ComponentProps<typeof RouterLink>>().toEqualTypeOf<RouterLinkProps>();
+expectTypeOf<RouterLinkProps['to']>().toEqualTypeOf<RouteLocationRaw>();
+expectTypeOf<ComponentSlots<typeof RouterLink>>().toEqualTypeOf<{ default?: Slot<{}> }>();
+// RouterView takes no props.
+// oxlint-disable-next-line typescript/no-generated-empty-object-type -- the props of RouterView are `{}`
+expectTypeOf<keyof ComponentProps<typeof RouterView>>().toBeNever();

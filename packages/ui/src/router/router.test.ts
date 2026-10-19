@@ -68,16 +68,24 @@ const routes: RouteRecordRaw[] = [
 ];
 
 describe('@vibejs-org/ui/router', () => {
-  it('exports only the router core', () => {
+  it('exports the router, its histories, components and composables', () => {
     const names = Object.keys(entry);
     names.sort();
     expect(names).toEqual([
       'NavigationFailureType',
+      'RouterLink',
+      'RouterView',
       'START_LOCATION',
       'createMemoryHistory',
       'createRouter',
+      'createWebHistory',
       'defineRoutes',
       'isNavigationFailure',
+      'onBeforeRouteLeave',
+      'onBeforeRouteUpdate',
+      'useLink',
+      'useRoute',
+      'useRouter',
     ]);
     expect(NavigationFailureType).toEqual({
       aborted: 'aborted',
@@ -558,7 +566,6 @@ describe('VIBE7107 and VIBE7103', () => {
   });
 
   it.each([
-    ['scrollBehavior', 'scroll behavior'],
     ['linkActiveClass', 'active classes'],
     ['parseQuery', 'URLSearchParams'],
     ['strict', 'trailing slash'],

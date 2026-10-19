@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2022", "dom"], "rootDir": "." },
-  "include": ["src", "test/abi", "test/testing", "test/codes.ts"],
+  "include": ["src", "test/abi", "test/router", "test/testing", "test/codes.ts"],
   "exclude": [
     "${configDir}/src/**/*.integration.test.ts",
     "${configDir}/src/virtual",
