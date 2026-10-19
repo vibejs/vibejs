@@ -53,6 +53,7 @@ const MESSAGES = {
   VIBE7206: ["mount() does not take the option {option}: {fix}.","Pass `plugins` and `provide` as top-level options of `mount()`.","Replace a child component with a mock of its module, as in `vi.mock('./Child.vibe')`.","Pass attributes and the starting state of the component in `props`."],
   VIBE7207: ["The component renders {count} root elements, so its wrapper has no single element.","Query the element first, as in `get('header')`, and use that wrapper.","Use `html()` or `text()`, which read every root node."],
   VIBE7208: ["mount() could not find the attachTo element {selector}.","Check that the document has an element that matches {selector} before calling `mount()`.","Pass the element itself instead of a selector."],
+  VIBE7301: ["useAsync() was called with no owner scope, so nothing could abort its runs or stop it.","Call `useAsync()` in a component's `setup`, or in a composable that `setup` calls.","Outside of a component, call it inside `effectScope().run()` and stop the scope when the data is no longer needed."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => (__DEV__ ? MESSAGES : undefined));
