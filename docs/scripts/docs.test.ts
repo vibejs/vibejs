@@ -11,6 +11,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { compile } from '@vibejs-org/compiler';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import help from './fixtures/help.json' with { type: 'json' };
 import {
@@ -19,6 +20,7 @@ import {
   docsIndex,
   EXCLUDE,
   expandIncludes,
+  fences,
   llms,
   loadSource,
   main,
@@ -576,17 +578,60 @@ const anchors = (markdown: string): string[] =>
       .trim()
       .replaceAll(/\s+/g, '-'),
   );
+const links = (text: string): string[] =>
+  [...text.matchAll(/\]\(([^)]+)\)/g)].map(([, target]) => target);
 
-describe('server docs', () => {
+describe('guides and UI docs', () => {
   const docs = loadSource(fileURLToPath(new URL('..', import.meta.url)));
   const codes = new Set(
-    globSync('packages/*/messages/*.md', {
-      cwd: fileURLToPath(new URL('../..', import.meta.url)),
-    }).flatMap((file) => {
-      const text = readFileSync(fileURLToPath(new URL(`../../${file}`, import.meta.url)), 'utf8');
-      return [...text.matchAll(/^## (VIBE\d{4}):/gm)].map(([, code]) => code);
-    }),
+    globSync('packages/*/messages/*.md', { cwd: fileURLToPath(new URL('../..', import.meta.url)) })
+      .flatMap((file) => [
+        ...readFileSync(fileURLToPath(new URL(`../../${file}`, import.meta.url)), 'utf8').matchAll(
+          /^## (VIBE\d{4}):/gm,
+        ),
+      ])
+      .map(([, code]) => code),
   );
+  const markdownOf = (path: string): string => docs.find((p) => p.path === path)?.markdown ?? '';
+  /** Why `target`, linked from a guide, is not an existing catalog code or docs section. */
+  const broken = (target: string): string | undefined => {
+    const code = /^\/errors\/(VIBE\d{4})$/.exec(target)?.[1];
+    if (code) return codes.has(code) ? undefined : 'unknown code';
+    const [file, hash] = target.split('#');
+    const linked = docs.find((p) => `../${p.path}.md` === file);
+    if (!linked) return 'no page';
+    return !hash || anchors(linked.markdown).includes(hash) ? undefined : 'no section';
+  };
+  /**
+   * The problems of the idiom table of a `coming-from-*` guide, whose header row starts with
+   * `source`: every row names a backticked vibe.js form and links only existing targets, and with
+   * `codes`, at least one catalog code.
+   */
+  const idioms = (path: string, source: string, o: { codes: boolean }) => {
+    const rows = markdownOf(path)
+      .split('\n')
+      .filter((line) => line.startsWith('| '))
+      .map((line) =>
+        line
+          .slice(1, -1)
+          .split('|')
+          .map((cell) => cell.trim()),
+      )
+      .filter(([idiom]) => idiom !== source && !idiom.startsWith('---'));
+    const problems = rows.flatMap(([idiom, form, caught]) => {
+      const targets = links(caught);
+      return [
+        ...(/`[^`]+`/.test(form) ? [] : [`${idiom}: no vibe.js form`]),
+        ...(targets.length ? [] : [`${idiom}: no link`]),
+        ...(o.codes && !targets.some((t) => t.startsWith('/errors/')) ? [`${idiom}: no code`] : []),
+        ...targets.flatMap((target) => {
+          const why = broken(target);
+          return why ? [`${idiom}: ${target}: ${why}`] : [];
+        }),
+      ];
+    });
+    return { rows: rows.length, problems };
+  };
 
   it('serves the TS1241 link of vibejs check as a page with the TS1241 section', () => {
     // The link that `vibejs check` adds to TS1241 on @Handle (packages/cli check.ts).
@@ -596,38 +641,51 @@ describe('server docs', () => {
   });
 
   it('names the vibe.js form and links an existing code or section on every NestJS row', () => {
-    const guide = docs.find((p) => p.path === 'guides/coming-from-nestjs');
-    const rows = (guide?.markdown ?? '')
-      .split('\n')
-      .filter((line) => line.startsWith('| '))
-      .map((line) =>
-        line
-          .slice(1, -1)
-          .split('|')
-          .map((cell) => cell.trim()),
-      )
-      .filter(([idiom]) => idiom !== 'NestJS' && !idiom.startsWith('---'));
-    expect(rows.length).toBeGreaterThanOrEqual(10);
-    /** Why `target` is not an existing catalog code or docs section, or `undefined`. */
-    const broken = (target: string): string | undefined => {
-      const code = /^\/errors\/(VIBE\d{4})$/.exec(target)?.[1];
-      if (code) return codes.has(code) ? undefined : 'unknown code';
-      const [file, hash] = target.split('#');
-      const linked = docs.find((p) => `../${p.path}.md` === file);
-      if (!linked) return 'no page';
-      return !hash || anchors(linked.markdown).includes(hash) ? undefined : 'no section';
-    };
-    const problems = rows.flatMap(([idiom, form, caught]) => {
-      const links = [...caught.matchAll(/\]\(([^)]+)\)/g)].map(([, target]) => target);
-      return [
-        ...(/`[^`]+`/.test(form) ? [] : [`${idiom}: no vibe.js form`]),
-        ...(links.length ? [] : [`${idiom}: no link`]),
-        ...links.flatMap((target) => {
-          const why = broken(target);
-          return why ? [`${idiom}: ${target}: ${why}`] : [];
-        }),
-      ];
+    const { rows, problems } = idioms('guides/coming-from-nestjs', 'NestJS', { codes: false });
+    expect(rows).toBeGreaterThanOrEqual(10);
+    expect(problems).toEqual([]);
+  });
+
+  it('names the vibe.js form and links an existing catalog code on every Vue idiom row', () => {
+    const { rows, problems } = idioms('guides/coming-from-vue', 'Vue', { codes: true });
+    expect(rows).toBeGreaterThanOrEqual(25);
+    expect(problems).toEqual([]);
+  });
+
+  it('links an existing UI section from every Vue behavior difference', () => {
+    const section = /^## Same API, different behavior\n([\s\S]*?)^## /m.exec(
+      markdownOf('guides/coming-from-vue'),
+    )?.[1];
+    const bullets = (section ?? '').split('\n').filter((line) => line.startsWith('- '));
+    expect(bullets.length).toBeGreaterThanOrEqual(7);
+    const problems = bullets.flatMap((bullet) => {
+      const targets = links(bullet).filter((t) => t.startsWith('../ui/') && t.includes('#'));
+      if (!targets.length) return [`no UI section: ${bullet}`];
+      return targets.flatMap((t) => (broken(t) ? [`${t}: ${broken(t)}`] : []));
     });
+    expect(problems).toEqual([]);
+  });
+
+  it('compiles every vibe fence of the UI pages and the extending guide without diagnostics', () => {
+    const pages = docs.filter((p) => p.path.startsWith('ui/') || p.path === 'guides/extending');
+    expect(pages.map((p) => p.path)).toEqual(
+      expect.arrayContaining(['ui/index', 'ui/components', 'guides/extending']),
+    );
+    const blocks = pages.flatMap((p) => {
+      const lines = p.markdown.split('\n');
+      return fences(lines)
+        .filter((fence) => fence.info === 'vibe')
+        .map((fence) => ({
+          at: `${p.path}.md:${fence.open + 1}`,
+          source: lines.slice(fence.open + 1, fence.close).join('\n'),
+        }));
+    });
+    expect(blocks.length).toBeGreaterThan(10);
+    const problems = blocks.flatMap(({ at, source }) =>
+      compile(source, { filename: 'Example.vibe', id: '00000000', dev: false }).diagnostics.map(
+        (d) => `${at} ${d.code}`,
+      ),
+    );
     expect(problems).toEqual([]);
   });
 });
