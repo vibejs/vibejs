@@ -49,6 +49,7 @@ Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`]
   - `packages/ui/src/runtime/scheduler.ts` from `packages/runtime-core/src/scheduler.ts` (shipped)
   - `packages/ui/src/runtime/errorHandling.ts` from `packages/runtime-core/src/errorHandling.ts` (shipped)
   - `packages/ui/src/runtime/watch.ts` from `packages/reactivity/src/watch.ts` and `packages/runtime-core/src/apiWatch.ts` (shipped)
+  - `packages/ui/src/dom-types.ts` from `packages/runtime-dom/src/jsx.ts` (shipped in the dist types). Its attribute types are based on the DefinitelyTyped definitions in `types/react/index.d.ts`, MIT; the copyright holders are listed in `packages/ui/THIRD-PARTY-NOTICES.md`.
   - `packages/ui/src/reactivity/ref.test.ts` from `packages/reactivity/__tests__/ref.spec.ts` (tests, not shipped)
   - `packages/ui/src/reactivity/computed.test.ts` from `packages/reactivity/__tests__/computed.spec.ts` (tests, not shipped)
   - `packages/ui/src/reactivity/effectScope.test.ts` from `packages/reactivity/__tests__/effectScope.spec.ts` (tests, not shipped)

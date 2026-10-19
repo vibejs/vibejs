@@ -219,6 +219,9 @@ catalogs:
     arktype:
       specifier: 2.2.8
       version: 2.2.8
+    csstype:
+      specifier: ^3.2.3
+      version: 3.2.3
     entities:
       specifier: ^8.1.0
       version: 8.1.0
@@ -468,6 +471,9 @@ importers:
       '@vibejs-org/errors':
         specifier: workspace:*
         version: link:../errors
+      csstype:
+        specifier: 'catalog:'
+        version: 3.2.3
     devDependencies:
       reactive-framework-test-suite:
         specifier: 'catalog:'

@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2022", "dom"] },
-  "exclude": ["src/router/typed-routes.integration.test.ts"],
+  "exclude": ["${configDir}/src/**/*.integration.test.ts"],
   "references": [{ "path": "../errors" }]
 }
