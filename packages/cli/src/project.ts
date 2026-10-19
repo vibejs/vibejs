@@ -1,4 +1,4 @@
-import { existsSync, globSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, globSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -102,15 +102,19 @@ export function resolveTool(
   return undefined;
 }
 
-/** The `.vibe` files under `dir`, relative to `root` and sorted; a directory named `*.vibe` is not one. */
+/**
+ * The `.vibe` files under `dir`, relative to `root` and sorted. A directory named `*.vibe` is not
+ * one; a symlink counts when it resolves to a file.
+ */
 export function vibeFiles(root: string, dir = '.'): string[] {
   return globSync('**/*.vibe', {
     cwd: join(root, dir),
     exclude: ['**/node_modules/**', '**/dist/**', '**/.*/**'],
     withFileTypes: true,
   })
-    .filter((d) => d.isFile())
-    .map((d) => relative(root, join(d.parentPath, d.name)))
+    .map((d) => join(d.parentPath, d.name))
+    .filter((path) => statSync(path, { throwIfNoEntry: false })?.isFile())
+    .map((path) => relative(root, path))
     .toSorted();
 }
 

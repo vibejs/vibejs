@@ -5,6 +5,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -403,6 +404,23 @@ describe('.vibe files', () => {
     uninstall('@vibejs-org/compiler');
     expect((await run({ only: 'types' }, CLEAN)).r.ok).toBe(true);
   });
+
+  // Creating a file symlink on Windows needs a privilege that CI runners lack.
+  it.skipIf(process.platform === 'win32')(
+    'compiles a .vibe file reached through a symlink',
+    async () => {
+      write(
+        '.shared/Macro.vibe',
+        `<script setup lang="ts">\nconst id = 'a'\n</script>\n\n<template>\n  <div :id="id" :id="id"></div>\n</template>\n`,
+      );
+      symlinkSync(join(root, '.shared/Macro.vibe'), join(root, 'src/Hello.vibe'));
+      symlinkSync(join(root, 'missing'), join(root, 'src/Broken.vibe'));
+      const { r } = await run({ only: 'types' }, CLEAN);
+      expect(r.diagnostics.map((d) => `${d.code} ${d.loc}`)).toEqual([
+        'VIBE1102 src/Hello.vibe:6:17',
+      ]);
+    },
+  );
 
   it('gives a mapper code outside the catalog only the suppression fix', async () => {
     const { r } = await run(
