@@ -53,6 +53,7 @@ export type {
   UnwrapRef,
 } from './reactivity/ref.ts';
 export { createApp, useId } from './runtime/app.ts';
+export { useAsync } from './runtime/async.ts';
 export type { App, AppConfig, ComponentHandle, Plugin } from './runtime/app.ts';
 export { hasInjectionContext, inject, provide } from './runtime/inject.ts';
 export type { InjectionKey } from './runtime/inject.ts';

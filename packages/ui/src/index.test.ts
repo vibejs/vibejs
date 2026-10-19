@@ -38,6 +38,7 @@ describe('@vibejs-org/ui', () => {
         'unref',
         'createApp',
         'useId',
+        'useAsync',
         'hasInjectionContext',
         'inject',
         'provide',
