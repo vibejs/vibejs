@@ -43,6 +43,8 @@ describe('tag diagnostics', () => {
     ['<item />', ['VIBE2002']],
     ['<form-input />', []],
     ['<local></local>', ['VIBE2002']],
+    ['<form></form>', []],
+    ['<list></list>', ['VIBE2003']],
     ['<widget />', ['VIBE2003']],
     ['<Missing />', ['VIBE2001']],
     ['<Teleport />', ['VIBE2901']],
@@ -52,6 +54,10 @@ describe('tag diagnostics', () => {
     ['<Suspense />', ['VIBE2905']],
   ])('%s', (template, codes) => {
     expect(run(sfc(template)).diagnostics.map((d) => d.code)).toStrictEqual(codes);
+  });
+
+  it('never reports a native element that shares the file name', () => {
+    expect(run(sfc('<button></button>'), 'src/Button.vibe').diagnostics).toStrictEqual([]);
   });
 
   it('names the PascalCase tag in the fix of VIBE2002', () => {

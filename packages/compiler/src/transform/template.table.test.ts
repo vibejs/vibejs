@@ -11,6 +11,7 @@ const rows: [string, string, string][] = [
   ['VIBE2006', '<component is="Item" />', '1:22-1:31'],
   ['VIBE2009', '<div is="x"></div>', '1:16-1:22'],
   ['VIBE2011', '<div><style></style></div>', '1:17-1:22'],
+  ['VIBE2012', '<template v-if="text" @click="count++"></template>', '1:33-1:49'],
   ['VIBE2101', '<p v-if></p>', '1:14-1:18'],
   ['VIBE2102', '<p v-else></p>', '1:14-1:20'],
   ['VIBE2103', '<p v-if="text" v-for="i in items" :key="i.id"></p>', '1:26-1:44'],
@@ -115,6 +116,16 @@ describe('diagnostic variants', () => {
     ['<slot :ref="Form.set" v-bind />', ['VIBE2608', 'VIBE2401']],
     ['<slot :a.prop="text" v-show="text" />', ['VIBE2402', 'VIBE2706']],
     ['<p v-if="text" v-else></p>', []],
+    ['<template v-for="i in items" :key="i.id" v-memo="[i]"></template>', ['VIBE2906']],
+    [
+      '<template v-if="text" ref="box" :class="text" v-model="text" v-focus></template>',
+      ['VIBE2012', 'VIBE2012', 'VIBE2012', 'VIBE2908'],
+    ],
+    ['<Item><template #a ref="box" v-show="text"></template></Item>', ['VIBE2012', 'VIBE2706']],
+    [
+      '<ul><template v-for="i in items" :key="i.id"><li v-for="k in items" :key="k.id">x</li></template></ul>',
+      [],
+    ],
   ])('%s', (template, codes) => {
     const { ir, diagnostics } = run(sfc(template));
     expect(diagnostics.map((d) => d.code)).toStrictEqual(codes);

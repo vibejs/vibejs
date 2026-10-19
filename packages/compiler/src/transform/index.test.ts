@@ -44,6 +44,18 @@ const cases: [string, string, string, string][] = [
     't0 = <p></p>\nn0 = t0\non(n0, "click", statements($setup.count++))\neffect setDynamicProps(n0, [{ "id": ("x"), "title": ($setup.text) }, ($setup.fixed), { [$setup.text]: ($setup.count), "class": ("c"), "disabled": ("") }])\nreturn n0\nABI on renderEffect setDynamicProps template',
   ],
   [
+    'static class merged inside setDynamicProps',
+    '<p class :class="text" :style="fixed" style="color: red" v-bind="fixed"></p>',
+    '',
+    't0 = <p></p>\nn0 = t0\neffect setDynamicProps(n0, [{ "class": (["", ($setup.text)]), "style": (["color: red", ($setup.fixed)]) }, ($setup.fixed)])\nreturn n0\nABI renderEffect setDynamicProps template',
+  ],
+  [
+    'left and right are keys on key events',
+    '<input @keyup.left="count++" @keydown.right.ctrl="count++" @click.left="count++">',
+    '',
+    't0 = <input>\nn0 = t0\non(n0, "keyup", statements($setup.count++) keys=left)\non(n0, "keydown", statements($setup.count++) mods=ctrl keys=right)\non(n0, "click", statements($setup.count++) mods=left)\nreturn n0\nABI on template withKeys withModifiers',
+  ],
+  [
     'same-name shorthand',
     '<p :label></p>',
     '',

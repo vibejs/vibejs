@@ -75,6 +75,8 @@ const MODIFIERS = new Set(
   'stop prevent self exact ctrl alt shift meta left middle right'.split(' '),
 );
 const KEY_EVENTS = new Set(['keydown', 'keyup', 'keypress']);
+/** Directives a `<template>` takes; `v-show`, `v-html` and `v-text` are reported elsewhere. */
+const TEMPLATE_DIRECTIVES = new Set('if else else-if for slot pre show html text'.split(' '));
 /** Elements whose direct text the HTML parser moves or drops. */
 const NO_TEXT = new Set('table thead tbody tfoot tr colgroup select'.split(' '));
 const BUILTINS = {
@@ -287,6 +289,7 @@ function elementItems(s: State, el: ElementNode, env: Env, stage: number): Item[
     const slot = dir(el, 'slot');
     if (slot) err(s, vibeError('VIBE2601'), span(slot.loc));
     checkNonElement(s, el);
+    checkTemplate(s, el);
     return items(s, el.children, env, null, false);
   }
   if (el.tag === 'template' && !dir(el, 'pre')) {
@@ -294,6 +297,18 @@ function elementItems(s: State, el: ElementNode, env: Env, stage: number): Item[
     return items(s, el.children, env, null, false);
   }
   return [{ k: 'el', el, env, pre: false }];
+}
+
+/** Reports what a `<template>` for `v-if`, `v-for` or `v-slot` would drop. */
+function checkTemplate(s: State, el: ElementNode): void {
+  const key = bindArg(el, 'key');
+  for (const p of el.props) {
+    if (p === key || (isDirective(p) && TEMPLATE_DIRECTIVES.has(p.name))) continue;
+    if (!isDirective(p)) err(s, vibeError('VIBE2012', { name: p.name }), span(p.loc));
+    else if (/^(bind|on|model)$/.test(p.name)) {
+      err(s, vibeError('VIBE2012', { name: p.rawName! }), span(p.loc));
+    } else unsupported(s, p);
+  }
 }
 
 /** Reports `v-show`, `v-html` and `v-text` on a component, `<template>` or `<slot>`. */
@@ -325,7 +340,8 @@ function forItem(s: State, el: ElementNode, d: DirectiveNode, env: Env): Item {
   const key = bindArg(el, 'key');
   if (el.tagType === ElementTypes.TEMPLATE) {
     for (const child of el.children) {
-      const childKey = child.type === NodeTypes.ELEMENT ? bindArg(child, 'key') : undefined;
+      const own = child.type === NodeTypes.ELEMENT && !dir(child, 'for');
+      const childKey = own ? bindArg(child, 'key') : undefined;
       if (childKey) err(s, vibeError('VIBE2204'), span(childKey.loc));
     }
   }
@@ -440,11 +456,9 @@ function checkTag(s: State, el: ElementNode): void {
   const { tag } = el;
   const name = capitalize(camelize(tag));
   if (tag === 'script' || tag === 'style') err(s, vibeError('VIBE2011', { tag }), tagSpan(el));
-  else if (resolveComponentTag(name, s.a, s.d.filename)) {
-    err(s, vibeError('VIBE2002', { tag, name }), tagSpan(el));
-  } else if (!tag.includes('-') && !isHTMLTag(tag) && !isSVGTag(tag) && !isMathMLTag(tag)) {
-    err(s, vibeError('VIBE2003', { tag }), tagSpan(el));
-  }
+  else if (isHTMLTag(tag) || isSVGTag(tag) || isMathMLTag(tag)) return;
+  else if (s.a.bindings.has(name)) err(s, vibeError('VIBE2002', { tag, name }), tagSpan(el));
+  else if (!tag.includes('-')) err(s, vibeError('VIBE2003', { tag }), tagSpan(el));
 }
 
 /** The attributes and directives of a plain element. */
@@ -471,17 +485,24 @@ function elementProps(
   const isModelValue = (name: string) =>
     checkbox && (name === 'true-value' || name === 'false-value');
   const dynamic: Partial<Record<string, [ExprIR, number]>> = {};
-  const statics: Record<string, ExprIR> = {};
+  // A static class or style next to its binding merges into it: `[static, (bound)]`.
+  const statics = new Map<string, ExprIR>();
+  for (const name of ['class', 'style']) {
+    const a = attr(el, name);
+    if (a && bindArg(el, name)) statics.set(name, literal(a.value?.content ?? true));
+  }
+  const merged = (name: string, value: ExprIR) => {
+    const fixed = statics.get(name);
+    return fixed ? join('[', fixed, ', (', value, ')]') : value;
+  };
   for (const p of el.props) {
     if (!isDirective(p)) {
       const value = p.value?.content ?? true;
       if (p.name === 'ref') stringRef(s, p, ref(), env, body);
       else if (p.name === 'is') err(s, vibeError('VIBE2009', { tag: el.tag }), span(p.loc));
-      else if (isModelValue(p.name)) continue;
+      else if (isModelValue(p.name) || statics.has(p.name)) continue;
       else if (fold) add(p.name, literal(value));
-      else if ((p.name === 'class' || p.name === 'style') && bindArg(el, p.name)) {
-        statics[p.name] = literal(value);
-      } else h.attrs.push([p.name, value]);
+      else h.attrs.push([p.name, value]);
       continue;
     }
     const loc = p.loc.start.offset;
@@ -511,7 +532,7 @@ function elementProps(
         }
         const name = mods.has('camel') ? camelize(arg.content) : arg.content;
         const value = bound(s, p, env);
-        if (fold) add(name, value);
+        if (fold) add(name, merged(name, value));
         else if (name === 'class' || name === 'style') dynamic[name] = [value, loc];
         else {
           const prop = (mods.has('prop') || PROPS.has(name)) && !mods.has('attr');
@@ -526,6 +547,8 @@ function elementProps(
         for (const m of p.modifiers) {
           const c = m.content;
           if (c === 'once' || c === 'capture' || c === 'passive') listener.options[c] = true;
+          else if (KEY_EVENTS.has(ev.name) && (c === 'left' || c === 'right'))
+            listener.keys.push(c);
           else if (MODIFIERS.has(c)) listener.mods.push(c);
           else if (KEY_EVENTS.has(ev.name)) listener.keys.push(hyphenate(c));
           else err(s, vibeError('VIBE2304', { modifier: c }), span(m.loc));
@@ -580,8 +603,7 @@ function elementProps(
     const binding = dynamic[name];
     if (!binding) continue;
     const [value, loc] = binding;
-    const merged = name in statics ? join('[', statics[name], ', (', value, ')]') : value;
-    effect(name === 'class' ? 'setClass' : 'setStyle', [{ expr: merged }], loc);
+    effect(name === 'class' ? 'setClass' : 'setStyle', [{ expr: merged(name, value) }], loc);
   }
   if (sources.length > 0) {
     const objects = sources.map((source) =>
@@ -916,6 +938,8 @@ function slotsOf(s: State, el: ElementNode, env: Env): SlotIR[] {
   let chain: ExprIR[] | null = null;
   for (const t of named) {
     const d = dir(t, 'slot')!;
+    checkNonElement(s, t);
+    checkTemplate(s, t);
     const vfor = dir(t, 'for');
     if (vfor) err(s, vibeError('VIBE2606'), span(vfor.loc));
     const vif = dir(t, 'if');

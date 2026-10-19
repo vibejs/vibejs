@@ -47,6 +47,7 @@ const MESSAGES = {
   VIBE2009: ["The `is` attribute is not supported on `<{tag}>`.","Write the component tag directly, as in `<Item />`.","Use `<component :is=\"Item\" />` for a component chosen at runtime."],
   VIBE2010: ["`{name}` is reserved and cannot name a template local.","Rename `{name}`, as in `v-for=\"item in items\"` instead of `v-for=\"_item in items\"`.","Give a destructured slot prop a new local name, as in `_id: id`."],
   VIBE2011: ["`<{tag}>` cannot appear inside the template.","Move the code into `<script setup lang=\"ts\">`.","Move the styles into a `<style>` or `<style scoped>` block of the file."],
+  VIBE2012: ["`{name}` has no effect on a `<template>` element.","Move `{name}` onto an element inside the `<template>`.","Replace the `<template>` with an element such as `<div>` that carries `{name}`."],
   VIBE2101: ["`{directive}` needs a condition.","Write the condition, as in `{directive}=\"items.length\"`.","Write `v-else` for the last branch of a chain."],
   VIBE2102: ["`{directive}` has no `v-if` or `v-else-if` element right before it.","Move the element right after the element with `v-if` or `v-else-if`.","Replace `{directive}` with `v-if` to start a new chain."],
   VIBE2103: ["`v-if` and `v-for` cannot be on the same element.","Wrap the element in `<template v-for=\"…\">` and keep `v-if` on the element.","Filter the list in a `computed` value and loop over that."],

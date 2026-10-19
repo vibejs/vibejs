@@ -126,6 +126,17 @@ Templates render markup only. Code belongs in `<script setup>` and styles in a t
 - Move the code into `<script setup lang="ts">`.
 - Move the styles into a `<style>` or `<style scoped>` block of the file.
 
+## VIBE2012: Attribute on a template
+
+> `{name}` has no effect on a `<template>` element.
+
+A `<template>` with `v-if`, `v-else-if`, `v-else`, `v-for` or `v-slot` renders only its children, so attributes, bindings, listeners, `v-model` and `ref` on it would be lost. Only `:key` is kept, as the key of a `v-for` or keyed block.
+
+### Fix
+
+- Move `{name}` onto an element inside the `<template>`.
+- Replace the `<template>` with an element such as `<div>` that carries `{name}`.
+
 ## VIBE2101: Condition without expression
 
 > `{directive}` needs a condition.
