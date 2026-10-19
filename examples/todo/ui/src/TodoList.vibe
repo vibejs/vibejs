@@ -1,33 +1,38 @@
 <script setup lang="ts">
 import { inject, onMounted, ref } from '@vibejs-org/ui';
-import { API } from './api.ts';
+import { API, type Api } from './api.ts';
 
 const api = inject(API)!;
 
 type Todo = { id: string; title: string; done: boolean };
+type Result = Awaited<ReturnType<Api['todos'][keyof Api['todos']]>>;
 
 const items = ref<Todo[]>([]);
 const title = ref('');
-const error = ref<{ code: string } | null>(null);
+// The last call's result: a later success clears a shown error.
+const result = ref<Result>();
 
 async function load() {
   const r = await api.todos.list();
+  result.value = r;
   if (r.ok) items.value = r.data;
-  else error.value = r.error;
 }
 
 async function add() {
   const r = await api.todos.create({ body: { title: title.value } });
+  result.value = r;
   if (r.ok) {
     items.value = [...items.value, r.data];
     title.value = '';
-  } else error.value = r.error;
+  }
 }
 
 async function toggle(id: string) {
   const r = await api.todos.toggle({ params: { id } });
+  // On failure, re-sync from the server so the checkbox shows the real state.
+  if (!r.ok) await load();
+  result.value = r;
   if (r.ok) items.value = items.value.map((todo) => (todo.id === id ? r.data : todo));
-  else error.value = r.error;
 }
 
 onMounted(() => void load());
@@ -46,6 +51,6 @@ onMounted(() => void load());
       </li>
     </ul>
     <p v-else>Nothing to do.</p>
-    <p v-if="error" class="error">{{ error.code }}</p>
+    <p v-if="result && !result.ok" class="error">{{ result.error.code }}</p>
   </section>
 </template>

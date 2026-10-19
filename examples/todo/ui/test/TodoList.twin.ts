@@ -17,14 +17,15 @@ import {
   withModifiers,
   type ComponentDef,
 } from '@vibejs-org/ui/internal';
-import { API } from '../src/api.ts';
+import { API, type Api } from '../src/api.ts';
 
 type Todo = { id: string; title: string; done: boolean };
+type Result = Awaited<ReturnType<Api['todos'][keyof Api['todos']]>>;
 
 type State = {
   items: Todo[];
   title: string;
-  error: { code: string } | null;
+  result?: Result;
   add: () => Promise<void>;
   toggle: (id: string) => Promise<void>;
 };
@@ -44,30 +45,32 @@ export const TodoList: ComponentDef = {
     const api = inject(API)!;
     const items = ref<Todo[]>([]);
     const title = ref('');
-    const error = ref<{ code: string } | null>(null);
+    const result = ref<Result>();
 
     async function load() {
       const r = await api.todos.list();
+      result.value = r;
       if (r.ok) items.value = r.data;
-      else error.value = r.error;
     }
 
     async function add() {
       const r = await api.todos.create({ body: { title: title.value } });
+      result.value = r;
       if (r.ok) {
         items.value = [...items.value, r.data];
         title.value = '';
-      } else error.value = r.error;
+      }
     }
 
     async function toggle(id: string) {
       const r = await api.todos.toggle({ params: { id } });
+      if (!r.ok) await load();
+      result.value = r;
       if (r.ok) items.value = items.value.map((todo) => (todo.id === id ? r.data : todo));
-      else error.value = r.error;
     }
 
     onMounted(() => void load());
-    return { api, items, title, error, load, add, toggle };
+    return { api, items, title, result, load, add, toggle };
   },
   render($setup: State) {
     const n0 = t4() as Element;
@@ -117,11 +120,15 @@ export const TodoList: ComponentDef = {
     );
     insert(
       createIf(
-        () => $setup.error,
+        () => $setup.result && !$setup.result.ok,
         () => {
           const n7 = t3() as Element;
           const x0 = txt(n7);
-          renderEffect(() => setText(x0, toDisplayString($setup.error?.code)));
+          // The compiler emits `$setup.result.error.code`; the guard narrows it for the type checker.
+          renderEffect(() => {
+            const r = $setup.result;
+            if (r?.ok === false) setText(x0, toDisplayString(r.error.code));
+          });
           return n7;
         },
       ),

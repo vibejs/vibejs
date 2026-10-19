@@ -10,5 +10,5 @@
   // The mapper emits no declarations, so the test project type-checks ui/src itself.
   "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }],
   "include": ["test", "ui/src"],
-  "references": [{ "path": "contracts" }, { "path": "server" }]
+  "references": [{ "path": "contracts" }, { "path": "server" }, { "path": "ui" }]
 }

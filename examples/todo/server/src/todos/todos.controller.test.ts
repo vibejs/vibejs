@@ -1,7 +1,8 @@
+import { createClient, type Client } from '@vibejs-org/contract';
 import { JsonLogger } from '@vibejs-org/server';
 import { Test } from '@vibejs-org/server/testing';
 import { afterEach, beforeEach, expect, expectTypeOf, it } from 'vitest';
-import { createApi, type Api } from '../../../ui/src/api.ts';
+import { todos } from '../../../contracts/src/todos.contract.ts';
 import { appOptions } from '../app.module.ts';
 import { TodosModule } from './todos.module.ts';
 import { TodosService } from './todos.service.ts';
@@ -9,7 +10,7 @@ import { TodosService } from './todos.service.ts';
 type App = Awaited<ReturnType<ReturnType<typeof Test.createTestingModule>['compile']>>;
 
 let app: App;
-let api: Api;
+let api: Client<{ todos: typeof todos }>;
 
 beforeEach(async () => {
   app = await Test.createTestingModule({
@@ -17,7 +18,7 @@ beforeEach(async () => {
     ...appOptions,
     logger: new JsonLogger({ level: 'silent' }),
   }).compile();
-  api = createApi(app.fetch);
+  api = createClient({ todos }, { baseUrl: '/api', fetch: app.fetch });
 });
 
 afterEach(() => app.close());

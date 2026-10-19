@@ -5,5 +5,5 @@
     "types": ["node"],
     "experimentalDecorators": true
   },
-  "references": [{ "path": "../contracts" }, { "path": "../ui" }]
+  "references": [{ "path": "../contracts" }]
 }

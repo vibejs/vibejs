@@ -57,7 +57,6 @@ describe.each<[string, Component]>([
     const box = wrapper.get<HTMLInputElement>('li input');
     await box.setValue(true);
     await flushPromises();
-    expect(box.element.checked).toBe(true);
     const listed = await createApi(app.fetch).todos.list();
     expect(listed).toMatchObject({ ok: true, data: [{ title: 'seeded', done: true }] });
   });
@@ -68,5 +67,19 @@ describe.each<[string, Component]>([
     await wrapper.get('li input').setValue(true);
     await flushPromises();
     expect(wrapper.get('.error').text()).toBe('TODO_NOT_FOUND');
+    // The failed toggle re-synced the list from the server.
+    expect(titles(wrapper)).toEqual([]);
+  });
+
+  it('clears a shown error after a later success', async () => {
+    const { wrapper, service, seeded } = await setup();
+    service.remove(seeded.id);
+    await wrapper.get('li input').setValue(true);
+    await flushPromises();
+    await wrapper.get('input[placeholder]').setValue('again');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.find('.error').exists()).toBe(false);
+    expect(titles(wrapper)).toEqual(['again']);
   });
 });

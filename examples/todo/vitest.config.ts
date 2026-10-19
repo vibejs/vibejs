@@ -1,4 +1,3 @@
-import { compile, formatDiagnostic } from '@vibejs-org/compiler';
 import { transformWithOxc } from 'vite';
 import { defineConfig } from 'vitest/config';
 
@@ -9,6 +8,8 @@ export default defineConfig({
       name: 'todo:vibe',
       async transform(code, id) {
         if (!id.endsWith('.vibe')) return null;
+        // Imported here, not at the top: knip loads this config before compiler dist exists.
+        const { compile, formatDiagnostic } = await import('@vibejs-org/compiler');
         // ponytail: one fixed id, as TodoList.vibe has no scoped style.
         const r = compile(code, { filename: id, id: '00000000', dev: false });
         if (r.diagnostics.length) {
