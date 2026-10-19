@@ -9,6 +9,10 @@
       {
         "allow": [
           "__DEV__",
+          "__defaults",
+          "__emits",
+          "__propKeys",
+          "__scopeId",
           "__v_isRef",
           "__v_isReactive",
           "__v_isReadonly",
@@ -148,9 +152,13 @@
     },
     {
       // ABI twins are compiled output by hand: walkers return Node and models assign unknown,
-      // so a twin narrows with the type assertions that the emitted JavaScript does without.
+      // so a twin narrows with the type assertions that the emitted JavaScript does without, and
+      // keeps the functions of a setup in the setup.
       "files": ["packages/ui/test/abi/**"],
-      "rules": { "typescript/no-unsafe-type-assertion": "off" }
+      "rules": {
+        "typescript/no-unsafe-type-assertion": "off",
+        "unicorn/consistent-function-scoping": "off"
+      }
     },
     {
       "files": ["**/*.config.ts", "docs/.vitepress/config.ts"],

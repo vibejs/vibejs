@@ -122,6 +122,22 @@ function flushJobs(): void {
   }
 }
 
+/**
+ * Runs the queued post callbacks now, and those they queue, so that `app.mount()` returns after
+ * the `mounted` hooks ran. Every pending post callback runs, also those queued before (such as a
+ * `flush: 'post'` watcher of another app), and before the jobs of the main queue, which wait for
+ * the next flush: such a callback may see the DOM before those jobs update it.
+ */
+export function flushPostFlushCbs(): void {
+  const seen = __DEV__ ? new Map<SchedulerJob, number>() : undefined;
+  while (pendingPostFlushCbs.length) {
+    // oxlint-disable-next-line unicorn/no-array-sort -- sorts a fresh copy; toSorted() is ES2023
+    const cbs = [...new Set(pendingPostFlushCbs)].sort((a, b) => getId(a) - getId(b));
+    pendingPostFlushCbs.length = 0;
+    for (const cb of cbs) runJob(cb, seen);
+  }
+}
+
 function runJob(job: SchedulerJob, seen: Map<SchedulerJob, number> | undefined): void {
   const flags = job.flags ?? 0;
   // A recursive job may queue itself again while it runs; any other job is still queued then.
@@ -129,7 +145,7 @@ function runJob(job: SchedulerJob, seen: Map<SchedulerJob, number> | undefined):
   if (recurse) job.flags = flags & ~QUEUED;
   try {
     if (!(flags & DISPOSED) && !(__DEV__ && tooManyRuns(seen!, job))) {
-      callWithErrorHandling(job, 'scheduler flush');
+      callWithErrorHandling(job, null, 'scheduler flush');
     }
   } finally {
     if (!recurse) job.flags = (job.flags ?? 0) & ~QUEUED;
@@ -140,7 +156,7 @@ function runJob(job: SchedulerJob, seen: Map<SchedulerJob, number> | undefined):
 function tooManyRuns(seen: Map<SchedulerJob, number>, job: SchedulerJob): boolean {
   const count = seen.get(job) ?? 0;
   if (count >= RECURSION_LIMIT) {
-    handleError(vibeError('VIBE5101'), 'scheduler flush');
+    handleError(vibeError('VIBE5101'), null, 'scheduler flush');
     return true;
   }
   seen.set(job, count + 1);

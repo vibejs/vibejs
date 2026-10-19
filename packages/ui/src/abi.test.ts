@@ -1,11 +1,32 @@
 // Runs each shared ABI suite on its hand-written compiled twin.
+import { Card } from '../test/abi/Card.ts';
+import { CardSuite } from '../test/abi/Card.suite.ts';
 import { Counter } from '../test/abi/Counter.ts';
 import { CounterSuite } from '../test/abi/Counter.suite.ts';
+import { Dynamic } from '../test/abi/Dynamic.ts';
+import { DynamicSuite } from '../test/abi/Dynamic.suite.ts';
+import { Fallthrough } from '../test/abi/Fallthrough.ts';
+import { FallthroughSuite } from '../test/abi/Fallthrough.suite.ts';
 import { Form } from '../test/abi/Form.ts';
 import { FormSuite } from '../test/abi/Form.suite.ts';
+import { Lifecycle } from '../test/abi/Lifecycle.ts';
+import { LifecycleSuite } from '../test/abi/Lifecycle.suite.ts';
 import { List } from '../test/abi/List.ts';
 import { ListSuite } from '../test/abi/List.suite.ts';
+import { Provide } from '../test/abi/Provide.ts';
+import { ProvideSuite } from '../test/abi/Provide.suite.ts';
+import { Refs } from '../test/abi/Refs.ts';
+import { RefsSuite } from '../test/abi/Refs.suite.ts';
+import { ScopedRoot } from '../test/abi/ScopedRoot.ts';
+import { ScopedRootSuite } from '../test/abi/ScopedRoot.suite.ts';
 
 CounterSuite.run(() => Counter);
 ListSuite.run(() => List);
 FormSuite.run(() => Form);
+CardSuite.run(() => Card);
+FallthroughSuite.run(() => Fallthrough);
+ScopedRootSuite.run(() => ScopedRoot);
+DynamicSuite.run(() => Dynamic);
+RefsSuite.run(() => Refs);
+ProvideSuite.run(() => Provide);
+LifecycleSuite.run(() => Lifecycle);

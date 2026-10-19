@@ -1,0 +1,20 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui';
+
+defineSlots<{
+  default?: (props: { count: number }) => unknown;
+  header?: () => unknown;
+  footer?: () => unknown;
+}>();
+
+const count = ref(0);
+</script>
+
+<template>
+  <article>
+    <header><slot name="header">Untitled</slot></header>
+    <button type="button" @click="count++">More</button>
+    <slot :count="count" />
+    <footer><slot name="footer" /></footer>
+  </article>
+</template>

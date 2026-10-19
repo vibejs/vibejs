@@ -1,8 +1,8 @@
 import { expect, expectTypeOf, test } from 'vitest';
 import * as internal from './internal.ts';
-import type { Block, Fragment } from './internal.ts';
+import type { Block, ComponentInstance, Fragment } from './internal.ts';
 
-test('exports exactly the ABI draft helpers', () => {
+test('exports exactly the ABI v1 helpers of C3, without hmr', () => {
   expect(new Set(Object.keys(internal))).toEqual(
     new Set([
       'template',
@@ -31,7 +31,12 @@ test('exports exactly the ABI draft helpers', () => {
       'applyCheckboxModel',
       'applyRadioModel',
       'applySelectModel',
+      'createComponent',
+      'createDynamicComponent',
+      'createSlot',
+      'useModel',
+      'setRef',
     ]),
   );
-  expectTypeOf<Block>().toEqualTypeOf<Node | Fragment | Block[]>();
+  expectTypeOf<Block>().toEqualTypeOf<Node | Fragment | ComponentInstance | Block[]>();
 });

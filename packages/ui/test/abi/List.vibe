@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from '@vibejs-org/ui';
+import Item from './Item.vibe';
 
-interface Item {
+interface Entry {
   id: number;
   label: string;
   done: boolean;
 }
 
-const props = defineProps<{ title: string; items: Item[] }>();
+const props = defineProps<{ title: string; items: Entry[] }>();
 
 const filter = ref('');
 const shown = computed(() => props.items.filter((item) => item.label.includes(filter.value)));
@@ -19,7 +20,13 @@ const shown = computed(() => props.items.filter((item) => item.label.includes(fi
     <input v-model.trim="filter" />
     <p v-if="!shown.length">Nothing</p>
     <ul v-else>
-      <li v-for="(item, index) in shown" :key="item.id" :class="{ done: item.done }">{{ index + 1 }}. {{ item.label }}</li>
+      <Item
+        v-for="(item, index) in shown"
+        :key="item.id"
+        :index="index"
+        :label="item.label"
+        :done="item.done"
+      />
     </ul>
   </section>
 </template>

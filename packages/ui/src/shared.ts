@@ -18,5 +18,18 @@ export const isIntegerKey = (key: unknown): boolean =>
 export const hyphenate = (value: string): string =>
   value.replaceAll(/\B([A-Z])/g, '-$1').toLowerCase();
 
+/** `foo-bar` → `fooBar`. */
+export const camelize = (value: string): string =>
+  value.replaceAll(/-(\w)/g, (_, c: string) => c.toUpperCase());
+
+/** `foo` → `Foo`. */
+export const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+
+/** `'1.5'` → `1.5`; a string that does not start with a number stays as it is. */
+export function looseToNumber(value: string): unknown {
+  const n = Number.parseFloat(value);
+  return Number.isNaN(n) ? value : n;
+}
+
 /** The string the DOM would make of `value`. */
 export const toText = (value: unknown): string => String(value);

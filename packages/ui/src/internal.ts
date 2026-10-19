@@ -1,10 +1,13 @@
-// The runtime ABI between compiled .vibe modules and @vibejs-org/ui (CONTRACTS C3), draft of v1.
-// It carries no semver promise. The JSDoc of each helper states what codegen emits for it.
+// The runtime ABI between compiled .vibe modules and @vibejs-org/ui (CONTRACTS C3), v1. A change
+// lands in the compiler and the runtime together, with the compiled twins in test/abi. It carries
+// no semver promise. The JSDoc of each helper states what codegen emits for it.
 import type { SetupContext } from './component.ts';
 import type { Block } from './runtime/block.ts';
 
+export type { Slot } from './component.ts';
 export type { Block, Fragment } from './runtime/block.ts';
 export { createIf, createKeyed, insert } from './runtime/block.ts';
+export { createComponent, createDynamicComponent } from './runtime/component.ts';
 export {
   child,
   next,
@@ -22,7 +25,13 @@ export {
 } from './runtime/dom.ts';
 export { on, withKeys, withModifiers } from './runtime/events.ts';
 export { createFor } from './runtime/for.ts';
+export type { ComponentInstance } from './runtime/instance.ts';
+export { useModel } from './runtime/props.ts';
+export type { RawProps } from './runtime/props.ts';
 export { renderEffect } from './runtime/renderEffect.ts';
+export { createSlot } from './runtime/slots.ts';
+export type { RawSlots } from './runtime/slots.ts';
+export { setRef } from './runtime/templateRef.ts';
 export {
   applyCheckboxModel,
   applyRadioModel,

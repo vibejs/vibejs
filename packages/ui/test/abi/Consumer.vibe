@@ -1,0 +1,13 @@
+<script setup lang="ts">
+import { inject, useId } from '@vibejs-org/ui';
+import { ThemeKey } from './keys.ts';
+
+const theme = inject(ThemeKey)!;
+const user = inject('user', 'guest');
+const locale = inject('locale', () => 'en', true);
+const id = useId();
+</script>
+
+<template>
+  <p :id="id">{{ theme }} {{ user }} {{ locale }}</p>
+</template>

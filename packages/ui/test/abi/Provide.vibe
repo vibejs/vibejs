@@ -1,0 +1,16 @@
+<script setup lang="ts">
+import { provide, ref } from '@vibejs-org/ui';
+import Consumer from './Consumer.vibe';
+import { ThemeKey } from './keys.ts';
+
+const theme = ref('dark');
+provide(ThemeKey, theme);
+</script>
+
+<template>
+  <section>
+    <button type="button" @click="theme = theme === 'dark' ? 'light' : 'dark'">Toggle</button>
+    <Consumer />
+    <Consumer />
+  </section>
+</template>

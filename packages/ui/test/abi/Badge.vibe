@@ -1,0 +1,8 @@
+<script setup lang="ts">
+defineProps<{ wide?: boolean }>();
+</script>
+
+<template>
+  <strong v-if="wide" class="badge" style="color: red">Wide</strong>
+  <span v-else class="badge" style="color: red">Badge</span>
+</template>

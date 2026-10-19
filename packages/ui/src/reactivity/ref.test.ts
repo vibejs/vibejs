@@ -9,7 +9,17 @@ import { computed } from './computed.ts';
 import { endBatch, ReactiveEffect, startBatch } from './core.ts';
 import { isReactive, isRef, isShallow, toRaw } from './dep.ts';
 import { reactive, readonly, shallowReactive, shallowReadonly } from './reactive.ts';
-import { ref, shallowRef, toRef, toRefs, toValue, triggerRef, unref, type Ref } from './ref.ts';
+import {
+  proxyRefs,
+  ref,
+  shallowRef,
+  toRef,
+  toRefs,
+  toValue,
+  triggerRef,
+  unref,
+  type Ref,
+} from './ref.ts';
 
 function effect(fn: () => unknown): ReactiveEffect {
   const e = new ReactiveEffect(fn);
@@ -787,4 +797,21 @@ describe('ref', () => {
     for (const r of refs) triggerRef(r);
     expect(spy).toHaveBeenCalledTimes(1);
   });
+});
+
+test('proxyRefs reads refs as values, writes into them, and keeps reactive objects', () => {
+  const count = ref(1);
+  const raw = { count, plain: 'a' };
+  const view = proxyRefs(raw);
+  expect(view.count).toBe(1);
+  view.count = 2;
+  expect(count.value).toBe(2);
+  view.plain = 'b';
+  expect(raw.plain).toBe('b');
+  const other = ref(3);
+  (view as { count: unknown }).count = other;
+  expect(raw.count).toBe(other);
+  expect(toRaw(view)).toBe(raw);
+  const state = reactive({ count: 1 });
+  expect(proxyRefs(state)).toBe(state);
 });

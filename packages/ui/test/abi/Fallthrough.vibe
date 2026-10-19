@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import Badge from './Badge.vibe';
+
+defineProps<{ wide?: boolean }>();
+</script>
+
+<template>
+  <Badge :wide="wide" class="mid" style="color: green; font-style: italic" />
+</template>

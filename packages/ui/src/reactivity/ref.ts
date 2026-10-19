@@ -248,6 +248,27 @@ export function toRefs(object: Record<PropertyKey, unknown>): any {
   return refs;
 }
 
+/**
+ * A view of `object` that reads refs as their values and writes plain values into the refs it
+ * holds; accessors pass through. A reactive object already unwraps, so it is returned as is.
+ */
+export function proxyRefs<T extends object>(object: T): ShallowUnwrapRef<T>;
+export function proxyRefs(object: object): unknown {
+  if (isReactive(object)) return object;
+  return new Proxy(object, {
+    get: (target, key, receiver) =>
+      key === '__v_raw' ? target : unref(Reflect.get(target, key, receiver)),
+    set: (target, key, value, receiver) => {
+      const old: unknown = Reflect.get(target, key, receiver);
+      if (isRef(old) && !isRef(value)) {
+        old.value = value;
+        return true;
+      }
+      return Reflect.set(target, key, value, receiver);
+    },
+  });
+}
+
 /** Notifies the readers of a ref as if its value changed, e.g. after mutating a `shallowRef`. */
 export function triggerRef(source: Ref): void {
   // A readonly proxy of a ref triggers the ref itself.
