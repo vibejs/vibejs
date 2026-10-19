@@ -74,6 +74,24 @@ describe('listen', () => {
     await expect(app.listen(0)).rejects.toMatchObject({ code: 'VIBE9403', args: { url: 'none' } });
   });
 
+  it('throws VIBE9403 and serves nothing when close starts while srvx loads', async () => {
+    const { app } = await create();
+    const listening = app.listen(0, '127.0.0.1');
+    await app.close();
+    await expect(listening).rejects.toMatchObject({ code: 'VIBE9403', args: { url: 'none' } });
+  });
+
+  it('can listen again after a failed listen', async () => {
+    const first = await create();
+    const { url } = await first.app.listen(0, '127.0.0.1');
+    const { app } = await create();
+    await expect(app.listen(Number(new URL(url).port), '127.0.0.1')).rejects.toMatchObject({
+      code: 'EADDRINUSE',
+    });
+    await expect(app.listen(0, '127.0.0.1')).resolves.toEqual({ url: expect.any(String) });
+    await Promise.all([first.app.close(), app.close()]);
+  });
+
   it('listens on port 3000 by default', async () => {
     const { app } = await create();
     const { url } = await app.listen(undefined, '127.0.0.1');

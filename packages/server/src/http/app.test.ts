@@ -402,16 +402,9 @@ describe('VibeFactory.create', () => {
           providers: ['Greeting'],
         },
         {
-          path: 'AppModule > LoggerModule',
-          global: true,
-          imports: [],
-          exports: ['Logger'],
-          providers: ['Logger'],
-        },
-        {
           path: 'AppModule',
           global: false,
-          imports: ['GreetingModule', 'LoggerModule'],
+          imports: ['GreetingModule'],
           exports: [],
           providers: [],
         },

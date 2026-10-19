@@ -125,6 +125,17 @@ describe('HttpError', () => {
     expect(entry.msg).toContain('[VIBE9503]');
   });
 
+  it.each([204, 0, 999, Number.NaN, 400.5])(
+    'answers an HttpError with status %s as a logged 500',
+    async (status) => {
+      const { app, lines } = await create([() => Promise.reject(new HttpError(status, 'X'))]);
+      const res = await app.request('/items/7');
+      expect(res.status).toBe(500);
+      expect(await res.json()).toMatchObject({ code: 'INTERNAL_ERROR' });
+      expect(lines[0]).toMatchObject({ code: 'VIBE9503', cause: { name: 'HttpError' } });
+    },
+  );
+
   it('answers a middleware throw with the same 500', async () => {
     const { app, lines } = await create([boom]);
     const res = await app.request('/items/7');

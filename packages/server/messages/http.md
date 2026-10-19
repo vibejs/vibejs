@@ -41,3 +41,13 @@ A response that allows credentials must name the requesting origin; browsers ign
 
 - List the allowed origins explicitly, such as `origin: ['https://app.example.com']`.
 - Remove `credentials: true` when the requests carry no cookies or authorization headers.
+
+## VIBE9405: Invalid base path
+
+> The base path {basePath} is not empty and not of the form `/segment` or `/a/b`.
+
+`VibeFactory.create()` mounts every route under `basePath`. A path without a leading slash, with a trailing slash or with an empty segment would make routes unreachable.
+
+### Fix
+
+- Pass `''` for no prefix, or a path such as `/api` without a trailing slash.

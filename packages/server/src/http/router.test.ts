@@ -157,6 +157,15 @@ describe('router', () => {
     expect(outcome(routes, 'GET', '/users/me', '/api')).toEqual({ status: 404 });
   });
 
+  it.each(['api', '/api/', '/', '//api', '/api//v1'])(
+    'throws VIBE9405 for the base path %j',
+    (basePath) => {
+      expect(() => createRouter([], basePath)).toThrow(
+        expect.objectContaining({ code: 'VIBE9405', args: { basePath } }),
+      );
+    },
+  );
+
   it('backtracks from a static branch to a param branch', () => {
     expect(outcome(routes, 'GET', '/users/me/posts/7')).toEqual({
       name: 'post',

@@ -36,6 +36,29 @@ describe('defineConfig', () => {
     for (const value of ['secret-token-value', 'hidden-mode']) expect(message).not.toContain(value);
   });
 
+  it('hides a transformed value that a schema message quotes', async () => {
+    const Config = defineConfig({
+      LIMIT: v.pipe(v.string(), v.transform(Number), v.maxValue(10)),
+      TOKEN: v.pipe(v.string(), v.toLowerCase(), v.picklist(['a'])),
+      FLAG: v.pipe(
+        v.string(),
+        v.transform(() => ({})),
+        v.string(),
+      ),
+    });
+    vi.stubEnv('LIMIT', '5e3');
+    vi.stubEnv('TOKEN', 'SuperSecret');
+    vi.stubEnv('FLAG', 'yes');
+    const error = await caught(() => new Config());
+    if (!isVibeError(error, 'VIBE9601')) throw new Error('expected VIBE9601');
+    expect(error.args.issues).toMatchInlineSnapshot(
+      `"LIMIT: Invalid value: Expected <=10 but received <value>; TOKEN: Invalid type: Expected "a" but received "<value>"; FLAG: Invalid type: Expected string but received Object"`,
+    );
+    for (const value of ['5000', 'SuperSecret', 'supersecret']) {
+      expect(error.message).not.toContain(value);
+    }
+  });
+
   it('reports a missing variable', () => {
     vi.stubEnv('PORT', undefined);
     vi.stubEnv('DATABASE_URL', 'https://db.test');

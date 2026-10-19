@@ -120,10 +120,8 @@ export const VibeFactory = {
       shutdownTimeout = 10_000,
     } = options;
     const dynamic: DynamicModule = typeof root === 'function' ? { module: root } : root;
-    const graph = scan({
-      ...dynamic,
-      imports: [loggerModule(logger), ...(dynamic.imports ?? [])],
-    });
+    const internal = loggerModule(logger);
+    const graph = scan({ ...dynamic, imports: [internal, ...(dynamic.imports ?? [])] });
     const scope = graph.root.scope;
     const globals = [...guards, ...interceptors, ...filters].map((cls) =>
       providerRecord(cls, scope),
@@ -236,11 +234,21 @@ export const VibeFactory = {
       async listen(port = 3000, hostname) {
         if (listening || closing) throw vibeError('VIBE9403', { url: server?.url ?? 'none' });
         listening = true;
-        const { serve } = await import('srvx');
-        const started = serve({ fetch, port, hostname, gracefulShutdown: false, silent: true });
-        server = started;
-        await started.ready();
-        const url = String(started.url);
+        let url: string;
+        try {
+          const { serve } = await import('srvx');
+          // oxlint-disable-next-line typescript/no-unnecessary-condition -- close() may have started while srvx loaded
+          if (closing) throw vibeError('VIBE9403', { url: 'none' });
+          const started = serve({ fetch, port, hostname, gracefulShutdown: false, silent: true });
+          server = started;
+          await started.ready();
+          url = String(started.url);
+        } catch (error) {
+          // A failed listen, such as EADDRINUSE, can be retried.
+          listening = false;
+          server = undefined;
+          throw error;
+        }
         logger.info('listening', { url });
         return { url };
       },
@@ -294,13 +302,18 @@ export const VibeFactory = {
           interceptors: names([...interceptors, ...binding.interceptors]),
           filters: names([...binding.filters, ...filters]),
         })),
-        modules: graph.modules.map((node) => ({
-          path: node.path,
-          global: node.global,
-          imports: node.imports.map((child) => child.name),
-          exports: node.exports,
-          providers: node.providers,
-        })),
+        // The generated logger module is an implementation detail.
+        modules: graph.modules
+          .filter((node) => node.module !== internal)
+          .map((node) => ({
+            path: node.path,
+            global: node.global,
+            imports: node.imports
+              .filter((child) => child.module !== internal)
+              .map((child) => child.name),
+            exports: node.exports,
+            providers: node.providers,
+          })),
       }),
     };
     return app;

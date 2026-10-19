@@ -18,9 +18,18 @@ export function defineConfig<const S extends Record<string, StandardSchemaV1>>(
         const result = field['~standard'].validate(raw);
         if (result instanceof Promise) throw vibeError('VIBE9602', { key });
         if (result.issues) {
-          // Schema messages may quote the received value; a config value can be a secret.
-          const hide = (text: string) => (raw ? text.replaceAll(raw, '<value>') : text);
-          issues.push(`${key}: ${result.issues.map((issue) => hide(issue.message)).join(', ')}`);
+          // Schema messages may quote the raw or the transformed value; a config value can be a
+          // secret. Common schema libraries put the failing value on the issue as `input`.
+          const messages = result.issues.map((issue) => {
+            const input: unknown = Reflect.get(issue, 'input');
+            const shown =
+              typeof input === 'string' || typeof input === 'number' ? String(input) : '';
+            return [raw ?? '', shown].reduce(
+              (text, value) => (value ? text.replaceAll(value, '<value>') : text),
+              issue.message,
+            );
+          });
+          issues.push(`${key}: ${messages.join(', ')}`);
         } else {
           Reflect.set(this, key, result.value);
         }

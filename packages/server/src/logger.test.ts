@@ -68,6 +68,19 @@ describe('JsonLogger', () => {
     expect(lines[0].error).not.toHaveProperty('cause.cause');
   });
 
+  it('ends a cause cycle and keeps its own time, level and msg', () => {
+    const { lines, logger } = capture();
+    const error = new Error('loop');
+    error.cause = error;
+    logger.error('failed', { error, time: 0, level: 'debug', msg: 'other' });
+    expect(lines[0]).toMatchObject({
+      level: 'error',
+      msg: 'failed',
+      error: { cause: '[Circular]' },
+    });
+    expect(lines[0].time).not.toBe(0);
+  });
+
   it('writes to console.log by default', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
     new JsonLogger().warn('careful');

@@ -24,6 +24,7 @@ const MESSAGES = {
   VIBE9402: ["{inFlight} requests were still running after the shutdown timeout of {timeout} ms, so the server was closed with them in flight.","Raise `shutdownTimeout` in the options of `VibeFactory.create()`.","Make long handlers stop early when `ctx.signal` is aborted."],
   VIBE9403: ["listen() was called on an app that already listens or is closing (server: {url}).","Call `listen()` once per app; create another app with `VibeFactory.create()` for a second server."],
   VIBE9404: ["cors() was called with `origin: '*'` and `credentials: true`, which browsers reject.","List the allowed origins explicitly, such as `origin: ['https://app.example.com']`.","Remove `credentials: true` when the requests carry no cookies or authorization headers."],
+  VIBE9405: ["The base path {basePath} is not empty and not of the form `/segment` or `/a/b`.","Pass `''` for no prefix, or a path such as `/api` without a trailing slash."],
   VIBE9503: ["A request failed with an unexpected error, so the client received 500 INTERNAL_ERROR.","Read the logged `cause` and fix the code that threw it.","Throw an `HttpError`, or call `ctx.fail()` with a declared error code, when the error is meant for the client."],
   VIBE9504: ["The cookie name \"{name}\" is not a valid token.","Use a name made of letters, digits and ``!#$%&'*+-.^_`|~``."],
   VIBE9601: ["The environment variables do not match the config schema: {issues}.","Set the listed environment variables to values that match their schemas."],

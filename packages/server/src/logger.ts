@@ -13,9 +13,14 @@ export abstract class Logger {
 
 const RANK: Record<LogLevel, number> = { debug: 0, info: 1, warn: 2, error: 3, silent: 4 };
 
-/** An `Error` as plain JSON: name, message, stack, and its `code` and `cause` when present. */
-function serialize(value: unknown): unknown {
+/**
+ * An `Error` as plain JSON: name, message, stack, and its `code` and `cause` when present. A cause
+ * cycle ends in `'[Circular]'`.
+ */
+function serialize(value: unknown, seen = new WeakSet<Error>()): unknown {
   if (!(value instanceof Error)) return value;
+  if (seen.has(value)) return '[Circular]';
+  seen.add(value);
   const { name, message, stack } = value;
   const code: unknown = Reflect.get(value, 'code');
   return {
@@ -23,12 +28,13 @@ function serialize(value: unknown): unknown {
     message,
     stack,
     ...(code === undefined ? {} : { code }),
-    ...(value.cause === undefined ? {} : { cause: serialize(value.cause) }),
+    ...(value.cause === undefined ? {} : { cause: serialize(value.cause, seen) }),
   };
 }
 
 /**
- * Writes one JSON line per entry: `{ time, level, msg, ...fields }`. Entries below `level`
+ * Writes one JSON line per entry: `{ time, level, msg, ...fields }`; fields named `time`, `level`
+ * or `msg` are dropped. Entries below `level`
  * (default `info`) are dropped, and `silent` drops all. `write` defaults to `console.log`.
  */
 export class JsonLogger extends Logger {
@@ -48,10 +54,13 @@ export class JsonLogger extends Logger {
   #log(level: Exclude<LogLevel, 'silent'>, msg: string, fields: LogFields = {}): void {
     const { level: min = 'info', fields: base, write } = this.#options;
     if (RANK[level] < RANK[min]) return;
+    const head = { time: new Date().toISOString(), level, msg };
     const entry = Object.fromEntries(
-      Object.entries({ ...base, ...fields }).map(([key, value]) => [key, serialize(value)]),
+      Object.entries({ ...base, ...fields })
+        .filter(([key]) => !Object.hasOwn(head, key))
+        .map(([key, value]) => [key, serialize(value)]),
     );
-    const line = JSON.stringify({ time: new Date().toISOString(), level, msg, ...entry });
+    const line = JSON.stringify({ ...head, ...entry });
     // oxlint-disable-next-line eslint/no-console -- the default destination of the logger
     (write ?? console.log)(line);
   }
