@@ -13,6 +13,7 @@ import type {
   RouteRecordNormalized,
   Router,
   RouterOptions,
+  RouteRecordRaw,
 } from './types.ts';
 
 export const START_LOCATION: RouteLocation = {
@@ -116,7 +117,14 @@ const register =
     };
   };
 
-export function createRouter(options: RouterOptions): Router {
+/** Returns `routes` as-is; its literal names and paths type the router. */
+export function defineRoutes<const R extends readonly RouteRecordRaw[]>(routes: R): R {
+  return routes;
+}
+
+export function createRouter<const R extends readonly RouteRecordRaw[]>(
+  options: RouterOptions<R>,
+): Router<R> {
   checkOptions(options, ['history', 'routes'], 'createRouter()');
   const { history } = options;
   const matcher = createMatcher(options.routes);

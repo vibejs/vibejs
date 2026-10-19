@@ -1,0 +1,80 @@
+import type {
+  NavigationGuard,
+  RouteLocationOf,
+  RouteLocationRaw,
+  RouteParams,
+  Router,
+} from '@vibejs-org/ui/router';
+import { router } from './router.ts';
+import { routes300 } from './routes-300.ts';
+import { UserPage } from './user-page.ts';
+
+// The registered router types every default.
+const registered: Router = router;
+const label: string = UserPage.setup({ id: '1' }).label;
+
+// currentRoute narrows on the name.
+const current = router.currentRoute.value;
+if (current.name === 'user') {
+  const id: string = current.params.id;
+  void id;
+}
+// @ts-expect-error not narrowed: other routes have no `id`
+const notNarrowed: string = current.params.id;
+
+// Guards narrow `to` and `from`, and redirect to registered names only.
+const guard: NavigationGuard = (to, from) => {
+  if (to.name === 'user-posts' && from.name === 'user') {
+    const postId: string | undefined = to.params.postId;
+    const id: string = from.params.id;
+    void [postId, id];
+  }
+  return { name: 'home' };
+};
+router.beforeEach(guard);
+// @ts-expect-error an unknown name
+const badGuard: NavigationGuard = () => ({ name: 'usr' });
+
+// push() and locations reject bad named locations.
+void router.push({ name: 'user', params: { id: 1 } });
+void router.push({ name: 'home' });
+// @ts-expect-error the required `id` is missing
+void router.push({ name: 'user' });
+// @ts-expect-error an unknown name
+const badRaw: RouteLocationRaw = { name: 'usr' };
+// @ts-expect-error an unknown param
+const badParam: RouteLocationRaw = { name: 'user', params: { userId: 1 } };
+
+const params: RouteParams<'user'> = { id: '1' };
+const ofUser: RouteLocationOf<'user'>['params'] = { id: '1' };
+// @ts-expect-error `id` is a string when read
+const numeric: RouteParams<'user'> = { id: 1 };
+
+// 300 routes, with explicit R.
+type R300 = typeof routes300;
+const leaf: RouteParams<'r49-leaf', R300> = { id: '1', parts: ['a'], leaf: '2' };
+const absolute: RouteParams<'r0-abs', R300> = { rest: [] };
+const to300: RouteLocationRaw<R300> = { name: 'r0-abs' };
+const opt: RouteLocationRaw<R300> = { name: 'r25-opt', params: { id: 1, opt: null } };
+// @ts-expect-error the required `id` is missing
+const bad300: RouteLocationRaw<R300> = { name: 'r0' };
+// @ts-expect-error an unknown name
+const unknown300: RouteLocationRaw<R300> = { name: 'r50' };
+
+export {
+  absolute,
+  bad300,
+  badGuard,
+  badParam,
+  badRaw,
+  label,
+  leaf,
+  notNarrowed,
+  numeric,
+  ofUser,
+  opt,
+  params,
+  registered,
+  to300,
+  unknown300,
+};

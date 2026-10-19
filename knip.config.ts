@@ -7,5 +7,5 @@ export default {
     '.': { entry: ['scripts/*.ts'] },
     'packages/*': {},
   },
-  ignore: ['packages/create-vibejs/templates/**'],
+  ignore: ['packages/create-vibejs/templates/**', 'packages/ui/test/fixtures/**'],
 } satisfies KnipConfig;
