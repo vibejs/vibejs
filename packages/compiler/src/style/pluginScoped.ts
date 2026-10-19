@@ -14,11 +14,23 @@
 //   CssSyntaxError at its position.
 // - An empty selector, such as the middle one of `.a, , .b` or the argument of `:is()`, is left
 //   as it is, where upstream throws a TypeError.
-// - Types for erasableSyntaxOnly and isolatedDeclarations. The deep-rule marker is a WeakSet of
+// - Types for erasableSyntaxOnly and isolatedDeclarations, and a local `Selector` type for the
+//   TypeScript 7.1 checker. The deep-rule marker is a WeakSet of
 //   `raws` objects, which a node shares with its visitor proxy.
 /* oxlint-disable eslint/no-shadow, typescript/consistent-return -- kept as upstream writes it */
 import { type AtRule, type Container, type Document, type Plugin, Rule } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
+
+// The package types `Selector` as `_Selector<Selector>` over `Diff<Node, S>`, which the TypeScript 7.1
+// checker rejects as infinitely circular (TS5115). These are the same shapes without the cycle.
+type Node = selectorParser.NodeTypes[Exclude<keyof selectorParser.NodeTypes, 'selector' | 'root'>];
+type Selector = selectorParser.Container<string, Node> & { type: 'selector' };
+
+/** The argument selectors of `pseudo`, typed as `Selector`. */
+function args(pseudo: selectorParser.Pseudo): Selector[] {
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the same objects; see `Selector`
+  return pseudo.nodes as unknown as Selector[];
+}
 
 /** Called with the escape (`:deep` or `:global`) and its [start, end) offsets in the input CSS. */
 export type OnMalformed = (escape: string, start: number, end: number) => void;
@@ -102,7 +114,8 @@ function processRule(id: string, rule: Rule, onMalformed: OnMalformed): void {
   }
   rule.selector = selectorParser((selectorRoot) => {
     selectorRoot.each((selector) => {
-      rewriteSelector(id, rule, selector, selectorRoot, deep);
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the same object; see `Selector`
+      rewriteSelector(id, rule, selector as unknown as Selector, selectorRoot, deep);
     });
   }).processSync(rule.selector);
 }
@@ -117,7 +130,7 @@ function reportMalformed(rule: Rule, onMalformed: OnMalformed): boolean {
       const { value, nodes } = pseudo;
       if (value !== ':deep' && value !== ':global') return;
       // A comment is not a selector: `:deep(/* x */)` has an empty argument.
-      if (nodes.length === 1 && nodes[0].nodes.some((n) => n.type !== 'comment')) return;
+      if (nodes.length === 1 && args(pseudo)[0].nodes.some((n) => n.type !== 'comment')) return;
       malformed = true;
       const offset = rule.source!.start!.offset;
       const start = pseudo.sourceIndex;
@@ -151,13 +164,13 @@ function pseudoEnd(text: string, i: number): number {
 function rewriteSelector(
   id: string,
   rule: Rule,
-  selector: selectorParser.Selector,
+  selector: Selector,
   selectorRoot: selectorParser.Root,
   deep: boolean,
 ): void {
   // An empty selector (`.a, , .b` or `:is()`) has nothing to scope.
   if (!selector.length) return;
-  let node = null as selectorParser.Selector['nodes'][0] | null;
+  let node = null as Node | null;
   let shouldInject = !deep;
   let hasNestedDeep = false as boolean;
   let splitForNestedDeep = false as boolean;
@@ -166,10 +179,10 @@ function rewriteSelector(
     if (n.type === 'pseudo') {
       const { value } = n;
       if (isDeepContainerPseudo(n)) {
-        const hasDeepSelectors = n.nodes.some((selector) => selector.some(isDeepSelector));
+        const hasDeepSelectors = args(n).some((selector) => selector.some(isDeepSelector));
         if (hasDeepSelectors) {
           const hasScopeAnchor = !!node;
-          const hasMixedSelectors = n.nodes.some((selector) => !selector.some(isDeepSelector));
+          const hasMixedSelectors = args(n).some((selector) => !selector.some(isDeepSelector));
           const hasTrailingNodes = selector.index(n) < selector.length - 1;
           if (
             canSplitDeepContainerPseudo(n) &&
@@ -193,7 +206,7 @@ function rewriteSelector(
             return;
           }
 
-          n.nodes.forEach((selector) =>
+          args(n).forEach((selector) =>
             rewriteSelector(id, rule, selector, selectorRoot, deep || hasScopeAnchor),
           );
           if (!hasScopeAnchor) {
@@ -209,13 +222,13 @@ function rewriteSelector(
         deepRules.add(rule.raws);
         // .foo :deep(.bar) -> .foo[xxxxxxx] .bar
         // replace the current node with :deep's inner selector
-        let last: selectorParser.Selector['nodes'][0] = n;
-        n.nodes[0].each((ss) => {
+        let last: Node = n;
+        args(n)[0].each((ss: Node) => {
           selector.insertAfter(last, ss);
           last = ss;
         });
         // insert a space combinator before if it doesn't already have one
-        const prev = selector.at(selector.index(n) - 1) as selectorParser.Node | undefined;
+        const prev = selector.at(selector.index(n) - 1) as Node | undefined;
         if (!prev || !isSpaceCombinator(prev)) {
           selector.insertAfter(
             n,
@@ -231,14 +244,15 @@ function rewriteSelector(
       // global: replace with inner selector and do not inject [id].
       // :global(.foo) -> .foo
       if (value === ':global') {
-        selector.replaceWith(n.nodes[0]);
+        // oxlint-disable-next-line typescript/no-unnecessary-type-assertion, typescript/no-unsafe-type-assertion -- the same object; TypeScript 7.1 needs the cast, see `Selector`
+        selector.replaceWith(args(n)[0] as unknown as selectorParser.Node);
         return false;
       }
     }
 
     if (n.type === 'universal') {
-      const prev = selector.at(selector.index(n) - 1) as selectorParser.Node | undefined;
-      const next = selector.at(selector.index(n) + 1) as selectorParser.Node | undefined;
+      const prev = selector.at(selector.index(n) - 1) as Node | undefined;
+      const next = selector.at(selector.index(n) + 1) as Node | undefined;
       // * ... {}
       if (!prev) {
         // * .foo {} -> .foo[xxxxxxx] {}
@@ -290,7 +304,7 @@ function rewriteSelector(
   if (node && !hasNestedDeep) {
     const { type, value } = node;
     if (type === 'pseudo' && (value === ':is' || value === ':where')) {
-      node.nodes.forEach((value) => rewriteSelector(id, rule, value, selectorRoot, deep));
+      args(node).forEach((value) => rewriteSelector(id, rule, value, selectorRoot, deep));
       shouldInject = false;
     }
   }
@@ -309,7 +323,7 @@ function rewriteSelector(
       // If node is null it means we need to inject [id] at the start
       // insertAfter can handle `null` here
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see above
-      node as selectorParser.Selector['nodes'][0],
+      node as Node,
       selectorParser.attribute({
         attribute: id,
         value: id,
@@ -320,21 +334,22 @@ function rewriteSelector(
   }
 }
 
-function isSpaceCombinator(node: selectorParser.Node): boolean {
+function isSpaceCombinator(node: Node): boolean {
   return node.type === 'combinator' && /^\s+$/.test(node.value);
 }
 
-function isDeepSelector(node: selectorParser.Node): boolean {
+function isDeepSelector(node: Node | Selector): boolean {
   if (node.type === 'pseudo' && node.value === ':deep') {
     return true;
   }
 
-  return !!(node as selectorParser.Node & { nodes?: selectorParser.Node[] }).nodes?.some((child) =>
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a pseudo holds selectors; see `Selector`
+  return !!(node as unknown as { nodes?: (Node | Selector)[] }).nodes?.some((child) =>
     isDeepSelector(child),
   );
 }
 
-function isDeepContainerPseudo(node: selectorParser.Node): node is selectorParser.Pseudo {
+function isDeepContainerPseudo(node: Node): node is selectorParser.Pseudo {
   return (
     node.type === 'pseudo' &&
     (node.value === ':is' ||
@@ -351,13 +366,13 @@ function canSplitDeepContainerPseudo(node: selectorParser.Pseudo): boolean {
 function splitSelectorForNestedDeep(
   id: string,
   rule: Rule,
-  selector: selectorParser.Selector,
+  selector: Selector,
   selectorRoot: selectorParser.Root,
   pseudo: selectorParser.Pseudo,
   deep: boolean,
 ): void {
   const pseudoIndex = selector.index(pseudo);
-  const selectors = pseudo.nodes.map((branch, index) => {
+  const selectors = args(pseudo).map((branch, index) => {
     const branchSelector = selector.clone();
     // oxlint-disable typescript/no-unnecessary-condition -- the upstream check of the hint below
     /* v8 ignore else -- @preserve upstream-defensive: a clone of a selector that holds the pseudo has a first node */
@@ -373,12 +388,14 @@ function splitSelectorForNestedDeep(
       branchClone.first.spaces.before = '';
     }
     branchPseudo.removeAll();
-    branchPseudo.append(branchClone);
+    // oxlint-disable-next-line typescript/no-unnecessary-type-assertion, typescript/no-unsafe-type-assertion -- the same object; TypeScript 7.1 needs the cast, see `Selector`
+    branchPseudo.append(branchClone as unknown as selectorParser.Selector);
     rewriteSelector(id, rule, branchSelector, selectorRoot, deep);
     return branchSelector;
   });
 
-  selector.replaceWith(...selectors);
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the same objects; see `Selector`
+  selector.replaceWith(...(selectors as unknown as selectorParser.Node[]));
 }
 
 function extractAndWrapNodes(parentNode: Rule | AtRule): void {
