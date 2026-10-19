@@ -1,0 +1,4 @@
+<template>
+  <input disabled checked>
+  <svg viewBox="0 0 1 1"><path d="M0" /></svg>
+</template>

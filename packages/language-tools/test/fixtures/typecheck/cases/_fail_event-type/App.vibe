@@ -1,0 +1,9 @@
+<script setup lang="ts">
+function shout(text: string) {
+  return text.toUpperCase()
+}
+</script>
+
+<template>
+  <button @click="shout($event)">Shout</button>
+</template>

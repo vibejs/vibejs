@@ -1,0 +1,12 @@
+type __VibeProps = {};
+type __VibeEmits = {};
+const __vibe_setup = {  };
+{
+  __vibe.el(__vibe.tags.label)({ for: 'x', class: 'a b', 'aria-label': 'It\u0027s\u000ahere', 'data-test': 'x' });
+}
+type __VibeSlots = {};
+type __VibeExposed = {};
+type __VibeRefs = {};
+type __VibeModels = {};
+export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();
+import * as __vibe from '@vibejs-org/ui/tooling';

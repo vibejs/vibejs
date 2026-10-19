@@ -1,0 +1,8 @@
+<script setup lang="ts">
+const { title = 'List' } = defineProps<{ title?: string; count: number }>()
+const emit = defineEmits<{ pick: [id: string] }>()
+</script>
+
+<template>
+  <h1 @click="emit('pick', title)">{{ title }} {{ count }}</h1>
+</template>

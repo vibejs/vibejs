@@ -1,0 +1,10 @@
+<script setup lang="ts">
+interface Props {
+  label: string
+}
+const props = defineProps<Props>()
+</script>
+
+<template>
+  <p :title="props.label">{{ label }} {{ $props.label }} {{ $attrs }}</p>
+</template>

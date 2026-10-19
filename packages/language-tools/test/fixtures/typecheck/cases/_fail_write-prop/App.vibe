@@ -1,0 +1,7 @@
+<script setup lang="ts">
+defineProps<{ count: number }>()
+</script>
+
+<template>
+  <button @click="count++">{{ count }}</button>
+</template>

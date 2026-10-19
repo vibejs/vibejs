@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import Comp from './Comp.vibe'
+const value = 1
+</script>
+
+<template>
+  <Comp :value="value" @change="value = 2">
+    <p>{{ value }}</p>
+  </Comp>
+  <component :is="Comp" />
+  <slot name="a" :value="value" />
+  <template><p>{{ value }}</p></template>
+  <x-widget :value="value">{{ value }}</x-widget>
+  <ns.Comp />
+</template>

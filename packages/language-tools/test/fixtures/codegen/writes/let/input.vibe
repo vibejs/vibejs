@@ -1,0 +1,8 @@
+<script setup lang="ts">
+let label = 'a'
+let other = 'b'
+</script>
+
+<template>
+  <button @click="label = 'b'">{{ label }} {{ other }}</button>
+</template>

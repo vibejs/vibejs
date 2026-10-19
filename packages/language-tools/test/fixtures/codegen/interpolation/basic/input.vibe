@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const user = { name: 'Ada' }
+const unused = 1
+</script>
+
+<template>
+  <p>{{ user.name }} and {{ `${user.name}!` }} {{  }} {{ missing }}</p>
+  text {{ (x => x)(user) }}
+</template>

@@ -1,0 +1,11 @@
+<script setup lang="ts">
+const on = true
+const name = 'field'
+</script>
+
+<template>
+  <form>
+    <input type="checkbox" :checked="on" :name="name" disabled aria-label="Toggle" data-test="x">
+    <label for="x" class="a  b">Label</label>
+  </form>
+</template>

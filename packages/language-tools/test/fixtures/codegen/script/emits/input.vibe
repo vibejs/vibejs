@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const emit = defineEmits<{ pick: [id: string]; close: [] }>()
+</script>
+
+<template>
+  <button @click="emit('close')" @dblclick="$emit('pick', 'a')">Close</button>
+</template>

@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const size = 5
+</script>
+
+<template>
+  <input :placeholder="size">
+</template>

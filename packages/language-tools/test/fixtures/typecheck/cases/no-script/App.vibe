@@ -1,0 +1,3 @@
+<template>
+  <p title="Hello">{{ Math.max(1, 2) }}</p>
+</template>
