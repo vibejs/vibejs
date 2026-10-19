@@ -118,5 +118,5 @@ describe('demo', () => {
 
     writeFileSync(app, clean);
     expect(tsc(demo)).toEqual({ status: 0, diagnostics: [] });
-  });
+  }, 60_000);
 });

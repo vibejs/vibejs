@@ -17,5 +17,6 @@
 #16 Verbatim BOUND o[309,314) "value" → v[507,512) "value"
 #17 Atom BOUND o[296,297) "p" → v[542,543) "p"
 #18 Atom BOUND o[338,339) "p" → v[585,586) "p"
-#19 Atom BOUND o[389,390) "p" → v[628,629) "p"
-#20 Atom ANCHOR o[0,0) "" → v[737,845) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
+#19 Verbatim BOUND o[376,381) "value" → v[604,609) "value"
+#20 Atom BOUND o[389,390) "p" → v[652,653) "p"
+#21 Atom ANCHOR o[0,0) "" → v[761,869) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

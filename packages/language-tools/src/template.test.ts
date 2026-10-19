@@ -35,12 +35,23 @@ it('chains v-if, v-else-if and v-else across whitespace and comments', () => {
   ]);
 });
 
-it('breaks a chain at text, interpolations and untyped elements', () => {
+it('breaks a chain at text and interpolations', () => {
   const orphan = ['if (b) {', '__vibe.el(__vibe.tags.p)({ });', '}'];
   const first = ['if (a) {', '__vibe.el(__vibe.tags.p)({ });', '}'];
   expect(emit('<p v-if="a" />x<p v-else-if="b" />')).toEqual([...first, ...orphan]);
   expect(emit('<p v-if="a" />{{ a }}<p v-else-if="b" />')).toEqual([...first, '(a);', ...orphan]);
-  expect(emit('<C v-if="a" /><p v-else-if="b" />')).toEqual(orphan);
+});
+
+it('keeps the condition of an untyped branch, so the chain still narrows', () => {
+  expect(emit('<C v-if="a" /><p v-else-if="b" /><template v-else>x</template>')).toEqual([
+    'if (a) {',
+    '}',
+    'else if (b) {',
+    '__vibe.el(__vibe.tags.p)({ });',
+    '}',
+    'else {',
+    '}',
+  ]);
 });
 
 it('loops v-for inside v-if and binds its aliases as locals', () => {

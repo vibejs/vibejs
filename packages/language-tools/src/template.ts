@@ -58,10 +58,6 @@ export function children(nodes: TemplateChildNode[], w: Walk, locals: Locals): v
     if (node.type !== NodeTypes.ELEMENT) continue;
     const cond = directive(node, 'if') ?? directive(node, 'else-if');
     const otherwise = directive(node, 'else');
-    if (!typed(node)) {
-      chain = false;
-      continue;
-    }
     const exp = filled(cond?.exp);
     if (cond || otherwise) {
       line(w, chain && (cond?.name === 'else-if' || otherwise) ? 'else ' : '');
@@ -71,11 +67,12 @@ export function children(nodes: TemplateChildNode[], w: Walk, locals: Locals): v
         w.b.add(') {');
       } else w.b.add('{');
       chain = exp !== undefined;
-      block(w, () => element(node, w, locals));
+      // An untyped branch keeps its condition, so the rest of the chain still narrows.
+      if (typed(node)) block(w, () => element(node, w, locals));
       line(w, '}');
     } else {
       chain = false;
-      element(node, w, locals);
+      if (typed(node)) element(node, w, locals);
     }
   }
 }

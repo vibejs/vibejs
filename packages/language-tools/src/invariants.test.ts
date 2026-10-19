@@ -1,6 +1,10 @@
 import {
   analyzeScript,
+  camelize,
+  capitalize,
+  ElementTypes,
   NodeTypes,
+  type ElementNode,
   parse,
   type SimpleExpressionNode,
   type TemplateChildNode,
@@ -13,18 +17,35 @@ import { generate } from './generate.ts';
 
 const range = (e: SimpleExpressionNode): [number, number] => [e.loc.start.offset, e.loc.end.offset];
 
-/** The template expressions of a parsed file, as original ranges. */
+/** Only intrinsic elements are walked into; `<template>`, components and custom elements are not. */
+const typed = (el: ElementNode) =>
+  el.tagType === ElementTypes.ELEMENT && el.tag !== 'template' && !el.tag.includes('-');
+
+/**
+ * The template expressions the generator supports, as original ranges: interpolations, `v-for`,
+ * `v-show` and static `v-bind`/`v-on` on intrinsic elements, and every `v-if`/`v-else-if`.
+ */
 function expressions(nodes: TemplateChildNode[]): [number, number][] {
   return nodes.flatMap((node): [number, number][] => {
     if (node.type === NodeTypes.INTERPOLATION) return [range(node.content)];
     if (node.type !== NodeTypes.ELEMENT) return [];
+    // A repeated key is skipped (merging is not typed yet), so only its first value counts.
+    const seen = new Set<string>();
     const own = node.props.flatMap((p) => {
-      if (p.type !== NodeTypes.DIRECTIVE) return [];
+      if (p.type === NodeTypes.ATTRIBUTE) seen.add(p.name);
+      if (p.type !== NodeTypes.DIRECTIVE || !p.exp) return [];
+      if (p.name === 'if' || p.name === 'else-if') return [range(p.exp)];
+      if (!typed(node)) return [];
       const f = p.forParseResult;
       if (f) return [f.source, f.value, f.key, f.index].filter((e) => e !== undefined).map(range);
-      return p.exp ? [range(p.exp)] : [];
+      if (p.name === 'show') return [range(p.exp)];
+      if ((p.name !== 'bind' && p.name !== 'on') || !p.arg?.isStatic) return [];
+      const key = p.name === 'on' ? `on${capitalize(camelize(p.arg.content))}` : p.arg.content;
+      if (key === 'ref' || seen.has(key) || !p.exp.content.trim()) return [];
+      seen.add(key);
+      return [range(p.exp)];
     });
-    return [...own, ...expressions(node.children)];
+    return typed(node) ? [...own, ...expressions(node.children)] : own;
   });
 }
 
@@ -75,13 +96,10 @@ describe.each(all)('%s', (name, source, clean) => {
     const script = descriptor.scriptSetup?.loc;
     const scriptOffsets = script ? visible(script.start.offset, script.end.offset) : [];
     expect(scriptOffsets.filter((i) => !covered.has(i))).toEqual([]);
-    // An expression that is emitted at all is emitted whole; unsupported ones are not emitted.
-    const partial = expressions(descriptor.template?.ast.children ?? [])
-      .map(([start, end]) => visible(start, end))
-      .filter(
-        (offsets) => offsets.some((i) => covered.has(i)) && !offsets.every((i) => covered.has(i)),
-      );
-    expect(partial).toEqual([]);
+    const missing = expressions(descriptor.template?.ast.children ?? []).filter(([start, end]) =>
+      visible(start, end).some((i) => !covered.has(i)),
+    );
+    expect(missing).toEqual([]);
   });
 
   it('has exactly one ANCHOR, on the default export', () => {

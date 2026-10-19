@@ -1,0 +1,8 @@
+<script setup lang="ts">
+const n = 1
+</script>
+
+<template>
+  <p v-if="n > 0 // positive" :id="String(n) // as text">{{ n // the count
+  }}</p>
+</template>

@@ -19,7 +19,10 @@ export interface GeneratedFile {
 }
 
 const CTX = ['$attrs', '$slots', '$emit', '$props'];
-const MACROS = /\bdefine(?:Props|Emits|Slots|Model|Expose|Options)\b/g;
+/** Macro calls; comments and strings match first, so a macro named in them is not a call. */
+// ponytail: regex scan, misses a call inside a template literal `${}`; use the script AST if needed.
+const MACROS =
+  /\/\/[^\n]*|\/\*[\s\S]*?\*\/|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`|\b(define(?:Props|Emits|Slots|Model|Expose|Options))\s*[<(]/g;
 const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
 
 /**
@@ -78,7 +81,8 @@ export function generate(fileName: string, text: string): GeneratedFile {
     Preset.ANCHOR,
   );
   b.add("\nimport * as __vibe from '@vibejs-org/ui/tooling';\n");
-  const macros = new Set(descriptor.scriptSetup?.content.match(MACROS));
+  const content = descriptor.scriptSetup?.content ?? '';
+  const macros = new Set([...content.matchAll(MACROS)].map((m) => m[1]).filter(Boolean));
   if (macros.size > 0)
     b.add(`import { ${[...macros].join(', ')} } from '@vibejs-org/ui/tooling';\n`);
 

@@ -41,6 +41,8 @@ export function expression(
     at = to;
   });
   b.verbatim(at, end, Preset.EXPR);
+  // A line comment would swallow the synthesized code that follows.
+  if (source.slice(start, end).includes('//')) b.add('\n');
 }
 
 /** The names that a v-for alias (`item`, `{ id, name }`, `[a, b]`) declares. */
