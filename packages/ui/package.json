@@ -63,7 +63,8 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@vibejs-org/errors": "workspace:*"
+    "@vibejs-org/errors": "workspace:*",
+    "csstype": "catalog:"
   },
   "devDependencies": {
     "reactive-framework-test-suite": "catalog:",

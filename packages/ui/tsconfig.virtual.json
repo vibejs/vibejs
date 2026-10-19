@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "isolatedDeclarations": false,
+    "outDir": "${configDir}/.tsbuild/virtual",
+    "tsBuildInfoFile": "${configDir}/.tsbuild/virtual.tsbuildinfo"
+  },
+  "include": ["${configDir}/src/virtual", "${configDir}/src/tooling.test-d.ts"],
+  "exclude": [],
+  "references": [{ "path": "./tsconfig.json" }]
+}

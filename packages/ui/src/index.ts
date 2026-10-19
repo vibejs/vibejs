@@ -1,4 +1,23 @@
 export { isVibeError, VibeError } from '@vibejs-org/errors';
+export type {
+  Component,
+  ComponentEmits,
+  ComponentExposed,
+  ComponentProps,
+  ComponentSlots,
+  EmitFn,
+  EmitsToProps,
+  Handle,
+  ModelRef,
+  SetupContext,
+} from './component.ts';
+export type {
+  ClassValue,
+  HTMLAttributes,
+  IntrinsicElementAttributes,
+  ReservedProps,
+  StyleValue,
+} from './dom-types.ts';
 export { computed } from './reactivity/computed.ts';
 export type { ComputedRef, WritableComputedRef } from './reactivity/computed.ts';
 export { effectScope, getCurrentScope, onScopeDispose } from './reactivity/effectScope.ts';
