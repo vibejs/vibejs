@@ -507,6 +507,12 @@ describe('validation', () => {
       });
     }
   });
+
+  it('keeps a `__proto__` query key as an own key', async () => {
+    const { app } = await create(ItemsModule);
+    const res = await app.request('/orgs/o/items/untyped?__proto__=a&__proto__=b&q=x');
+    expect(await res.json()).toEqual({ ['__proto__']: ['a', 'b'], q: 'x' });
+  });
 });
 
 describe('response building', () => {
@@ -693,6 +699,7 @@ describe('errors and filters', () => {
       }
       if (mode === 'http') return new HttpError(422, 'DECLARED', 'Mapped.', { cause: error });
       if (mode === 'throw') throw new Error('filter failed');
+      if (mode === 'throw-http') throw new HttpError(409, 'UNKNOWN');
       return undefined;
     }
   }
@@ -747,6 +754,13 @@ describe('errors and filters', () => {
     const { res, lines } = await send({ 'x-mode': 'throw' });
     expect(res.status).toBe(500);
     expect(lines).toMatchObject([{ code: 'VIBE9503', cause: { message: 'filter failed' } }]);
+  });
+
+  it('warns with VIBE9502 when a filter throws an undeclared HttpError code', async () => {
+    const { res, lines } = await send({ 'x-mode': 'throw-http' });
+    expect(res.status).toBe(409);
+    expect(await res.json()).toMatchObject({ code: 'UNKNOWN' });
+    expect(lines).toEqual([expect.objectContaining({ level: 'warn', code: 'VIBE9502' })]);
   });
 
   it('never leaks the detail or cause of a 500 and logs VIBE9503 with the cause', async () => {
