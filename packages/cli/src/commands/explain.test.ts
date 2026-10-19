@@ -7,6 +7,9 @@ const ctx: Ctx = {
   version: '1.2.3',
   agent: { active: true },
   docsDir: '',
+  cwd: '',
+  now: () => 0,
+  exec: vi.fn<Ctx['exec']>(),
   out: vi.fn<Ctx['out']>(),
   err: vi.fn<Ctx['err']>(),
 };

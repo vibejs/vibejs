@@ -56,6 +56,9 @@ describe('exitCode', () => {
     [{ ...base, ok: true }, 0],
     [{ ...base, ok: false, error: error('VIBE8003') }, 2],
     [{ ...base, ok: false, error: error('VIBE8004') }, 2],
+    [{ ...base, ok: false, error: error('VIBE8001') }, 2],
+    [{ ...base, ok: false, error: error('VIBE8005') }, 2],
+    [{ ...base, ok: false, error: error('VIBE8301') }, 2],
     [{ ...base, ok: false, error: error('VIBE8008') }, 1],
     [{ ...base, ok: false }, 1],
   ])('maps %o to %i', (r, code) => {

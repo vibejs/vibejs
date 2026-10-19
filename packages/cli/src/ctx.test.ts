@@ -1,4 +1,6 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import manifest from '../package.json' with { type: 'json' };
 import { detectAgentMode, nodeCtx } from './ctx.ts';
 
@@ -68,6 +70,31 @@ it('builds the Node context from package.json, dist/docs and the process streams
   expect(ctx.version).toBe(manifest.version);
   expect(ctx.agent.active).toBe(true);
   expect(ctx.docsDir.replaceAll('\\', '/')).toMatch(/\/packages\/cli\/dist\/docs$/);
+  expect(ctx.cwd).toBe(process.cwd());
+  expect(ctx.now()).toBeGreaterThan(0);
   expect(out).toHaveBeenCalledWith('to stdout');
   expect(err).toHaveBeenCalledWith('to stderr');
+});
+
+describe('exec', () => {
+  const ctx = nodeCtx();
+  const cwd = process.cwd();
+
+  it('resolves with the code and output of a child that exits non-zero', async () => {
+    const script = "process.stdout.write('out'); process.stderr.write('err'); process.exit(3)";
+    expect(await ctx.exec(process.execPath, ['-e', script], { cwd })).toEqual({
+      code: 3,
+      stdout: 'out',
+      stderr: 'err',
+    });
+  });
+
+  it('resolves with code 0 on success and code 1 when the program cannot start', async () => {
+    expect(await ctx.exec(process.execPath, ['-e', ''], { cwd })).toEqual({
+      code: 0,
+      stdout: '',
+      stderr: '',
+    });
+    expect((await ctx.exec(join(tmpdir(), 'vibejs-no-such-program'), [], { cwd })).code).toBe(1);
+  });
 });

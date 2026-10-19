@@ -6,6 +6,10 @@ export default {
   workspaces: {
     '.': { entry: ['scripts/*.ts'] },
     'packages/*': {},
+    'packages/cli': {
+      // Run, never imported, by the check tool-contract test from packages/cli/node_modules.
+      ignoreDependencies: ['oxlint', 'oxfmt'],
+    },
   },
-  ignore: ['packages/create-vibejs/templates/**', 'packages/ui/test/fixtures/**'],
+  ignore: ['packages/create-vibejs/templates/**', '**/test/fixtures/**'],
 } satisfies KnipConfig;

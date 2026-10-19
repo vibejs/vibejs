@@ -39,7 +39,12 @@
     "std-env": "catalog:"
   },
   "devDependencies": {
-    "tsdown": "catalog:"
+    "@vitest/coverage-v8": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:ts-next",
+    "vitest": "catalog:"
   },
   "engines": {
     "node": "^24.15.0 || >=26"

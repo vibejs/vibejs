@@ -5,14 +5,14 @@
   "scripts": {
     "pretypecheck": "pnpm errors",
     "typecheck": "tsc -b && pnpm --dir packages/vscode typecheck",
-    "lint": "tsc -b && pnpm --dir packages/vscode typecheck && oxlint --type-aware --deny-warnings && node scripts/lint-repo.ts && knip",
-    "fmt": "oxfmt",
+    "lint": "tsc -b && pnpm --dir packages/vscode typecheck && oxlint --type-aware --deny-warnings --disable-nested-config && node scripts/lint-repo.ts && knip",
+    "fmt": "oxfmt --disable-nested-config",
     "pretest": "pnpm errors",
     "test": "vitest --project node --project dom",
     "test:coverage": "vitest run --coverage --project node --project dom --project browser",
     "test:integration": "pnpm build && vitest run --project integration",
     "build": "pnpm -r --filter \"./packages/*\" build",
-    "check": "pnpm errors --check && oxfmt --check && pnpm lint && pnpm test:coverage",
+    "check": "pnpm errors --check && oxfmt --check --disable-nested-config && pnpm lint && pnpm test:coverage",
     "errors": "node scripts/errors.ts",
     "version-packages": "changeset version && pnpm errors && pnpm install --lockfile-only"
   },

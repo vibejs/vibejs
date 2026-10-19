@@ -1,0 +1,7 @@
+{ "diagnostics": [{"message": "Using a spread operator here creates a new array unnecessarily.","code": "unicorn(no-useless-spread)","severity": "error","url": "https://oxc.rs/docs/guide/usage/linter/rules/unicorn/no-useless-spread.html","help": "Consider removing the spread operator.","filename": "src/math.ts","labels": [{"span": {"offset": 53,"length": 3,"line": 2,"column": 22}}]}],
+              "number_of_files": 4,
+              "number_of_rules": 96,
+              "threads_count": 10,
+              "start_time": 0.003204875
+            }
+            

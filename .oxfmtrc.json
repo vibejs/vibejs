@@ -4,6 +4,7 @@
   "ignorePatterns": [
     "CONTRACTS.md",
     "**/*.gen.ts",
+    "**/test/fixtures/**",
     "packages/vscode/test/grammars/**",
     "packages/ui/src/reactivity/system.ts"
   ]
