@@ -453,6 +453,10 @@ describe('VibeFactory.create', () => {
       ],
     });
     expect((await app.request('/api/users')).status).toBe(200);
+    // inspect() reports what the app serves, not later changes to the options object.
+    const before = app.inspect();
+    Object.assign(options, { basePath: '/v2', guards: [] });
+    expect(app.inspect()).toEqual(before);
   });
 
   it('sends JSON through request() and keeps a given content type', async () => {

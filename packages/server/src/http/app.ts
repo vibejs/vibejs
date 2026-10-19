@@ -364,7 +364,7 @@ export async function createApp(
       })();
       return closing;
     },
-    inspect: () => describeApp(scanned, options),
+    inspect: () => describeApp(scanned, { basePath, guards, interceptors, filters }),
   };
   return app;
 }
