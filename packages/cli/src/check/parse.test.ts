@@ -8,12 +8,23 @@
 //     --coverage.reportsDirectory=.vibejs/check/coverage --coverage.reportOnFailure
 // Every file, including .vibejs/check/vitest.json and .vibejs/check/coverage/coverage-final.json,
 // is copied with the copy's absolute path rewritten to /project and the repository's to /vibejs.
-// tsc-vibe.txt holds the verbatim tsc lines of the content-mapper spike for .vibe files, with the
-// mapper name rewritten to @vibejs-org/language-tools@0.0.0.
+// tsc-vibe.txt holds the .vibe lines of tsc.txt and the tsc output, recorded the same way, on a
+// copy of test/fixtures/clean whose src/Hello.vibe repeats an attribute (`:id="id" :id="id"`) and
+// whose src/bad.ts holds a TS2322. tsc-synthetic.txt holds lines the real mapper never prints
+// (a position in synthesized code, an unresolved mapper), verbatim from the content-mapper spike
+// with the mapper name rewritten to @vibejs-org/language-tools@0.0.0.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { ExecResult } from '../ctx.ts';
-import { parseCoverage, parseOxfmt, parseOxlint, parseTsc, parseVitest } from './parse.ts';
+import type { Diagnostic } from '@vibejs-org/compiler';
+import {
+  parseCompiler,
+  parseCoverage,
+  parseOxfmt,
+  parseOxlint,
+  parseTsc,
+  parseVitest,
+} from './parse.ts';
 
 const tool = (name: string) =>
   readFileSync(new URL(`../../test/fixtures/tools/${name}`, import.meta.url), 'utf8');
@@ -26,30 +37,31 @@ const range = (line: number, character: number, length = 0) => ({
 
 describe('parseTsc', () => {
   const vibe = parseTsc(ok(tool('tsc-vibe.txt'), 2), ROOT)!;
+  const synthetic = parseTsc(ok(tool('tsc-synthetic.txt'), 2), ROOT)!;
 
   it.each([
-    [0, 'TS2322', 'src/App.vibe', 'src/App.vibe:5:7', range(4, 6)],
-    [1, 'TS2552', 'src/App.vibe', 'src/App.vibe:11:15', range(10, 14)],
-    [2, 'VIBE6001', 'fixtures/q3/Bogus.vibe', 'fixtures/q3/Bogus.vibe:6:6', range(5, 5)],
+    [vibe[0], 'TS2322', 'src/App.vibe', 'src/App.vibe:6:11', range(5, 10)],
+    [vibe[1], 'VIBE1102', 'src/Hello.vibe', 'src/Hello.vibe:6:17', range(5, 16)],
     // Synthesized code: the position is virtual, so no position is reported.
-    [3, 'TS2322', 'fixtures/q8/Synth.vibe', 'fixtures/q8/Synth.vibe', range(0, 0)],
-    [4, 'TS18075', '', '', range(0, 0)],
-  ])('tsc-vibe.txt #%i is %s at %j', (i, code, file, loc, at) => {
-    expect(vibe[i]).toMatchObject({ source: 'tsc', code, severity: 'error', file, loc, range: at });
+    [synthetic[0], 'TS2322', 'fixtures/q8/Synth.vibe', 'fixtures/q8/Synth.vibe', range(0, 0)],
+    [synthetic[1], 'TS18075', '', '', range(0, 0)],
+  ])('reads %s at %j', (d, code, file, loc, at) => {
+    expect(d).toMatchObject({ source: 'tsc', code, severity: 'error', file, loc, range: at });
   });
 
-  it('extracts five diagnostics and keeps the continuation in the message', () => {
-    expect(vibe).toHaveLength(5);
-    expect(vibe[3].message).toBe(
+  it('extracts two diagnostics of each file and keeps the continuation in the message', () => {
+    expect(vibe).toHaveLength(2);
+    expect(synthetic).toHaveLength(2);
+    expect(synthetic[0].message).toBe(
       "Type 'string' is not assignable to type 'number'.\n  This location is in virtual code produced by the content mapper '@vibejs-org/language-tools@0.0.0' and has no corresponding location in the original file.",
     );
-    expect(vibe[4].message).toBe(
+    expect(synthetic[1].message).toBe(
       "The content mapper package '@vibejs-org/language-tools' could not be resolved.",
     );
   });
 
   it('appends the TS1241 chain lines of tsc.txt to its message', () => {
-    const [ts1241, ts2322] = parseTsc(ok(tool('tsc.txt'), 2), ROOT)!;
+    const [, ts1241, ts2322] = parseTsc(ok(tool('tsc.txt'), 2), ROOT)!;
     expect(ts1241).toMatchObject({ code: 'TS1241', loc: 'src/handler.ts:29:4' });
     expect(ts1241.message.split('\n')).toHaveLength(6);
     expect(ts1241.message.split('\n')[5]).toMatch(/^ {10}Type 'number' is not assignable/);
@@ -68,6 +80,58 @@ describe('parseTsc', () => {
     ['a non-zero exit without a diagnostic', ok('', 1), null],
   ])('%s', (_, r, expected) => {
     expect(parseTsc(r, ROOT)).toEqual(expected);
+  });
+});
+
+const pos = (line: number, column: number) => ({ offset: 0, line, column });
+const diagnostic = (code: Diagnostic['code'], typeChecked?: true): Diagnostic => ({
+  code,
+  message: 'M.',
+  fixes: ['F.'],
+  docs: `https://vibejs.org/v0/errors/${code}`,
+  file: '/project/src/A.vibe',
+  start: pos(3, 1),
+  end: pos(4, 12),
+  ...(typeChecked && { typeChecked }),
+});
+
+describe('parseCompiler', () => {
+  it.each([
+    ['VIBE1000', undefined, true],
+    ['VIBE1102', undefined, true],
+    ['VIBE1199', undefined, true],
+    ['VIBE1200', undefined, true],
+    ['VIBE1201', true, false],
+    ['VIBE2001', true, false],
+    ['VIBE2004', undefined, true],
+    ['VIBE3005', undefined, true],
+    ['VIBE4001', undefined, true],
+  ] as const)('%s (typeChecked %s) is kept: %s', (code, typeChecked, kept) => {
+    expect(parseCompiler([diagnostic(code, typeChecked)], ROOT)).toHaveLength(kept ? 1 : 0);
+  });
+
+  it('maps 1-based positions to a 0-based range and the file to a root-relative POSIX path', () => {
+    expect(parseCompiler([diagnostic('VIBE3005')], ROOT)).toEqual([
+      {
+        source: 'vibejs',
+        code: 'VIBE3005',
+        severity: 'error',
+        file: 'src/A.vibe',
+        loc: 'src/A.vibe:3:1',
+        range: { start: { line: 2, character: 0 }, end: { line: 3, character: 11 } },
+        message: 'M.',
+        docs: 'https://vibejs.org/v0/errors/VIBE3005',
+        fixes: ['F.'],
+      },
+    ]);
+  });
+
+  it('turns Windows separators into slashes', () => {
+    const d = { ...diagnostic('VIBE3005'), file: 'src\\ui\\A.vibe' };
+    expect(parseCompiler([d], ROOT)[0]).toMatchObject({
+      file: 'src/ui/A.vibe',
+      loc: 'src/ui/A.vibe:3:1',
+    });
   });
 });
 

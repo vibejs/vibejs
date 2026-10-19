@@ -1,6 +1,7 @@
 // Pure parsers of the tool outputs `vibejs check` reads. Each returns null for output it cannot
 // read (VIBE8301). Paths become root-relative POSIX paths.
 import { relative, resolve } from 'node:path';
+import type { Diagnostic } from '@vibejs-org/compiler';
 import type { ExecResult } from '../ctx.ts';
 import { vibeError } from '../errors.gen.ts';
 import { envelopeError, type CheckDiagnostic } from '../output.ts';
@@ -66,6 +67,29 @@ export function parseTsc(r: ExecResult, root: string): CheckDiagnostic[] | null 
   }
   if (r.code !== 0 && !found.length) return null;
   return found.map((d) => at('tsc', d.code, d.severity, d.file, d.message, d.pos));
+}
+
+/** The compiler diagnostics of `.vibe` files, without the `typeChecked` ones tsc finds itself (CONTRACTS C6). */
+export function parseCompiler(diagnostics: readonly Diagnostic[], root: string): CheckDiagnostic[] {
+  return diagnostics
+    .filter((d) => !d.typeChecked)
+    .map(({ code, message, docs, fixes, file: path, start, end }) => {
+      const file = rel(root, path);
+      return {
+        source: 'vibejs',
+        code,
+        severity: 'error',
+        file,
+        loc: `${file}:${start.line}:${start.column}`,
+        range: {
+          start: { line: start.line - 1, character: start.column - 1 },
+          end: { line: end.line - 1, character: end.column - 1 },
+        },
+        message,
+        docs,
+        fixes: [...fixes],
+      };
+    });
 }
 
 interface OxlintReport {

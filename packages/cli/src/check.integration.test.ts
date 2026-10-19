@@ -1,5 +1,6 @@
-// The tool contract: the pinned real tools (tsc from catalog:ts-next, oxlint, oxfmt, vitest with
-// coverage-v8) run through the built bin on copies of test/fixtures/broken and clean.
+// The tool contract: the pinned real tools (tsc from catalog:ts-next with the built
+// @vibejs-org/language-tools mapper, the built compiler, oxlint, oxfmt, vitest with coverage-v8)
+// run through the built bin on copies of test/fixtures/broken and clean.
 import { spawnSync } from 'node:child_process';
 import {
   cpSync,
@@ -65,6 +66,15 @@ it('parses the real output on broken/ to the recorded diagnostics', { timeout: 6
     ...parseOxfmt(out(tool('oxfmt.txt'), 1), '/project')!,
     ...parseVitest(tool('vitest.json'), '/project')!.diagnostics,
     ...parseCoverage(tool('coverage-final.json'), '/project')!.diagnostics,
+    {
+      source: 'vibejs',
+      code: 'VIBE3005',
+      severity: 'error',
+      file: 'src/Macro.vibe',
+      loc: 'src/Macro.vibe:3:1',
+      range: { start: { line: 2, character: 0 }, end: { line: 2, character: 11 } },
+      message: '`defineProps()` is called more than once.',
+    } satisfies CheckDiagnostic,
   ];
   const { status, r } = check(copy('broken'));
   expect(status).toBe(1);
@@ -73,7 +83,7 @@ it('parses the real output on broken/ to the recorded diagnostics', { timeout: 6
   expect(r.diagnostics.find((d) => d.code === 'TS1241')!.docs).toMatch(/\/server\/handlers$/);
 });
 
-it('passes clean/ with full coverage', { timeout: 60_000 }, () => {
+it('passes clean/, with its .vibe file, with full coverage', { timeout: 60_000 }, () => {
   const { status, r } = check(copy('clean'));
   expect(r.diagnostics).toEqual([]);
   expect(status).toBe(0);
@@ -140,3 +150,40 @@ it('--fix leaves no format and no fixable lint diagnostics', { timeout: 60_000 }
   expect(r.diagnostics.filter((d) => d.source === 'oxfmt' || d.source === 'oxlint')).toEqual([]);
   expect(r.steps).toMatchObject({ lint: { status: 'passed' }, format: { status: 'passed' } });
 });
+
+it(
+  'reports a forwarded parse error once, without the type errors it suppresses',
+  { timeout: 60_000 },
+  () => {
+    const dir = copy('clean');
+    writeFileSync(
+      join(dir, 'src/Hello.vibe'),
+      `<script setup lang="ts">\nconst id = 'a'\n</script>\n\n<template>\n  <div :id="id" :id="id"></div>\n</template>\n`,
+    );
+    writeFileSync(join(dir, 'src/bad.ts'), "export const n: number = 'x';\n");
+    const { status, r } = check(dir, '--only', 'types');
+    expect(status).toBe(1);
+    // The recorded line, with the message the compile step gives it.
+    const [, vibe1102] = tool('tsc-vibe.txt').split('\n');
+    const [recorded] = parseTsc(out(`${vibe1102}\n`, 2), '/project')!;
+    expect(plain(r.diagnostics)).toEqual(
+      plain([
+        { ...recorded, message: 'The attribute `:id` appears more than once on this element.' },
+      ]),
+    );
+    expect(r.diagnostics[0]).toMatchObject({
+      source: 'tsc',
+      code: 'VIBE1102',
+      loc: 'src/Hello.vibe:6:17',
+    });
+    expect(r.diagnostics[0]).toMatchObject({
+      message: 'The attribute `:id` appears more than once on this element.',
+      docs: 'https://vibejs.org/v0/errors/VIBE1102',
+      fixes: [
+        'Remove the second `:id`.',
+        'Merge both values into one `:id` attribute.',
+        'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again',
+      ],
+    });
+  },
+);

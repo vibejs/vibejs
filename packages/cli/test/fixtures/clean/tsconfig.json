@@ -9,5 +9,6 @@
     "experimentalDecorators": true,
     "allowImportingTsExtensions": true
   },
+  "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }],
   "include": ["src"]
 }

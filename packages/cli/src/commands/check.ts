@@ -1,8 +1,17 @@
-import { readFileSync, rmSync } from 'node:fs';
+import { globSync, readFileSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { DOCS_BASE, type VibeError } from '@vibejs-org/errors';
 import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
-import { parseCoverage, parseOxfmt, parseOxlint, parseTsc, parseVitest } from '../check/parse.ts';
+import {
+  parseCompiler,
+  parseCoverage,
+  parseOxfmt,
+  parseOxlint,
+  parseTsc,
+  parseVitest,
+} from '../check/parse.ts';
 import type { CommandDef } from '../command.ts';
 import type { Ctx, ExecResult } from '../ctx.ts';
 import { vibeError } from '../errors.gen.ts';
@@ -28,6 +37,19 @@ const TOOLS: Record<StepName, [pkg: string, bin: string][]> = {
     ['@vitest/coverage-v8', ''],
   ],
 };
+
+/** The types step also needs these when the project has `.vibe` files: the mapper and the compile step. */
+const VIBE_TOOLS: [pkg: string, bin: string][] = [
+  ['@vibejs-org/language-tools', ''],
+  ['@vibejs-org/compiler', ''],
+];
+
+/** The project's `.vibe` files, root-relative and sorted. */
+const vibeFiles = (root: string) =>
+  globSync('**/*.vibe', {
+    cwd: root,
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.*/**'],
+  }).toSorted();
 
 const OUT = '.vibejs/check';
 /** The arguments of each step. Report paths are absolute: Vitest resolves them against its own `root`. */
@@ -63,19 +85,37 @@ const tsTooOld = (version: string) => {
 const TS1241_FIX =
   'the handler must be `(ctx: Ctx<typeof contract.route>)` and return the route response type; do not cast or use `any`';
 
-/** Adds docs and fixes: from the catalog for a VIBE code, from a static map for TS1241 on `@Handle(`. */
+/** tsc type-checks nothing more in a tsconfig project once the mapper reports a diagnostic in it. */
+const SUPPRESSED_FIX =
+  'this error stops type checking of its tsconfig project; fix it, then run `vibejs check --only types` again';
+
+/**
+ * Adds docs and fixes: from the catalog for a VIBE code, from a static map for TS1241 on
+ * `@Handle(`. A diagnostic with fixes (the compiler's, interpolated) keeps them.
+ */
 export function enrich(
   d: CheckDiagnostic,
   catalog: readonly CatalogEntry[],
   sourceLine?: string,
 ): CheckDiagnostic {
-  const entry = /^VIBE\d{4}$/.test(d.code) && catalog.find((e) => e.code === d.code);
-  if (entry) return { ...d, docs: entry.docs, fixes: [...entry.fixes] };
+  const entry = !d.fixes && /^VIBE\d{4}$/.test(d.code) && catalog.find((e) => e.code === d.code);
+  // A fix with a `{placeholder}` left in it is a template, not advice.
+  if (entry)
+    return { ...d, docs: entry.docs, fixes: entry.fixes.filter((f) => !/\{\w+\}/.test(f)) };
   if (d.code === 'TS1241' && sourceLine?.trimStart().startsWith('@Handle(')) {
     return { ...d, docs: new URL('../server/handlers', DOCS_BASE).href, fixes: [TS1241_FIX] };
   }
   return d;
 }
+
+/** VIBE1000-1199: the mapper forwards them to tsc, which flattens their fixes and docs into the message. */
+const forwarded = (d: CheckDiagnostic) => /^VIBE1[01]\d\d$/.test(d.code);
+
+const sameStart = (a: CheckDiagnostic, b: CheckDiagnostic) =>
+  a.file === b.file &&
+  a.code === b.code &&
+  a.range.start.line === b.range.start.line &&
+  a.range.start.character === b.range.start.character;
 
 const SEVERITY = ['error', 'warning', 'info'];
 const SOURCE = ['vibejs', 'tsc', 'vitest', 'oxlint', 'coverage', 'oxfmt'];
@@ -177,8 +217,10 @@ export const check: CommandDef<CheckResult> = {
 
     const bins: Partial<Record<StepName, string>> = {};
     const missing: string[] = [];
+    const vibe = only.includes('types') ? vibeFiles(root) : [];
     for (const s of STEPS.filter((name) => only.includes(name))) {
-      for (const [pkg, bin] of TOOLS[s]) {
+      const tools = s === 'types' && vibe.length ? [...TOOLS.types, ...VIBE_TOOLS] : TOOLS[s];
+      for (const [pkg, bin] of tools) {
         const tool = resolveTool(root, pkg, bin);
         if (!tool || (bin && !tool.bin) || (pkg === 'typescript' && tsTooOld(tool.version))) {
           missing.push(pkg);
@@ -205,7 +247,7 @@ export const check: CommandDef<CheckResult> = {
     }
     // A report left by an earlier run is never read.
     rmSync(join(root, OUT), { recursive: true, force: true });
-    const runs = await Promise.all(
+    const pending = Promise.all(
       STEPS.map(async (s) => {
         const bin = bins[s];
         if (!bin) return undefined;
@@ -214,7 +256,23 @@ export const check: CommandDef<CheckResult> = {
         return { r, ms: ctx.now() - at };
       }),
     );
-    const [types, lint, format, tests] = runs;
+    // The compile step reports the compiler diagnostics that the mapper does not forward to tsc,
+    // and the unflattened message, docs and fixes of those it does.
+    const compiled: CheckDiagnostic[] = [];
+    if (vibe.length) {
+      // The project's compiler, the one the gate found and the mapper uses, not one next to the CLI.
+      const entry = createRequire(join(root, 'package.json')).resolve('@vibejs-org/compiler');
+      const { compile }: typeof import('@vibejs-org/compiler') = await import(
+        pathToFileURL(entry).href
+      );
+      for (const file of vibe) {
+        const filename = join(root, file);
+        const source = readFileSync(filename, 'utf8');
+        const { diagnostics } = compile(source, { filename, id: '00000000', dev: false });
+        compiled.push(...parseCompiler(diagnostics, root));
+      }
+    }
+    const [types, lint, format, tests] = await pending;
 
     const errors: VibeError[] = [];
     const or8301 = (tool: string, r: ExecResult, ds: CheckDiagnostic[] | null | undefined) => {
@@ -223,7 +281,15 @@ export const check: CommandDef<CheckResult> = {
       errors.push(e);
       return [d];
     };
-    const tsc = types && or8301('tsc', types.r, parseTsc(types.r, root));
+    // A forwarded diagnostic takes its message, docs and fixes from the compile step.
+    const unflatten = (d: CheckDiagnostic) => {
+      const c = compiled.find((x) => forwarded(x) && sameStart(x, d));
+      return c ? { ...d, message: c.message, docs: c.docs, fixes: c.fixes } : d;
+    };
+    const tsc = types && [
+      ...or8301('tsc', types.r, parseTsc(types.r, root)).map(unflatten),
+      ...compiled.filter((d) => !forwarded(d)),
+    ];
     const oxlint = lint && or8301('oxlint', lint.r, parseOxlint(lint.r, root));
     const oxfmt = format && or8301('oxfmt', format.r, parseOxfmt(format.r, root));
     const report = tests && parseVitest(read(join(root, OUT, 'vitest.json')), root);
@@ -248,6 +314,12 @@ export const check: CommandDef<CheckResult> = {
     const all = [tsc, oxlint, oxfmt, vitest, coverage]
       .flatMap((ds) => ds ?? [])
       .map((d) => enrich(d, CATALOG, d.code === 'TS1241' ? sourceLine(root, d) : undefined))
+      // A tsc diagnostic with a VIBE code comes from the mapper.
+      .map((d) =>
+        d.source === 'tsc' && /^VIBE\d{4}$/.test(d.code)
+          ? { ...d, fixes: [...(d.fixes ?? []), SUPPRESSED_FIX] }
+          : d,
+      )
       .toSorted(order);
     const shown = all.slice(0, Number(max));
     const explain = shown.find((d) => /^VIBE\d{4}$/.test(d.code));
