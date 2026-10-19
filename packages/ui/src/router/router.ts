@@ -164,6 +164,8 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
   /** The first installed app: guards, redirects, loaders and hooks run in its injection context. */
   let app: App | undefined;
   let installs = 0;
+  /** Once installed, only `install` starts listening: a later navigation must not outlive the app. */
+  let installed = false;
 
   /** Calls `fn` in the injection context of the installed app. */
   const inContext = <T>(fn: () => T): T => (app ? app.runWithContext(fn) : fn());
@@ -242,7 +244,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
             else if (to !== first) history.replace(to.fullPath);
             resolveReady();
             afterEach(to, from);
-            scroll?.apply(to, from, pop || initial).catch(logError);
+            scroll?.apply(to, from, pop || initial, app?.config).catch(logError);
             return undefined;
           }
           next = result;
@@ -261,7 +263,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       rejectReady(error);
       throw error;
     } finally {
-      listen();
+      if (!installed) listen();
     }
   }
 
@@ -318,6 +320,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       target.provide(routerKey, router as AnyRouter);
       app ??= target;
       installs++;
+      installed = true;
       target.onUnmount(() => {
         if (--installs) return;
         unlisten!();

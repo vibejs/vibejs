@@ -1,4 +1,5 @@
 import { vibeError } from '../errors.gen.ts';
+import type { AppConfig } from '../runtime/app.ts';
 import { nextTick } from '../runtime/scheduler.ts';
 import { warn } from '../warn.ts';
 import { historyState } from './history.ts';
@@ -18,8 +19,11 @@ type Behavior = (
 const defaultBehavior: Behavior = (to, from, saved) =>
   saved ?? (to.hash ? { el: to.hash } : to.path !== from.path && { left: 0, top: 0 });
 
-/** Scrolls the window to `position`, or its element into view; offsets come from `scroll-margin-top`. */
-function scrollTo(position: ScrollPosition): void {
+/**
+ * Scrolls the window to `position`, or its element into view; offsets come from `scroll-margin-top`.
+ * A missing element is warned to `config`, the config of the installed app.
+ */
+function scrollTo(position: ScrollPosition, config: AppConfig | undefined): void {
   if (!('el' in position)) {
     window.scrollTo(position);
     return;
@@ -34,7 +38,7 @@ function scrollTo(position: ScrollPosition): void {
     ? document.getElementById(decodeURIComponent(el.slice(1)))
     : document.querySelector(el);
   if (target) target.scrollIntoView({ behavior });
-  else warn(vibeError('VIBE7116', { el }));
+  else warn(vibeError('VIBE7116', { el }), null, config);
 }
 
 /** The scrolling of a web history's navigations; the router takes over `scrollRestoration`. */
@@ -45,7 +49,12 @@ export function createScroll(
   /** Saves the scroll of `from`, `offset` entries before the current one, before the commit. */
   save(from: AnyLocation, offset: number): void;
   /** Scrolls once the new route rendered; `restore` passes the saved position of `to`. */
-  apply(to: AnyLocation, from: AnyLocation, restore: boolean): Promise<void>;
+  apply(
+    to: AnyLocation,
+    from: AnyLocation,
+    restore: boolean,
+    config: AppConfig | undefined,
+  ): Promise<void>;
 } {
   window.history.scrollRestoration = 'manual';
   // The router passes its own locations. The assertion is needed once `Register` is augmented.
@@ -61,12 +70,12 @@ export function createScroll(
       const key = `${historyState().position - offset}${from.fullPath}`;
       positions.set(key, { left: window.scrollX, top: window.scrollY });
     },
-    async apply(to, from, restore) {
+    async apply(to, from, restore, config) {
       const key = `${historyState().position}${to.fullPath}`;
       const saved = (restore && positions.get(key)) || null;
       await nextTick();
       const target = await scrollBehavior(to, from, saved);
-      if (target) scrollTo(target);
+      if (target) scrollTo(target, config);
     },
   };
 }

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { warnedCodes } from '../../test/codes.ts';
-import { page } from '../../test/router/components.ts';
+import { handlers, page } from '../../test/router/components.ts';
 import { flushPromises, mount } from '../testing/mount.ts';
 import { RouterView } from './components.ts';
 import { createMemoryHistory, createWebHistory } from './history.ts';
@@ -38,11 +38,14 @@ afterEach(() => {
 });
 
 /** Mounts a RouterView with a router on a web history, after its first navigation and scroll. */
-async function setup(options: Partial<RouterOptions> = {}): Promise<Router> {
+async function setup(
+  options: Partial<RouterOptions> = {},
+  warnHandler?: (msg: string) => void,
+): Promise<Router> {
   const history = createWebHistory();
   histories.push(history);
   const router = createRouter({ history, routes, ...options });
-  mount(RouterView, { plugins: [router] });
+  mount(RouterView, { plugins: [handlers(() => {}, warnHandler), router] });
   await router.isReady();
   await flushPromises();
   return router;
@@ -85,8 +88,8 @@ describe('the default scroll behavior', () => {
   });
 
   it('scrolls the hash element into view, and warns VIBE7116 when it is missing', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const router = await setup();
+    const warnHandler = vi.fn<(msg: string) => void>();
+    const router = await setup({}, warnHandler);
     const target = document.createElement('h2');
     target.id = 'part 2';
     document.body.append(target);
@@ -94,7 +97,7 @@ describe('the default scroll behavior', () => {
     expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({ behavior: undefined });
     expect(scrollIntoView.mock.contexts[0]).toBe(target);
     await go(router, '/b#missing');
-    expect(warnedCodes(warn)).toEqual(['VIBE7116']);
+    expect(warnedCodes(warnHandler)).toEqual(['VIBE7116']);
   });
 
   it('restores the scroll that pagehide saved in the entry, after a reload', async () => {

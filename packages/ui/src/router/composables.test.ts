@@ -70,6 +70,26 @@ describe('install', () => {
     expect(router.currentRoute.value).not.toBe(START_LOCATION);
   });
 
+  it('stops listening when the last app unmounts before the first navigation settles', async () => {
+    const { history, router } = setup();
+    history.push('/a');
+    let release!: () => void;
+    const stop = router.beforeEach(() => new Promise<void>((resolve) => (release = resolve)));
+    mountComposable(() => {}, { plugins: [router] }).unmount();
+    stop();
+    release();
+    await router.isReady();
+    expect(router.currentRoute.value.fullPath).toBe('/a');
+    history.go(-1);
+    await flushPromises();
+    expect(router.currentRoute.value.fullPath).toBe('/a');
+    // A later push does not listen again either.
+    await router.push('/');
+    history.go(1);
+    await flushPromises();
+    expect(router.currentRoute.value.fullPath).toBe('/');
+  });
+
   it('reports an error of the first navigation to onError and isReady()', async () => {
     const { router } = setup();
     const error = new Error('guard');
