@@ -18,6 +18,10 @@ export default {
         '@vibejs-org/ui',
       ],
     },
+    'packages/create-vibejs': {
+      // Built first: its build script copies the CLI's agent files into the package.
+      ignoreDependencies: ['@vibejs-org/cli'],
+    },
     'packages/ui': {
       // An optional peer by design: only the `./testing` entry imports it, inside the user's tests.
       ignoreDependencies: ['vitest'],

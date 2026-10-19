@@ -23,12 +23,21 @@
     "create-vibejs": "./bin.js"
   },
   "files": [
-    "bin.js"
+    "bin.js",
+    "templates",
+    "agents"
   ],
   "type": "module",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').cpSync('node_modules/@vibejs-org/cli/dist/agents', 'agents', { recursive: true })\""
+  },
+  "devDependencies": {
+    "@vibejs-org/cli": "workspace:*",
+    "@vibejs-org/errors": "workspace:*"
   },
   "engines": {
     "node": "^24.15.0 || >=26"

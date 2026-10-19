@@ -4,7 +4,10 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedDeclarations": false,
+    "lib": ["es2024"],
+    "types": ["node"],
     "rootDir": "."
   },
-  "include": ["bin.js"]
+  "references": [{ "path": "../cli" }, { "path": "../errors" }],
+  "include": ["bin.js", "*.test.ts", "package.json"]
 }

@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": { "types": ["node"], "experimentalDecorators": true },
+  "references": [{ "path": "../contracts" }]
+}

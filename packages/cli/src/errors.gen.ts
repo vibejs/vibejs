@@ -16,6 +16,7 @@ const MESSAGES = {
   VIBE8302: ["`{file}` is not fully covered: {uncovered}.","Add tests for the listed ranges; never add coverage-ignore comments."],
   VIBE8303: ["`{file}` is not formatted.","Run `vibejs check --fix`."],
   VIBE8304: ["Building the {part} failed: {reason}.","Fix the reported error and run `vibejs build` again."],
+  VIBE8601: ["{file} has {problem}; vibejs agents sync only edits text between one BEGIN and one END marker.","Restore or delete both marker lines, then run `vibejs agents sync`."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

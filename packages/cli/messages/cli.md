@@ -147,3 +147,13 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 ### Fix
 
 - Fix the reported error and run `vibejs build` again.
+
+## VIBE8601: Malformed agent rules markers
+
+> {file} has {problem}; vibejs agents sync only edits text between one BEGIN and one END marker.
+
+`vibejs agents sync`, `vibejs dev` and `create-vibejs` keep the vibe.js rules for coding agents in a block of AGENTS.md between the lines `<!-- BEGIN:vibejs-agent-rules -->` and `<!-- END:vibejs-agent-rules -->`, and never touch the text around it. With a marker missing, out of order or repeated, the block's extent is unknown, so the file is left as it is. `vibejs dev` logs this as a warning and keeps running.
+
+### Fix
+
+- Restore or delete both marker lines, then run `vibejs agents sync`.

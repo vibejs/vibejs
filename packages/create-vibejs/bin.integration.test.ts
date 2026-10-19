@@ -1,0 +1,205 @@
+// Scaffolds with the real bin from packed tarballs of every package, installs with pnpm and npm,
+// then runs the app's own vibejs check, agents sync --check and build, and serves the build.
+import { spawn, spawnSync } from 'node:child_process';
+import {
+  appendFileSync,
+  globSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import manifest from './package.json' with { type: 'json' };
+
+const PACKAGES = fileURLToPath(new URL('..', import.meta.url));
+const BIN = fileURLToPath(new URL('bin.js', import.meta.url));
+const SCOPED = ['cli', 'compiler', 'contract', 'errors', 'language-tools', 'server', 'ui'];
+const INSTALL = 10 * 60_000;
+
+// The children must not see the Vitest worker or the package manager that runs this test.
+const env = Object.fromEntries(
+  Object.entries(process.env).filter(([k]) => !/^(VITEST|npm_|pnpm_)/i.test(k)),
+);
+
+function run(cmd: string, args: string[], cwd: string, extra: Record<string, string> = {}) {
+  const r = spawnSync(cmd, args, {
+    cwd,
+    env: { ...env, ...extra },
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  return { status: r.status, stdout: r.stdout, stderr: r.stderr };
+}
+
+/** Throws with the output when the command failed. */
+function must(r: ReturnType<typeof run>): string {
+  if (r.status !== 0) throw new Error(`exit ${r.status}\n${r.stdout}\n${r.stderr}`);
+  return r.stdout;
+}
+
+const vibejs = (app: string, ...args: string[]) =>
+  run(process.execPath, [join(app, 'node_modules/@vibejs-org/cli/dist/bin.js'), ...args], app);
+
+const dirs: string[] = [];
+const temp = (prefix: string) => {
+  const dir = mkdtempSync(join(tmpdir(), prefix));
+  dirs.push(dir);
+  return dir;
+};
+afterAll(() => {
+  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+}, INSTALL);
+
+let packs: string;
+/** The tarball of each scoped package, by full name. */
+const tarballs: Record<string, string> = {};
+let created: { files: { path: string }[]; filename: string };
+
+beforeAll(() => {
+  packs = temp('vibejs-packs-');
+  for (const name of [...SCOPED, 'create-vibejs']) {
+    const packed = JSON.parse(
+      must(run('pnpm', ['pack', '--json', '--pack-destination', packs], join(PACKAGES, name))),
+    );
+    if (name === 'create-vibejs') created = packed;
+    else tarballs[packed.name] = packed.filename;
+  }
+}, INSTALL);
+
+/** A new app from the built bin, not installed. */
+function scaffold(pm: 'pnpm' | 'npm'): string {
+  const app = join(temp(`vibejs-${pm}-`), 'app');
+  const r = run(process.execPath, [BIN, app, '--pm', pm, '--no-install'], tmpdir(), {
+    VIBEJS_AGENT: '1',
+  });
+  expect(JSON.parse(must(r))).toMatchObject({ ok: true, pm, installed: false });
+  return app;
+}
+
+it('publishes only the bin, its manifest, docs, the template and the agent files, under 1 MB', () => {
+  expect(manifest).not.toHaveProperty('dependencies');
+  expect(manifest).not.toHaveProperty('peerDependencies');
+  const allowed = /^(?:bin\.js|package\.json|LICENSE|README\.md|templates\/.+|agents\/.+)$/;
+  expect(created.files.map((f) => f.path).filter((path) => !allowed.test(path))).toEqual([]);
+  expect(created.files.map((f) => f.path)).toEqual(
+    expect.arrayContaining(['bin.js', 'agents/AGENTS.md', 'templates/fullstack/_gitignore']),
+  );
+  expect(statSync(created.filename).size).toBeLessThan(1024 * 1024);
+});
+
+describe('pnpm', () => {
+  let app: string;
+  beforeAll(() => {
+    app = scaffold('pnpm');
+    const overrides = Object.entries(tarballs).map(([name, file]) => `  '${name}': file:${file}`);
+    appendFileSync(join(app, 'pnpm-workspace.yaml'), `overrides:\n${overrides.join('\n')}\n`);
+    must(run('pnpm', ['install'], app));
+  }, INSTALL);
+
+  it(
+    'passes check with full coverage and keeps the agent files current',
+    () => {
+      const check = vibejs(app, 'check', '--json');
+      expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, diagnostics: [] });
+      expect(check.status).toBe(0);
+      expect(vibejs(app, 'agents', 'sync', '--check', '--json').status).toBe(0);
+      expect(readFileSync(join(app, 'AGENTS.md'), 'utf8')).toContain(
+        '`pnpm exec vibejs check --json`',
+      );
+    },
+    INSTALL,
+  );
+
+  it(
+    'reports a type error in a .vibe template at its line and column',
+    () => {
+      const page = join(app, 'ui/src/pages/HomePage.vibe');
+      const source = readFileSync(page, 'utf8');
+      const broken = source.replace('{{ status }}', '{{ status.toFixed(1) }}');
+      const before = broken.slice(0, broken.indexOf('toFixed')).split('\n');
+      writeFileSync(page, broken);
+      try {
+        const r = vibejs(app, 'check', '--only', 'types', '--json');
+        expect(r.status).toBe(1);
+        expect(JSON.parse(r.stdout).diagnostics).toContainEqual(
+          expect.objectContaining({
+            source: 'tsc',
+            code: 'TS2551',
+            loc: `ui/src/pages/HomePage.vibe:${before.length}:${before.at(-1)!.length + 1}`,
+          }),
+        );
+      } finally {
+        writeFileSync(page, source);
+      }
+    },
+    INSTALL,
+  );
+
+  it(
+    'builds the UI and a server that answers the health check',
+    async () => {
+      const build = vibejs(app, 'build', '--json');
+      expect(JSON.parse(build.stdout)).toMatchObject({ ok: true });
+      const js = globSync('ui/dist/**/*.js', { cwd: app });
+      expect(js.length).toBeGreaterThan(0);
+      const gzip = js.reduce(
+        (sum, file) => sum + gzipSync(readFileSync(join(app, file))).length,
+        0,
+      );
+      // Reported, not gated (CONTRACTS C10).
+      process.stdout.write(`template ui/dist JS: ${gzip} bytes gzip\n`);
+
+      const server = spawn(process.execPath, ['server/dist/main.js'], {
+        cwd: app,
+        env: { ...env, PORT: '0' },
+      });
+      try {
+        const url = await new Promise<string>((resolve, reject) => {
+          server.on('exit', (code) => reject(new Error(`the server exited with ${code}`)));
+          server.stdout.on('data', (chunk: Buffer) => {
+            const port = /"url":"http:\/\/[^"]*:(\d+)\//.exec(String(chunk))?.[1];
+            if (port) resolve(`http://127.0.0.1:${port}`);
+          });
+        });
+        const res = await fetch(`${url}/api/health`);
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ status: 'ok' });
+      } finally {
+        server.kill();
+      }
+    },
+    INSTALL,
+  );
+});
+
+describe('npm', () => {
+  it(
+    'installs with npm and passes check',
+    () => {
+      const app = scaffold('npm');
+      const file = join(app, 'package.json');
+      const pkg = JSON.parse(readFileSync(file, 'utf8'));
+      // npm accepts an override of a direct dependency only with the same spec. The keys stay
+      // sorted, as the app's formatter wants them.
+      const specs = Object.entries(tarballs).map(([name, tarball]) => [name, `file:${tarball}`]);
+      for (const [name, spec] of specs) {
+        for (const deps of [pkg.dependencies, pkg.devDependencies])
+          if (deps[name]) deps[name] = spec;
+      }
+      pkg.overrides = { ...Object.fromEntries(specs), ...pkg.overrides };
+      writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
+      must(run('npm', ['install', '--no-audit', '--no-fund'], app));
+      const check = vibejs(app, 'check', '--json');
+      expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, diagnostics: [] });
+      expect(check.status).toBe(0);
+    },
+    2 * INSTALL,
+  );
+});

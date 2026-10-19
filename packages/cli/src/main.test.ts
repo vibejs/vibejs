@@ -16,6 +16,7 @@ function write(path: string, content: string): void {
 }
 // The search rows match only this page, so new catalog entries never change their snapshots.
 write('docs/guide/quokka.md', '# Quokka guide\n\nA quokka page.\n');
+write('docs/index.txt', '[vibe.js docs index]|guide:{quokka.md}\n');
 // A project with stub tools for `vibejs check`; `exec` below answers like a clean run.
 write('app/package.json', JSON.stringify({ devDependencies: { '@vibejs-org/cli': '0.0.0' } }));
 for (const [pkg, version, bin] of [

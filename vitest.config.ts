@@ -22,6 +22,7 @@ export default defineConfig({
           environment: 'node',
           include: [
             'packages/*/src/**/*.test.ts',
+            'packages/create-vibejs/*.test.ts',
             'scripts/**/*.test.ts',
             'docs/scripts/**/*.test.ts',
           ],
@@ -58,6 +59,7 @@ export default defineConfig({
           environment: 'node',
           include: [
             'packages/*/src/**/*.integration.test.ts',
+            'packages/create-vibejs/*.integration.test.ts',
             'docs/scripts/**/*.integration.test.ts',
             '**/*.vibe.test.ts',
           ],
