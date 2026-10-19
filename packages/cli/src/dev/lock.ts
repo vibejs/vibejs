@@ -92,12 +92,24 @@ export function claimLock(root: string, pid: number): boolean {
   }
 }
 
+// Windows refuses to replace a file while another process has it open.
+const BUSY = new Set(['EACCES', 'EPERM', 'EBUSY']);
+
 /** Writes a temporary file and renames it, so readers never see a partial lock. */
 export function writeLock(root: string, lock: DevLock): void {
   const tmp = join(root, `${LOCK}.${lock.pid}.tmp`);
   mkdirSync(join(root, '.vibejs'), { recursive: true });
   writeFileSync(tmp, `${JSON.stringify(lock, null, 2)}\n`);
-  renameSync(tmp, join(root, LOCK));
+  for (let attempt = 1; ; attempt++) {
+    try {
+      renameSync(tmp, join(root, LOCK));
+      return;
+    } catch (error) {
+      if (attempt === 100 || !BUSY.has(Object(error).code)) throw error;
+      // A reader holds the file only for a moment.
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5);
+    }
+  }
 }
 
 /** Deletes the lock only while it still belongs to `pid`. */

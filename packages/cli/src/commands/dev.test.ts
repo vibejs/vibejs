@@ -224,7 +224,8 @@ describe('restart', () => {
     const r = await start();
     const vite = fixtureServer();
     expect(await text(r, '/src/main.ts')).toContain('fixture');
-    const main = join(r.root, 'ui/src/main.ts');
+    // Vite keys its module graph by forward-slash paths.
+    const main = join(r.root, 'ui/src/main.ts').replaceAll('\\', '/');
 
     edit(r.root, APP_MODULE, "'ok'", "'v2'");
     await vi.waitFor(() => expect(JSON.stringify(log(r))).toContain('Restarting'), WAIT);

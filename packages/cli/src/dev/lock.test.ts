@@ -6,15 +6,25 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { portOf } from '../../test/app.ts';
 import { claimLock, readLiveLock, removeLock, writeLock, type DevLock } from './lock.ts';
+
+vi.mock('node:fs', async (importOriginal) => {
+  const fs = await importOriginal<typeof import('node:fs')>();
+  return { ...fs, renameSync: vi.fn<typeof fs.renameSync>(fs.renameSync) };
+});
+
+const fail = (code: string) => () => {
+  throw Object.assign(new Error(code), { code });
+};
 
 let root: string;
 let server: Server | undefined;
@@ -136,6 +146,24 @@ for (let i = 0; i < 300; i++) writeLock(${JSON.stringify(root)}, { ...big, pid: 
     expect(await exited).toBe(0);
     expect(lengths.length).toBeGreaterThan(0);
     expect(new Set(lengths)).toEqual(new Set([size]));
+  });
+
+  it('retries a rename that a reader blocks, and rethrows other errors', () => {
+    vi.mocked(renameSync).mockImplementationOnce(fail('EPERM'));
+    writeLock(root, lock(7));
+    expect(JSON.parse(readFileSync(LOCK(), 'utf8')).pid).toBe(7);
+    vi.mocked(renameSync).mockImplementationOnce(fail('ENOSPC'));
+    expect(() => writeLock(root, lock(8))).toThrow('ENOSPC');
+  });
+
+  it('gives up on a rename that stays blocked', () => {
+    vi.mocked(renameSync).mockClear().mockImplementation(fail('EBUSY'));
+    try {
+      expect(() => writeLock(root, lock(7))).toThrow('EBUSY');
+      expect(renameSync).toHaveBeenCalledTimes(100);
+    } finally {
+      vi.mocked(renameSync).mockReset();
+    }
   });
 });
 
