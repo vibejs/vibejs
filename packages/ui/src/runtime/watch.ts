@@ -1,4 +1,5 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/reactivity/src/watch.ts (MIT)
+// Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/runtime-core/src/apiWatch.ts (MIT)
 // oxlint-disable typescript/no-explicit-any -- the public types follow the upstream declarations
 import { vibeError } from '../errors.gen.ts';
 import type { ComputedRef } from '../reactivity/computed.ts';

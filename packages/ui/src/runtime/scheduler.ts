@@ -90,16 +90,27 @@ export function nextTick<T = void, R = void>(
 /** Runs the main queue, then the post callbacks, until both are empty. */
 function flushJobs(): void {
   const seen = __DEV__ ? new Map<SchedulerJob, number>() : undefined;
-  while (queue.length || pendingPostFlushCbs.length) {
-    for (flushIndex = 0; flushIndex < queue.length; flushIndex++) runJob(queue[flushIndex], seen);
+  let cbs: SchedulerJob[] = [];
+  let cbIndex = 0;
+  try {
+    while (queue.length || pendingPostFlushCbs.length) {
+      for (flushIndex = 0; flushIndex < queue.length; flushIndex++) runJob(queue[flushIndex], seen);
+      flushIndex = -1;
+      queue.length = 0;
+      // oxlint-disable-next-line unicorn/no-array-sort -- sorts a fresh copy; toSorted() is ES2023
+      cbs = [...new Set(pendingPostFlushCbs)].sort((a, b) => getId(a) - getId(b));
+      pendingPostFlushCbs.length = 0;
+      for (cbIndex = 0; cbIndex < cbs.length; cbIndex++) runJob(cbs[cbIndex], seen);
+    }
+  } finally {
+    // Work is left only when reporting an error threw (a throwing console.error): drop what ran
+    // and move the rest to a new flush, so the scheduler keeps working.
+    queue.splice(0, flushIndex + 1);
     flushIndex = -1;
-    queue.length = 0;
-    // oxlint-disable-next-line unicorn/no-array-sort -- sorts a fresh copy; toSorted() is ES2023
-    const cbs = [...new Set(pendingPostFlushCbs)].sort((a, b) => getId(a) - getId(b));
-    pendingPostFlushCbs.length = 0;
-    for (const cb of cbs) runJob(cb, seen);
+    for (const cb of cbs.slice(cbIndex + 1)) pendingPostFlushCbs.push(cb);
+    currentFlushPromise = undefined;
+    if (queue.length || pendingPostFlushCbs.length) queueFlush();
   }
-  currentFlushPromise = undefined;
 }
 
 function runJob(job: SchedulerJob, seen: Map<SchedulerJob, number> | undefined): void {
@@ -107,10 +118,13 @@ function runJob(job: SchedulerJob, seen: Map<SchedulerJob, number> | undefined):
   // A recursive job may queue itself again while it runs; any other job is still queued then.
   const recurse = flags & ALLOW_RECURSE;
   if (recurse) job.flags = flags & ~QUEUED;
-  if (!(flags & DISPOSED) && !(__DEV__ && tooManyRuns(seen!, job))) {
-    callWithErrorHandling(job, 'scheduler flush');
+  try {
+    if (!(flags & DISPOSED) && !(__DEV__ && tooManyRuns(seen!, job))) {
+      callWithErrorHandling(job, 'scheduler flush');
+    }
+  } finally {
+    if (!recurse) job.flags = (job.flags ?? 0) & ~QUEUED;
   }
-  if (!recurse) job.flags = (job.flags ?? 0) & ~QUEUED;
 }
 
 /** Counts the runs of `job` in this flush; past the limit, reports VIBE5101 and skips it. */

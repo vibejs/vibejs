@@ -717,8 +717,50 @@ describe('nextTick', () => {
   });
 });
 
+describe('a throwing error report', () => {
+  test('ends the flush with the error and runs the jobs left in a new flush', async () => {
+    const report = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+      .mockImplementationOnce(() => {
+        throw new Error('console');
+      });
+    const calls: string[] = [];
+    const failing = job(() => {
+      throw new Error('job');
+    });
+    queueJob(failing);
+    queueJob(() => calls.push('next'));
+    queuePostFlushCb(() => calls.push('post'));
+    await expect(nextTick()).rejects.toThrow('console');
+    await nextTick();
+    expect(calls).toEqual(['next', 'post']);
+    queueJob(failing);
+    await nextTick();
+    expect(report).toHaveBeenCalledTimes(2);
+  });
+
+  test('keeps the post callbacks left when a post callback fails', async () => {
+    vi.spyOn(console, 'error')
+      .mockImplementation(() => {})
+      .mockImplementationOnce(() => {
+        throw new Error('console');
+      });
+    const calls: string[] = [];
+    queuePostFlushCb([
+      job(() => {
+        throw new Error('post');
+      }, 1),
+      job(() => calls.push('post 2'), 2),
+    ]);
+    await expect(nextTick()).rejects.toThrow('console');
+    await nextTick();
+    expect(calls).toEqual(['post 2']);
+  });
+});
+
 describe('recursion guard', () => {
-  test('in dev, a job that runs more than 100 times in one flush reports VIBE5101 and is skipped', async () => {
+  test('in dev, a job queued again after 100 runs in one flush reports VIBE5101 and is skipped', async () => {
     const { reported } = spyErrors();
     let runs = 0;
     const recursive: SchedulerJob = job(

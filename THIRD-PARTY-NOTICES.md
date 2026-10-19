@@ -48,7 +48,7 @@ Details and the full license texts are in [`packages/ui/THIRD-PARTY-NOTICES.md`]
   - `packages/ui/src/reactivity/dep.ts` from `packages/reactivity/src/dep.ts` (shipped)
   - `packages/ui/src/runtime/scheduler.ts` from `packages/runtime-core/src/scheduler.ts` (shipped)
   - `packages/ui/src/runtime/errorHandling.ts` from `packages/runtime-core/src/errorHandling.ts` (shipped)
-  - `packages/ui/src/runtime/watch.ts` from `packages/reactivity/src/watch.ts` (shipped)
+  - `packages/ui/src/runtime/watch.ts` from `packages/reactivity/src/watch.ts` and `packages/runtime-core/src/apiWatch.ts` (shipped)
   - `packages/ui/src/reactivity/ref.test.ts` from `packages/reactivity/__tests__/ref.spec.ts` (tests, not shipped)
   - `packages/ui/src/reactivity/computed.test.ts` from `packages/reactivity/__tests__/computed.spec.ts` (tests, not shipped)
   - `packages/ui/src/reactivity/effectScope.test.ts` from `packages/reactivity/__tests__/effectScope.spec.ts` (tests, not shipped)

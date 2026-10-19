@@ -2,7 +2,7 @@
 
 ## VIBE5101: Too many recursive updates
 
-> A scheduled job ran more than 100 times in one flush, so it was skipped: a watcher or an update writes a value that it also reads.
+> A scheduled job ran 100 times in one flush and was queued again, so it was skipped: a watcher or an update writes a value that it also reads.
 
 Each write to a value that a job reads queues the job again. When the job writes to that value every time it runs, the queue never empties. In development builds the scheduler stops such a job after 100 runs in one flush and reports this error, so that the rest of the flush still runs.
 
