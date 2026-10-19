@@ -1,6 +1,6 @@
 import { globSync, readFileSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { DOCS_BASE, type VibeError } from '@vibejs-org/errors';
 import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
@@ -44,12 +44,16 @@ const VIBE_TOOLS: [pkg: string, bin: string][] = [
   ['@vibejs-org/compiler', ''],
 ];
 
-/** The project's `.vibe` files, root-relative and sorted. */
+/** The project's `.vibe` files, root-relative and sorted; a directory named `*.vibe` is not one. */
 const vibeFiles = (root: string) =>
   globSync('**/*.vibe', {
     cwd: root,
     exclude: ['**/node_modules/**', '**/dist/**', '**/.*/**'],
-  }).toSorted();
+    withFileTypes: true,
+  })
+    .filter((d) => d.isFile())
+    .map((d) => relative(root, join(d.parentPath, d.name)))
+    .toSorted();
 
 const OUT = '.vibejs/check';
 /** The arguments of each step. Report paths are absolute: Vitest resolves them against its own `root`. */
@@ -107,9 +111,6 @@ export function enrich(
   }
   return d;
 }
-
-/** VIBE1000-1199: the mapper forwards them to tsc, which flattens their fixes and docs into the message. */
-const forwarded = (d: CheckDiagnostic) => /^VIBE1[01]\d\d$/.test(d.code);
 
 const sameStart = (a: CheckDiagnostic, b: CheckDiagnostic) =>
   a.file === b.file &&
@@ -256,8 +257,9 @@ export const check: CommandDef<CheckResult> = {
         return { r, ms: ctx.now() - at };
       }),
     );
-    // The compile step reports the compiler diagnostics that the mapper does not forward to tsc,
-    // and the unflattened message, docs and fixes of those it does.
+    // The compile step reports the compiler diagnostics that tsc does not (the mapper forwards only
+    // VIBE1000-1199, and only for files it maps), and the unflattened message, docs and fixes of
+    // those it does.
     const compiled: CheckDiagnostic[] = [];
     if (vibe.length) {
       // The project's compiler, the one the gate found and the mapper uses, not one next to the CLI.
@@ -283,12 +285,14 @@ export const check: CommandDef<CheckResult> = {
     };
     // A forwarded diagnostic takes its message, docs and fixes from the compile step.
     const unflatten = (d: CheckDiagnostic) => {
-      const c = compiled.find((x) => forwarded(x) && sameStart(x, d));
+      const c = compiled.find((x) => sameStart(x, d));
       return c ? { ...d, message: c.message, docs: c.docs, fixes: c.fixes } : d;
     };
-    const tsc = types && [
-      ...or8301('tsc', types.r, parseTsc(types.r, root)).map(unflatten),
-      ...compiled.filter((d) => !forwarded(d)),
+    const fromTsc = types && or8301('tsc', types.r, parseTsc(types.r, root));
+    const tsc = fromTsc && [
+      ...fromTsc.map(unflatten),
+      // Each problem once: a compile diagnostic that tsc reported is left out.
+      ...compiled.filter((c) => !fromTsc.some((d) => sameStart(c, d))),
     ];
     const oxlint = lint && or8301('oxlint', lint.r, parseOxlint(lint.r, root));
     const oxfmt = format && or8301('oxfmt', format.r, parseOxfmt(format.r, root));
