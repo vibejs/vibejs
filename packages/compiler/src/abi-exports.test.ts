@@ -37,14 +37,6 @@ const C3 = [
   'useModel',
   'setRef',
 ];
-/** C3 helpers that RR-5 adds to `@vibejs-org/ui/internal`. Empty this list when RR-5 merges. */
-const PENDING_RR5 = [
-  'createComponent',
-  'createDynamicComponent',
-  'createSlot',
-  'setRef',
-  'useModel',
-];
 const ABI = '@vibejs-org/ui/internal';
 
 const root = new URL('../test/fixtures/', import.meta.url);
@@ -87,12 +79,7 @@ describe('the ABI imports of the output.ts fixtures', () => {
 
   it.each([...used].toSorted())('%s is a function export of @vibejs-org/ui/internal', (name) => {
     const type = typeof Reflect.get(internal, name);
-    expect(type).toBe(PENDING_RR5.includes(name) ? 'undefined' : 'function');
-  });
-
-  it('lists as pending only the helpers RR-5 adds', () => {
-    const rr5 = ['createComponent', 'createDynamicComponent', 'createSlot', 'setRef', 'useModel'];
-    expect(rr5).toStrictEqual(expect.arrayContaining(PENDING_RR5));
+    expect(type).toBe('function');
   });
 
   it('imports every C3 helper the compiler can emit, and nothing else', () => {
