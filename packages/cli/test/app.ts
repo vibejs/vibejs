@@ -73,3 +73,24 @@ export function testCtx(cwd: string, agent = true): TestCtx {
   };
   return { ctx, out, err, stop: () => stop('SIGINT') };
 }
+
+type Vite = typeof import('vite');
+
+/**
+ * Vite whose `createServer` resolves the workspace packages to their sources, as the fixture's
+ * `ui/vite.config.ts` does, for code that starts Vite without a config file:
+ * `vi.mock('vite', async (original) => (await import('../../test/app.ts')).sourceVite(original))`.
+ */
+export async function sourceVite(original: () => Promise<Vite>): Promise<Vite> {
+  const vite = await original();
+  const source = {
+    ssr: {
+      noExternal: [/^@vibejs-org\//],
+      resolve: { conditions: ['vibejs-source', ...vite.defaultServerConditions] },
+    },
+  };
+  return {
+    ...vite,
+    createServer: (config) => vite.createServer(vite.mergeConfig(config!, source)),
+  };
+}

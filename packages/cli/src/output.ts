@@ -134,6 +134,7 @@ const USAGE: readonly string[] = [
   'VIBE8201',
   'VIBE8204',
   'VIBE8301',
+  'VIBE8503',
 ];
 
 /** 0 ok, 2 usage, project or tool error, 1 any other failure. */

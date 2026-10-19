@@ -201,8 +201,8 @@ describe('--help --json', () => {
       for (const example of def.examples) {
         const argv = example
           .slice('vibejs '.length)
-          .match(/"[^"]*"|\S+/g)!
-          .map((arg) => arg.replaceAll('"', ''));
+          .match(/'[^']*'|"[^"]*"|\S+/g)!
+          .map((arg) => (/^(['"]).*\1$/.test(arg) ? arg.slice(1, -1) : arg));
         const r = json(await run([...argv, '--json']));
         // dev and build stop at VIBE8201 in the stub project, after parsing.
         expect({

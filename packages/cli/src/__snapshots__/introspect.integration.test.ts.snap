@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`di --json describes the todo modules 1`] = `
+[
+  {
+    "exports": [
+      "TodosService",
+    ],
+    "global": false,
+    "imports": [],
+    "path": "AppModule > TodosModule",
+    "providers": [
+      "TodosService",
+    ],
+  },
+  {
+    "exports": [],
+    "global": false,
+    "imports": [],
+    "path": "AppModule > HealthModule",
+    "providers": [],
+  },
+  {
+    "exports": [],
+    "global": false,
+    "imports": [
+      "TodosModule",
+      "HealthModule",
+    ],
+    "path": "AppModule",
+    "providers": [],
+  },
+]
+`;
