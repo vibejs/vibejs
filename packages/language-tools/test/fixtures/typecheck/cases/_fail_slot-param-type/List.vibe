@@ -1,0 +1,13 @@
+<script setup lang="ts">
+import type { Item } from './types.ts'
+const { rows } = defineProps<{ rows: Item[] }>()
+</script>
+
+<template>
+  <slot name="header" :count="rows.length" />
+  <ul>
+    <li v-for="row in rows" :key="row.id"><slot name="item" :item="row" /></li>
+  </ul>
+  <slot name="empty" v-if="rows.length === 0" />
+  <slot />
+</template>

@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import type { Node } from './types.ts'
+const { node } = defineProps<{ node: Node }>()
+</script>
+
+<template>
+  <p>{{ node.label }}</p>
+  <ul>
+    <li v-for="child in node.children" :key="child.label"><Tree :node="child" /></li>
+  </ul>
+</template>

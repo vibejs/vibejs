@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import Comp from './Comp.vibe'
 const value = 1
 </script>
 
 <template>
-  <Comp><template #a="{ item }"><p ref="inSlot">{{ item }}</p></template></Comp>
-  <Comp v-slot="{ item }">{{ item }}</Comp>
-  <slot name="a" :value="value" />
   <template><p>{{ value }}</p></template>
 </template>

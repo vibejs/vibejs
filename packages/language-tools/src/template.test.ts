@@ -20,7 +20,19 @@ function emit(
     unknown: new Map(),
     writes: false,
   };
-  const w = { b, names, source, depth: 0, self: () => false, handles: 0, refs, loops: 0 };
+  const w = {
+    b,
+    names,
+    source,
+    depth: 0,
+    own: undefined,
+    ownUsed: false,
+    handles: 0,
+    outlets: new Map(),
+    slots: 0,
+    refs,
+    loops: 0,
+  };
   children(descriptor.template!.ast.children, w, locals);
   return b.text
     .trim()
@@ -50,7 +62,7 @@ it('breaks a chain at text and interpolations', () => {
 });
 
 it('keeps the condition of an untyped branch, so the chain still narrows', () => {
-  expect(emit('<template v-if="a" #x /><p v-else-if="b" /><slot v-else />')).toEqual([
+  expect(emit('<template v-if="a" #x /><p v-else-if="b" /><template v-else />')).toEqual([
     'if (a) {',
     '}',
     'else if (b) {',
@@ -108,18 +120,74 @@ it('binds the names read by a v-for alias default, not the ones it declares', ()
   ]);
 });
 
-it('emits components with handles, and leaves v-slot content untyped with unknown refs', () => {
+it('emits components with handles, and types v-slot content with its params as locals', () => {
   const refs = new Map<string, string>();
   expect(
     emit('<C v-slot="{ x }"><p ref="a">{{ x }}</p></C><L ref="c" />', ['C'], refs, new Set(['L'])),
   ).toEqual([
     'var __vibe_c0 = __vibe.component(C)({ });',
+    '{',
+    'const [{ x }] = __vibe.slotParams(__vibe_c0.slots.default);',
+    '__vibe.el(__vibe.tags.p)({ });',
+    '(x);',
+    '}',
     'var __vibe_c1 = __vibe.component(L)({ });',
   ]);
   expect([...refs]).toEqual([
-    ['a', 'unknown'],
+    ['a', "HTMLElementTagNameMap extends Record<'p', infer E> ? E : Element"],
     ['c', 'typeof __vibe_c1.exposed'],
   ]);
+});
+
+it('emits slot templates of a component in v-if chains, then the implicit default children', () => {
+  expect(
+    emit(
+      '<C><template v-if="a" #x="p">{{ p }}</template><template v-else #y />\n<!-- c -->\n</C>',
+      ['C'],
+    ),
+  ).toEqual([
+    'var __vibe_c0 = __vibe.component(C)({ });',
+    'if (a) {',
+    '{',
+    'const [p] = __vibe.slotParams(__vibe_c0.slots.x);',
+    '(p);',
+    '}',
+    '}',
+    'else {',
+    '{',
+    '__vibe.slotParams(__vibe_c0.slots.y);',
+    '}',
+    '}',
+  ]);
+  expect(emit('<C>text<template #[k] /><template v-slot:a-b /></C>', ['C'])).toEqual([
+    'var __vibe_c0 = __vibe.component(C)({ });',
+    '{',
+    "__vibe.slotParams(__vibe_c0.slots['a-b']);",
+    '}',
+    '{',
+    '__vibe.slotParams(__vibe_c0.slots.default);',
+    '}',
+  ]);
+});
+
+it('leaves a slot template outside a component untyped', () => {
+  const refs = new Map<string, string>();
+  expect(emit('<div><template #a><p ref="r" /></template></div>', [], refs)).toEqual([
+    '__vibe.el(__vibe.tags.div)({ });',
+  ]);
+  expect([...refs]).toEqual([['r', 'unknown']]);
+  expect(emit('<C><template #a v-for="x in xs">{{ x }}</template></C>', ['C'])).toEqual([
+    'var __vibe_c0 = __vibe.component(C)({ });',
+  ]);
+});
+
+it('collects inferred outlets with camelized props, without the name, and their refs as unknown', () => {
+  const refs = new Map<string, string>();
+  expect(emit('<slot name="n" :item-id="a" ref="r" /><slot />', [], refs)).toEqual([
+    'var __vibe_s0 = ({ itemId: a });',
+    'var __vibe_s1 = ({ });',
+  ]);
+  expect([...refs]).toEqual([['r', 'unknown']]);
 });
 
 const exposed = (tag: string) =>

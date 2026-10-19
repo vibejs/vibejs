@@ -18,22 +18,29 @@ const range = (e: SimpleExpressionNode): [number, number] => [e.loc.start.offset
 const directive = (el: ElementNode, name: string) =>
   el.props.some((p) => p.type === NodeTypes.DIRECTIVE && p.name === name);
 
-/** Walked into: elements, components and fragments; not slots, slot wrappers or the file's own tag. */
-const typed = (el: ElementNode, self: string) =>
-  el.tagType === ElementTypes.TEMPLATE
-    ? !directive(el, 'slot')
-    : el.tagType !== ElementTypes.SLOT && el.tag !== 'template' && el.tag !== self;
+/**
+ * Walked into: elements, components, outlets and fragments, and the slot templates with a static
+ * name and no `v-for` directly inside a component; not a plain `<template>`.
+ */
+const typed = (el: ElementNode, inComponent: boolean) => {
+  const slot = el.props.find((p) => p.type === NodeTypes.DIRECTIVE && p.name === 'slot');
+  if (el.tagType === ElementTypes.TEMPLATE && slot) {
+    const name = slot.type === NodeTypes.DIRECTIVE && slot.arg?.isStatic !== false;
+    return inComponent && name && !directive(el, 'for');
+  }
+  return el.tagType !== ElementTypes.ELEMENT || el.tag !== 'template';
+};
 
 /**
  * The template expressions the generator supports, as original ranges: interpolations, `v-for`,
  * and `v-show`, `v-bind`, `v-on` and `v-model` on typed elements, `v-html` and `v-text` on
  * intrinsic elements, and every `v-if`/`v-else-if`.
  */
-function expressions(nodes: TemplateChildNode[], self: string): [number, number][] {
+function expressions(nodes: TemplateChildNode[], inComponent = false): [number, number][] {
   return nodes.flatMap((node): [number, number][] => {
     if (node.type === NodeTypes.INTERPOLATION) return [range(node.content)];
     if (node.type !== NodeTypes.ELEMENT) return [];
-    const walked = typed(node, self);
+    const walked = typed(node, inComponent);
     const intrinsic = node.tagType === ElementTypes.ELEMENT && !node.tag.includes('-');
     const own = node.props.flatMap((p) => {
       if (p.type !== NodeTypes.DIRECTIVE || !p.exp?.content.trim()) return [];
@@ -42,15 +49,17 @@ function expressions(nodes: TemplateChildNode[], self: string): [number, number]
       const f = p.forParseResult;
       if (f) return [f.source, f.value, f.key, f.index].filter((e) => e !== undefined).map(range);
       if (p.name === 'model' && p.arg && !p.arg.isStatic) return [];
-      if (node.tagType === ElementTypes.TEMPLATE && p.name !== 'bind') return [];
+      if (node.tagType === ElementTypes.TEMPLATE && p.name !== 'bind' && p.name !== 'slot') {
+        return [];
+      }
+      if (p.name === 'slot') return [range(p.exp)];
       const html = p.name === 'html' || p.name === 'text';
       return ['show', 'bind', 'on', 'model'].includes(p.name) || (html && intrinsic)
         ? [range(p.exp)]
         : [];
     });
-    // The children of a component with `v-slot` read slot props.
-    const inner = walked && !(node.tagType === ElementTypes.COMPONENT && directive(node, 'slot'));
-    return inner ? [...own, ...expressions(node.children, self)] : own;
+    const inner = walked ? expressions(node.children, node.tagType === ElementTypes.COMPONENT) : [];
+    return [...own, ...inner];
   });
 }
 
@@ -101,9 +110,8 @@ describe.each(all)('%s', (name, source, clean) => {
     const script = descriptor.scriptSetup?.loc;
     const scriptOffsets = script ? visible(script.start.offset, script.end.offset) : [];
     expect(scriptOffsets.filter((i) => !covered.has(i))).toEqual([]);
-    const self = /[^/]*$/.exec(name)![0].replace(/\.vibe$/, '');
-    const missing = expressions(descriptor.template?.ast.children ?? [], self).filter(
-      ([start, end]) => visible(start, end).some((i) => !covered.has(i)),
+    const missing = expressions(descriptor.template?.ast.children ?? []).filter(([start, end]) =>
+      visible(start, end).some((i) => !covered.has(i)),
     );
     expect(missing).toEqual([]);
   });

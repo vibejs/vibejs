@@ -1,11 +1,3 @@
-<script setup lang="ts">
-import Child from './Child.vibe'
-</script>
-
 <template>
-  <Child title="a"><template #a><span>{{ missing }}</span></template></Child>
-  <Child title="b" v-slot="{ item }">{{ item.missing }}</Child>
-  <slot name="a" :x="missing" />
   <template><span>{{ missing }}</span></template>
-  <App :x="missing" />
 </template>

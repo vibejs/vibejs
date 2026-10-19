@@ -1,0 +1,13 @@
+<script setup lang="ts">
+const { title, items } = defineProps<{ title: string; items: string[] }>()
+</script>
+
+<template>
+  <section>
+    <slot name="header" :title="title" />
+    <ul>
+      <li v-for="(item, index) in items" :key="item"><slot name="item" :item="item" :index="index" /></li>
+    </ul>
+    <slot><p>{{ title }}</p></slot>
+  </section>
+</template>

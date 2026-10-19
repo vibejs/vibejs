@@ -2,16 +2,18 @@ import type { SFCDescriptor, ScriptAnalysis } from '@vibejs-org/compiler';
 import { Preset, type CodeBuilder } from './builder.ts';
 
 /**
- * The user script, verbatim from virtual offset 0, with the type arguments of `defineProps` and
- * `defineEmits` moved (not duplicated) into `type __VibeProps` and `type __VibeEmits`, the
+ * The user script, verbatim from virtual offset 0, with the type arguments of `defineProps`,
+ * `defineEmits` and `defineSlots` moved (not duplicated) into `type __VibeProps`,
+ * `type __VibeEmits` and `type __VibeSlots` (only when declared: else the template infers it), the
  * `defineExpose` call captured in `__vibe_exposed`, and `<__VibeRefs['k']>` inserted into each
  * `useTemplateRef('k')` without a type argument. Returns whether `__vibe_exposed` is declared.
  */
 export function script(b: CodeBuilder, d: SFCDescriptor, analysis: ScriptAnalysis): boolean {
-  const { props, emits, expose } = analysis.macros;
+  const { props, emits, slots, expose } = analysis.macros;
   const moved = [
     { name: '__VibeProps', range: props?.typeArg },
     { name: '__VibeEmits', range: emits?.typeArg },
+    ...(slots ? [{ name: '__VibeSlots', range: slots.typeArg }] : []),
   ];
   // ponytail: an assigned `const x = defineExpose(…)` is not captured; its exposed type is `{}`.
   const exposeAt =

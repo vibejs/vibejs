@@ -5,4 +5,5 @@ const emit = defineEmits<{ select: [id: string]; toggle: [] }>()
 
 <template>
   <button @click="emit('select', title)">{{ title }} {{ count }}</button>
+  <slot />
 </template>

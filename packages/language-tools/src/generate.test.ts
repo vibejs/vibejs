@@ -7,7 +7,7 @@ import { generate } from './generate.ts';
 describe('codegen fixtures', () => {
   it.each(codegen)('%s', async (name, source) => {
     const file = generate(name, source);
-    const dir = `${CODEGEN}/${name.slice(0, -'/input.vibe'.length)}`;
+    const dir = `${CODEGEN}/${name.slice(0, name.lastIndexOf('/'))}`;
     await expect(file.text).toMatchFileSnapshot(`${dir}/virtual.ts`);
     await expect(`${formatSpans(file, source)}\n`).toMatchFileSnapshot(`${dir}/spans.txt`);
   });
@@ -64,15 +64,64 @@ export const a = 1
 });
 
 describe('component tags', () => {
-  it('leaves the file itself untyped, unless a binding shadows its name', () => {
-    const own = generate('src/Tree.vibe', '<template><Tree :x="missing" /></template>\n').text;
-    expect(own).not.toContain('__vibe.component(');
-    expect(own).not.toContain('missing');
+  it('types the file itself through its default export, unless a binding shadows its name', () => {
+    const own = generate('src/Tree.vibe', '<template><Tree :x="1" /></template>\n').text;
+    expect(own).toContain('__vibe.component(__vibe_self)({ x: 1 });');
+    expect(own).toContain('import __vibe_self from "./Tree.vibe";');
     const source = `<script setup lang="ts">
 import Tree from './Other.vibe'
 </script>
 <template><Tree /></template>
 `;
-    expect(generate('src/Tree.vibe', source).text).toContain('__vibe.component(Tree)({ });');
+    const shadowed = generate('src/Tree.vibe', source).text;
+    expect(shadowed).toContain('__vibe.component(Tree)({ });');
+    expect(shadowed).not.toContain('__vibe_self');
+    const prop =
+      '<script setup lang="ts">\ndefineProps<{ Tree: unknown }>()\n</script>\n<template><Tree /></template>\n';
+    expect(generate('Tree.vibe', prop).text).not.toContain('__vibe_self');
+    expect(generate('tree.vibe', '<template><Tree /></template>\n').text).not.toContain(
+      '__vibe_self',
+    );
+  });
+});
+
+describe('slots', () => {
+  it('declares __VibeSlots from defineSlots, else from the outlets', () => {
+    const declared = `<script setup lang="ts">
+defineSlots<{ a: (props: { x: number }) => unknown }>()
+</script>
+<template><slot name="a" :x="1" /></template>
+`;
+    const text = generate('A.vibe', declared).text;
+    expect(text).toContain('type __VibeSlots = { a: (props: { x: number }) => unknown };');
+    expect(text).toContain("__vibe.slot<__VibeSlots, 'a'>()({ x: 1 });");
+    expect(generate('A.vibe', '<template><p /></template>\n').text).toContain(
+      'type __VibeSlots = {};',
+    );
+  });
+
+  // `generic` (VIBE1013) is an SFC-structure error in 1000-1199, so C6 forwards it as before.
+  it('forwards generic as before, and none of the slot diagnostics of the compiler', () => {
+    const source = `<script setup lang="ts" generic="T">
+import C from './C.vibe'
+const n = 'a'
+</script>
+<template>
+  <div><template #a /></div>
+  <C v-slot="x"><template #b /></C>
+  <C><template #c /><template #c /></C>
+  <C><template #default />loose</C>
+  <C><template #[n] /></C>
+  <C><template v-for="i in 2" #d /></C>
+  <slot :name="n" />
+</template>
+`;
+    const codes = compile(source, { filename: 'A.vibe', id: '0000000a', dev: false })
+      .diagnostics.map((d) => d.code)
+      .filter((c) => /^VIBE(?:1013|260[1-7])$/.test(c));
+    expect(new Set(codes)).toEqual(
+      new Set(['VIBE1013', ...[1, 2, 3, 4, 5, 6, 7].map((i) => `VIBE260${i}`)]),
+    );
+    expect(generate('A.vibe', source).diagnostics.map((d) => d.code)).toEqual([1013]);
   });
 });
