@@ -5,6 +5,7 @@
     "CONTRACTS.md",
     "**/*.gen.ts",
     "**/test/fixtures/**",
+    "packages/server/test/openapi/*.json",
     "packages/vscode/test/grammars/**",
     "packages/ui/src/reactivity/system.ts",
     "packages/compiler/src/template/ast.ts",

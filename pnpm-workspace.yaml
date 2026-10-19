@@ -42,6 +42,8 @@ catalog:
   zod: 4.6.7
   valibot: 1.5.0
   arktype: 2.2.8
+  '@valibot/to-json-schema': 1.8.0
+  '@scalar/openapi-parser': 0.29.14
   '@types/vscode': 1.125.0
   '@vscode/vsce': 4.0.0
   vscode-tmgrammar-test: 0.1.3
