@@ -98,3 +98,26 @@ describe('exec', () => {
     expect((await ctx.exec(join(tmpdir(), 'vibejs-no-such-program'), [], { cwd })).code).toBe(1);
   });
 });
+
+describe('untilSignal', () => {
+  it.each(['SIGINT', 'SIGTERM'])(
+    'resolves with %s and then removes both listeners',
+    async (signal) => {
+      // Spies, so the runner's own signal listeners are never involved.
+      const once = vi.spyOn(process, 'once').mockReturnThis();
+      const off = vi.spyOn(process, 'off').mockReturnThis();
+      const ctx = nodeCtx();
+      expect(once).not.toHaveBeenCalled();
+      const waiting = ctx.untilSignal();
+      const [[first, listener], [second, same]] = once.mock.calls;
+      expect([first, second, same]).toEqual(['SIGINT', 'SIGTERM', listener]);
+      // Node passes the signal name to its listeners.
+      listener(signal);
+      expect(await waiting).toBe(signal);
+      expect(off.mock.calls).toEqual([
+        ['SIGINT', listener],
+        ['SIGTERM', listener],
+      ]);
+    },
+  );
+});

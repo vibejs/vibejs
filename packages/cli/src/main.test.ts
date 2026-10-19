@@ -61,6 +61,7 @@ async function run(argv: string[], agent = false, cwd = join(root, 'app')) {
     exec,
     out: (s) => (stdout += s),
     err: (s) => (stderr += s),
+    untilSignal: async () => 'SIGINT',
   };
   const code = await main(argv, ctx);
   return { code, stdout, stderr };
@@ -107,6 +108,8 @@ describe('unknown commands and options', () => {
     [['lint'], 'lint', 'lint', 'vibejs check --only lint'],
     [['format'], 'format', 'format', 'vibejs check --only format'],
     [['test'], 'test', 'test', 'vibejs check --only test'],
+    [['serve'], 'serve', 'serve', 'vibejs dev'],
+    [['start'], 'start', 'start', 'vibejs dev'],
     [['check', '--only', 'types,tests'], 'check', 'tests', 'vibejs check --help'],
     [['check', '--max', '0'], 'check', '0', 'vibejs check --help'],
   ])('%j gives VIBE8004 and exit 2', async (argv, command, name, next) => {
@@ -152,6 +155,11 @@ describe('command matrix', () => {
     ['explain --version', 0],
     ['g', 2],
     ['check --only types', 0],
+    ['dev', 2],
+    ['build', 2],
+    ['errors', 0],
+    ['logs --level warn', 0],
+    ['logs --level fatal', 2],
   ] as const;
 
   it.each(cases)('JSON: vibejs %s exits %i', async (line, code) => {
@@ -195,10 +203,15 @@ describe('--help --json', () => {
           .match(/"[^"]*"|\S+/g)!
           .map((arg) => arg.replaceAll('"', ''));
         const r = json(await run([...argv, '--json']));
-        expect({ example, command: r.command, ok: r.ok }).toEqual({
+        // dev and build stop at VIBE8201 in the stub project, after parsing.
+        expect({
+          example,
+          command: r.command,
+          parsed: r.ok || r.error?.code === 'VIBE8201',
+        }).toEqual({
           example,
           command: def.name,
-          ok: true,
+          parsed: true,
         });
       }
     }

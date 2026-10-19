@@ -1,5 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import type { VibeError } from '@vibejs-org/errors';
+import { vibeError } from './errors.gen.ts';
 
 interface Manifest {
   version: string;
@@ -32,6 +34,16 @@ export function findRoot(cwd: string): string | undefined {
     if (pkg && '@vibejs-org/cli' in { ...pkg.dependencies, ...pkg.devDependencies }) return dir;
   }
   return undefined;
+}
+
+const LAYOUT = ['ui/index.html', 'server/src/app.module.ts', 'server/src/main.ts'];
+
+/** The root of the full-stack project at or above `cwd`, or its VIBE8001 or VIBE8201 error. */
+export function fullstackRoot(cwd: string, command: string): string | VibeError {
+  const root = findRoot(cwd);
+  if (root === undefined) return vibeError('VIBE8001', { cwd });
+  const path = LAYOUT.find((file) => !existsSync(join(root, file)));
+  return path === undefined ? root : vibeError('VIBE8201', { path, command });
 }
 
 export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun';

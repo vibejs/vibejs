@@ -37,6 +37,7 @@ const ctx = (dir = docsDir): Ctx => ({
   exec: vi.fn<Ctx['exec']>(),
   out: vi.fn<Ctx['out']>(),
   err: vi.fn<Ctx['err']>(),
+  untilSignal: vi.fn<Ctx['untilSignal']>(),
 });
 const run = (query: string, dir?: string) =>
   docs.run({ values: {}, positionals: query.split(' ') }, ctx(dir));

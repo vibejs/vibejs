@@ -7,9 +7,14 @@ const MESSAGES = {
   VIBE8004: ["Unknown command or option `{name}`.","Run `vibejs --help` to list the commands and their options.","Run the command from `next` in the JSON output."],
   VIBE8005: ["`{tool}` is missing or older than {minimum}; install it with `{install}`.","Run `{install}` in the project root."],
   VIBE8008: ["No error code `{code}` in the catalog of this vibejs version.","Check the spelling: a code is `VIBE` followed by four digits.","Update the vibe.js packages in this project if the code comes from a newer version."],
+  VIBE8201: ["`{path}` is missing; `vibejs {command}` expects `ui/index.html`, `server/src/app.module.ts` and `server/src/main.ts`.","Run `vibejs {command}` from a project created with `create-vibejs`.","Create `{path}` as in the project template."],
+  VIBE8202: ["`server/src/app.module.ts` must export `AppModule` (a module class) and `appOptions` (an object); found {found}.","Export `AppModule` and `appOptions` as in the template."],
+  VIBE8203: ["The backend failed to start: {reason}.","Fix the error at the logged location; the backend restarts on save.","Run `vibejs errors` to see the error with its stack."],
+  VIBE8204: ["Port {port} is already in use.","Pass `--port <free port>` or stop the other process.","Run `vibejs dev` without `--port` to let it pick a free port."],
   VIBE8301: ["`{tool}` exited with code {exitCode} and output that vibejs check cannot read.","Run the tool directly in the project root to see its full output.","Fix the configuration or the installation the output points to."],
   VIBE8302: ["`{file}` is not fully covered: {uncovered}.","Add tests for the listed ranges; never add coverage-ignore comments."],
   VIBE8303: ["`{file}` is not formatted.","Run `vibejs check --fix`."],
+  VIBE8304: ["Building the {part} failed: {reason}.","Fix the reported error and run `vibejs build` again."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

@@ -1,9 +1,13 @@
 import { parseArgs } from 'node:util';
 import type { VibeError } from '@vibejs-org/errors';
 import type { CommandDef, OptionDef } from './command.ts';
+import { build } from './commands/build.ts';
 import { check } from './commands/check.ts';
+import { dev } from './commands/dev.ts';
 import { docs } from './commands/docs.ts';
+import { errors } from './commands/errors.ts';
 import { explain } from './commands/explain.ts';
+import { logs } from './commands/logs.ts';
 import type { Ctx } from './ctx.ts';
 import { vibeError } from './errors.gen.ts';
 import {
@@ -17,7 +21,7 @@ import {
   type MissingInput,
 } from './output.ts';
 
-export const COMMANDS: readonly CommandDef[] = [explain, docs, check];
+export const COMMANDS: readonly CommandDef[] = [explain, docs, check, dev, build, errors, logs];
 
 /** Common wrong commands and what to run instead: a `vibejs` command or the `npm create` line. */
 export const MISTAKES: Readonly<Record<string, string>> = {
@@ -26,6 +30,8 @@ export const MISTAKES: Readonly<Record<string, string>> = {
   lint: 'vibejs check --only lint',
   format: 'vibejs check --only format',
   test: 'vibejs check --only test',
+  serve: 'vibejs dev',
+  start: 'vibejs dev',
 };
 
 const GLOBAL_OPTIONS: Record<string, OptionDef> = {
