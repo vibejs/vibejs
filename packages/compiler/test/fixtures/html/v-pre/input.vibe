@@ -1,0 +1,3 @@
+<template>
+  <div :a="x" @b=y v-if v-pre>{{ raw }} <p :c.d="e"></p></div>
+</template>

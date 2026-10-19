@@ -1,0 +1,6 @@
+error[VIBE1001]: The component has no `<template>` block.
+  --> sfc/missing-template/input.vibe:1:1
+1 | <script setup lang="ts">
+  | ^
+fix: Add a `<template>` block with the markup of the component.
+docs: https://vibejs.org/v0/errors/VIBE1001

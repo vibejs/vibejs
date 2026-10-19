@@ -1,0 +1,7 @@
+error[VIBE1102]: The attribute `title` appears more than once on this element.
+  --> sfc/utf16-crlf/input.vibe:3:19
+3 |   <span title="x" title="y">🎉</span>
+  |                   ^^^^^^^^^
+fix: Remove the second `title`.
+fix: Merge both values into one `title` attribute.
+docs: https://vibejs.org/v0/errors/VIBE1102

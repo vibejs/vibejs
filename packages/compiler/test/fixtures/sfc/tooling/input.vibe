@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import TodoItem from './TodoItem.vibe';
+
+defineProps<{ todos: Record<string, { text: string }> }>();
+</script>
+
+<template>
+  <ul class="todos">
+    <!-- @vibe-expect-error -->
+    <TodoItem
+      v-for="(todo, id, index) in todos"
+      :key="id"
+      :todo.camel="todo"
+      @remove.stop.prevent="remove(index)"
+    />
+  </ul>
+  <todo-counter :count="Object.keys(todos).length"></todo-counter>
+</template>

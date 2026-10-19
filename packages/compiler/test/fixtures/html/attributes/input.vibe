@@ -1,0 +1,4 @@
+<template>
+  <input id="a" id="b" v-="x" :[key="y" =z a"b c=d'e>
+  <div/ ><svg><![CDATA[ok]]></svg><![CDATA[bad]]><?xml?></>
+</template>
