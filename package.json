@@ -10,7 +10,7 @@
     "pretest": "pnpm errors",
     "test": "vitest --project node --project dom",
     "test:coverage": "vitest run --coverage --project node --project dom --project browser",
-    "test:integration": "pnpm build && vitest run --project integration",
+    "test:integration": "pnpm build && vitest run --project integration && pnpm --filter \"./examples/*\" test",
     "build": "pnpm -r --filter \"./packages/*\" build",
     "check": "pnpm errors --check && oxfmt --check --disable-nested-config && pnpm lint && pnpm test:coverage",
     "errors": "node scripts/errors.ts",
