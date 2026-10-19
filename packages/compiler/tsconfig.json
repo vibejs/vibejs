@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2024"], "types": ["node"], "rootDir": "." },
-  "references": [{ "path": "../errors" }],
+  "references": [{ "path": "../errors" }, { "path": "../ui" }],
   "include": ["src", "test"],
   "exclude": ["test/fixtures"]
 }

@@ -1,3 +1,4 @@
+import { renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@vibejs-org/ui/internal'
 import { watch } from '@vibejs-org/ui';
 const _defaults = { "data-id": () => 'x' }
 function _setup(__props: any, __ctx: any) {
@@ -22,3 +23,12 @@ watch(() => __props.a, (value) => console.log(value, shadow(value), pair));
 
 return { total, shadow, pair }
 }
+const _t0 = _template("<p> </p>")
+function _render($setup: any, $props: any, $ctx: any) {
+  const _n1 = _t0()
+  const _n0 = _txt(_n1)
+  _renderEffect(() => _setText(_n0, _toDisplayString($setup.total)))
+  return _n1
+}
+const _sfc = { __propKeys: ["a", "b", "data-id"], __defaults: _defaults, setup: _setup, render: _render }
+export default _sfc

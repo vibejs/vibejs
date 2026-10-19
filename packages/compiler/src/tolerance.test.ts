@@ -1,13 +1,14 @@
+import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
 import { contextOf, scopeOf, templateExpressions } from '../test/expr.ts';
 import { fixtures, locations } from '../test/walk.ts';
+import { compile } from './compile.ts';
 import { LineIndex, type Position } from './diagnostics.ts';
 import { forEachIdentifier } from './expr/index.ts';
 import { parseParams, rewriteExpr } from './expr/rewrite.ts';
 import { analyze } from './script/analyze.ts';
 import { compileScript } from './script/compile.ts';
 import { parse } from './sfc/parse.ts';
-import { transform } from './transform/index.ts';
 
 /** Parses `source` and lists every location of the descriptor, the AST or the diagnostics that is wrong. */
 function problems(source: string): string[] {
@@ -55,17 +56,27 @@ function scriptProblems(source: string): string[] {
     .map(([start, end]) => `${JSON.stringify(source)}: ${start}-${end} is out of bounds`);
 }
 
-/** Transforms `source` and lists every diagnostic out of bounds and a mismatch of `ir` and diagnostics. */
+/**
+ * Compiles `source` and lists every diagnostic out of bounds, a mismatch of `code` and
+ * diagnostics, and output that does not parse.
+ */
 function templateProblems(source: string): string[] {
-  const { descriptor } = parse(source, { filename: 'input.vibe' });
-  const { ir, diagnostics } = transform(descriptor, analyze(descriptor), { id: '0a1b2c3d' });
+  const { code, map, diagnostics } = compile(source, {
+    filename: 'input.vibe',
+    id: '0a1b2c3d',
+    dev: true,
+  });
   const bad = diagnostics
     .filter(
       (d) =>
         !(0 <= d.start.offset && d.start.offset <= d.end.offset && d.end.offset <= source.length),
     )
-    .map((d) => `${d.code} at ${d.start.offset}-${d.end.offset} is out of bounds`);
-  if ((ir === null) !== diagnostics.length > 0) bad.push('ir is null iff diagnostics exist');
+    .map((d) => `${d.code} at ${d.start.offset}-${d.end.offset}`);
+  if ((code === '') !== diagnostics.length > 0 || (map === null) !== (code === '')) {
+    bad.push('code and map are empty iff diagnostics exist');
+  }
+  if (parseSync('output.ts', code, { lang: 'ts', showSemanticErrors: true }).errors.length > 0)
+    bad.push('code does not parse');
   return bad.map((b) => `${JSON.stringify(source)}: ${b}`);
 }
 
@@ -79,7 +90,7 @@ const withTemplate = fixtures
   .slice(0, 10);
 
 describe('tolerance', () => {
-  it.each(templates)('%s: the template transform cut at every 7th character', (_, source) => {
+  it.each(templates)('%s: compile() cut at every 7th character', (_, source) => {
     const bad: string[] = [];
     for (let end = 0; end <= source.length; end += 7)
       bad.push(...templateProblems(source.slice(0, end)));
@@ -87,7 +98,7 @@ describe('tolerance', () => {
   });
 
   it.each(templates.slice(0, 10))(
-    '%s: the template transform without one character',
+    '%s: compile() without one character of its template',
     (_, source) => {
       const { loc } = parse(source, { filename: 'input.vibe' }).descriptor.template!;
       const bad: string[] = [];
@@ -96,7 +107,7 @@ describe('tolerance', () => {
       }
       expect(bad).toStrictEqual([]);
     },
-    // One parse, analysis and transform per character of a whole template.
+    // One compile per character of a whole template.
     60_000,
   );
 

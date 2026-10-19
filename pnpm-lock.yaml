@@ -195,6 +195,9 @@ catalogs:
     '@changesets/cli':
       specifier: 3.0.3
       version: 3.0.3
+    '@jridgewell/gen-mapping':
+      specifier: ^0.3.13
+      version: 0.3.13
     '@jridgewell/trace-mapping':
       specifier: 0.3.31
       version: 0.3.31
@@ -415,6 +418,9 @@ importers:
 
   packages/compiler:
     dependencies:
+      '@jridgewell/gen-mapping':
+        specifier: 'catalog:'
+        version: 0.3.13
       '@vibejs-org/errors':
         specifier: workspace:*
         version: link:../errors
@@ -437,6 +443,9 @@ importers:
       '@jridgewell/trace-mapping':
         specifier: 'catalog:'
         version: 0.3.31
+      '@vibejs-org/ui':
+        specifier: workspace:*
+        version: link:../ui
       tsdown:
         specifier: 'catalog:'
         version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.0.2)
@@ -795,6 +804,9 @@ packages:
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
+
+  '@jridgewell/gen-mapping@0.3.13':
+    resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -3931,6 +3943,11 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify/types@2.0.0': {}
+
+  '@jridgewell/gen-mapping@0.3.13':
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.6.0
+      '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/resolve-uri@3.1.2': {}
 

@@ -1,0 +1,22 @@
+<script setup lang="ts">
+import { ref, shallowRef } from '@vibejs-org/ui'
+import Field from './Field.vibe'
+import Panel from './Panel.vibe'
+const view = shallowRef(Panel)
+const text = ref('')
+const extra = ref({ hint: 'Type here' })
+const expanded = ref(false)
+</script>
+<template>
+  <div>
+    <component :is="view" :title="text" />
+    <Field v-bind="extra" v-model.trim="text" label="Name" @blur="expanded = false" />
+    <Panel>
+      <template #summary v-if="expanded">Expanded</template>
+      <template #summary v-else>Collapsed</template>
+      <slot name="body" v-bind="extra" :size="text.length">
+        <em>Empty</em>
+      </slot>
+    </Panel>
+  </div>
+</template>

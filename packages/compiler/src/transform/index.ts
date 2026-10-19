@@ -387,15 +387,17 @@ function template(s: State, item: Exclude<Item, { k: 'block' }>): { id: Ref; ops
   const html = serialize(root);
   const ns = item.k === 'el' ? NS[item.el.ns] : undefined;
   const tpl = s.templates.push(ns ? { html, ns } : { html }) - 1;
-  return { id, ops: [{ op: 'tpl', id, tpl }, ...walks({ ...root, ref: id }), ...body] };
+  const loc = root.loc;
+  return { id, ops: [{ op: 'tpl', id, tpl, loc }, ...walks({ ...root, ref: id }), ...body] };
 }
 
 /** One text node; a run with interpolations is `" "` plus one `setText` effect. */
-function textNode(s: State, nodes: Text[], env: Env, body: Op[]): HNode {
+function textNode(s: State, nodes: Text[], env: Env, body: Op[]): HNode & { kind: 'text' } {
+  const loc = nodes[0].loc.start.offset;
   if (nodes.every((n) => n.type === NodeTypes.TEXT)) {
-    return { kind: 'text', text: nodes.map((n) => n.content).join('') };
+    return { kind: 'text', text: nodes.map((n) => n.content).join(''), loc };
   }
-  const h: HNode = { kind: 'text', text: ' ' };
+  const h: HNode & { kind: 'text' } = { kind: 'text', text: ' ', loc };
   const pieces = nodes.flatMap((n, i) => [
     ...(i ? [' + '] : []),
     n.type === NodeTypes.TEXT
@@ -404,12 +406,18 @@ function textNode(s: State, nodes: Text[], env: Env, body: Op[]): HNode {
   ]);
   s.abi.add('toDisplayString');
   const call = { fn: 'setText', args: [{ ref: need(s, h) }, { expr: join(...pieces) }] };
-  body.push({ op: 'effect', call, loc: nodes[0].loc.start.offset });
+  body.push({ op: 'effect', call, loc });
   return h;
 }
 
 /** A plain element and its static subtree; `pre` emits it as written (`v-pre`). */
-function element(s: State, el: ElementNode, env: Env, body: Op[], pre: boolean): HNode {
+function element(
+  s: State,
+  el: ElementNode,
+  env: Env,
+  body: Op[],
+  pre: boolean,
+): HNode & { kind: 'el' } {
   const inPre = pre || dir(el, 'pre') !== undefined;
   const h: HNode & { kind: 'el' } = {
     kind: 'el',
@@ -417,6 +425,7 @@ function element(s: State, el: ElementNode, env: Env, body: Op[], pre: boolean):
     attrs: [],
     children: [],
     void: el.ns === 0 && isVoidTag(el.tag),
+    loc: el.loc.start.offset,
   };
   if (inPre) {
     for (const p of el.props) if (!isDirective(p)) h.attrs.push([p.name, p.value?.content ?? true]);

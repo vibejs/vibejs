@@ -1,0 +1,17 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const color = ref('red')
+const attrs = ref({ id: 'main' })
+const name = ref('title')
+const version = ref(1)
+</script>
+<template>
+  <main>
+    <svg :view-box.camel="'0 0 10 10'" :data-color.attr="color"></svg>
+    <p style="margin: 0" :style="{ color }">styled</p>
+    <div class="box" v-bind="attrs" :[name]="color" title="static"></div>
+    <section :key="version">
+      <h1>v{{ version }}</h1>
+    </section>
+  </main>
+</template>

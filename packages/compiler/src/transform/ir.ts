@@ -22,9 +22,10 @@ export interface BlockIR {
 /** `child(n)`, `next(n)`, `txt(n)`, or `nthChild(n, i)` for a number. */
 export type Step = 'child' | 'next' | 'txt' | number;
 
+/** `loc`: the file offset of the node a `tpl` or `walk` reaches, none for an anchor. */
 export type Op =
-  | { op: 'tpl'; id: Ref; tpl: number }
-  | { op: 'walk'; id: Ref; from: Ref; steps: Step[] }
+  | { op: 'tpl'; id: Ref; tpl: number; loc?: number }
+  | { op: 'walk'; id: Ref; from: Ref; steps: Step[]; loc?: number }
   /** A `renderEffect`; `loc` is the file offset of the binding. */
   | { op: 'effect'; call: CallIR; loc: number }
   | { op: 'once'; call: CallIR }
