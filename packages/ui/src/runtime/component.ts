@@ -92,8 +92,7 @@ function setupComponent(instance: ComponentInstance): ComponentInstance {
           return;
         }
         instance.block = block;
-        fallthrough(instance);
-        setScopeIds(instance);
+        decorateRoot(instance);
       }),
     );
   } finally {
@@ -110,40 +109,46 @@ function unmountComponent(instance: ComponentInstance): void {
   queuePostFlushCb(() => callHooks(instance, 'unmounted'));
 }
 
-/** Puts the fallthrough attributes on the root: an element, or each one-element content of a swapping root. */
-function fallthrough(instance: ComponentInstance): void {
-  if (instance.def.inheritAttrs === false || !hasFallthrough(instance)) return;
+/**
+ * Puts the owners' scope ids (see `scopeIds`) and the fallthrough attributes on the root: an
+ * element, or each one-element content of a swapping root.
+ */
+function decorateRoot(instance: ComponentInstance): void {
+  const ids = scopeIds(instance);
+  const attrs = instance.def.inheritAttrs !== false && hasFallthrough(instance);
   const root = instance.block;
   const apply = (nodes: Block): void => {
-    if (nodes instanceof Element)
-      renderEffect(() => setDynamicProps(nodes, [instance.attrs], true));
+    if (!(nodes instanceof Element)) return;
+    for (const id of ids) nodes.setAttribute(id, '');
+    if (attrs) renderEffect(() => setDynamicProps(nodes, [instance.attrs], true));
   };
   if (root instanceof SwitchFragment) {
     root.onSwap = apply;
     root.scope?.run(() => apply(root.nodes));
   } else if (root instanceof Element) apply(root);
   // A component root takes the attributes as its own props (`isSingleRoot`).
-  else if (!(root instanceof ComponentInstance) && Object.keys(instance.attrs).length) {
+  else if (attrs && !(root instanceof ComponentInstance) && Object.keys(instance.attrs).length) {
     warn(vibeError('VIBE5201', { name: instance.name ?? 'Anonymous' }), instance);
   }
 }
 
-/** Adds the owner's scope id to a root element, and each further owner's through single roots. */
-function setScopeIds(instance: ComponentInstance): void {
-  const root = instance.block;
-  if (!(root instanceof Element)) return;
+/** The scope id of the owner, and of each further owner through single roots. */
+function scopeIds(instance: ComponentInstance): string[] {
+  const ids: string[] = [];
   for (let cur = instance; cur.owner; cur = cur.owner) {
     const id = cur.owner.def.__scopeId;
-    if (id) root.setAttribute(id, '');
-    if (!cur.isSingleRoot) return;
+    if (id) ids.push(id);
+    if (!cur.isSingleRoot) break;
   }
+  return ids;
 }
 
 /**
  * `<component :is="c">`: renders the component that `is()` returns, created like
  * `createComponent(c, props, slots, isSingleRoot)`, and remounts it when `is()` returns another
- * one; `null` and `undefined` render nothing. Any other value throws VIBE5207 (strings are a
- * compile error).
+ * one; `null` and `undefined` render nothing. Any other value raises VIBE5207, in every build
+ * (strings are a compile error); like any render error it goes to the error handler as
+ * `'render effect'`, since a later swap runs in a scheduler flush where nothing can catch it.
  */
 export function createDynamicComponent(
   is: () => ComponentDef | null | undefined,

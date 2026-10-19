@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import Item from './Item.vibe';
+
+defineProps<{ open?: boolean }>();
 </script>
 
 <template>
-  <div class="child">
+  <div v-if="open" class="child">
     <Item :index="0" label="first" :done="false" />
   </div>
+  <p v-else class="child">Closed</p>
 </template>
 
 <style scoped>

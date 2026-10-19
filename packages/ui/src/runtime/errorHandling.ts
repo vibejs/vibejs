@@ -14,12 +14,15 @@ export type ErrorInfo =
   | 'native event handler'
   | 'component event handler'
   | `${LifecycleHook} hook`
+  | 'errorCaptured hook'
   | 'template ref';
 
 /**
  * The one place errors of user code end up. The `onErrorCaptured` hooks of the ancestors of
  * `instance` see it first, nearest first, and one that returns `false` stops it; then the app's
- * `config.errorHandler`; else it is logged as VIBE5102. It never rethrows.
+ * `config.errorHandler`; else it is logged as VIBE5102. It never rethrows: an error of a hook
+ * goes on from the hook's component as `'errorCaptured hook'`, and an error of the app handler is
+ * logged as VIBE5102.
  */
 export function handleError(
   err: unknown,
@@ -27,11 +30,21 @@ export function handleError(
   info: ErrorInfo,
 ): void {
   for (let cur = instance?.parent; cur; cur = cur.parent) {
-    for (const hook of cur.errorCaptured) if (hook(err, instance, info) === false) return;
+    for (const hook of cur.errorCaptured) {
+      const args: [unknown, ComponentInstance | null, string] = [err, instance, info];
+      if (callWithErrorHandling(hook, cur, 'errorCaptured hook', args) === false) return;
+    }
   }
   const handler = instance?.appContext.config.errorHandler;
-  if (handler) handler(err, instance, info);
-  else logError(vibeError('VIBE5102', { info }, { cause: err }));
+  if (!handler) {
+    logError(vibeError('VIBE5102', { info }, { cause: err }));
+    return;
+  }
+  try {
+    handler(err, instance, info);
+  } catch (handlerErr) {
+    logError(vibeError('VIBE5102', { info: 'config.errorHandler' }, { cause: handlerErr }));
+  }
 }
 
 /** Calls `fn`; an error it throws goes to `handleError` and the call returns `undefined`. */

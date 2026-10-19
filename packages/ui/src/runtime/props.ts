@@ -19,7 +19,7 @@ import { callWithAsyncErrorHandling } from './errorHandling.ts';
 import { setupInstance, type ComponentInstance } from './instance.ts';
 import { watchSyncEffect } from './watch.ts';
 
-/** The props a parent passes: a getter per key, and `$` for `v-bind` objects (the last one wins). */
+/** The props a parent passes: a getter per key, and `$` for `v-bind` objects (the last one wins, `class` and `style` merge). */
 export type RawProps = Record<string, () => unknown> & { $?: (() => Record<string, unknown>)[] };
 
 /** The `$` sources of `raw`. */
@@ -27,10 +27,24 @@ export type RawProps = Record<string, () => unknown> & { $?: (() => Record<strin
 const sources = (raw: RawProps | null): (() => unknown)[] =>
   (raw?.$ as (() => unknown)[] | undefined) ?? [];
 
-/** The getter of the first of `names` that `raw` holds: in the last `$` object that has one, else static. */
+/**
+ * The getter of the first of `names` that `raw` holds: in the last `$` object that has one, else
+ * static. `class` and `style` merge instead: the static value, then each `$` object's in order,
+ * so inherited attributes (the last source) add classes and win per style key.
+ */
 function findRaw(raw: RawProps | null, names: readonly string[]): (() => unknown) | undefined {
   if (!raw) return undefined;
   const dynamic = sources(raw);
+  const [first] = names;
+  if (first === 'class' || first === 'style') {
+    const values: unknown[] = Object.hasOwn(raw, first) ? [raw[first]()] : [];
+    for (const get of dynamic) {
+      const source = get();
+      if (isObject(source) && first in source) values.push(source[first]);
+    }
+    if (!values.length) return undefined;
+    return () => (values.length === 1 ? values[0] : values);
+  }
   for (let i = dynamic.length - 1; i >= 0; i--) {
     const source = dynamic[i]();
     if (!isObject(source)) continue;

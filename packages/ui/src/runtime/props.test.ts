@@ -153,6 +153,25 @@ describe('attrs', () => {
   });
 });
 
+describe('class and style', () => {
+  test('merge the static value and every v-bind object in order', () => {
+    const { attrs } = create(
+      {},
+      withSources({
+        class: () => 'own',
+        $: [
+          () => ({ class: ['a'], style: 'color: red' }),
+          () => null,
+          () => ({ style: { color: 'blue' } }),
+        ],
+      }),
+    );
+    expect(attrs.class).toEqual(['own', ['a']]);
+    expect(attrs.style).toEqual(['color: red', { color: 'blue' }]);
+    expect('class' in create({}, withSources({ $: [() => ({ id: 1 })] })).attrs).toBe(false);
+  });
+});
+
 describe('emit', () => {
   test('calls the listener as written or in camelCase', () => {
     const onPick = vi.fn<(...args: unknown[]) => void>();

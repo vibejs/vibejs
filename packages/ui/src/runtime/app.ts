@@ -48,7 +48,8 @@ export interface App {
   ): this;
   /**
    * Renders the root component into `container` (an element or a selector), replacing its
-   * content, and returns the root's exposed values once the `mounted` hooks ran.
+   * content, and returns the root's exposed values once the `mounted` hooks ran. Other pending
+   * post-flush work, such as `flush: 'post'` watchers, runs then too, before pending updates.
    */
   mount(container: Element | string): Record<string, unknown>;
   /** Unmounts the root component and removes its nodes, then runs the `onUnmount` callbacks. */

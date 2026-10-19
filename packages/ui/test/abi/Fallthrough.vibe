@@ -5,5 +5,5 @@ defineProps<{ wide?: boolean }>();
 </script>
 
 <template>
-  <Badge :wide="wide" />
+  <Badge :wide="wide" class="mid" style="color: green; font-style: italic" />
 </template>

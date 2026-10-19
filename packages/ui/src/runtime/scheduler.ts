@@ -124,7 +124,9 @@ function flushJobs(): void {
 
 /**
  * Runs the queued post callbacks now, and those they queue, so that `app.mount()` returns after
- * the `mounted` hooks ran. Jobs of the main queue wait for the next flush.
+ * the `mounted` hooks ran. Every pending post callback runs, also those queued before (such as a
+ * `flush: 'post'` watcher of another app), and before the jobs of the main queue, which wait for
+ * the next flush: such a callback may see the DOM before those jobs update it.
  */
 export function flushPostFlushCbs(): void {
   const seen = __DEV__ ? new Map<SchedulerJob, number>() : undefined;

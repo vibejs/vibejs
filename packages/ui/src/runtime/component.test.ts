@@ -358,7 +358,7 @@ describe('fallthrough', () => {
 });
 
 describe('createDynamicComponent', () => {
-  test('throws VIBE5207 for a value that is not a component, in prod too', () => {
+  test('reports VIBE5207 to the error handler for a value that is not a component, in prod too', () => {
     vi.stubGlobal('__DEV__', false);
     const errors: unknown[] = [];
     const app = createApp({
@@ -456,6 +456,45 @@ describe('error routing', () => {
       'watcher cleanup',
       'render effect',
     ]);
+  });
+
+  test('an error of an onErrorCaptured hook goes on up the chain, and so does the original', () => {
+    const captured: string[] = [];
+    const handled: string[] = [];
+    const Parent: ComponentDef = {
+      setup: () => onErrorCaptured(fail('hook')),
+      render: () => [createComponent(failing('setup')), createComponent(element('b', 'sib'))],
+    };
+    const app = createApp({
+      setup: () =>
+        onErrorCaptured<Error>((err, _instance, info) => {
+          captured.push(`${err.message} ${info}`);
+        }),
+      render: () => createComponent(Parent),
+    });
+    app.config.errorHandler = (_err, _instance, info) => handled.push(info);
+    const host = document.createElement('div');
+    app.mount(host);
+    expect(host.innerHTML).toBe('<!----><b>sib</b>');
+    expect(captured).toEqual(['hook errorCaptured hook', 'setup setup function']);
+    expect(handled).toEqual(['errorCaptured hook', 'setup function']);
+  });
+
+  test('an error of the app handler is logged as VIBE5102 and the siblings still render', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const app = createApp({
+      render: () => [createComponent(failing('setup')), createComponent(element('b', 'sib'))],
+    });
+    app.config.errorHandler = fail('handler');
+    const host = document.createElement('div');
+    app.mount(host);
+    expect(host.innerHTML).toBe('<!----><b>sib</b>');
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toMatchObject({
+      code: 'VIBE5102',
+      args: { info: 'config.errorHandler' },
+      cause: new Error('handler'),
+    });
   });
 
   test('without an app handler, an error is logged as VIBE5102 with its info', () => {

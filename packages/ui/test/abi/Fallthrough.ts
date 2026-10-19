@@ -11,6 +11,15 @@ export const Fallthrough: ComponentDef = {
   __file: 'test/abi/Fallthrough.vibe',
   __propKeys: ['wide'],
   render(_$setup, $props: Props) {
-    return createComponent(Badge, { wide: () => $props.wide }, null, true);
+    return createComponent(
+      Badge,
+      {
+        wide: () => $props.wide,
+        class: () => 'mid',
+        style: () => 'color: green; font-style: italic',
+      },
+      null,
+      true,
+    );
   },
 };
