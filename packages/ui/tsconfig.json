@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2022", "dom"] },
-  "exclude": ["${configDir}/src/**/*.integration.test.ts"],
+  "exclude": [
+    "${configDir}/src/**/*.integration.test.ts",
+    "${configDir}/src/virtual",
+    "${configDir}/src/tooling.test-d.ts"
+  ],
   "references": [{ "path": "../errors" }]
 }

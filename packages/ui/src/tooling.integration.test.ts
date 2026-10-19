@@ -43,15 +43,27 @@ it('throws VIBE5900 when dist/tooling.js is imported', async () => {
   );
 });
 
+// Node strips the types of the source entry itself (the `vibejs-source` condition), without a bundler.
+it('throws VIBE5900 when Node imports src/tooling.ts', () => {
+  const { stdout, stderr } = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `globalThis.__DEV__ = true;
+await import('./src/tooling.ts').catch((e) => console.log(e.code));`,
+    ],
+    { cwd: dir, encoding: 'utf8' },
+  );
+  expect(stderr).toBe('');
+  expect(stdout.trim()).toBe('VIBE5900');
+});
+
 it('declares exactly the macros and helpers in dist/tooling.d.ts', () => {
   const dts = readFileSync(join(dir, 'dist/tooling.d.ts'), 'utf8');
   const names = new Set(
     [...dts.matchAll(/^export declare (?:function|const) (\w+)/gm)].map((m) => m[1]),
   );
-  for (const [, list = ''] of dts.matchAll(/^export \{([^}]*)\};$/gm)) {
-    // The exported name is the last word of a specifier: `tags` or `local as tags`.
-    for (const specifier of list.split(',')) names.add(/\w+$/.exec(specifier.trim())?.[0] ?? '');
-  }
   expect([...names].toSorted()).toEqual([...MACROS, ...HELPERS].toSorted());
 });
 

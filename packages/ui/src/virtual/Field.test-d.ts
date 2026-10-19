@@ -1,8 +1,8 @@
-import { ref, type ModelRef } from '@vibejs-org/ui'
+import { ref } from '@vibejs-org/ui'
 defineProps<__VibeProps>()
-const model: ModelRef<string> = defineModel<string>({ required: true })
-const count: ModelRef<number> = defineModel<number>('count', { default: () => 0 })
-const title: ModelRef<string | undefined, 'trim'> = defineModel<string, 'trim'>('title')
+const model = defineModel<string>({ required: true })
+const count = defineModel<number>('count', { default: () => 0 })
+const title = defineModel<string, 'trim'>('title')
 const [, titleModifiers] = title
 const done = ref(false)
 const picked = ref<string[]>([])
@@ -25,6 +25,6 @@ type __VibeModels = {
   count?: (typeof count)['value']; 'onUpdate:count'?: (value: (typeof count)['value']) => void; countModifiers?: (typeof count)[1]
   title?: (typeof title)['value']; 'onUpdate:title'?: (value: (typeof title)['value']) => void; titleModifiers?: (typeof title)[1]
 }
-export const Field: ReturnType<typeof __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>> = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
+export const Field = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
 import * as __vibe from '@vibejs-org/ui/tooling'
 import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@vibejs-org/ui/tooling'

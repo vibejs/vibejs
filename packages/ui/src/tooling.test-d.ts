@@ -1,9 +1,9 @@
 // oxlint-disable eslint/no-underscore-dangle, eslint/no-unused-vars, typescript/no-empty-object-type, typescript/no-generated-empty-object-type, typescript/no-explicit-any -- the names, `$event` parameters, empty records and `Component<any>` of the virtual code
 // Type tests of the tooling contract. The modules in ./virtual are the Layout A virtual code of
-// five .vibe files, written as the language tools emit it, with three deviations: the component is
-// a named export, `.vibe` imports point at the sibling `.test-d.ts`, and the type annotations that
-// isolatedDeclarations needs (on the export and on `__vibe_exposed`). The blocks below copy their
-// code to assert types inside it and to seed user mistakes.
+// five .vibe files, written as the language tools emit it, with two deviations: the component is a
+// named export, and `.vibe` imports point at the sibling `.test-d.ts`. They and this file are
+// checked by tsconfig.virtual.json, without isolatedDeclarations. The blocks below copy their code
+// to assert types inside it and to seed user mistakes.
 import { expectTypeOf } from 'vitest';
 import type {
   Component,

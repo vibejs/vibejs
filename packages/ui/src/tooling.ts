@@ -60,13 +60,15 @@ export declare function defineOptions(o: { name?: string; inheritAttrs?: boolean
 
 // Helpers of the virtual code
 
-/** The attributes and event handlers of each intrinsic element. */
-declare const tags: {
+type Tags = {
   readonly [K in keyof IntrinsicElementAttributes]: IntrinsicElementAttributes[K] &
     EventHandlers<Events>;
 };
-// A separate export: the declaration bundler drops the type imports of `export declare const`.
-export { tags };
+// Not `export declare const`: the declaration emitter drops the types that an ambient variable
+// references, and Node's type stripping keeps the `export { tags }` of a local `declare const`.
+/** The attributes and event handlers of each intrinsic element. */
+// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the module throws before any read
+export const tags: Tags = undefined as never;
 /** Checks the attributes of an intrinsic element: `el(tags.div)({ id: e })`. */
 export declare function el<A>(attrs: A): (props: A & ReservedProps) => void;
 /** Accepts any attribute of a custom element; `on*` handlers receive an `Event`. */

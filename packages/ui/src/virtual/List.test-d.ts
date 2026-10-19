@@ -24,6 +24,6 @@ const __vibe_setup = { Row, items, title, emit, user, open, current, clicks, gre
   var __vibe_c1 = __vibe.dynamicComponent(current)({ title: title });
 }
 type __VibeSlots = {}; type __VibeExposed = {}; type __VibeRefs = {}; type __VibeModels = {}
-export const List: ReturnType<typeof __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>> = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
+export const List = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
 import * as __vibe from '@vibejs-org/ui/tooling'
 import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@vibejs-org/ui/tooling'
