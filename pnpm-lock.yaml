@@ -410,6 +410,9 @@ importers:
 
   packages/server:
     dependencies:
+      '@vibejs-org/contract':
+        specifier: workspace:*
+        version: link:../contract
       '@vibejs-org/errors':
         specifier: workspace:*
         version: link:../errors
@@ -417,6 +420,9 @@ importers:
       tsdown:
         specifier: 'catalog:'
         version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(typescript@7.0.2)
+      valibot:
+        specifier: 'catalog:'
+        version: 1.5.0(typescript@7.0.2)
 
   packages/ui:
     dependencies:

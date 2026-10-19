@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2024"], "types": ["node"], "experimentalDecorators": true },
-  "references": [{ "path": "../errors" }]
+  "references": [{ "path": "../contract" }, { "path": "../errors" }]
 }

@@ -157,6 +157,12 @@ export function get<T>(scope: Scope, token: Token<T>): T {
   return resolveSync(rec as Rec, []) as T;
 }
 
+/** The built value of `record`, for records that no scope finds (controllers, enhancers, modules). */
+export function recordValue(record: ProviderRecord): unknown {
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- providerRecord() creates every record
+  return (record as Rec).value;
+}
+
 function missing(scope: Scope, token: Token<unknown>, chain: readonly Rec[]) {
   const names = [...chain.map(name), tokenName(token)];
   return vibeError('VIBE9102', {
