@@ -10,6 +10,7 @@ import {
   readFileSync,
   realpathSync,
   renameSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
@@ -27,8 +28,8 @@ import { parseArgs } from 'node:util';
  * @property {(s: string) => void} stdout
  * @property {(s: string) => void} stderr
  * @property {(question: string) => Promise<string>} prompt
- * @property {(command: string, cwd: string) => Promise<{ ok: boolean; output: string }>} exec
- *   Runs a shell command and captures its output.
+ * @property {(command: string, cwd: string, capture: boolean) => Promise<{ ok: boolean; output: string }>} exec
+ *   Runs a shell command; with `capture` it returns the output, otherwise the output is inherited.
  * @property {string} templateDir
  * @property {string} agentsDir
  * @property {string} version
@@ -58,7 +59,7 @@ export const EXEC = {
  */
 export const MESSAGES = {
   VIBE8101: [
-    '`{dir}` is not empty; create-vibejs writes a new project only into an empty or missing directory.',
+    '`{dir}` is not an empty directory; create-vibejs writes a new project only into an empty or missing directory.',
     [
       'Pass the name of a new directory, as in `npm create vibejs@latest my-app`.',
       'Empty `{dir}` first if it holds nothing you need.',
@@ -153,7 +154,9 @@ export async function main(argv, ctx) {
   const target = resolve(ctx.cwd, dir);
   const name = basename(target);
   if (!NAME.test(name) || name.length > 214) return fail('VIBE8102', { name });
-  if (existsSync(target) && readdirSync(target).length) return fail('VIBE8101', { dir });
+  if (existsSync(target) && (!statSync(target).isDirectory() || readdirSync(target).length)) {
+    return fail('VIBE8101', { dir });
+  }
 
   cpSync(ctx.templateDir, target, { recursive: true });
   renameSync(join(target, '_gitignore'), join(target, '.gitignore'));
@@ -171,15 +174,16 @@ export async function main(argv, ctx) {
 
   const install = `${pm} install`;
   const run = [`${pm} run dev`, `${pm} run check`];
-  const next = [`cd ${dir}`, ...(values.install ? run : [install, ...run])];
+  const cd = `cd ${/\s/.test(dir) ? JSON.stringify(dir) : dir}`;
+  const next = [cd, ...(values.install ? run : [install, ...run])];
   if (values.install) {
     if (!agent) ctx.stdout(`Installing the dependencies with ${pm}...\n`);
-    const r = await ctx.exec(install, target);
+    // Agent mode captures the output to keep stdout one JSON object; a person sees it live.
+    const r = await ctx.exec(install, target, agent);
     if (!r.ok) {
       ctx.stderr(r.output);
-      return fail('VIBE8103', { command: install, dir }, { next: [`cd ${dir}`, install] });
+      return fail('VIBE8103', { command: install, dir }, { next: [cd, install] });
     }
-    if (!agent) ctx.stdout(r.output);
   }
   if (agent) {
     ctx.stdout(`${JSON.stringify({ ...base, next, dir, pm, installed: values.install })}\n`);
@@ -209,13 +213,13 @@ export function nodeCtx(proc = process) {
         rl.close();
       }
     },
-    exec: (command, cwd) =>
+    exec: (command, cwd, capture) =>
       new Promise((done) => {
         // A shell finds npm.cmd and the other Windows shims; the command is fixed text.
-        const child = spawn(command, { cwd, shell: true });
+        const child = spawn(command, { cwd, shell: true, stdio: capture ? 'pipe' : 'inherit' });
         let output = '';
-        child.stdout.on('data', (chunk) => (output += chunk));
-        child.stderr.on('data', (chunk) => (output += chunk));
+        child.stdout?.on('data', (chunk) => (output += chunk));
+        child.stderr?.on('data', (chunk) => (output += chunk));
         child.on('close', (code) => done({ ok: code === 0, output }));
       }),
     templateDir: fileURLToPath(new URL('templates/fullstack', import.meta.url)),

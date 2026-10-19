@@ -181,7 +181,7 @@ describe('pnpm', () => {
 
 describe('npm', () => {
   it(
-    'installs with npm and passes check',
+    'installs with npm, passes check and keeps the agent files current',
     () => {
       const app = scaffold('npm');
       const file = join(app, 'package.json');
@@ -199,6 +199,10 @@ describe('npm', () => {
       const check = vibejs(app, 'check', '--json');
       expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, diagnostics: [] });
       expect(check.status).toBe(0);
+      expect(vibejs(app, 'agents', 'sync', '--check', '--json').status).toBe(0);
+      expect(readFileSync(join(app, 'AGENTS.md'), 'utf8')).toContain(
+        '`npx --no vibejs check --json`',
+      );
     },
     2 * INSTALL,
   );

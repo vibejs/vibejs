@@ -1,8 +1,8 @@
 # create-vibejs
 
-## VIBE8101: Target directory not empty
+## VIBE8101: Target not an empty directory
 
-> `{dir}` is not empty; create-vibejs writes a new project only into an empty or missing directory.
+> `{dir}` is not an empty directory; create-vibejs writes a new project only into an empty or missing directory.
 
 The scaffolder never overwrites or merges files, so an existing project is never changed by accident.
 

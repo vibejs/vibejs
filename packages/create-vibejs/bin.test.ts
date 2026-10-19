@@ -120,6 +120,17 @@ describe('agent mode', () => {
     expect(files('app')).toEqual(['keep.txt']);
   });
 
+  it('rejects an existing file with VIBE8101', async () => {
+    writeFileSync(join(cwd, 'app'), 'x');
+    const t = setup();
+    expect(await main(['app'], t.ctx)).toBe(2);
+    expect(t.json().error).toMatchObject({
+      code: 'VIBE8101',
+      message: expect.stringMatching(/^`app` is not an empty directory;/),
+    });
+    expect(read('app')).toBe('x');
+  });
+
   it.each(['My App', '.app', 'App', 'x'.repeat(215)])('rejects %j with VIBE8102', async (dir) => {
     const t = setup();
     expect(await main([dir], t.ctx)).toBe(2);
@@ -139,7 +150,7 @@ describe('agent mode', () => {
       pm: 'pnpm',
       installed: true,
     });
-    expect(t.ctx.exec).toHaveBeenCalledExactlyOnceWith('pnpm install', join(cwd, 'apps/web'));
+    expect(t.ctx.exec).toHaveBeenCalledExactlyOnceWith('pnpm install', join(cwd, 'apps/web'), true);
     // The install output is captured: stdout carries only the JSON object.
     expect(t.out).toHaveLength(1);
     expect(t.err).toEqual([]);
@@ -191,6 +202,15 @@ describe('agent mode', () => {
     expect(t.err).toEqual(['install output\n']);
     expect(existsSync(join(cwd, 'app/package.json'))).toBe(true);
   });
+
+  it('quotes a directory with whitespace in the cd step', async () => {
+    const t = setup({ install: false });
+    expect(await main(['sub dir/app'], t.ctx)).toBe(1);
+    expect(t.json().next).toEqual(['cd "sub dir/app"', 'npm install']);
+    const ok = setup();
+    expect(await main(['sub dir/web'], ok.ctx)).toBe(0);
+    expect(ok.json().next[0]).toBe('cd "sub dir/web"');
+  });
 });
 
 describe('package manager', () => {
@@ -209,15 +229,26 @@ describe('package manager', () => {
     expect(t.json().pm).toBe(pm);
     expect(read('app/AGENTS.md')).toContain(`Run \`${EXEC[pm]} check --json\`.`);
   });
+
+  it('runs the CLI with the execPrefix table of @vibejs-org/cli', () => {
+    // Keep in sync with execPrefix in packages/cli/src/agents.ts (its test pins the same values).
+    expect(EXEC).toEqual({
+      pnpm: 'pnpm exec vibejs',
+      npm: 'npx --no vibejs',
+      yarn: 'yarn vibejs',
+      bun: 'npx --no vibejs',
+    });
+  });
 });
 
 describe('human mode', () => {
-  it('prompts once for the directory and prints the install output and next steps', async () => {
+  it('prompts once for the directory, installs with live output and prints next steps', async () => {
     const t = setup({ agent: false, answer: ' my-app ' });
     expect(await main([], t.ctx)).toBe(0);
     expect(t.ctx.prompt).toHaveBeenCalledExactlyOnceWith('Project directory (vibejs-app): ');
+    expect(t.ctx.exec).toHaveBeenCalledExactlyOnceWith('npm install', join(cwd, 'my-app'), false);
     expect(t.out.join('')).toBe(
-      'Installing the dependencies with npm...\ninstall output\nCreated my-app. Next:\n  cd my-app\n  npm run dev\n  npm run check\n',
+      'Installing the dependencies with npm...\nCreated my-app. Next:\n  cd my-app\n  npm run dev\n  npm run check\n',
     );
     expect(existsSync(join(cwd, 'my-app/package.json'))).toBe(true);
   });
@@ -300,9 +331,21 @@ describe('nodeCtx', () => {
     const { exec } = nodeCtx(proc());
     const node = JSON.stringify(process.execPath);
     expect(
-      await exec(`${node} -e "process.stdout.write('a'); process.stderr.write('b')"`, cwd),
+      await exec(`${node} -e "process.stdout.write('a'); process.stderr.write('b')"`, cwd, true),
     ).toEqual({ ok: true, output: 'ab' });
-    expect(await exec(`${node} -e "process.exit(3)"`, cwd)).toEqual({ ok: false, output: '' });
+    expect(await exec(`${node} -e "process.exit(3)"`, cwd, true)).toEqual({
+      ok: false,
+      output: '',
+    });
+  });
+
+  it('runs a shell command with inherited output', async () => {
+    const { exec } = nodeCtx(proc());
+    const node = JSON.stringify(process.execPath);
+    expect(await exec(`${node} -e "process.exit(0)"`, cwd, false)).toEqual({
+      ok: true,
+      output: '',
+    });
   });
 
   it('runs main when bin.js is the main script', async () => {

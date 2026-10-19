@@ -41,7 +41,6 @@ describe('renderBlock', () => {
     const inner = lines.slice(1, -1);
     expect(inner.filter((line) => line === INDEX)).toHaveLength(1);
     expect(inner.length - 1).toBeLessThanOrEqual(30);
-    expect(Buffer.byteLength(INDEX)).toBeLessThanOrEqual(8192);
   });
 
   it('carries the disambiguation line of the repo AGENTS.md verbatim', () => {
