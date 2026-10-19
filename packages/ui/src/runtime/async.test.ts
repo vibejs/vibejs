@@ -82,9 +82,11 @@ describe('useAsync', () => {
     const state = scope.run(() => useAsync(fn))!;
     scope.stop();
     expect(runs[0].signal.aborted).toBe(true);
-    runs[0].reject(abortError());
+    runs[0].reject(new Error('late'));
     await flushPromises();
+    expect(state.data.value).toBeUndefined();
     expect(state.error.value).toBeUndefined();
+    expect(state.loading.value).toBe(true);
   });
 
   it('leaves error undefined when an aborted run rejects with an AbortError', async () => {
@@ -150,6 +152,17 @@ describe('useAsync', () => {
     runs[1].reject(new Error('boom'));
     await done;
     expect(refreshed).toBe(true);
+  });
+
+  it('refresh() resolves after a successful run has updated data', async () => {
+    const { runs, fn } = deferredRuns<string>();
+    const { result } = mountComposable(() => useAsync(fn));
+    runs[0].resolve('first');
+    const done = result.refresh();
+    await nextTick();
+    runs[1].resolve('second');
+    await done;
+    expect(result.data.value).toBe('second');
   });
 
   it('refresh() resolves when its run is superseded or the owner stops', async () => {
