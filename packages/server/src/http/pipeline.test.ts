@@ -159,6 +159,25 @@ describe('run order', () => {
     ]);
   });
 
+  it('falls through method and class filters to the global filter', async () => {
+    const fall = defineContract('/fall', { fail: get('/') });
+    class Last extends OnClass {}
+    @Controller(fall)
+    @UseFilters(Global)
+    class FallController {
+      @Handle(fall.fail)
+      @UseFilters(OnMethod)
+      fail(): void {
+        throw new Error('boom');
+      }
+    }
+    @Module({ controllers: [FallController] })
+    class FallModule {}
+    const { app } = await create(FallModule, { filters: [Last] });
+    expect(await (await app.request('/fall')).json()).toEqual({ handled: 'Last' });
+    expect(order).toEqual(['filter OnMethod', 'filter Global', 'filter Last']);
+  });
+
   it('inspects enhancers in the same run order', async () => {
     const { app } = await create(OrderModule, options);
     expect(app.inspect().routes[0]).toMatchObject({
@@ -262,6 +281,7 @@ describe('interceptors', () => {
     mapped: get('/mapped', { response: v.unknown() }),
     cached: get('/cached', { response: v.number() }),
     rescued: get('/rescued', { response: v.string() }),
+    retried: post('/retried', { body: v.object({ n: v.number() }), response: v.number() }),
   });
   class Envelope implements Interceptor {
     async intercept(_ctx: RequestContext, next: () => Promise<unknown>): Promise<unknown> {
@@ -282,6 +302,12 @@ describe('interceptors', () => {
       }
     }
   }
+  class Twice implements Interceptor {
+    async intercept(_ctx: RequestContext, next: () => Promise<unknown>): Promise<unknown> {
+      await next();
+      return next();
+    }
+  }
   @Controller(contract)
   class WrapController {
     @Handle(contract.mapped)
@@ -300,6 +326,12 @@ describe('interceptors', () => {
     rescued(): string {
       throw new Error('boom');
     }
+    @Handle(contract.retried)
+    @UseInterceptors(Twice)
+    retried(ctx: Ctx<typeof contract.retried>): number {
+      order.push('handler');
+      return ctx.body.n;
+    }
   }
   @Module({ controllers: [WrapController] })
   class WrapModule {}
@@ -313,6 +345,14 @@ describe('interceptors', () => {
     const { app } = await create(WrapModule);
     expect(await (await app.request('/wrap/cached')).json()).toBe(42);
     expect(order).toEqual([]);
+  });
+
+  it('reads and validates the body once when next() runs twice', async () => {
+    const { app, lines } = await create(WrapModule);
+    const res = await app.request('/wrap/retried', { method: 'POST', json: { n: 7 } });
+    expect(await res.json()).toBe(7);
+    expect(order).toEqual(['handler', 'handler']);
+    expect(lines).toEqual([]);
   });
 
   it('turns a handler error into a success', async () => {
@@ -525,6 +565,7 @@ describe('response building', () => {
     }
     @Handle(contract.bad)
     bad(ctx: Ctx<typeof contract.bad>): unknown {
+      if (ctx.req.headers.has('x-null')) return Object.create(null);
       return ctx.req.headers.has('x-number') ? 5 : { rows: [] };
     }
     @Handle(contract.count)
@@ -587,13 +628,16 @@ describe('response building', () => {
     expect(res.status).toBe(500);
     expect(await res.json()).toMatchObject({ code: 'INTERNAL_ERROR' });
     await app.request('/out/bad', { headers: { 'x-number': '1' } });
+    await app.request('/out/bad', { headers: { 'x-null': '1' } });
     expect(lines).toMatchObject([
       { level: 'error', code: 'VIBE9505', cause: { code: 'VIBE9505' } },
+      { level: 'error', code: 'VIBE9505' },
       { level: 'error', code: 'VIBE9505' },
     ]);
     expect(lines[0].msg).toContain('GET /out/bad');
     expect(lines[0].msg).toContain('Object');
     expect(lines[1].msg).toContain('number');
+    expect(lines[2].msg).toContain('Object');
   });
 
   it('keeps the headers and drops the body for HEAD on a raw route', async () => {
@@ -666,7 +710,7 @@ describe('errors and filters', () => {
     fail(ctx: Ctx<typeof contract.fail>): void {
       const code = ctx.req.headers.get('x-code');
       if (code === 'DECLARED') ctx.fail('DECLARED');
-      if (code) throw new HttpError(409, code);
+      if (code) throw new HttpError(Number(ctx.req.headers.get('x-status') ?? 409), code);
       throw new Error('secret detail', { cause: new Error('secret cause') });
     }
   }
@@ -729,6 +773,13 @@ describe('errors and filters', () => {
     ]);
     expect(lines[0].msg).toContain('GET /err/fail');
     expect(lines[0].msg).toContain('UNKNOWN');
+  });
+
+  it('logs only VIBE9503 for an undeclared code with a status outside 400-599', async () => {
+    const { res, lines } = await send({ 'x-code': 'UNKNOWN', 'x-status': '600' });
+    expect(res.status).toBe(500);
+    expect(lines).toMatchObject([{ level: 'error', code: 'VIBE9503' }]);
+    expect(lines).toHaveLength(1);
   });
 
   it.each(['DECLARED', 'FORBIDDEN'])('logs nothing for the code %s', async (code) => {

@@ -5,7 +5,7 @@ import { vibeError } from '../errors.gen.ts';
 import type { RouteBinding } from '../module/graph.ts';
 import { readJson } from './body.ts';
 import type { CanActivate, ExceptionFilter, Interceptor, RequestContext } from './context.ts';
-import { HttpError, renderError } from './errors.ts';
+import { HttpError, isClientVisible, renderError } from './errors.ts';
 
 // The server builds against the Node types, which have no global `BodyInit`.
 type BodyInit = NonNullable<RequestInit['body']>;
@@ -101,7 +101,8 @@ export function createPipeline(
     return query;
   }
 
-  async function core(ctx: RequestContext): Promise<unknown> {
+  /** Reads and validates the inputs into `ctx`; runs once per request. */
+  async function validate(ctx: RequestContext): Promise<void> {
     const { req, url } = ctx;
     const inputs = {
       params: ctx.params,
@@ -129,7 +130,6 @@ export function createPipeline(
     if (errors.length > 0) throw new HttpError(400, 'VALIDATION_FAILED', undefined, { errors });
     if ('params' in validated) validated.params = { ...ctx.params, ...Object(validated.params) };
     Object.assign(ctx, validated);
-    return Reflect.apply(Object(handler), controller, [ctx]);
   }
 
   async function respond(value: unknown): Promise<Response> {
@@ -138,7 +138,10 @@ export function createPipeline(
     if (!response) return new Response(null, { status: status ?? 204 });
     if (!('~standard' in response)) {
       if (!isBodyInit(value)) {
-        const type = typeof value === 'object' && value ? value.constructor.name : typeof value;
+        const type =
+          typeof value === 'object' && value
+            ? (Object.getPrototypeOf(value)?.constructor?.name ?? 'Object')
+            : typeof value;
         throw vibeError('VIBE9505', { route, type });
       }
       const headers = { 'content-type': response.contentType };
@@ -169,7 +172,7 @@ export function createPipeline(
     if (result instanceof Response) return result;
     const final = result ?? error;
     if (
-      final instanceof HttpError &&
+      isClientVisible(final) &&
       !BUILTIN.has(final.code) &&
       !Object.hasOwn(def.errors ?? {}, final.code)
     ) {
@@ -184,8 +187,14 @@ export function createPipeline(
       for (const guard of guards) {
         if (!(await guard.canActivate(ctx))) throw new HttpError(403, 'FORBIDDEN');
       }
+      // An interceptor may call next() more than once; the body stream can be read only once.
+      let inputs: Promise<void> | undefined;
+      const core = async () => {
+        await (inputs ??= validate(ctx));
+        return Reflect.apply(Object(handler), controller, [ctx]);
+      };
       const run = (i: number): Promise<unknown> =>
-        i === interceptors.length ? core(ctx) : interceptors[i].intercept(ctx, () => run(i + 1));
+        i === interceptors.length ? core() : interceptors[i].intercept(ctx, () => run(i + 1));
       return await respond(await run(0));
     } catch (error) {
       return handleError(error, ctx);

@@ -55,13 +55,19 @@ export function problem(error: HttpError, requestId: string): Response {
   return res;
 }
 
+/** Whether `error` is an `HttpError` with an integer status in 400-599, sent as its own problem. */
+export const isClientVisible = (error: unknown): error is HttpError =>
+  error instanceof HttpError &&
+  Number.isInteger(error.status) &&
+  error.status >= 400 &&
+  error.status <= 599;
+
 /**
  * The problem of an `HttpError` with an integer status in 400-599; anything else is logged, a
  * `VibeError` under its own code and any other error as VIBE9503, and answered with a 500.
  */
 export function renderError(error: unknown, requestId: string, log: Logger): Response {
-  const valid = error instanceof HttpError && Number.isInteger(error.status);
-  if (valid && error.status >= 400 && error.status <= 599) return problem(error, requestId);
+  if (isClientVisible(error)) return problem(error, requestId);
   const { message, code } = isVibeError(error)
     ? error
     : vibeError('VIBE9503', undefined, { cause: error });
