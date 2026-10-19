@@ -19,11 +19,13 @@ const __vibe_setup = { Comp, setEl };
   __vibe.el(__vibe.tags.svg)({ });
     __vibe.el(__vibe.tags.circle)({ });
   __vibe.customElement({ });
+  var __vibe_s0 = ({ });
+    __vibe.el(__vibe.tags.p)({ });
   __vibe.el(__vibe.tags.p)({ ref: setEl });
 }
-type __VibeSlots = {};
+type __VibeSlots = { default?: (props: typeof __vibe_s0) => unknown };
 type __VibeExposed = {};
-type __VibeRefs = { input: HTMLElementTagNameMap extends Record<'input', infer E> ? E : Element; comp: ReturnType<typeof __vibe.unrefs<{ c: typeof Comp }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown; rows: (ReturnType<typeof __vibe.unrefs<{ c: typeof Comp }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown)[]; circle: SVGElementTagNameMap extends Record<'circle', infer E> ? E : Element; widget: HTMLElementTagNameMap extends Record<'x-widget', infer E> ? E : Element; slotted: unknown };
+type __VibeRefs = { input: HTMLElementTagNameMap extends Record<'input', infer E> ? E : Element; comp: ReturnType<typeof __vibe.unrefs<{ c: typeof Comp }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown; rows: (ReturnType<typeof __vibe.unrefs<{ c: typeof Comp }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown)[]; circle: SVGElementTagNameMap extends Record<'circle', infer E> ? E : Element; widget: HTMLElementTagNameMap extends Record<'x-widget', infer E> ? E : Element; slotted: HTMLElementTagNameMap extends Record<'p', infer E> ? E : Element };
 type __VibeModels = {};
 export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();
 import * as __vibe from '@vibejs-org/ui/tooling';

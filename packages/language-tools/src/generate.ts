@@ -33,6 +33,8 @@ export function generate(fileName: string, text: string): GeneratedFile {
   const { descriptor, diagnostics } = parse(text, { filename: fileName });
   const analysis = analyzeScript(descriptor);
   const b = new CodeBuilder(text);
+  const file = /[^/\\]*$/.exec(fileName)![0];
+  const own = file.replace(/\.vibe$/, '');
   const exposed = script(b, descriptor, analysis);
 
   const setup = setupBindings(analysis);
@@ -51,12 +53,16 @@ export function generate(fileName: string, text: string): GeneratedFile {
     names,
     source: text,
     depth: 1,
-    // A tag that resolves to no binding is the file itself.
-    self: (tag) =>
-      !setup.has(tag.split('.')[0]) &&
-      !ctx.has(tag.split('.')[0]) &&
-      resolveComponentTag(tag, analysis, fileName) !== null,
+    own:
+      setup.has(own) || ctx.has(own)
+        ? undefined
+        : (resolveComponentTag(own, analysis, fileName) ?? undefined),
+    ownUsed: false,
     handles: 0,
+    outlets: analysis.macros.slots ? undefined : new Map(),
+    slots: 0,
+    inSelf: 0,
+    forwarded: new Set(),
     refs: new Map(),
     loops: 0,
   };
@@ -102,7 +108,15 @@ export function generate(fileName: string, text: string): GeneratedFile {
     const modifiers = name === 'modelValue' ? 'modelModifiers' : `${name}Modifiers`;
     return `${key(name)}${required ? '' : '?'}: ${value}; ${key(`onUpdate:${name}`)}?: (value: ${value}) => void; ${key(modifiers)}?: (typeof ${binding})[1]`;
   });
-  b.add('type __VibeSlots = {};\n');
+  if (w.outlets) {
+    const slots = [...w.outlets].map(([name, all]) => {
+      // ponytail: a name with only forwarded outlets keeps them, and so its cycle.
+      const direct = all.filter((k) => !w.forwarded.has(k));
+      const ks = direct.length > 0 ? direct : all;
+      return `${key(name)}?: (props: ${ks.map((k) => `typeof __vibe_s${k}`).join(' | ')}) => unknown`;
+    });
+    b.add(`type __VibeSlots = ${members(slots)};\n`);
+  }
   b.add(`type __VibeExposed = ${exposed ? 'typeof __vibe_exposed' : '{}'};\n`);
   b.add(`type __VibeRefs = ${members(refs)};\ntype __VibeModels = ${members(models)};\n`);
   b.atom(
@@ -112,6 +126,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
     Preset.ANCHOR,
   );
   b.add("\nimport * as __vibe from '@vibejs-org/ui/tooling';\n");
+  if (w.ownUsed) b.add(`import __vibe_self from ${JSON.stringify(`./${file}`)};\n`);
   const content = descriptor.scriptSetup?.content ?? '';
   const macros = new Set([...content.matchAll(MACROS)].map((m) => m[1]).filter(Boolean));
   if (macros.size > 0)

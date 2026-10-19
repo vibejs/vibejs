@@ -27,10 +27,23 @@ export interface Walk {
   names: Names;
   source: string;
   depth: number;
-  /** Whether a component tag names the file itself: it stays untyped until slots are typed. */
-  self: (tag: string) => boolean;
+  /** The file's own component name when no binding shadows it: that tag types through the file. */
+  own: string | undefined;
+  /** Whether a tag named the file itself. */
+  ownUsed: boolean;
   /** The number of component handles (`__vibe_cN`) emitted so far. */
   handles: number;
+  /** The inferred `<slot>` outlets: name -> their `__vibe_sK` numbers; undefined with `defineSlots`. */
+  outlets: Map<string, number[]> | undefined;
+  /** The number of inferred outlets (`__vibe_sK`) emitted so far. */
+  slots: number;
+  /** The number of self tags whose slot content is being walked. */
+  inSelf: number;
+  /**
+   * The inferred outlets inside the slot content of a self tag. They forward the file's own slots,
+   * so they stay out of `__VibeSlots`: their props would read `__VibeSlots` itself (a type cycle).
+   */
+  forwarded: Set<number>;
   /** The `ref="key"` targets: key -> type. */
   refs: Map<string, string>;
   /** The number of `v-for` loops around the current element. */
@@ -39,8 +52,8 @@ export interface Walk {
 
 type Locals = ReadonlySet<string>;
 type Prop = AttributeNode | DirectiveNode;
-/** How an element is checked: an intrinsic, a custom element, a component or `<component :is>`. */
-type Kind = 'el' | 'custom' | 'component' | 'dynamic';
+/** How an element is checked: an intrinsic, a custom element, a component, `<component :is>` or a `<slot>` outlet. */
+type Kind = 'el' | 'custom' | 'component' | 'dynamic' | 'slot';
 
 const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
 const STRUCTURE = new Set(['if', 'else-if', 'else', 'for', 'slot']);
@@ -77,16 +90,32 @@ const staticKey = (p: Prop) =>
       ? p.arg.content
       : undefined;
 
-/** Typed: elements, components and `<template v-if/v-for>` fragments; not slots or the file itself. */
-const typed = (el: ElementNode, w: Walk) =>
-  el.tagType === ElementTypes.TEMPLATE
-    ? !directive(el, 'slot')
-    : el.tagType === ElementTypes.COMPONENT
-      ? !w.self(el.tag)
-      : el.tagType === ElementTypes.ELEMENT && el.tag !== 'template';
+/** A `<template v-slot>`: the slot content of the component around it. */
+const slotTemplate = (node: TemplateChildNode) =>
+  node.type === NodeTypes.ELEMENT &&
+  node.tagType === ElementTypes.TEMPLATE &&
+  directive(node, 'slot') !== undefined;
 
-/** Emits the template children as statements, with `v-if` chains as `if`/`else` statements. */
-export function children(nodes: TemplateChildNode[], w: Walk, locals: Locals): void {
+/**
+ * Emits the template children as statements, with `v-if` chains as `if`/`else` statements. `owner`
+ * is the handle of the component whose slot templates these are.
+ */
+export function children(
+  nodes: TemplateChildNode[],
+  w: Walk,
+  locals: Locals,
+  owner?: number,
+): void {
+  // A plain `<template>`, and a slot template outside a component, with a dynamic name or with
+  // `v-for` (compiler errors) are untyped.
+  const visit = (node: ElementNode) => {
+    const slot = slotTemplate(node) ? directive(node, 'slot')! : undefined;
+    if (slot && owner !== undefined && slot.arg?.isStatic !== false && !directive(node, 'for')) {
+      slotBlock(w, owner, slot, nameRange(slot), node.children, locals);
+    } else if (slot || (node.tagType === ElementTypes.ELEMENT && node.tag === 'template')) {
+      untyped(node, w);
+    } else element(node, w, locals);
+  };
   // Whether the last emitted statement is an `if` that a `v-else(-if)` continues.
   let chain = false;
   for (const node of nodes) {
@@ -109,13 +138,11 @@ export function children(nodes: TemplateChildNode[], w: Walk, locals: Locals): v
       } else w.b.add('{');
       chain = exp !== undefined;
       // An untyped branch keeps its condition, so the rest of the chain still narrows.
-      if (typed(node, w)) block(w, () => element(node, w, locals));
-      else untyped(node, w);
+      block(w, () => visit(node));
       line(w, '}');
     } else {
       chain = false;
-      if (typed(node, w)) element(node, w, locals);
-      else untyped(node, w);
+      visit(node);
     }
   }
 }
@@ -125,6 +152,57 @@ function block(w: Walk, body: () => void): void {
   w.depth++;
   body();
   w.depth--;
+}
+
+/**
+ * `{ const [params] = __vibe.slotParams(__vibe_cN.slots.name); … }`: slot content, with the slot
+ * props as locals. Without an argument the slot is `default`, mapped to `at`.
+ */
+function slotBlock(
+  w: Walk,
+  owner: number,
+  dir: DirectiveNode | undefined,
+  at: [number, number],
+  nodes: TemplateChildNode[],
+  outer: Locals,
+): void {
+  const { b } = w;
+  const locals = new Set(outer);
+  line(w, '{');
+  block(w, () => {
+    line(w);
+    const params = filled(dir?.exp);
+    if (params) {
+      b.add('const [');
+      expression(b, w.names, w.source, range(params), outer, { pattern: true });
+      for (const name of aliasNames(w.source, range(params))) locals.add(name);
+      b.add('] = ');
+    }
+    b.add(`__vibe.slotParams(__vibe_c${owner}.slots`);
+    const arg = dir?.arg;
+    const name = arg?.content ?? 'default';
+    const text = key(name);
+    b.add(text === name ? '.' : '[');
+    if (arg && text === name) b.verbatim(...range(arg), Preset.BOUND);
+    else b.atom(text, ...(arg ? range(arg) : at), arg ? Preset.BOUND : Preset.NONE);
+    b.add(text === name ? ');' : ']);');
+    children(nodes, w, locals);
+  });
+  line(w, '}');
+}
+
+/** Slot content other than whitespace and comments. */
+const content = (node: TemplateChildNode) =>
+  node.type !== NodeTypes.COMMENT && (node.type !== NodeTypes.TEXT || node.content.trim());
+
+/** The slot content of a component: its slot templates, then the implicit default children. */
+function slots(el: ElementNode, w: Walk, locals: Locals, tag: [number, number]): void {
+  const owner = w.handles - 1;
+  const own = directive(el, 'slot');
+  if (own) return slotBlock(w, owner, own, tag, el.children, locals);
+  children(el.children.filter(slotTemplate), w, locals, owner);
+  const rest = el.children.filter((node) => !slotTemplate(node));
+  if (rest.some(content)) slotBlock(w, owner, undefined, tag, rest, locals);
 }
 
 /** The refs of an untyped subtree are `unknown`, so their `useTemplateRef` never fails. */
@@ -179,9 +257,10 @@ interface Props {
 }
 
 /**
- * `__vibe.el(__vibe.tags.div)({ … });`, `__vibe.customElement({ … });` or
- * `var __vibe_cN = __vibe.component(C)({ … });`, then the children; a fragment emits only its
- * children.
+ * `__vibe.el(__vibe.tags.div)({ … });`, `__vibe.customElement({ … });`,
+ * `var __vibe_cN = __vibe.component(C)({ … });` or a `<slot>` outlet (`var __vibe_sK = ({ … });`,
+ * or `__vibe.slot<__VibeSlots, 'name'>()({ … });` with `defineSlots`), then the children; a
+ * fragment emits only its children.
  */
 function emit(el: ElementNode, w: Walk, locals: Locals): void {
   const { b } = w;
@@ -203,15 +282,37 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
       ? 'dynamic'
       : el.tagType === ElementTypes.COMPONENT
         ? 'component'
-        : el.tag.includes('-')
-          ? 'custom'
-          : 'el';
+        : el.tagType === ElementTypes.SLOT
+          ? 'slot'
+          : el.tag.includes('-')
+            ? 'custom'
+            : 'el';
   const is = kind === 'dynamic' ? el.props.find((p) => staticKey(p) === 'is') : undefined;
+  // An outlet's `name` is its slot, not one of its props.
+  const outletName = kind === 'slot' ? findAttr(el, 'name') : undefined;
   if (kind === 'el') line(w, '__vibe.el(__vibe.tags.').atom(el.tag, ...tag, Preset.BOUND);
   else if (kind === 'custom') line(w, '__vibe.customElement(');
-  else {
+  else if (kind === 'slot') {
+    const slot = outletName?.value?.content ?? 'default';
+    if (w.outlets) {
+      const k = w.slots++;
+      if (w.inSelf > 0) w.forwarded.add(k);
+      w.outlets.set(slot, [...(w.outlets.get(slot) ?? []), k]);
+      line(w, `var __vibe_s${k} = (`);
+    } else {
+      // An undeclared name fails at the `name` value, or at the tag of an unnamed outlet: the
+      // callee stands for it, so the call of the resulting non-function fails there too.
+      line(w);
+      const callee = `__vibe.slot<__VibeSlots, ${quote(slot)}>()`;
+      b.atom(callee, ...(outletName?.value ? range(outletName.value) : tag), Preset.NONE).add('(');
+    }
+  } else {
     line(w, `var __vibe_c${w.handles++} = __vibe.`);
-    if (kind === 'component') {
+    if (el.tag === w.own) {
+      // The file itself, through its own default export.
+      b.add('component(').atom('__vibe_self', ...tag, Preset.BOUND);
+      w.ownUsed = true;
+    } else if (kind === 'component') {
       b.add('component(').verbatim(...tag, Preset.BOUND);
       const root = el.tag.split('.')[0];
       if (w.names.setup.has(root)) w.names.usedSetup.add(root);
@@ -223,9 +324,9 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
       else b.add('null');
     }
   }
-  if (kind !== 'custom') b.add(')(');
+  if (kind === 'el' || kind === 'component' || kind === 'dynamic') b.add(')(');
   // A missing required prop is reported on the object literal, which stands for the tag.
-  if (kind === 'component') b.atom('{', ...tag, Preset.NONE);
+  if (kind === 'component' || (kind === 'slot' && !w.outlets)) b.atom('{', ...tag, Preset.NONE);
   else b.add('{');
   const p: Props = { w, kind, locals, seen: new Set(), after: [] };
   // Static and bound `class` (and `style`) merge into one array: head -> the group, rest -> null.
@@ -241,7 +342,7 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
     directive(el, 'model') !== undefined &&
     /^(?:true|false)-value$/.test(staticKey(prop) ?? '');
   for (const prop of el.props) {
-    if (prop === is || consumed(prop)) continue;
+    if (prop === is || prop === outletName || consumed(prop)) continue;
     const group = merged.get(prop);
     if (group === null) continue;
     if (group) mergedProperty(p, group);
@@ -255,9 +356,11 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
     line(w);
     statement();
   }
-  // The children of a component with `v-slot` read slot props, which are typed with slots.
-  if (kind === 'component' && directive(el, 'slot')) {
-    for (const child of el.children) untyped(child, w);
+  if (kind === 'component' || kind === 'dynamic') {
+    const self = el.tag === w.own;
+    if (self) w.inSelf++;
+    block(w, () => slots(el, w, locals, tag));
+    if (self) w.inSelf--;
   } else block(w, () => children(el.children, w, locals));
 }
 
@@ -303,7 +406,10 @@ function property(
   return true;
 }
 
-/** A kebab name on a component is its camelCase prop key; `data-*` and `aria-*` stay attributes. */
+/**
+ * A kebab name on a component is its camelCase prop key; `data-*` and `aria-*` stay attributes. An
+ * outlet passes its keys as written.
+ */
 const componentKey = (p: Props, name: string) =>
   p.kind === 'component' && !/^(?:data|aria)-/.test(name) ? camelize(name) : name;
 
@@ -345,7 +451,7 @@ function ref(node: AttributeNode, p: Props, el: ElementNode): void {
   const tag = binding && binding + path.map((m) => `['${m}']`).join('');
   // ponytail: a `v-for` local (or an unresolved name) as the tag still goes through `__vibe_cN`.
   const type =
-    p.kind === 'dynamic'
+    p.kind === 'dynamic' || p.kind === 'slot'
       ? 'unknown'
       : p.kind === 'el' || p.kind === 'custom'
         ? `${map} extends Record<'${el.tag}', infer E> ? E : Element`
@@ -404,6 +510,8 @@ function bound(dir: DirectiveNode, p: Props): void {
     w.b.add(']: ');
     return value(dir, w, locals);
   }
+  // An outlet does not pass its `:key`.
+  if (p.kind === 'slot' && arg.content === 'key') return loose(p, () => value(dir, w, locals));
   const camel = on || dir.modifiers.some((m) => m.content === 'camel');
   const name = camel ? camelize(arg.content) : componentKey(p, arg.content);
   const alias = on || (!camel && name !== arg.content);

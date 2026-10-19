@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import List from './List.vibe'
+import type { Item } from './types.ts'
+const rows: Item[] = []
+</script>
+
+<template>
+  <List :rows="rows"><template #item="{ item }">{{ item.toFixed() }}</template></List>
+</template>

@@ -25,6 +25,19 @@ type __VibeEmits = { go: [] };
 `);
 });
 
+it('moves the type argument of defineSlots', () => {
+  const { text } = run(`<script setup lang="ts">
+defineSlots<{ a?: () => unknown }>()
+</script>`);
+  expect(text).toBe(`
+defineSlots<__VibeSlots>()
+
+type __VibeProps = {};
+type __VibeEmits = {};
+type __VibeSlots = { a?: () => unknown };
+`);
+});
+
 it('declares empty types without macros or without a script', () => {
   const empty = 'type __VibeProps = {};\ntype __VibeEmits = {};\n';
   expect(run('<script setup lang="ts">\nconst a = 1\n</script>').text).toBe(

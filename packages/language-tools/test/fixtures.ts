@@ -14,8 +14,8 @@ function read(dir: string, pattern: string): [string, string][] {
 export const CODEGEN: string = here('fixtures/codegen');
 const TYPECHECK = here('fixtures/typecheck');
 
-/** The codegen inputs, as `<feature>/<case>/input.vibe`. */
-export const codegen: [string, string][] = read(CODEGEN, '*/*/input.vibe');
+/** The codegen inputs, as `<feature>/<case>/<name>.vibe`: `input.vibe`, or a component name. */
+export const codegen: [string, string][] = read(CODEGEN, '*/*/*.vibe');
 /** The `.vibe` files of the typecheck corpus and demo. */
 export const typecheck: [string, string][] = read(TYPECHECK, '**/*.vibe');
 /** The compiler's fixture inputs. */

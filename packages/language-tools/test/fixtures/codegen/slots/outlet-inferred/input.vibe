@@ -1,0 +1,17 @@
+<script setup lang="ts">
+const { title, items } = defineProps<{ title: string; items: string[] }>()
+const extra = { level: 1 }
+</script>
+
+<template>
+  <slot name="header" :title="title" v-bind="extra" data-x="1" />
+  <ul>
+    <li v-for="(item, index) in items" :key="item">
+      <slot name="item" :item="item" :index="index" />
+    </li>
+  </ul>
+  <slot v-if="items.length === 0" name="empty" />
+  <slot name="item" :item="title" :index="-1" />
+  <slot name="foot-note" ref="r" />
+  <slot><p ref="fallback">{{ title }}</p></slot>
+</template>

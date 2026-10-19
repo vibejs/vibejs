@@ -1,0 +1,25 @@
+<script setup lang="ts">
+import List from './List.vibe'
+const rows = [{ id: 1 }]
+const ok = true
+const current = List
+</script>
+
+<template>
+  <List :rows="rows">
+    <!-- the header -->
+    <template v-if="ok" #header>Rows</template>
+    <template v-else #empty>None</template>
+    <template #item="{ item, index = 0 }"><p ref="row">{{ item.id + index }}</p></template>
+    <template #foot-note>Note</template>
+    <template v-slot="all">{{ all }}</template>
+    <template #[ok]>Dynamic</template>
+  </List>
+  <List :rows="rows" v-slot="{ item }">{{ item }}</List>
+  <List :rows="rows">
+    Implicit {{ ok }}
+  </List>
+  <List :rows="rows"><template #header /></List>
+  <component :is="current" #item="{ item }">{{ item }}</component>
+  <x-card><p>{{ ok }}</p></x-card>
+</template>

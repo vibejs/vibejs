@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const { title } = defineProps<{ title: string }>()
+defineSlots<{ default?: (props: {}) => unknown; header: (props: { title: string; size?: number }) => unknown }>()
+</script>
+
+<template>
+  <slot name="header" :title="title" />
+  <slot />
+</template>

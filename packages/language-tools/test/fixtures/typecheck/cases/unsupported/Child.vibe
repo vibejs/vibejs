@@ -1,8 +1,0 @@
-<script setup lang="ts">
-const { title, count = 0 } = defineProps<{ title: string; count?: number; maxItems?: number; isOpen?: boolean }>()
-const emit = defineEmits<{ select: [id: string]; toggle: [] }>()
-</script>
-
-<template>
-  <button @click="emit('select', title)">{{ title }} {{ count }}</button>
-</template>
