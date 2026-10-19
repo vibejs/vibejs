@@ -31,6 +31,7 @@ catalog:
   entities: ^8.1.0
   postcss: ^8.5.30
   postcss-selector-parser: ^7.1.6
+  magic-string: ^1.4.3
   '@jridgewell/trace-mapping': 0.3.31
   csstype: ^3.2.3
   knip: 6.41.0

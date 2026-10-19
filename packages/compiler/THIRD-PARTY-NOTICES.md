@@ -18,6 +18,7 @@
   - `packages/compiler/src/sfc/parse.test.ts` from `packages/compiler-sfc/__tests__/parse.spec.ts`
   - `packages/compiler/src/style/pluginScoped.test.ts` from `packages/compiler-sfc/__tests__/compileStyle.spec.ts`
   - `packages/compiler/src/expr/transformExpression.test.ts` from `packages/compiler-core/__tests__/transforms/transformExpressions.spec.ts`
+  - `packages/compiler/src/script/definePropsDestructure.test.ts` from `packages/compiler-sfc/__tests__/compileScript/definePropsDestructure.spec.ts`
 
 ```text
 The MIT License (MIT)

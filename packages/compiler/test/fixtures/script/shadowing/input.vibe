@@ -1,0 +1,23 @@
+<template>
+  <p>{{ total }}</p>
+</template>
+
+<script setup lang="ts">
+import { watch } from '@vibejs-org/ui';
+
+const { a, b: renamed, 'data-id': dataId = 'x' } = defineProps<{ a: number; b: number; 'data-id'?: string }>();
+
+const total = () => a + renamed;
+const shadow = (a: number) => a + renamed;
+const pair = { a, renamed, dataId };
+try {
+  JSON.parse(dataId);
+} catch (a) {
+  console.log(a);
+}
+{
+  const renamed = 1;
+  console.log(renamed, a);
+}
+watch(() => a, (value) => console.log(value, shadow(value), pair));
+</script>

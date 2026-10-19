@@ -1,0 +1,15 @@
+<template>
+  <button @click="emit('save', 1)">Save</button>
+</template>
+
+<script setup lang="ts">
+interface Events {
+  save: [id: number];
+  'update:title': [title: string];
+}
+interface Events {
+  close: [];
+}
+
+const emit = defineEmits<Events>();
+</script>

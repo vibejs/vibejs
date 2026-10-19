@@ -1,0 +1,15 @@
+<template>
+  <input v-model="value" />
+</template>
+
+<script setup lang="ts">
+const value = defineModel<string>();
+const [count, modifiers] = defineModel<number>('count', { required: true });
+const open = defineModel<boolean>('open', { default: () => false });
+
+function reset() {
+  value.value = '';
+  count.value = modifiers.trim ? 0 : count.value;
+  open.value = false;
+}
+</script>
