@@ -109,12 +109,7 @@ const problem = (status: number, codes: string[]): Json => ({
  * Schema converter; their named definitions are shared in `components.schemas`. Throws VIBE9801
  * for a schema that cannot be converted and VIBE9802 for two different schemas with one name.
  *
- * @example Serve the document with a middleware:
- * ```ts
- * const doc = generateOpenApi({ users }, { info: { title: 'API', version: '1.0.0' }, servers: [{ url: '/api' }] });
- * const openapi: Middleware = (req, next) =>
- *   new URL(req.url).pathname === '/openapi.json' ? Promise.resolve(Response.json(doc)) : next();
- * ```
+ * @see https://vibejs.org/v0/server/contracts#openapi for serving the document.
  */
 export function generateOpenApi(contracts: object, options: OpenApiOptions): OpenApiDocument {
   const paths: OpenApiDocument['paths'] = {};

@@ -13,7 +13,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '../module/decorators.ts';
-import { VibeFactory, type AppOptions, type Middleware } from './app.ts';
+import { inspect, VibeFactory, type AppOptions, type Middleware } from './app.ts';
 import type { CanActivate, Ctx, ExceptionFilter, Interceptor, RequestContext } from './context.ts';
 import { HttpError } from './errors.ts';
 
@@ -180,6 +180,7 @@ describe('run order', () => {
 
   it('inspects enhancers in the same run order', async () => {
     const { app } = await create(OrderModule, options);
+    expect(inspect(OrderModule, options)).toEqual(app.inspect());
     expect(app.inspect().routes[0]).toMatchObject({
       guards: ['Global', 'OnClass', 'OnMethod'],
       interceptors: ['Global', 'OnClass', 'OnMethod'],

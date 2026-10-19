@@ -107,6 +107,59 @@ function loggerModule(logger: Logger): ModuleImport {
 const names = (list: readonly (ProviderRecord | Token<unknown>)[]): string[] =>
   list.map((item) => tokenName('token' in item ? item.token : item));
 
+/**
+ * Validates the options, scans `root` with the generated logger module and routes it. Nothing is
+ * constructed.
+ */
+function scanApp(
+  root: ModuleImport,
+  options: AppOptions,
+  overrides?: ReadonlyMap<Token<unknown>, Provider>,
+) {
+  const { basePath = '', logger = new JsonLogger() } = options;
+  if (!/^(?:\/[^/]+)*$/.test(basePath)) throw vibeError('VIBE9405', { basePath });
+  const dynamic: DynamicModule = typeof root === 'function' ? { module: root } : root;
+  const internal = loggerModule(logger);
+  const graph = scan({ ...dynamic, imports: [internal, ...(dynamic.imports ?? [])] }, overrides);
+  return { graph, internal, router: createRouter(graph.routes, basePath) };
+}
+
+/** Describes a scanned application; the generated logger module is left out. */
+function describeApp(
+  { graph, internal }: ReturnType<typeof scanApp>,
+  { basePath = '', guards = [], interceptors = [], filters = [] }: AppOptions,
+): AppInspection {
+  return {
+    routes: graph.routes.map((binding) => ({
+      method: binding.route.method,
+      path: basePath + binding.route.path,
+      handler: handlerName(binding),
+      guards: names([...guards, ...binding.guards]),
+      interceptors: names([...interceptors, ...binding.interceptors]),
+      filters: names([...binding.filters, ...filters]),
+    })),
+    modules: graph.modules
+      .filter((node) => node.module !== internal)
+      .map((node) => ({
+        path: node.path,
+        global: node.global,
+        imports: node.imports
+          .filter((child) => child.module !== internal)
+          .map((child) => child.name),
+        exports: node.exports,
+        providers: node.providers,
+      })),
+  };
+}
+
+/**
+ * Scans `root` and returns its routes and modules. Constructs nothing: no provider, controller,
+ * enhancer or lifecycle hook runs. Throws the same scan errors as `VibeFactory.create`.
+ */
+export function inspect(root: ModuleImport, options: AppOptions = {}): AppInspection {
+  return describeApp(scanApp(root, options), options);
+}
+
 /** Turns a module graph into a running application. */
 export const VibeFactory = {
   /** Scans, builds and initializes the application; it does not listen. */
@@ -130,11 +183,9 @@ export async function createApp(
     shutdownTimeout = 10_000,
     validateResponses = true,
   } = options;
-  // Checked before any provider runs, so a bad option leaves nothing to shut down.
-  if (!/^(?:\/[^/]+)*$/.test(basePath)) throw vibeError('VIBE9405', { basePath });
-  const dynamic: DynamicModule = typeof root === 'function' ? { module: root } : root;
-  const internal = loggerModule(logger);
-  const graph = scan({ ...dynamic, imports: [internal, ...(dynamic.imports ?? [])] }, overrides);
+  // Scanned before any provider runs, so a bad option or graph leaves nothing to shut down.
+  const scanned = scanApp(root, { ...options, logger }, overrides);
+  const { graph, router } = scanned;
   const scope = graph.root.scope;
   const records = (classes: readonly (new () => object)[]) =>
     classes.map((cls) => providerRecord(cls, scope));
@@ -145,7 +196,6 @@ export async function createApp(
   };
   await instantiate([...graph.records, ...Object.values(globals).flat()]);
   await init(graph);
-  const router = createRouter(graph.routes, basePath);
   const pipelines = new Map(
     graph.routes.map((binding) => [
       binding,
@@ -314,28 +364,7 @@ export async function createApp(
       })();
       return closing;
     },
-    inspect: () => ({
-      routes: graph.routes.map((binding) => ({
-        method: binding.route.method,
-        path: basePath + binding.route.path,
-        handler: handlerName(binding),
-        guards: names([...guards, ...binding.guards]),
-        interceptors: names([...interceptors, ...binding.interceptors]),
-        filters: names([...binding.filters, ...filters]),
-      })),
-      // The generated logger module is an implementation detail.
-      modules: graph.modules
-        .filter((node) => node.module !== internal)
-        .map((node) => ({
-          path: node.path,
-          global: node.global,
-          imports: node.imports
-            .filter((child) => child.module !== internal)
-            .map((child) => child.name),
-          exports: node.exports,
-          providers: node.providers,
-        })),
-    }),
+    inspect: () => describeApp(scanned, options),
   };
   return app;
 }

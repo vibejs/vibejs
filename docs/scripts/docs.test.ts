@@ -415,3 +415,68 @@ describe('as a script', () => {
     expect(process.exitCode).toBe(2);
   });
 });
+
+/** The VitePress anchors of a page's headings. */
+const anchors = (markdown: string): string[] =>
+  [...markdown.matchAll(/^#+ (.+)$/gm)].map(([, text]) =>
+    text
+      .toLowerCase()
+      .replaceAll(/[^\w\s-]/g, '')
+      .trim()
+      .replaceAll(/\s+/g, '-'),
+  );
+
+describe('server docs', () => {
+  const docs = loadSource(fileURLToPath(new URL('..', import.meta.url)));
+  const codes = new Set(
+    globSync('packages/*/messages/*.md', {
+      cwd: fileURLToPath(new URL('../..', import.meta.url)),
+    }).flatMap((file) => {
+      const text = readFileSync(fileURLToPath(new URL(`../../${file}`, import.meta.url)), 'utf8');
+      return [...text.matchAll(/^## (VIBE\d{4}):/gm)].map(([, code]) => code);
+    }),
+  );
+
+  it('serves the TS1241 link of vibejs check as a page with the TS1241 section', () => {
+    // The link that `vibejs check` adds to TS1241 on @Handle (packages/cli check.ts).
+    const target = new URL('https://vibejs.org/v0/server/handlers');
+    const handlers = docs.find((p) => SITE + p.path === target.href);
+    expect(anchors(handlers?.markdown ?? '')).toContain('ts1241-on-handle');
+  });
+
+  it('names the vibe.js form and links an existing code or section on every NestJS row', () => {
+    const guide = docs.find((p) => p.path === 'guides/coming-from-nestjs');
+    const rows = (guide?.markdown ?? '')
+      .split('\n')
+      .filter((line) => line.startsWith('| '))
+      .map((line) =>
+        line
+          .slice(1, -1)
+          .split('|')
+          .map((cell) => cell.trim()),
+      )
+      .filter(([idiom]) => idiom !== 'NestJS' && !idiom.startsWith('---'));
+    expect(rows.length).toBeGreaterThanOrEqual(10);
+    /** Why `target` is not an existing catalog code or docs section, or `undefined`. */
+    const broken = (target: string): string | undefined => {
+      const code = /^\/errors\/(VIBE\d{4})$/.exec(target)?.[1];
+      if (code) return codes.has(code) ? undefined : 'unknown code';
+      const [file, hash] = target.split('#');
+      const linked = docs.find((p) => `../${p.path}.md` === file);
+      if (!linked) return 'no page';
+      return !hash || anchors(linked.markdown).includes(hash) ? undefined : 'no section';
+    };
+    const problems = rows.flatMap(([idiom, form, caught]) => {
+      const links = [...caught.matchAll(/\]\(([^)]+)\)/g)].map(([, target]) => target);
+      return [
+        ...(/`[^`]+`/.test(form) ? [] : [`${idiom}: no vibe.js form`]),
+        ...(links.length ? [] : [`${idiom}: no link`]),
+        ...links.flatMap((target) => {
+          const why = broken(target);
+          return why ? [`${idiom}: ${target}: ${why}`] : [];
+        }),
+      ];
+    });
+    expect(problems).toEqual([]);
+  });
+});

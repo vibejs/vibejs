@@ -22,4 +22,9 @@ export class TodosController {
       this.todos.toggle(ctx.params.id) ?? ctx.fail('TODO_NOT_FOUND', `No todo ${ctx.params.id}`)
     );
   }
+
+  @Handle(todos.remove)
+  remove(ctx: Ctx<typeof todos.remove>): void {
+    if (!this.todos.remove(ctx.params.id)) ctx.fail('TODO_NOT_FOUND', `No todo ${ctx.params.id}`);
+  }
 }

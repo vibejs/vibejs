@@ -22,7 +22,8 @@ export class TodosService {
     return todo;
   }
 
-  remove(id: string): void {
-    this.#todos.delete(id);
+  /** Removes the todo; `false` when there is none with `id`. */
+  remove(id: string): boolean {
+    return this.#todos.delete(id);
   }
 }

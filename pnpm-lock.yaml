@@ -376,12 +376,21 @@ importers:
 
   docs:
     devDependencies:
+      '@vibejs-org/contract':
+        specifier: workspace:*
+        version: link:../packages/contract
       '@vibejs-org/errors':
         specifier: workspace:*
         version: link:../packages/errors
+      '@vibejs-org/server':
+        specifier: workspace:*
+        version: link:../packages/server
       typescript:
         specifier: catalog:ts-next
         version: 7.1.0-dev.20261015.1
+      valibot:
+        specifier: 'catalog:'
+        version: 1.5.0(typescript@7.1.0-dev.20261015.1)
       vitepress:
         specifier: 'catalog:'
         version: 2.0.0-alpha.20(@types/node@24.19.2)(jiti@2.7.0)(postcss@8.5.30)(typescript@7.1.0-dev.20261015.1)(yaml@2.9.1)
