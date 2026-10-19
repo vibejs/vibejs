@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import Comp from './Comp.vibe'
+const label = 'a'
+</script>
+
+<template>
+  <Comp :title="label">
+    <p>{{ label }}</p>
+    <template #footer>{{ label }}</template>
+  </Comp>
+</template>

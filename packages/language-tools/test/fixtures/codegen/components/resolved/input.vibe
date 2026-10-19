@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import Comp from './Comp.vibe'
+const count = 1
+</script>
+
+<template>
+  <Comp title="Static" :count="count" is-open :max-items="3" data-x="1" aria-label="a" :view-box.camel="count" />
+</template>

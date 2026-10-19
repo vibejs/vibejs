@@ -1,14 +1,12 @@
 
-import { ref } from '@vibejs-org/ui'
-const text = ref('')
-const attrs = { id: 'a' }
-const el = ref(null)
+import * as Ns from './ns.ts'
 
 type __VibeProps = {};
 type __VibeEmits = {};
-const __vibe_setup = {  };
+const __vibe_setup = { Ns };
 {
-  __vibe.el(__vibe.tags.input)({ });
+  const { Ns } = __vibe.unrefs(__vibe_setup);
+  var __vibe_c0 = __vibe.component(Ns.Comp)({ title: 'a' });
 }
 type __VibeSlots = {};
 type __VibeExposed = {};

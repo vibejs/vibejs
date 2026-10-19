@@ -1,0 +1,11 @@
+<script setup lang="ts">
+const active = true
+const color = 'red'
+const html = '<b>bold</b>'
+</script>
+
+<template>
+  <p class="a" :class="{ active }" style="margin: 0" :style="{ color }">{{ Math.max(1, 2) }} {{ Date.now() }}</p>
+  <div v-html="html"></div>
+  <p v-text="String(active)"></p>
+</template>

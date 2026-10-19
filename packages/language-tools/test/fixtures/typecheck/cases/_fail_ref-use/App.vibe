@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import { useTemplateRef } from '@vibejs-org/ui'
+const input = useTemplateRef('input')
+function go(): void {
+  input.value?.play()
+}
+</script>
+
+<template>
+  <input ref="input" @click="go">
+</template>

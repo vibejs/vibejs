@@ -1,0 +1,12 @@
+<script setup lang="ts">
+const model = defineModel<string>({ required: true })
+const [count] = defineModel<number, 'lazy'>('count')
+function reset(): void {
+  count.value = 0
+}
+defineExpose({ reset, size: 1 })
+</script>
+
+<template>
+  <p>{{ model }} {{ count }}</p>
+</template>

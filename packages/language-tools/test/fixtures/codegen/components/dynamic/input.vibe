@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import { shallowRef } from '@vibejs-org/ui'
+import Comp from './Comp.vibe'
+const current = shallowRef(Comp)
+</script>
+
+<template>
+  <component :is="current" title="a" />
+  <component is="Comp" />
+  <component />
+</template>

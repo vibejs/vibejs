@@ -1,0 +1,20 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const text = ref('')
+const amount = ref(0)
+const done = ref(false)
+const tags = ref<string[]>([])
+</script>
+
+<template>
+  <input v-model="text">
+  <input v-model.number="amount">
+  <input type="number" v-model="amount">
+  <input v-model.trim="text">
+  <textarea v-model="text"></textarea>
+  <select v-model="text"></select>
+  <select multiple v-model="tags"></select>
+  <input type="radio" value="a" v-model="text">
+  <input type="checkbox" v-model="done">
+  <x-input v-model="text" />
+</template>

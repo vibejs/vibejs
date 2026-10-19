@@ -6,9 +6,9 @@ type __VibeEmits = { pick: [id: string]; close: [] };
 const __vibe_setup = { emit };
 {
   const { emit } = __vibe.unrefs(__vibe_setup);
-  const __vibe_ctx = __vibe.ctx<__VibeProps, __VibeEmits, __VibeSlots>();
+  const __vibe_ctx = __vibe.ctx<__VibeProps & __VibeModels, __VibeEmits, __VibeSlots>();
   const { $emit } = __vibe_ctx;
-  __vibe.el(__vibe.tags.button)({ onClick: ($event) => { emit('close') }, onDblclick: ($event) => { $emit('pick', 'a') } });
+  __vibe.el(__vibe.tags.button)({ onClick: () => { emit('close') }, onDblclick: () => { $emit('pick', 'a') } });
 }
 type __VibeSlots = {};
 type __VibeExposed = {};

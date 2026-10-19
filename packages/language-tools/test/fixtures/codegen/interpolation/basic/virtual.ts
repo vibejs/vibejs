@@ -7,6 +7,7 @@ type __VibeEmits = {};
 const __vibe_setup = { user };
 {
   const { user } = __vibe.unrefs(__vibe_setup);
+  const { missing } = {};
   __vibe.el(__vibe.tags.p)({ });
     (user.name);
     (`${user.name}!`);

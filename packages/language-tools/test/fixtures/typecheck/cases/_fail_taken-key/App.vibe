@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const active = true
+function go() {}
 </script>
 
 <template>
-  <p class="x" :class="{ active: typoo }">{{ active }}</p>
+  <p @click="go" @click.once="typoo()">text</p>
 </template>

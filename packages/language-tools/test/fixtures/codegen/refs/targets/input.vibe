@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import { useTemplateRef } from '@vibejs-org/ui'
+import Comp from './Comp.vibe'
+const input = useTemplateRef('input')
+const typed = useTemplateRef<HTMLElement>('input')
+const rows = useTemplateRef('rows')
+function setEl(el: unknown) {}
+</script>
+
+<template>
+  <input ref="input">
+  <Comp ref="comp" />
+  <Comp v-for="n in 3" ref="rows" />
+  <svg><circle ref="circle" /></svg>
+  <x-widget ref="widget" />
+  <slot><p ref="slotted" /></slot>
+  <p ref="" :ref="setEl" />
+</template>

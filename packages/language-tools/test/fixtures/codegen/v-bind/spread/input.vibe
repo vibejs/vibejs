@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const attrs = { id: 'a' }
+</script>
+
+<template>
+  <p v-bind="attrs" title="t" v-on="{ click: () => {} }"></p>
+</template>

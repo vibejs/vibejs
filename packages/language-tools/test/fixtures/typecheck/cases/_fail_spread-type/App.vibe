@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import Child from './Child.vibe'
+const extra = { count: 'x' }
+</script>
+
+<template>
+  <Child title="a" v-bind="extra" />
+</template>

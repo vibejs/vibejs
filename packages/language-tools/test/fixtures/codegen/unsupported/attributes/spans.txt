@@ -1,3 +1,0 @@
-#0 Verbatim EXPR o[24,130) "\nimport { ref } from '@vibejs-org/ui'\nconst text = ref('')\nconst attrs = { id: 'a' }\nconst el = ref(null)\n" → v[0,106) "\nimport { ref } from '@vibejs-org/ui'\nconst text = ref('')\nconst attrs = { id: 'a' }\nconst el = ref(null)\n"
-#1 Atom BOUND o[155,160) "input" → v[206,211) "input"
-#2 Atom ANCHOR o[0,0) "" → v[315,423) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

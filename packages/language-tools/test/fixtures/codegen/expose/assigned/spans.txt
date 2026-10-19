@@ -1,0 +1,2 @@
+#0 Verbatim EXPR o[24,63) "\nconst api = defineExpose({ size: 1 })\n" → v[0,39) "\nconst api = defineExpose({ size: 1 })\n"
+#1 Atom ANCHOR o[0,0) "" → v[211,319) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

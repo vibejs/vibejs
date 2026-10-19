@@ -1,0 +1,3 @@
+<script setup lang="ts">
+const api = defineExpose({ size: 1 })
+</script>

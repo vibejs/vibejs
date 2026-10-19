@@ -7,6 +7,7 @@ const names = (): Names => ({
   ctx: new Map([['limit', [6, 11]]]),
   usedSetup: new Set(),
   usedCtx: new Set(),
+  unknown: new Map(),
   writes: false,
 });
 
@@ -33,7 +34,11 @@ it('keeps reads verbatim with BOUND spans on setup and ctx names', () => {
 it('writes setup bindings through __vibe_w and props through __vibe_ctx', () => {
   const { text, spans, n } = emit('count++; limit = 1');
   expect(text).toBe('__vibe_w.count++; __vibe_ctx.limit = 1');
-  expect(spans.every(([, , , , kind]) => kind === SpanKind.Verbatim)).toBe(true);
+  // The prefixes stand for the empty range before the name, so assignment errors land on it.
+  expect(spans.filter(([, , , , kind]) => kind === SpanKind.Atom)).toEqual([
+    [0, 9, 0, 0, SpanKind.Atom, Preset.NONE],
+    [18, 11, 9, 0, SpanKind.Atom, Preset.NONE],
+  ]);
   expect(n.writes).toBe(true);
 });
 

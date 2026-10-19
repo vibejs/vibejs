@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+const count = ref(0)
+</script>
+
+<template>
+  <input type="checkbox" true-value="yes" v-model="count">
+</template>

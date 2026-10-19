@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const model = defineModel<string>({ required: true })
+const [title, titleModifiers] = defineModel<string, 'trim'>('title')
+const count = defineModel<number>('first-count', { default: () => 0 })
+</script>
+
+<template>
+  <p>{{ model }} {{ title }} {{ titleModifiers.trim }} {{ count }} {{ modelValue }}</p>
+</template>

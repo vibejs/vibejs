@@ -1,0 +1,8 @@
+<script setup lang="ts">
+const html = '<b>b</b>'
+</script>
+
+<template>
+  <div v-html="html"></div>
+  <p v-text="html" :text-content="html"></p>
+</template>

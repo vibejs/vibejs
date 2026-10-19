@@ -1,0 +1,42 @@
+<script setup lang="ts">
+import { useTemplateRef, type ComponentExposed, type TemplateRef } from '@vibejs-org/ui'
+import { expectType } from '../../expect.ts'
+import Row from './Row.vibe'
+const input = useTemplateRef('input')
+const row = useTemplateRef('row')
+const items = useTemplateRef('items')
+const circle = useTemplateRef('circle')
+const slotted = useTemplateRef('slotted')
+const typed = useTemplateRef<HTMLElement>('input')
+defineProps<{ Item: typeof Row }>()
+const Local = Row
+const local = useTemplateRef('local')
+const item = useTemplateRef('item')
+const quoted = useTemplateRef("a'b")
+expectType<TemplateRef<HTMLInputElement>>()(input)
+expectType<TemplateRef<ComponentExposed<typeof Row>>>()(row)
+expectType<TemplateRef<HTMLLIElement[]>>()(items)
+expectType<TemplateRef<SVGCircleElement>>()(circle)
+expectType<TemplateRef<unknown>>()(slotted)
+expectType<TemplateRef<HTMLElement>>()(typed)
+expectType<TemplateRef<ComponentExposed<typeof Row>>>()(local)
+expectType<TemplateRef<ComponentExposed<typeof Row>>>()(item)
+expectType<TemplateRef<HTMLParagraphElement>>()(quoted)
+function setEl(el: unknown): void {
+  void el
+}
+</script>
+
+<template>
+  <input ref="input">
+  <Row ref="row" />
+  <button @click="row?.focus()">focus</button>
+  <ul><li v-for="n in 3" ref="items" :key="n">{{ n }}</li></ul>
+  <svg><circle ref="circle" /></svg>
+  <slot><p ref="slotted" /></slot>
+  <p :ref="setEl" />
+  <Local ref="local" />
+  <Item ref="item" />
+  <button @click="local?.focus(); item?.focus()">{{ local && item ? 'both' : 'none' }}</button>
+  <p ref="a'b">{{ quoted ? 'y' : 'n' }}</p>
+</template>

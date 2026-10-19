@@ -1,0 +1,16 @@
+<script setup lang="ts">
+import { useTemplateRef, type Component } from '@vibejs-org/ui'
+import Row from './Row.vibe'
+defineProps<{ Item: Component }>()
+const Local = Row
+const local = useTemplateRef('local')
+const quoted = useTemplateRef("a'b")
+</script>
+
+<template>
+  <Local ref="local" />
+  <p>{{ local ? 'y' : 'n' }}</p>
+  <Item ref="item" />
+  <template v-for="C in [Row]"><C ref="looped" /></template>
+  <p ref="a'b">{{ quoted }}</p>
+</template>

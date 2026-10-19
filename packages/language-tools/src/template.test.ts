@@ -3,7 +3,12 @@ import { expect, it } from 'vitest';
 import { CodeBuilder } from './builder.ts';
 import { children } from './template.ts';
 
-function emit(template: string, setup: string[] = []) {
+function emit(
+  template: string,
+  setup: string[] = [],
+  refs = new Map<string, string>(),
+  locals = new Set<string>(),
+) {
   const source = `<template>${template}</template>`;
   const { descriptor } = parse(source, { filename: 'A.vibe' });
   const b = new CodeBuilder(source);
@@ -12,9 +17,11 @@ function emit(template: string, setup: string[] = []) {
     ctx: new Map(),
     usedSetup: new Set<string>(),
     usedCtx: new Set<string>(),
+    unknown: new Map(),
     writes: false,
   };
-  children(descriptor.template!.ast.children, { b, names, source, depth: 0 }, new Set());
+  const w = { b, names, source, depth: 0, self: () => false, handles: 0, refs, loops: 0 };
+  children(descriptor.template!.ast.children, w, locals);
   return b.text
     .trim()
     .split('\n')
@@ -43,7 +50,7 @@ it('breaks a chain at text and interpolations', () => {
 });
 
 it('keeps the condition of an untyped branch, so the chain still narrows', () => {
-  expect(emit('<C v-if="a" /><p v-else-if="b" /><slot v-else />')).toEqual([
+  expect(emit('<template v-if="a" #x /><p v-else-if="b" /><slot v-else />')).toEqual([
     'if (a) {',
     '}',
     'else if (b) {',
@@ -58,7 +65,7 @@ it('loops v-for inside v-if and binds its aliases as locals', () => {
   expect(emit('<i v-for="(x, i) in xs" v-if="ok" @click="x = i" />', ['x', 'xs', 'ok'])).toEqual([
     'if (ok) {',
     'for (const [x, i] of __vibe.vFor(xs)) {',
-    '__vibe.el(__vibe.tags.i)({ onClick: ($event) => { x = i } });',
+    '__vibe.el(__vibe.tags.i)({ onClick: () => { x = i } });',
     '}',
     '}',
   ]);
@@ -77,16 +84,19 @@ it('quotes static values on one line', () => {
 it('walks a v-if or v-for fragment, not a slot wrapper', () => {
   expect(
     emit('<template v-for="x in xs" :key="x">{{ x }}</template><template #a>{{ a }}</template>'),
-  ).toEqual(['for (const [x] of __vibe.vFor(xs)) {', '(x);', '}']);
+  ).toEqual(['for (const [x] of __vibe.vFor(xs)) {', '(x);', '(x);', '}']);
 });
 
 it('checks a value whose key is taken as a statement, and camelizes .camel', () => {
   expect(
-    emit('<svg class="x" :class="a" :view-box.camel="v" @click="f" @click.once="g()" />'),
+    emit('<svg :id="a" :view-box.camel="v" @click="f" @click.once="g($event)" v-text="a" />'),
   ).toEqual([
-    "__vibe.el(__vibe.tags.svg)({ class: 'x', viewBox: v, onClick: f });",
-    '(a);',
-    '(($event) => { g() });',
+    '__vibe.el(__vibe.tags.svg)({ id: a, viewBox: v, onClick: f, textContent: a });',
+    '(($event: unknown) => { g($event) });',
+  ]);
+  expect(emit('<p v-text="a" v-text.x="b" />')).toEqual([
+    '__vibe.el(__vibe.tags.p)({ textContent: a });',
+    '(b);',
   ]);
 });
 
@@ -95,5 +105,44 @@ it('binds the names read by a v-for alias default, not the ones it declares', ()
     'for (const [{ a = d, b: [c] }] of __vibe.vFor(xs)) {',
     '__vibe.el(__vibe.tags.i)({ });',
     '}',
+  ]);
+});
+
+it('emits components with handles, and leaves v-slot content untyped with unknown refs', () => {
+  const refs = new Map<string, string>();
+  expect(
+    emit('<C v-slot="{ x }"><p ref="a">{{ x }}</p></C><L ref="c" />', ['C'], refs, new Set(['L'])),
+  ).toEqual([
+    'var __vibe_c0 = __vibe.component(C)({ });',
+    'var __vibe_c1 = __vibe.component(L)({ });',
+  ]);
+  expect([...refs]).toEqual([
+    ['a', 'unknown'],
+    ['c', 'typeof __vibe_c1.exposed'],
+  ]);
+});
+
+const exposed = (tag: string) =>
+  `${tag} extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown`;
+
+it('types a component ref from its tag binding, and the ref of <component :is> as unknown', () => {
+  const refs = new Map<string, string>();
+  emit('<C.D ref="c" /><component :is="C" ref="d" /><U ref="u" />', ['C'], refs);
+  expect([...refs]).toEqual([
+    ['c', exposed("ReturnType<typeof __vibe.unrefs<{ c: typeof C }>>['c']['D']")],
+    ['d', 'unknown'],
+    ['u', 'typeof __vibe_c2.exposed'],
+  ]);
+});
+
+it('writes a component model through its update handler, with modifiers', () => {
+  expect(emit('<C v-model:x.trim="m" />', ['C', 'm'])).toEqual([
+    "var __vibe_c0 = __vibe.component(C)({ x: m, 'onUpdate:x': ($event = undefined as never) => { __vibe_w.m = $event }, xModifiers: { trim: true } });",
+  ]);
+});
+
+it('camelizes a kebab model name on a component', () => {
+  expect(emit('<C v-model:first-name="m" />', ['C', 'm'])).toEqual([
+    "var __vibe_c0 = __vibe.component(C)({ firstName: m, 'onUpdate:firstName': ($event = undefined as never) => { __vibe_w.m = $event } });",
   ]);
 });

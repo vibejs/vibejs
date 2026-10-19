@@ -1,0 +1,7 @@
+<script setup lang="ts">
+import * as Ns from './ns.ts'
+</script>
+
+<template>
+  <Ns.Comp title="a" />
+</template>

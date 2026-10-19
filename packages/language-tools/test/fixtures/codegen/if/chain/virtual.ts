@@ -30,6 +30,7 @@ const __vibe_setup = { value };
     __vibe.el(__vibe.tags.p)({ });
   }
   if (value) {
+    var __vibe_c0 = __vibe.component(Comp)({ });
   }
   else {
     __vibe.el(__vibe.tags.p)({ });

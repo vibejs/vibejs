@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import Comp from './Comp.vibe'
+function pick(id: string) {}
+</script>
+
+<template>
+  <Comp @select="pick" @close.once="pick" />
+</template>

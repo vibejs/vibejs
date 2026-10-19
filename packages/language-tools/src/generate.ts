@@ -1,8 +1,8 @@
-import { analyzeScript, parse, type Diagnostic } from '@vibejs-org/compiler';
+import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@vibejs-org/compiler';
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
 import type { Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
-import { children } from './template.ts';
+import { children, CTX_TYPES, key, type Walk } from './template.ts';
 
 /** A forwarded compiler diagnostic; `code` is the numeric part of VIBE####. */
 export interface LanguageDiagnostic {
@@ -33,47 +33,78 @@ export function generate(fileName: string, text: string): GeneratedFile {
   const { descriptor, diagnostics } = parse(text, { filename: fileName });
   const analysis = analyzeScript(descriptor);
   const b = new CodeBuilder(text);
-  script(b, descriptor, analysis);
+  const exposed = script(b, descriptor, analysis);
 
   const setup = setupBindings(analysis);
   const ctx = new Map<string, [number, number] | null>(CTX.map((name) => [name, null]));
   for (const { name, decl } of analysis.propKeys) if (!setup.has(name)) ctx.set(name, decl);
-  const names: Names = { setup, ctx, usedSetup: new Set(), usedCtx: new Set(), writes: false };
-  const body = new CodeBuilder(text);
-  const nodes = descriptor.template?.ast.children ?? [];
-  children(nodes, { b: body, names, source: text, depth: 1 }, new Set());
+  const names: Names = {
+    setup,
+    ctx,
+    usedSetup: new Set(),
+    usedCtx: new Set(),
+    unknown: new Map(),
+    writes: false,
+  };
+  const w: Walk = {
+    b: new CodeBuilder(text),
+    names,
+    source: text,
+    depth: 1,
+    // A tag that resolves to no binding is the file itself.
+    self: (tag) =>
+      !setup.has(tag.split('.')[0]) &&
+      !ctx.has(tag.split('.')[0]) &&
+      resolveComponentTag(tag, analysis, fileName) !== null,
+    handles: 0,
+    refs: new Map(),
+    loops: 0,
+  };
+  children(descriptor.template?.ast.children ?? [], w, new Set());
 
   const used = [...names.usedSetup];
   b.add(`const __vibe_setup = { ${used.join(', ')} };\n{`);
-  /** `const { a, b } = from;` with LINK spans to the declarations. */
-  const destructure = (
-    list: string[],
-    decls: ReadonlyMap<string, [number, number] | null>,
-    from: string,
-  ) => {
+  /** `const { a, b } = from;` with spans to the declarations (LINK) or to the first use (NONE). */
+  const destructure = (list: [string, [number, number] | null, number][], from: string) => {
     if (list.length === 0) return;
     b.add('\n  const { ');
-    list.forEach((name, i) => {
-      const decl = decls.get(name);
+    list.forEach(([name, at, features], i) => {
       if (i > 0) b.add(', ');
-      if (decl) b.atom(name, ...decl, Preset.LINK);
+      if (at) b.atom(name, ...at, features);
       else b.add(name);
     });
     b.add(` } = ${from};`);
   };
-  destructure(used, setup, '__vibe.unrefs(__vibe_setup)');
-  if (names.usedCtx.size > 0) b.add(`\n  const __vibe_ctx = __vibe.ctx<${TYPES}>();`);
-  destructure([...names.usedCtx], ctx, '__vibe_ctx');
+  destructure(
+    used.map((name) => link(name, setup)),
+    '__vibe.unrefs(__vibe_setup)',
+  );
+  if (names.usedCtx.size > 0) b.add(`\n  const __vibe_ctx = __vibe.ctx<${CTX_TYPES}>();`);
+  destructure(
+    [...names.usedCtx].map((name) => link(name, ctx)),
+    '__vibe_ctx',
+  );
+  // Other names fail at their first use instead of resolving from lib.dom, as they do at runtime.
+  destructure(
+    [...names.unknown].map(([name, at]) => [name, at, Preset.NONE]),
+    '{}',
+  );
   if (names.writes) {
     const lets = used.filter((name) => analysis.bindings.get(name)!.kind === 'let');
     const letNames = lets.map((name) => `'${name}'`).join(' | ') || 'never';
     b.add(`\n  const __vibe_w = __vibe.writable<typeof __vibe_setup, ${letNames}>(__vibe_setup);`);
   }
-  b.append(body).add('\n}\n');
+  b.append(w.b).add('\n}\n');
 
-  b.add(
-    'type __VibeSlots = {};\ntype __VibeExposed = {};\ntype __VibeRefs = {};\ntype __VibeModels = {};\n',
-  );
+  const refs = [...w.refs].map(([name, type]) => `${key(name)}: ${type}`);
+  const models = analysis.macros.models.map(({ name, binding, required }) => {
+    const value = `(typeof ${binding})['value']`;
+    const modifiers = name === 'modelValue' ? 'modelModifiers' : `${name}Modifiers`;
+    return `${key(name)}${required ? '' : '?'}: ${value}; ${key(`onUpdate:${name}`)}?: (value: ${value}) => void; ${key(modifiers)}?: (typeof ${binding})[1]`;
+  });
+  b.add('type __VibeSlots = {};\n');
+  b.add(`type __VibeExposed = ${exposed ? 'typeof __vibe_exposed' : '{}'};\n`);
+  b.add(`type __VibeRefs = ${members(refs)};\ntype __VibeModels = ${members(models)};\n`);
   b.atom(
     `export default __vibe.defineComponent<${TYPES}, __VibeExposed, __VibeModels>();`,
     0,
@@ -92,6 +123,13 @@ export function generate(fileName: string, text: string): GeneratedFile {
     diagnostics: diagnostics.filter(forwarded).map(toLanguage),
   };
 }
+
+/** A destructured name with a LINK span to its declaration. */
+const link = (name: string, decls: ReadonlyMap<string, [number, number] | null>) =>
+  [name, decls.get(name)!, Preset.LINK] as [string, [number, number] | null, number];
+
+/** An object type literal. */
+const members = (list: string[]) => (list.length > 0 ? `{ ${list.join('; ')} }` : '{}');
 
 /** Only SFC-structure and HTML parse errors: tsc skips type checking after a mapper diagnostic. */
 const forwarded = (d: Diagnostic) => {

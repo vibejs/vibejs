@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const { label } = defineProps<{ label: string }>()
+</script>
+
+<template>
+  <input v-model="label">
+</template>
