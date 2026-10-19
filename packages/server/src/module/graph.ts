@@ -130,9 +130,15 @@ function bind(
 
 /**
  * Walks the imports from `root`, validates modules, exports, controllers and handlers, and creates
- * the records of every module. Nothing is constructed.
+ * the records of every module. Nothing is constructed. A provider whose token is a key of
+ * `overrides` is replaced by that provider in every module that provides the token (VIBE9701 for
+ * an override that replaces nothing).
  */
-export function scan(root: ModuleImport): ModuleGraph {
+export function scan(
+  root: ModuleImport,
+  overrides: ReadonlyMap<Token<unknown>, Provider> = new Map(),
+): ModuleGraph {
+  const used = new Set<Token<unknown>>();
   const nodes = new Map<ModuleImport, Node>();
   const modules: Node[] = [];
   const records: ProviderRecord[] = [];
@@ -169,7 +175,12 @@ export function scan(root: ModuleImport): ModuleGraph {
           .find(Boolean),
     };
     for (const provider of list('providers')) {
-      const rec = providerRecord(provider, scope);
+      let rec = providerRecord(provider, scope);
+      const override = overrides.get(rec.token);
+      if (override) {
+        used.add(rec.token);
+        rec = providerRecord(override, scope);
+      }
       own.delete(rec.token);
       own.set(rec.token, rec);
     }
@@ -226,5 +237,11 @@ export function scan(root: ModuleImport): ModuleGraph {
     return node;
   };
 
-  return { root: visit(root, []), modules, records, routes };
+  const node = visit(root, []);
+  for (const token of overrides.keys()) {
+    if (!used.has(token)) {
+      throw vibeError('VIBE9701', { token: tokenName(token), module: node.name });
+    }
+  }
+  return { root: node, modules, records, routes };
 }
