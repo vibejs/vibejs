@@ -791,7 +791,7 @@ describe('recursion guard', () => {
     expect(after).toHaveBeenCalledTimes(1);
     const [{ info, cause }] = reported();
     expect(info).toBe('scheduler flush');
-    expect(cause).toMatchObject({ code: 'VIBE5101' });
+    expect(cause).toMatchObject({ code: 'VIBE5101', args: { component: 'outside a component' } });
     expect(reported()).toHaveLength(1);
   });
 

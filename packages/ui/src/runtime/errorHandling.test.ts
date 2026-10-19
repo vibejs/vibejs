@@ -205,4 +205,19 @@ describe('callWithErrorHandling', () => {
     expect(reported()).toEqual([[err, 'watcher callback']]);
     expect(callWithAsyncErrorHandling(() => 1, null, 'watcher callback')).toBe(1);
   });
+
+  test('in dev, logs the source position after the error, and only the error in prod', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const err = new Error('boom');
+    handleError(err, null, 'render effect', 'src/A.vibe:12:5');
+    vi.stubGlobal('__DEV__', false);
+    handleError(err, null, 'render effect', 'src/A.vibe:12:5');
+    const [[dev, details], prod] = spy.mock.calls;
+    expect(unhandled(dev).cause).toBe(err);
+    expect(details).toBe('at src/A.vibe:12:5');
+    expect(prod).toHaveLength(1);
+    expect(unhandled(prod[0]).message).toBe(
+      '[VIBE5102] https://vibejs.org/v0/errors/VIBE5102?info=render+effect',
+    );
+  });
 });

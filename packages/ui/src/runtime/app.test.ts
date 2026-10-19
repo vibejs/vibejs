@@ -16,7 +16,8 @@ import { ref } from '../reactivity/ref.ts';
 import { createApp, useId, type App, type ComponentHandle, type Plugin } from './app.ts';
 import { createComponent } from './component.ts';
 import { inject, provide } from './inject.ts';
-import { onMounted } from './lifecycle.ts';
+import { onMounted, onUnmounted } from './lifecycle.ts';
+import { currentInstance, type ComponentInstance } from './instance.ts';
 import { renderEffect } from './renderEffect.ts';
 import { nextTick } from './scheduler.ts';
 
@@ -379,4 +380,60 @@ test('a failed root setup still mounts an empty block', () => {
   app.mount(root);
   expect(root.innerHTML).toBe('<!---->');
   expect(isVibeError(errors[0])).toBe(false);
+});
+
+describe('remount', () => {
+  /** Mounts a root that logs its setups and unmounts, and returns the app and its context. */
+  function mountLogged(log: string[]) {
+    let instance: ComponentInstance | null = null;
+    const app = createApp(
+      comp((props) => `${String(props.label)}:${String(inject('key'))}`, {
+        __propKeys: ['label'],
+        setup: () => {
+          instance = currentInstance;
+          log.push('setup');
+          onUnmounted(() => log.push('unmounted'));
+        },
+      }),
+      { label: 'root' },
+    );
+    app.provide('key', 'provided');
+    const host = document.createElement('div');
+    app.mount(host);
+    return { app, host, context: instance!.appContext };
+  }
+
+  test('in dev, mounts the root again in the same container with its props and provides', () => {
+    const log: string[] = [];
+    const { app, host, context } = mountLogged(log);
+    context.remount!();
+    expect(host.textContent).toBe('root:provided');
+    expect(host.childNodes).toHaveLength(1);
+    app.unmount();
+    expect(host.textContent).toBe('');
+    // The old root's `unmounted` hooks run after the new setup, in the post flush of the remount.
+    expect(log).toEqual(['setup', 'setup', 'unmounted', 'unmounted']);
+  });
+
+  test('in dev, a later mount returns the exposed values of the remounted root', () => {
+    let instance: ComponentInstance | null = null;
+    let setups = 0;
+    const app = createApp({
+      setup: (_props, ctx) => {
+        instance = currentInstance;
+        ctx.expose({ setup: ++setups });
+      },
+      render: () => [],
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const host = document.createElement('div');
+    expect(app.mount(host)).toEqual({ setup: 1 });
+    instance!.appContext.remount!();
+    expect(app.mount(host)).toEqual({ setup: 2 });
+  });
+
+  test('in prod, the app context has no remount', () => {
+    vi.stubGlobal('__DEV__', false);
+    expect(mountLogged([]).context.remount).toBeUndefined();
+  });
 });

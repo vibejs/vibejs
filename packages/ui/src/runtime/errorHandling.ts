@@ -1,6 +1,6 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/runtime-core/src/errorHandling.ts (MIT)
 import { vibeError } from '../errors.gen.ts';
-import { logError } from '../warn.ts';
+import { formatTrace, logError } from '../warn.ts';
 import type { ComponentInstance, LifecycleHook } from './instance.ts';
 
 /** Where an error was thrown; the same strings in dev and prod builds. */
@@ -20,7 +20,8 @@ export type ErrorInfo =
 /**
  * The one place errors of user code end up. The `onErrorCaptured` hooks of the ancestors of
  * `instance` see it first, nearest first, and one that returns `false` stops it; then the app's
- * `config.errorHandler`; else it is logged as VIBE5102. It never rethrows: an error of a hook
+ * `config.errorHandler`; else it is logged as VIBE5102, in dev with the source position `loc` and
+ * the component trace. It never rethrows: an error of a hook
  * goes on from the hook's component as `'errorCaptured hook'`, and an error of the app handler is
  * logged as VIBE5102.
  */
@@ -28,6 +29,7 @@ export function handleError(
   err: unknown,
   instance: ComponentInstance | null,
   info: ErrorInfo,
+  loc?: string,
 ): void {
   for (let cur = instance?.parent; cur; cur = cur.parent) {
     for (const hook of cur.errorCaptured) {
@@ -37,7 +39,8 @@ export function handleError(
   }
   const handler = instance?.appContext.config.errorHandler;
   if (!handler) {
-    logError(vibeError('VIBE5102', { info }, { cause: err }));
+    const details = __DEV__ ? [loc && `at ${loc}`, formatTrace(instance)] : [];
+    logError(vibeError('VIBE5102', { info }, { cause: err }), details.filter(Boolean).join('\n'));
     return;
   }
   try {

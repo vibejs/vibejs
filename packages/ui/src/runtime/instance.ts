@@ -33,6 +33,8 @@ export interface AppContext {
   readonly provides: Record<PropertyKey, unknown>;
   /** The number of ids `useId()` gave out. */
   ids: number;
+  /** Dev only: unmounts the root component and mounts it again, for HMR. */
+  remount?: () => void;
 }
 
 /** The context of components created outside an app. */
@@ -50,6 +52,8 @@ export class ComponentInstance {
   readonly uid: number = uid++;
   readonly def: ComponentDef;
   readonly name: string | undefined;
+  /** Dev only: the source file of the component. */
+  readonly file: string | undefined;
   /** The component that renders this one: its provides, error hooks and app reach this one. */
   readonly parent: ComponentInstance | null;
   /**
@@ -64,6 +68,8 @@ export class ComponentInstance {
   readonly appContext: AppContext;
   /** Owns everything the setup and the render create; detached, it stops when the instance unmounts. */
   readonly scope: EffectScopeImpl = new EffectScopeImpl(true);
+  /** Owns what the render creates; a child of `scope`, replaced when HMR rerenders. */
+  renderScope: EffectScopeImpl | undefined;
   /** What `provide()` adds to: the parent's provides until the first `provide()`. */
   provides: Record<PropertyKey, unknown>;
   hooks: Partial<Record<LifecycleHook, (() => void)[]>> = {};
@@ -75,6 +81,8 @@ export class ComponentInstance {
   attrs!: Record<string, unknown>;
   slots!: Slots;
   ctx!: SetupContext;
+  /** The `$setup` of the render: the setup bindings with refs unwrapped. */
+  setupState: Record<string, unknown> = {};
   exposed: Record<string, unknown> | undefined;
   isMounted = false;
   isUnmounted = false;
@@ -92,6 +100,7 @@ export class ComponentInstance {
   ) {
     this.def = def;
     this.name = def.name;
+    this.file = __DEV__ ? def.__file : undefined;
     this.parent = parent;
     this.owner = owner;
     this.rawProps = rawProps;
@@ -101,6 +110,18 @@ export class ComponentInstance {
     this.provides = parent ? parent.provides : appContext.provides;
   }
 }
+
+/** An HMR record: the def a `.vibe` module exported first, and its live instances. */
+export interface HmrRecord {
+  readonly def: ComponentDef;
+  readonly instances: Set<ComponentInstance>;
+}
+
+/**
+ * Dev only: the HMR records by `__hmrId`. `hmr.createRecord()` adds them; `createComponent`
+ * registers each instance of a recorded def until it unmounts.
+ */
+export const hmrRecords: Map<string, HmrRecord> = new Map();
 
 /** The instance whose setup, render or render effect is running: the owner of what it creates. */
 export let currentInstance: ComponentInstance | null = null;

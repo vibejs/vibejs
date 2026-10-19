@@ -25,6 +25,7 @@ export {
 } from './runtime/dom.ts';
 export { on, withKeys, withModifiers } from './runtime/events.ts';
 export { createFor } from './runtime/for.ts';
+export { hmr } from './runtime/hmr.ts';
 export type { ComponentInstance } from './runtime/instance.ts';
 export { useModel } from './runtime/props.ts';
 export type { RawProps } from './runtime/props.ts';

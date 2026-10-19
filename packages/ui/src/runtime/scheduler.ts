@@ -1,6 +1,7 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/runtime-core/src/scheduler.ts (MIT)
 import { vibeError } from '../errors.gen.ts';
 import { callWithErrorHandling, handleError } from './errorHandling.ts';
+import type { ComponentInstance } from './instance.ts';
 
 /**
  * A queued function. Jobs run in `id` order (none = `Infinity`): an unowned pre watcher is `-1`, an
@@ -13,6 +14,9 @@ export interface SchedulerJob {
   id?: number;
   order?: number;
   flags?: number;
+  /** The instance of a watcher or a render effect (render effects set it in dev only), and the dev-only source position of a render effect, for VIBE5101. */
+  instance?: ComponentInstance | null;
+  loc?: string | undefined;
 }
 
 export const SchedulerJobFlags = {
@@ -156,7 +160,9 @@ function runJob(job: SchedulerJob, seen: Map<SchedulerJob, number> | undefined):
 function tooManyRuns(seen: Map<SchedulerJob, number>, job: SchedulerJob): boolean {
   const count = seen.get(job) ?? 0;
   if (count >= RECURSION_LIMIT) {
-    handleError(vibeError('VIBE5101'), null, 'scheduler flush');
+    const { instance } = job;
+    const component = instance ? `<${instance.name ?? 'Anonymous'}>` : 'outside a component';
+    handleError(vibeError('VIBE5101', { component }), null, 'scheduler flush', job.loc);
     return true;
   }
   seen.set(job, count + 1);
