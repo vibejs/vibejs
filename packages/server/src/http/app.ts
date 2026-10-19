@@ -1,10 +1,9 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
-import type { HttpMethod, RouteDef } from '@vibejs-org/contract';
+import type { HttpMethod } from '@vibejs-org/contract';
 import {
   get,
   instantiate,
   providerRecord,
-  recordValue,
   type Injector,
   type ProviderRecord,
 } from '../di/injector.ts';
@@ -14,7 +13,6 @@ import { JsonLogger, Logger } from '../logger.ts';
 import { Module } from '../module/decorators.ts';
 import { scan, type DynamicModule, type ModuleImport } from '../module/graph.ts';
 import { init, shutdown } from '../module/lifecycle.ts';
-import { readJson } from './body.ts';
 import {
   createContext,
   type CanActivate,
@@ -22,6 +20,7 @@ import {
   type Interceptor,
 } from './context.ts';
 import { HttpError, problem, renderError } from './errors.ts';
+import { createPipeline } from './pipeline.ts';
 import { createRouter, handlerName } from './router.ts';
 
 export interface AppOptions {
@@ -41,6 +40,8 @@ export interface AppOptions {
   readonly bodyLimit?: number;
   /** How long `close()` waits for running requests, in ms; default 10 000. */
   readonly shutdownTimeout?: number;
+  /** Validates handler results against the route's response schema; default `true`. */
+  readonly validateResponses?: boolean;
 }
 
 /** Wraps request handling; `next(req?)` continues, optionally with a replacement request. */
@@ -118,17 +119,28 @@ export const VibeFactory = {
       logger = new JsonLogger(),
       bodyLimit = 1_048_576,
       shutdownTimeout = 10_000,
+      validateResponses = true,
     } = options;
     const dynamic: DynamicModule = typeof root === 'function' ? { module: root } : root;
     const internal = loggerModule(logger);
     const graph = scan({ ...dynamic, imports: [internal, ...(dynamic.imports ?? [])] });
     const scope = graph.root.scope;
-    const globals = [...guards, ...interceptors, ...filters].map((cls) =>
-      providerRecord(cls, scope),
-    );
-    await instantiate([...graph.records, ...globals]);
+    const records = (classes: readonly (new () => object)[]) =>
+      classes.map((cls) => providerRecord(cls, scope));
+    const globals = {
+      guards: records(guards),
+      interceptors: records(interceptors),
+      filters: records(filters),
+    };
+    await instantiate([...graph.records, ...Object.values(globals).flat()]);
     await init(graph);
     const router = createRouter(graph.routes, basePath);
+    const pipelines = new Map(
+      graph.routes.map((binding) => [
+        binding,
+        createPipeline(binding, globals, { basePath, bodyLimit, validateResponses }),
+      ]),
+    );
 
     let inFlight = 0;
     let drained: (() => void) | undefined;
@@ -137,7 +149,7 @@ export const VibeFactory = {
     let server: { readonly url?: string; close(force?: boolean): Promise<void> } | undefined;
     const hooks = new Map<string, () => void>();
 
-    /** Routes a request and runs its handler; every error becomes a problem response. */
+    /** Routes a request and runs its pipeline; every error becomes a problem response. */
     async function dispatch(req: Request, requestId: string, headers: Headers): Promise<Response> {
       const log = logger.child({ requestId });
       try {
@@ -148,20 +160,17 @@ export const VibeFactory = {
         const found = router.match(req.method, url.pathname);
         if ('allow' in found) return new Response(null, { status: 204, headers: found });
         const { binding, params } = found;
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- every route def is a RouteDef
-        const def = binding.route.def as RouteDef;
-        const parts = def.body ? { body: await readJson(req, bodyLimit) } : {};
-        const base = { req, url, binding, params, requestId, log, responseHeaders: headers };
-        const ctx = createContext(base, parts);
-        const controller = recordValue(binding.controller);
-        const value: unknown = await Reflect.apply(
-          Reflect.get(Object(controller), binding.key),
-          controller,
-          [ctx],
-        );
-        if (value instanceof Response) return value;
-        if (!def.response) return new Response(null, { status: def.status ?? 204 });
-        return Response.json(value, { status: def.status ?? 200 });
+        const ctx = createContext({
+          req,
+          url,
+          binding,
+          params,
+          requestId,
+          log,
+          responseHeaders: headers,
+        });
+        // oxlint-disable-next-line typescript/no-non-null-assertion -- every routed binding has a pipeline
+        return await pipelines.get(binding)!(ctx);
       } catch (error) {
         return renderError(error, requestId, log);
       }
