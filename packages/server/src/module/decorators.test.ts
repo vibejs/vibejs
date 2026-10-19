@@ -245,9 +245,30 @@ describe('call shape', () => {
     });
     expect(error).toMatchObject({
       code: 'VIBE9307',
-      args: { controller: 'UsersController', method: 'one' },
+      args: { decorator: '@Handle', controller: 'UsersController', method: 'one' },
       fixes: nonEmpty,
     });
+  });
+
+  it('throws VIBE9307 for a method enhancer on a static method and records nothing', () => {
+    const enhancers = [
+      ['@UseGuards', UseGuards()],
+      ['@UseInterceptors', UseInterceptors()],
+      ['@UseFilters', UseFilters()],
+      ["createMetadata('roles')", Roles([])],
+    ] as const;
+    for (const [decorator, apply] of enhancers) {
+      class UsersController {
+        static one(): void {}
+      }
+      const desc = Object.getOwnPropertyDescriptor(UsersController, 'one') ?? {};
+      expect(thrown(() => apply(UsersController, 'one', desc))).toMatchObject({
+        code: 'VIBE9307',
+        args: { decorator, controller: 'UsersController', method: 'one' },
+      });
+      expect(readMeta(UsersController)).toBeUndefined();
+    }
+    expect(readMeta(Function)).toBeUndefined();
   });
 });
 

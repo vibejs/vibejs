@@ -11,7 +11,7 @@ const MESSAGES = {
   VIBE9107: ["A provider in {module} is neither a class nor an object with a token in `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`.","List the class itself, or set `provide` and exactly one of `useClass`, `useValue`, `useFactory` or `useExisting`."],
   VIBE9201: ["{module} is imported at {path}, but the class has no `@Module()` decorator.","Add the `@Module()` decorator to the class {module}; an empty options object is enough.","Import the module class itself instead of a class derived from it."],
   VIBE9202: ["The modules import each other in a cycle: {cycle}.","Move the providers that both modules need into a third module and import it in both."],
-  VIBE9203: ["{module} exports {export}, which is neither one of its providers nor one of its imports.","Add {export} to `providers` of {module}.","Add the module {export} to `imports` of {module}."],
+  VIBE9203: ["{module} exports {export}, which is neither one of its providers nor one of its imports.","If {export} is a provider token, add its provider to `providers` of {module}.","If {export} is a module, add it to `imports` of {module}."],
   VIBE9204: ["{count} shutdown hooks failed: {hooks}.","Read `cause.errors` of this error and fix each hook that is listed."],
   VIBE9301: ["{decorator} was called with a standard decorator context, but the server decorators need `experimentalDecorators`.","Set `\"experimentalDecorators\": true` in `compilerOptions` of the server `tsconfig.json`."],
   VIBE9302: ["{controller} is listed in `controllers` of {module}, but neither it nor a parent class has `@Controller()`.","Add `@Controller(contract)` to the class {controller}.","Remove {controller} from `controllers` of {module}."],
@@ -19,7 +19,7 @@ const MESSAGES = {
   VIBE9304: ["The route {route} is handled by more than one method of {controller}: {methods}.","Keep one handler for {route} and remove `@Handle()` from the other methods."],
   VIBE9305: ["The method {controller}.{method} handles a route that is not part of the contract of {controller}.","Pass a route of this controller's contract to `@Handle()` on {method}.","Move {method} to the controller of the contract that declares its route."],
   VIBE9306: ["More than one controller serves the same contract: {controllers}.","Merge the controllers {controllers} into one.","Split the contract into one contract per controller."],
-  VIBE9307: ["The handler {controller}.{method} is static, but `@Handle()` needs an instance method.","Remove `static` from {controller}.{method}."],
+  VIBE9307: ["{decorator} is on the static method {controller}.{method}, but it needs an instance method.","Remove `static` from {controller}.{method}."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

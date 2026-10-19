@@ -29,8 +29,8 @@ A module can export the tokens of its own providers and the modules it imports. 
 
 ### Fix
 
-- Add {export} to `providers` of {module}.
-- Add the module {export} to `imports` of {module}.
+- If {export} is a provider token, add its provider to `providers` of {module}.
+- If {export} is a module, add it to `imports` of {module}.
 
 ## VIBE9204: Shutdown hooks failed
 

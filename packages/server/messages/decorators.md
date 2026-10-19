@@ -63,11 +63,11 @@ A contract belongs to exactly one controller, so each route has a single handler
 - Merge the controllers {controllers} into one.
 - Split the contract into one contract per controller.
 
-## VIBE9307: Static handler
+## VIBE9307: Static method
 
-> The handler {controller}.{method} is static, but `@Handle()` needs an instance method.
+> {decorator} is on the static method {controller}.{method}, but it needs an instance method.
 
-Handlers run on the controller instance that the container creates, so they can use its injected fields.
+Handlers run on the controller instance that the container creates, so they can use its injected fields. Method guards, interceptors, filters and metadata apply to those handlers.
 
 ### Fix
 

@@ -127,7 +127,11 @@ export function Handle<R extends Route>(
   return (target: object, key: string | symbol): void => {
     legacy('@Handle', key);
     if (typeof target === 'function') {
-      throw vibeError('VIBE9307', { controller: target.name, method: String(key) });
+      throw vibeError('VIBE9307', {
+        decorator: '@Handle',
+        controller: target.name,
+        method: String(key),
+      });
     }
     ownMeta(target.constructor).handlers.set(key, route);
   };
@@ -143,6 +147,9 @@ function enhancer(
 ): EnhancerDecorator {
   return (target: object, key?: string | symbol): void => {
     legacy(decorator, key);
+    if (key !== undefined && typeof target === 'function') {
+      throw vibeError('VIBE9307', { decorator, controller: target.name, method: String(key) });
+    }
     const cls = key === undefined ? target : target.constructor;
     const meta = ownMeta(cls);
     const parent = readMeta(Reflect.getPrototypeOf(cls));

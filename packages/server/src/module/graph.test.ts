@@ -317,8 +317,8 @@ describe('graph errors', () => {
     });
     expect(error).toMatchInlineSnapshot(`
       [VibeError: [VIBE9203] TokenModule exports T, which is neither one of its providers nor one of its imports.
-        Fix: Add T to \`providers\` of TokenModule.
-        Fix: Add the module T to \`imports\` of TokenModule.
+        Fix: If T is a provider token, add its provider to \`providers\` of TokenModule.
+        Fix: If T is a module, add it to \`imports\` of TokenModule.
         Docs: https://vibejs.org/v0/errors/VIBE9203]
     `);
     expect(thrown(() => scan(ModuleModule))).toMatchObject({

@@ -120,6 +120,18 @@ describe('init', () => {
       'Service.onModuleInit',
     ]);
   });
+
+  it('rejects with the same error object the hook threw', async () => {
+    const failure = new Error('init failed');
+    class Failing {
+      onModuleInit(): void {
+        throw failure;
+      }
+    }
+    @Module({ providers: [Failing] })
+    class AppModule {}
+    await expect(init(await boot(AppModule))).rejects.toBe(failure);
+  });
 });
 
 describe('shutdown', () => {
@@ -156,5 +168,42 @@ describe('shutdown', () => {
         Fix: Read \`cause.errors\` of this error and fix each hook that is listed.
         Docs: https://vibejs.org/v0/errors/VIBE9204]
     `);
+  });
+
+  it('names failing hooks by token and runs the rest when a target has no prototype', async () => {
+    const log: string[] = [];
+    const destroy = (name: string) => () => {
+      log.push(name);
+      throw new Error(name);
+    };
+    const NullProto = token<object>('NullProto');
+    const Later = hooked(log, 'Later');
+    @Module({
+      providers: [
+        Later,
+        {
+          provide: NullProto,
+          useValue: Object.assign(Object.create(null), { onModuleDestroy: destroy('nullproto') }),
+        },
+        class {
+          onModuleDestroy = destroy('anonymous');
+        },
+      ],
+    })
+    class AppModule {}
+    const error: unknown = await shutdown(await boot(AppModule)).catch((e: unknown) => e);
+    expect(log).toEqual([
+      'anonymous',
+      'nullproto',
+      'Later.onModuleDestroy',
+      'Later.onApplicationShutdown',
+    ]);
+    expect(error).toMatchObject({
+      code: 'VIBE9204',
+      args: {
+        count: 2,
+        hooks: '<anonymous class>.onModuleDestroy, NullProto.onModuleDestroy',
+      },
+    });
   });
 });
