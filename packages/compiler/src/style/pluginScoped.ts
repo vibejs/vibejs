@@ -117,7 +117,11 @@ function reportMalformed(rule: Rule, onMalformed: OnMalformed): boolean {
       const { value, nodes } = pseudo;
       if (value !== ':deep' && value !== ':global') return;
       // A comment is not a selector: `:deep(/* x */)` has an empty argument.
-      if (nodes.length === 1 && nodes[0].nodes.some((n) => n.type !== 'comment')) return;
+      if (
+        nodes.length === 1 &&
+        nodes[0].nodes.some((n: selectorParser.Node) => n.type !== 'comment')
+      )
+        return;
       malformed = true;
       const offset = rule.source!.start!.offset;
       const start = pseudo.sourceIndex;
@@ -210,7 +214,7 @@ function rewriteSelector(
         // .foo :deep(.bar) -> .foo[xxxxxxx] .bar
         // replace the current node with :deep's inner selector
         let last: selectorParser.Selector['nodes'][0] = n;
-        n.nodes[0].each((ss) => {
+        n.nodes[0].each((ss: selectorParser.Selector['nodes'][number]) => {
           selector.insertAfter(last, ss);
           last = ss;
         });

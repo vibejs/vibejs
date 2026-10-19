@@ -62,7 +62,8 @@ interface ViewGuard {
   guard: AnyGuard;
 }
 
-const viewGuards = new WeakMap<AnyRouter, Set<ViewGuard>>();
+// Keyed by `object`: a `Router<R>` with literal routes is built before it is widened to `AnyRouter`.
+const viewGuards = new WeakMap<object, Set<ViewGuard>>();
 
 /** Registers the guard of a view: it runs while `record()` is leaving or updating. */
 export function addViewGuard(
@@ -279,7 +280,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
     return undefined;
   }
 
-  const router: AnyRouter = {
+  const router: Router<R> = {
     currentRoute,
     push: (to) => navigate(to, false),
     replace: (to) => navigate(to, true),
