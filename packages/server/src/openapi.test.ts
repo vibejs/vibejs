@@ -135,6 +135,20 @@ describe('generateOpenApi: mapping', () => {
         { name: 'x-tenant', in: 'header', required: false, schema: { type: 'string' } },
       ],
     });
+    // A named schema is read from its definition; a reference to no definition gives none.
+    const named = defineContract('/n', {
+      a: get('/:id', {
+        params: z.object({ id: z.uuid() }).meta({ id: 'P' }),
+        query: z.object({ q: z.string() }).meta({ id: 'Q' }),
+        headers: fake({ $ref: '#/$defs/Missing' }),
+      }),
+    });
+    expect(op(generateOpenApi(named, { info }), '/n/{id}', 'get')).toMatchObject({
+      parameters: [
+        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        { name: 'q', in: 'query', required: true, schema: { type: 'string' } },
+      ],
+    });
     // A schema without properties gives no parameters.
     const empty = defineContract('/e', { a: get('/', { query: fake({ type: 'object' }) }) });
     expect(op(generateOpenApi(empty, { info }), '/e', 'get')).not.toHaveProperty('parameters');
@@ -152,6 +166,7 @@ describe('generateOpenApi: mapping', () => {
       file: get('/file', { response: raw('text/csv') }),
       octet: get('/octet', { response: raw() }),
       remove: del('/'),
+      accept: put('/', { status: 202 }),
     });
     const doc = generateOpenApi(c, { info });
     expect(op(doc, '/u', 'post')).toEqual({
@@ -198,6 +213,10 @@ describe('generateOpenApi: mapping', () => {
       operationId: 'remove',
       responses: { 204: { description: 'No Content' } },
     });
+    expect(op(doc, '/u', 'put')).toEqual({
+      operationId: 'accept',
+      responses: { 202: { description: 'OK' } },
+    });
   });
 
   it('groups declared errors by status and adds VALIDATION_FAILED for routes with input', () => {
@@ -223,7 +242,7 @@ describe('generateOpenApi: mapping', () => {
                   status: { type: 'integer', const: 404 },
                   code: { type: 'string', enum: ['GONE', 'MISSING'] },
                 },
-                required: ['type', 'title', 'status', 'code'],
+                required: ['type', 'title', 'status', 'code', 'requestId'],
               },
             },
           },
@@ -309,6 +328,16 @@ describe('generateOpenApi: $defs', () => {
     expect(error.code).toBe('VIBE9802');
     expect(error.message).toContain('User');
     expect(error.message).toContain('GET /d/b');
+  });
+
+  it('shares equal definitions whose keys are in another order', () => {
+    const c = defineContract('/d', {
+      a: get('/a', { response: fake(withUser(user)) }),
+      b: get('/b', {
+        response: fake(withUser({ properties: { id: { type: 'string' } }, type: 'object' })),
+      }),
+    });
+    expect(generateOpenApi(c, { info }).components.schemas).toEqual({ User: user });
   });
 
   it('keeps definitions named after Object.prototype members', () => {

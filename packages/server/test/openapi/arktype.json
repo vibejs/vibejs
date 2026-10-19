@@ -128,7 +128,8 @@
                     "type",
                     "title",
                     "status",
-                    "code"
+                    "code",
+                    "requestId"
                   ]
                 }
               }
@@ -259,7 +260,8 @@
                     "type",
                     "title",
                     "status",
-                    "code"
+                    "code",
+                    "requestId"
                   ]
                 }
               }
@@ -327,7 +329,8 @@
                     "type",
                     "title",
                     "status",
-                    "code"
+                    "code",
+                    "requestId"
                   ]
                 }
               }
@@ -470,7 +473,8 @@
                     "type",
                     "title",
                     "status",
-                    "code"
+                    "code",
+                    "requestId"
                   ]
                 }
               }
@@ -538,7 +542,8 @@
                     "type",
                     "title",
                     "status",
-                    "code"
+                    "code",
+                    "requestId"
                   ]
                 }
               }
@@ -627,7 +632,8 @@
                     "type",
                     "title",
                     "status",
-                    "code"
+                    "code",
+                    "requestId"
                   ]
                 }
               }

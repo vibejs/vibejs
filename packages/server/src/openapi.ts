@@ -22,6 +22,7 @@ export interface OpenApiDocument {
 type Json = Record<string, unknown>;
 type Part = 'params' | 'query' | 'headers' | 'body' | 'response';
 
+const components = '#/components/schemas/';
 const isJson = (value: unknown): value is Json => typeof value === 'object' && value !== null;
 
 // Deep copies of JSON data with each `#/$defs/X` reference pointed at `components.schemas`.
@@ -32,10 +33,23 @@ const rewriteRefs = (json: Json): Json =>
     Object.entries(json).map(([key, value]) => [
       key,
       key === '$ref' && typeof value === 'string'
-        ? value.replace(/^#\/\$defs\//, '#/components/schemas/')
+        ? value.replace(/^#\/\$defs\//, components)
         : rewrite(value),
     ]),
   );
+
+// A copy with keys sorted at every level, so that equal schemas serialize equally.
+const sorted = (value: unknown): unknown =>
+  Array.isArray(value)
+    ? value.map(sorted)
+    : isJson(value)
+      ? Object.fromEntries(
+          Object.entries(value)
+            .toSorted(([a], [b]) => (a < b ? -1 : 1))
+            .map(([key, item]) => [key, sorted(item)]),
+        )
+      : value;
+const same = (a: unknown, b: unknown) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
 
 /** The JSON Schema of `schema`: its own converter first, then `toJsonSchema`, else VIBE9801. */
 function toJson(
@@ -86,7 +100,7 @@ const problem = (status: number, codes: string[]): Json => ({
     },
     requestId: { type: 'string' },
   },
-  required: ['type', 'title', 'status', 'code'],
+  required: ['type', 'title', 'status', 'code', 'requestId'],
 });
 
 /**
@@ -120,8 +134,7 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
     const { $schema: _, $defs, ...rest } = json;
     for (const [name, def] of Object.entries(isJson($defs) ? $defs : {})) {
       const value = rewrite(def);
-      // Converters emit keys in a fixed order, so equal schemas serialize equally.
-      if (schemas.has(name) && JSON.stringify(schemas.get(name)) !== JSON.stringify(value))
+      if (schemas.has(name) && !same(schemas.get(name), value))
         throw vibeError('VIBE9802', { name, route });
       schemas.set(name, value);
     }
@@ -134,7 +147,12 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
     const def = route.def as RouteDef<`:${string}`>;
     const label = `${route.method} ${route.path}`;
     const input = (part: 'params' | 'query' | 'headers', schema: StandardSchemaV1) => {
-      const json = convert(schema, 'input', label, part);
+      const root = convert(schema, 'input', label, part);
+      // A named schema converts to a reference to its definition, which holds the properties.
+      const ref = typeof root.$ref === 'string' ? root.$ref : '';
+      const named: unknown =
+        ref.startsWith(components) && schemas.get(ref.slice(components.length));
+      const json = isJson(named) ? named : root;
       const properties = isJson(json.properties) ? json.properties : {};
       const required: unknown[] = Array.isArray(json.required) ? json.required : [];
       return { properties, required };
@@ -165,12 +183,17 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
     const body = def.body && convert(def.body, 'input', label, 'body');
 
     const responses: Json = {};
-    const status = String(def.status ?? 200);
-    if (!def.response) responses['204'] = { description: 'No Content' };
-    else if ('~standard' in def.response) {
-      const schema = convert(def.response, 'output', label, 'response');
-      responses[status] = { description: 'OK', content: { 'application/json': { schema } } };
-    } else responses[status] = { description: 'OK', content: { [def.response.contentType]: {} } };
+    // Without a response the server answers `def.status ?? 204` with no body.
+    const status = def.status ?? (def.response ? 200 : 204);
+    const content = !def.response
+      ? undefined
+      : '~standard' in def.response
+        ? { 'application/json': { schema: convert(def.response, 'output', label, 'response') } }
+        : { [def.response.contentType]: {} };
+    responses[status] = {
+      description: status === 204 ? 'No Content' : 'OK',
+      ...(content && { content }),
+    };
 
     const hasInput = Boolean(def.params ?? def.query ?? def.headers ?? def.body);
     const errors = { ...(hasInput && { VALIDATION_FAILED: 400 }), ...def.errors };
