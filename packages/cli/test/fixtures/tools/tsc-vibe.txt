@@ -1,0 +1,6 @@
+src/App.vibe(5,7): error TS2322: Type 'string' is not assignable to type 'number'.
+src/App.vibe(11,15): error TS2552: Cannot find name 'nam'. Did you mean 'name'?
+fixtures/q3/Bogus.vibe(6,6): error VIBE6001: Unknown directive 'v-bogus'.
+fixtures/q8/Synth.vibe(6,7): error TS2322: Type 'string' is not assignable to type 'number'.
+  This location is in virtual code produced by the content mapper '@vibejs-org/language-tools@0.0.0' and has no corresponding location in the original file.
+error TS18075: The content mapper package '@vibejs-org/language-tools' could not be resolved.

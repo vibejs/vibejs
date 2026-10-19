@@ -1,12 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`command matrix > JSON: vibejs  exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]}]}"`;
+exports[`command matrix > JSON: vibejs  exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]}]}"`;
 
-exports[`command matrix > JSON: vibejs --help exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]}]}"`;
+exports[`command matrix > JSON: vibejs --help exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]}]}"`;
 
 exports[`command matrix > JSON: vibejs --version exits 0 > stdout 1`] = `"{"ok":true,"command":"version","version":"1.2.3"}"`;
 
-exports[`command matrix > JSON: vibejs -h exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]}]}"`;
+exports[`command matrix > JSON: vibejs -h exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"explain","aliases":[],"summary":"Explain a VIBE error code from the bundled catalog, offline.","usage":"vibejs explain <code>","examples":["vibejs explain VIBE8003"],"options":[],"positionals":[{"name":"code","required":true}]},{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]},{"name":"check","aliases":[],"summary":"Type-check, lint, format-check and test the project with coverage, concurrently.","usage":"vibejs check [--only types,lint,format,test] [--fix] [--max N]","examples":["vibejs check","vibejs check --only types,lint","vibejs check --fix --max 50"],"options":[{"name":"only","type":"string","description":"Run only these steps: types, lint, format, test."},{"name":"fix","type":"boolean","description":"Apply lint fixes and format the files first."},{"name":"max","type":"string","description":"Show at most N diagnostics (default 20)."}],"positionals":[]}]}"`;
+
+exports[`command matrix > JSON: vibejs check --only types exits 0 > stdout 1`] = `"{"ok":true,"command":"check","version":"1.2.3","durationMs":0,"steps":{"types":{"status":"passed","errors":0,"warnings":0,"ms":0},"lint":{"status":"skipped","errors":0,"warnings":0,"ms":0},"format":{"status":"skipped","errors":0,"warnings":0,"ms":0},"tests":{"status":"skipped","errors":0,"warnings":0,"ms":0,"passed":0,"failed":0,"skipped":0},"coverage":{"status":"skipped","errors":0,"warnings":0,"ms":0,"lines":0,"branches":0,"functions":0,"statements":0,"filesBelow100":0}},"diagnostics":[]}"`;
 
 exports[`command matrix > JSON: vibejs docs -h exits 0 > stdout 1`] = `"{"ok":true,"command":"help","version":"1.2.3","globalOptions":[{"name":"json","type":"boolean","description":"Print one JSON object (on by default in agent mode)."},{"name":"help","type":"boolean","short":"h","description":"Describe the commands and their options."},{"name":"version","type":"boolean","description":"Print the vibejs version."}],"commands":[{"name":"docs","aliases":[],"summary":"Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.","usage":"vibejs docs <query...>","examples":["vibejs docs VIBE8003","vibejs docs errors/VIBE8004","vibejs docs \\"unknown option\\""],"options":[],"positionals":[{"name":"query","required":true}]}]}"`;
 
@@ -43,6 +45,15 @@ vibejs docs <query...>
   $ vibejs docs errors/VIBE8004
   $ vibejs docs "unknown option"
 
+vibejs check [--only types,lint,format,test] [--fix] [--max N]
+  Type-check, lint, format-check and test the project with coverage, concurrently.
+  $ vibejs check
+  $ vibejs check --only types,lint
+  $ vibejs check --fix --max 50
+  --only  Run only these steps: types, lint, format, test.
+  --fix  Apply lint fixes and format the files first.
+  --max  Show at most N diagnostics (default 20).
+
 Global options:
   --json  Print one JSON object (on by default in agent mode).
   -h, --help  Describe the commands and their options.
@@ -62,6 +73,15 @@ vibejs docs <query...>
   $ vibejs docs VIBE8003
   $ vibejs docs errors/VIBE8004
   $ vibejs docs "unknown option"
+
+vibejs check [--only types,lint,format,test] [--fix] [--max N]
+  Type-check, lint, format-check and test the project with coverage, concurrently.
+  $ vibejs check
+  $ vibejs check --only types,lint
+  $ vibejs check --fix --max 50
+  --only  Run only these steps: types, lint, format, test.
+  --fix  Apply lint fixes and format the files first.
+  --max  Show at most N diagnostics (default 20).
 
 Global options:
   --json  Print one JSON object (on by default in agent mode).
@@ -88,10 +108,28 @@ vibejs docs <query...>
   $ vibejs docs errors/VIBE8004
   $ vibejs docs "unknown option"
 
+vibejs check [--only types,lint,format,test] [--fix] [--max N]
+  Type-check, lint, format-check and test the project with coverage, concurrently.
+  $ vibejs check
+  $ vibejs check --only types,lint
+  $ vibejs check --fix --max 50
+  --only  Run only these steps: types, lint, format, test.
+  --fix  Apply lint fixes and format the files first.
+  --max  Show at most N diagnostics (default 20).
+
 Global options:
   --json  Print one JSON object (on by default in agent mode).
   -h, --help  Describe the commands and their options.
   --version  Print the vibejs version.
+"
+`;
+
+exports[`command matrix > human: vibejs check --only types exits 0 > output 1`] = `
+"types: passed (0 errors, 0 warnings, 0 ms)
+lint: skipped (0 errors, 0 warnings, 0 ms)
+format: skipped (0 errors, 0 warnings, 0 ms)
+tests: skipped (0 errors, 0 warnings, 0 ms, passed 0, failed 0, skipped 0)
+coverage: skipped (0 errors, 0 warnings, 0 ms, lines 0, branches 0, functions 0, statements 0, filesBelow100 0)
 "
 `;
 

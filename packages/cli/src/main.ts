@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import type { VibeError } from '@vibejs-org/errors';
 import type { CommandDef, OptionDef } from './command.ts';
+import { check } from './commands/check.ts';
 import { docs } from './commands/docs.ts';
 import { explain } from './commands/explain.ts';
 import type { Ctx } from './ctx.ts';
@@ -15,10 +16,16 @@ import {
   type MissingInput,
 } from './output.ts';
 
-export const COMMANDS: readonly CommandDef[] = [explain, docs];
+export const COMMANDS: readonly CommandDef[] = [explain, docs, check];
 
 /** Common wrong commands and what to run instead: a `vibejs` command or the `npm create` line. */
-export const MISTAKES: Readonly<Record<string, string>> = { create: 'npm create vibejs@latest' };
+export const MISTAKES: Readonly<Record<string, string>> = {
+  create: 'npm create vibejs@latest',
+  typecheck: 'vibejs check --only types',
+  lint: 'vibejs check --only lint',
+  format: 'vibejs check --only format',
+  test: 'vibejs check --only test',
+};
 
 const GLOBAL_OPTIONS: Record<string, OptionDef> = {
   json: { type: 'boolean', description: 'Print one JSON object (on by default in agent mode).' },
@@ -147,7 +154,8 @@ function wantsJson(argv: string[]): boolean {
 export async function main(argv: string[], ctx: Ctx): Promise<0 | 1 | 2> {
   const [result, human] = await dispatch(argv, ctx);
   if (wantsJson(argv) || ctx.agent.active) ctx.out(`${JSON.stringify(result)}\n`);
-  else if (result.ok) ctx.out(`${human!()}\n`);
+  // A failure without an error (a check with diagnostics) is a result for people too.
+  else if (result.ok || !result.error) ctx.out(`${human!()}\n`);
   else ctx.err(`${errorText(result)}\n`);
   return exitCode(result);
 }

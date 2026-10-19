@@ -1,27 +1,64 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import type { Ctx } from './ctx.ts';
+import type { Ctx, ExecResult } from './ctx.ts';
 import { COMMANDS, main, MISTAKES } from './main.ts';
 import type { HelpResult, JsonEnvelope } from './output.ts';
 
 const root = mkdtempSync(join(tmpdir(), 'vibejs-main-'));
-// The search rows match only this page, so new catalog entries never change their snapshots.
-mkdirSync(join(root, 'docs', 'guide'), { recursive: true });
-writeFileSync(join(root, 'docs', 'guide', 'quokka.md'), '# Quokka guide\n\nA quokka page.\n');
 afterAll(() => {
   rmSync(root, { recursive: true, force: true });
 });
+function write(path: string, content: string): void {
+  mkdirSync(dirname(join(root, path)), { recursive: true });
+  writeFileSync(join(root, path), content);
+}
+// The search rows match only this page, so new catalog entries never change their snapshots.
+write('docs/guide/quokka.md', '# Quokka guide\n\nA quokka page.\n');
+// A project with stub tools for `vibejs check`; `exec` below answers like a clean run.
+write('app/package.json', JSON.stringify({ devDependencies: { '@vibejs-org/cli': '0.0.0' } }));
+for (const [pkg, version, bin] of [
+  ['typescript', '7.1.0', 'tsc'],
+  ['oxlint', '1.0.0', 'oxlint'],
+  ['oxfmt', '1.0.0', 'oxfmt'],
+  ['vitest', '5.0.0', 'vitest'],
+  ['@vitest/coverage-v8', '5.0.0'],
+]) {
+  write(`app/node_modules/${pkg}/package.json`, JSON.stringify({ version, bin }));
+}
+const REPORT = JSON.stringify({
+  numPassedTests: 1,
+  numFailedTests: 0,
+  numPendingTests: 0,
+  numTodoTests: 0,
+  testResults: [],
+});
+/** What the stub tsc prints; a test sets a type error. */
+let tscOutput = '';
 
-/** Runs main with a fixed version and a docs dir of one page. */
-async function run(argv: string[], agent = false) {
+async function exec(_: string, [bin]: string[], { cwd }: { cwd: string }): Promise<ExecResult> {
+  const name = bin.split(/[/\\]/).at(-1);
+  if (name === 'vitest') {
+    mkdirSync(join(cwd, '.vibejs/check/coverage'), { recursive: true });
+    writeFileSync(join(cwd, '.vibejs/check/vitest.json'), REPORT);
+    writeFileSync(join(cwd, '.vibejs/check/coverage/coverage-final.json'), '{}');
+  }
+  if (name === 'tsc') return { code: tscOutput ? 2 : 0, stdout: tscOutput, stderr: '' };
+  return { code: 0, stdout: name === 'oxlint' ? '{"diagnostics": []}' : '', stderr: '' };
+}
+
+/** Runs main with a fixed version and a docs dir of one page, in the stub project by default. */
+async function run(argv: string[], agent = false, cwd = join(root, 'app')) {
   let stdout = '';
   let stderr = '';
   const ctx: Ctx = {
     version: '1.2.3',
     agent: { active: agent },
     docsDir: join(root, 'docs'),
+    cwd,
+    now: () => 0,
+    exec,
     out: (s) => (stdout += s),
     err: (s) => (stderr += s),
   };
@@ -66,6 +103,12 @@ describe('unknown commands and options', () => {
     [['--bogus'], 'help', '--bogus', 'vibejs --help'],
     [['explain', 'VIBE8003', 'extra'], 'explain', 'extra', 'vibejs explain --help'],
     [['--', '-x'], 'help', '-x', 'vibejs --help'],
+    [['typecheck'], 'typecheck', 'typecheck', 'vibejs check --only types'],
+    [['lint'], 'lint', 'lint', 'vibejs check --only lint'],
+    [['format'], 'format', 'format', 'vibejs check --only format'],
+    [['test'], 'test', 'test', 'vibejs check --only test'],
+    [['check', '--only', 'types,tests'], 'check', 'tests', 'vibejs check --help'],
+    [['check', '--max', '0'], 'check', '0', 'vibejs check --help'],
   ])('%j gives VIBE8004 and exit 2', async (argv, command, name, next) => {
     const result = await run(['--json', ...argv]);
     expect(result.code).toBe(2);
@@ -108,6 +151,7 @@ describe('command matrix', () => {
     ['--version', 0],
     ['explain --version', 0],
     ['g', 2],
+    ['check --only types', 0],
   ] as const;
 
   it.each(cases)('JSON: vibejs %s exits %i', async (line, code) => {
@@ -179,4 +223,21 @@ it('prints the version with --version --json, without a skew check', async () =>
     command: 'version',
     version: '1.2.3',
   });
+});
+
+it('fails with VIBE8001 and exit 2 outside a project', async () => {
+  const result = await run(['check', '--json'], false, join(root, 'docs'));
+  expect(result.code).toBe(2);
+  expect(json(result)).toMatchObject({ ok: false, command: 'check', error: { code: 'VIBE8001' } });
+});
+
+it('prints a check with diagnostics for people on stdout, with exit 1', async () => {
+  tscOutput = 'src/a.ts(1,2): error TS2322: Nope.\n';
+  try {
+    const result = await run(['check', '--only', 'types']);
+    expect(result).toMatchObject({ code: 1, stderr: '' });
+    expect(result.stdout).toMatch(/^src\/a\.ts:1:2 {2}error {2}TS2322 {2}Nope\.\ntypes: failed /);
+  } finally {
+    tscOutput = '';
+  }
 });
