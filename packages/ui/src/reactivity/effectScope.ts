@@ -29,6 +29,8 @@ export class EffectScopeImpl implements EffectScope {
   warnOnRun = true;
   paused = false;
   readonly detached: boolean;
+  /** A scope stored in a reactive object stays raw, so that `run()` registers on the scope itself. */
+  readonly __v_skip = true;
   effects: OwnedEffect[] = [];
   cleanups: (() => void)[] = [];
   scopes: EffectScopeImpl[] = [];

@@ -38,7 +38,7 @@ SOFTWARE.
 - Repository: https://github.com/vuejs/core
 - Version: v3.5.44, commit `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`
 - License: MIT
-- Used in: the ported reactivity specs in `packages/ui/src/reactivity/ref.test.ts`, `computed.test.ts` and `effectScope.test.ts` (tests only, not shipped)
+- Used in: `packages/ui/src/reactivity/reactive.ts`, `baseHandlers.ts`, `collectionHandlers.ts`, `arrayInstrumentations.ts` and `dep.ts` (the reactive proxies, shipped in the `@vibejs-org/ui` dist) and the ported reactivity specs in `packages/ui/src/reactivity/ref.test.ts`, `computed.test.ts`, `effectScope.test.ts`, `reactive.test.ts`, `reactiveArray.test.ts`, `readonly.test.ts`, `shallowReactive.test.ts`, `shallowReadonly.test.ts`, `collectionMap.test.ts`, `collectionSet.test.ts`, `collectionWeakMap.test.ts`, `collectionWeakSet.test.ts` and `collectionShallowReadonly.test.ts` (tests, not shipped)
 
 ```text
 The MIT License (MIT)

@@ -46,12 +46,15 @@ export class ComputedRefImpl<T = unknown> implements Dependency {
   flags: number = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
   currentValue: T | undefined = undefined;
   readonly __v_isRef = true;
+  /** A computed without a setter is readonly. */
+  readonly __v_isReadonly: boolean;
   readonly getter: (oldValue: T | undefined) => T;
   readonly setter: ((value: T) => void) | undefined;
 
   constructor(getter: (oldValue: T | undefined) => T, setter?: (value: T) => void) {
     this.getter = getter;
     this.setter = setter;
+    this.__v_isReadonly = !setter;
   }
 
   get value(): T {

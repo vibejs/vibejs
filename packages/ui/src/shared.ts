@@ -6,3 +6,10 @@ export const isFunction = (value: unknown): value is () => unknown => typeof val
 
 export const isObject = (value: unknown): value is Record<PropertyKey, unknown> =>
   typeof value === 'object' && value !== null;
+
+/** Whether `key` is a canonical array index such as `'0'` (not `'-1'`, `'01'` or `'NaN'`). */
+export const isIntegerKey = (key: unknown): boolean =>
+  typeof key === 'string' &&
+  key !== 'NaN' &&
+  key[0] !== '-' &&
+  String(Number.parseInt(key, 10)) === key;
