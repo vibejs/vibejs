@@ -48,6 +48,7 @@ const MESSAGES = {
   VIBE3007: ["`{name}` is reserved for the compiled component.","Rename `{name}`."],
   VIBE3008: ["`{macro}` is a compiler macro and cannot be imported or declared.","Remove the import or the declaration of `{macro}` and call the macro directly."],
   VIBE3009: ["`{name}` is a prop and also a binding of the script.","Rename the binding of the script.","Rename the prop in its type and in the parent components that pass it."],
+  VIBE3010: ["`{syntax}` declarations cannot be used in `<script setup>`.","Move the namespace into a `.ts` module and import it here.","Write `import x = N.y` as `const x = N.y`, and `import x = require('m')` as an `import` declaration."],
   VIBE3101: ["`defineProps()` takes no arguments; the props are declared by its type argument.","Remove the argument and declare the props as the type argument."],
   VIBE3102: ["`{macro}()` needs a type argument.","Add the type argument, as in `{macro}<Declaration>()`, with `Declaration` declared in this file."],
   VIBE3103: ["The prop names cannot be read from the type argument of `defineProps`.","Destructure the props, so each name is written in the script.","Declare the props type in this file, as an interface or a type literal."],

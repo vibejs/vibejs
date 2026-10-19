@@ -102,6 +102,17 @@ The template reads `{name}` from one place only, so a prop and a script binding 
 - Rename the binding of the script.
 - Rename the prop in its type and in the parent components that pass it.
 
+## VIBE3010: Namespace or import alias
+
+> `{syntax}` declarations cannot be used in `<script setup>`.
+
+The block becomes the body of the setup function, and TypeScript allows namespace declarations and `import x =` aliases only at the top level of a module. `{syntax}` is the declaration.
+
+### Fix
+
+- Move the namespace into a `.ts` module and import it here.
+- Write `import x = N.y` as `const x = N.y`, and `import x = require('m')` as an `import` declaration.
+
 ## VIBE3101: Runtime props declaration
 
 > `defineProps()` takes no arguments; the props are declared by its type argument.

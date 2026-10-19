@@ -78,6 +78,14 @@ const GENERATED = new Set([
 const REACTIVE = new Set(['reactive', 'readonly', 'shallowReactive']);
 /** Calls that read a destructured prop once when it is passed directly (VIBE3107). */
 const BY_VALUE = new Set<string | undefined>(['watch', 'toRef']);
+const THUNKS = new Set(['ArrowFunctionExpression', 'FunctionExpression']);
+/** Type-only wrappers around an expression. */
+const TS_WRAPPERS = new Set([
+  'TSAsExpression',
+  'TSSatisfiesExpression',
+  'TSNonNullExpression',
+  'TSTypeAssertion',
+]);
 
 const range = (node: Node): [number, number] => [node.start, node.end];
 /** A read of a prop key on `__props`. */
@@ -197,16 +205,21 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
       }
     } else if (type.startsWith('Export') || type === 'TSExportAssignment') {
       const decl = first(statement, 'declaration');
+      const specifiers = children(statement, 'specifiers');
       const typeOnly =
         statement.exportKind === 'type' ||
         decl?.type === 'TSInterfaceDeclaration' ||
-        decl?.type === 'TSTypeAliasDeclaration';
+        decl?.type === 'TSTypeAliasDeclaration' ||
+        (specifiers.length > 0 && specifiers.every((s) => s.exportKind === 'type'));
       if (typeOnly) {
         a.hoisted.push(range(statement));
         skipped.add(statement);
       } else at(vibeError('VIBE3001'), [statement.start, statement.start + 'export'.length]);
     } else if (statement.declare === true) {
       continue;
+    } else if (type === 'TSModuleDeclaration' || type === 'TSImportEqualsDeclaration') {
+      const syntax = type === 'TSModuleDeclaration' ? 'namespace' : 'import =';
+      at(vibeError('VIBE3010', { syntax }), [statement.start, first(statement, 'id')!.end]);
     } else if (
       type === 'FunctionDeclaration' ||
       type === 'ClassDeclaration' ||
@@ -215,8 +228,9 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
       for (const id of children(statement, 'id').filter(isIdentifier)) bind(id, 'const');
     } else if (type === 'VariableDeclaration') {
       for (const declarator of children(statement, 'declarations')) {
-        const init = first(declarator, 'init');
+        let init = first(declarator, 'init');
         if (init && placed.has(init)) continue;
+        while (init && TS_WRAPPERS.has(init.type)) init = first(init, 'expression');
         const id = first(declarator, 'id')!;
         const kind: BindingKind =
           statement.kind === 'let' || statement.kind === 'var'
@@ -361,6 +375,11 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
       }
       const { name } = local;
       defineKeys.push({ name: key, decl: range(first(property, 'key')!) });
+      // A prop of the same name is checked with the other prop keys below.
+      if (name !== key && bindings.has(name)) {
+        at(vibeError('VIBE3009', { name }), range(local));
+        continue;
+      }
       destructured.set(name, key);
       if (name !== key) propAliases.set(name, key);
       bind(local, name === key ? 'prop' : 'prop-alias');
@@ -404,8 +423,13 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
       const name = property.type === 'Property' && !property.method ? keyName(property) : undefined;
       const value = first(property, 'value');
       if (name === 'required' && isBoolean(value)) required = value!.value === true;
-      else if (name === 'default') fallback = value;
-      else return fail('the options hold more than a boolean `required` and a `default`', property);
+      else if (name === 'default' && THUNKS.has(value!.type)) fallback = value;
+      else {
+        return fail(
+          'the options hold more than a boolean `required` and a `default` function',
+          property,
+        );
+      }
     }
     const name = named ?? 'modelValue';
     const decl = range(named === undefined ? callee : args[0]);
@@ -473,7 +497,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
   for (const [name, decl] of modelDecls) {
     keys.set(name, { name, decl });
     keys.set(`${name}Modifiers`, { name: `${name}Modifiers`, decl });
-    a.emits.push(`update:${name}`);
+    if (!a.emits.includes(`update:${name}`)) a.emits.push(`update:${name}`);
   }
   a.propKeys = [...keys.values()];
 

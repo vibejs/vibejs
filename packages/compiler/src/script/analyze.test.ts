@@ -33,6 +33,11 @@ describe('bindings', () => {
       { ref: 'import', a: 'maybe-ref', b: 'maybe-ref', c: 'maybe-ref' },
     ],
     [
+      'a call behind a type wrapper',
+      `const a = ref(0) as Ref<number>\nconst b = ref(0)!\nconst c = f() satisfies T\nconst d = <T>f()\nconst e = reactive({}) as T`,
+      { a: 'maybe-ref', b: 'maybe-ref', c: 'maybe-ref', d: 'maybe-ref', e: 'const' },
+    ],
+    [
       'a reactive const',
       `const a = reactive({})\nconst b = readonly({})\nconst c = shallowReactive({})`,
       { a: 'const', b: 'const', c: 'const' },
@@ -86,6 +91,12 @@ describe('bindings', () => {
   it('lists the bindings in source order', () => {
     const code = `const x = 1\nconst { a } = defineProps<{ a: string }>()\nconst y = 2`;
     expect(Object.keys(bindingsOf(code))).toStrictEqual(['x', 'a', 'y']);
+  });
+
+  it('hoists an export whose specifiers are all types', () => {
+    const { hoisted, bindings } = analyzeCode(`type T = 1\nexport { type T }`);
+    expect(hoisted).toHaveLength(1);
+    expect(bindings).toStrictEqual(new Map());
   });
 
   it('keeps the first declaration of a name', () => {
@@ -163,6 +174,7 @@ describe('analyzeScript', () => {
     ['const m = defineModel({ required: x })', 'the options hold more', 'required: x'],
     ['const m = defineModel({ ...o })', 'the options hold more', '...o'],
     ['const m = defineModel({ default() {} })', 'the options hold more', 'default() {}'],
+    ['const m = defineModel({ default: 0 })', 'a `default` function', 'default: 0'],
   ])('reports VIBE3321 for %s', (code, reason, at) => {
     const source = vibe(code);
     const [d] = analyzeFile(source).analysis.diagnostics;
@@ -177,6 +189,10 @@ describe('analyzeScript', () => {
     ['VIBE3331', 'defineOptions({ ...o })', '{ ...o }'],
     ['VIBE3331', `defineOptions({ name() { return 'X' } })`, `{ name() { return 'X' } }`],
     ['VIBE3322', `defineProps<{ a: string }>()\nconst m = defineModel('a')`, `'a'`],
+    ['VIBE3009', 'const cc = 1\nconst { c: cc } = defineProps<{ c: number }>()', 'cc'],
+    ['VIBE3001', `type T = 1\nexport { type T, a }\nconst a = 1`, 'export'],
+    ['VIBE3010', 'namespace N.M { export const x = 1 }', 'namespace N.M'],
+    ['VIBE3010', 'import Q = N.x', 'import Q'],
   ])('reports %s for %s', (code, script, at) => {
     const source = vibe(script);
     const { diagnostics } = analyzeFile(source).analysis;

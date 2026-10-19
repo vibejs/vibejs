@@ -21,6 +21,7 @@ const rows: [string, string, string][] = [
   ['VIBE3007', S('const _createIf = 1'), '1:52-1:61'],
   ['VIBE3008', S("import { defineProps } from '@vibejs-org/ui/tooling'"), '1:55-1:66'],
   ['VIBE3009', S('defineProps<{ a: string }>()\nconst a = 1'), '2:7-2:8'],
+  ['VIBE3010', S("import fs = require('fs')"), '1:46-1:55'],
   ['VIBE3101', S("defineProps<{ a: string }>(['a'])"), '1:73-1:78'],
   ['VIBE3102', S('const emit = defineEmits()'), '1:59-1:70'],
   ['VIBE3103', S("import type { P } from './p'\nconst props = defineProps<P>()"), '2:27-2:28'],

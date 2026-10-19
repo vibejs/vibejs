@@ -113,6 +113,11 @@ describe('emit keys', () => {
     expect(analyzeCode(code).emits).toStrictEqual(['a', 'update:modelValue', 'update:title']);
   });
 
+  it('lists an update event once when the emits type declares it', () => {
+    const code = `defineEmits<{ 'update:modelValue': [v: string] }>()\nconst m = defineModel<string>()`;
+    expect(analyzeCode(code).emits).toStrictEqual(['update:modelValue']);
+  });
+
   it.each([
     ['a call signature', `defineEmits<{ (e: 'a'): void }>()`, `(e: 'a'): void`],
     ['a method signature', `defineEmits<{ a(): void }>()`, `a(): void`],
