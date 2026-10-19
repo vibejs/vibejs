@@ -30,7 +30,7 @@ Navigation by name needs every name to point to exactly one route.
 
 > {option} in {where} is not supported: {deferral}.
 
-`createRouter()` accepts `history` and `routes`, and a route record accepts `path`, `name`, `component`, `children`, `redirect`, `meta` and `beforeEnter`. Any other key fails, so that a misspelled or unsupported option is never ignored silently.
+`createRouter()` accepts `history`, `routes` and `scrollBehavior`, and a route record accepts `path`, `name`, `component`, `props`, `children`, `redirect`, `meta` and `beforeEnter`. Any other key fails, so that a misspelled or unsupported option is never ignored silently.
 
 ### Fix
 
@@ -120,6 +120,84 @@ A lazy `component` is a function that returns a promise of a component or of a m
 
 - Return the module from the loader, as in `() => import('./Page.vibe')`.
 - Export the component as the `default` export of the loaded module.
+
+## VIBE7111: No router installed
+
+> {api} needs a router, but the app has none installed.
+
+The router composables read the router that `app.use(router)` provides. They work in the setup of a component of that app, and in guards, redirects, lazy loaders and `afterEach` hooks of the router.
+
+### Fix
+
+- Install the router with `app.use(router)` before mounting the app.
+- In a test, pass the router in the `plugins` option of `mount()`.
+- Call {api} in a component's setup, not in a timer or an event handler.
+
+## VIBE7112: Route guard outside a RouterView
+
+> {api} was called outside a page that a RouterView renders, so the guard is ignored.
+
+A guard of a page runs while the route record that its RouterView shows is leaving or updating. A component that no RouterView renders has no such record. This is a warning, printed in development builds only, so that a page can be tested on its own.
+
+### Fix
+
+- Call {api} in the setup of a route component, or of a component inside it.
+- Use `router.beforeEach()` for a guard that does not belong to a page.
+
+## VIBE7113: Route name not matched
+
+> useRoute('{name}') was called while the route {path} is shown, which is not {name} or one of its children.
+
+`useRoute(name)` narrows the route to the params of `name`, so it checks that a record named `name` is matched.
+
+### Fix
+
+- Call `useRoute()` without a name in a component that several routes render, and narrow with `route.name === '{name}'`.
+- Pass the name of the route that renders this component.
+
+## VIBE7114: External link in RouterLink
+
+> RouterLink cannot navigate to the external URL {to}.
+
+A RouterLink navigates inside the app. A URL with a scheme, such as `https:` or `mailto:`, or one that starts with `//`, leaves it.
+
+### Fix
+
+- Use `<a href="{to}">` for a link that leaves the app.
+- Pass a path inside the app, such as `/about`, or a named location.
+
+## VIBE7115: RouterView with slot content
+
+> RouterView does not take slot content.
+
+A RouterView renders the component of the matched route. Content between its tags is not supported.
+
+### Fix
+
+- Remove the content between `<RouterView>` and `</RouterView>`.
+- Put a layout around the view in the parent route's component instead.
+
+## VIBE7116: Scroll target not found
+
+> No element matches the scroll target {el}.
+
+After a navigation, the router scrolls to the element of the hash or of the `el` that `scrollBehavior` returns. This is a warning, printed in development builds only.
+
+### Fix
+
+- Give the target element the id of the hash, such as `id="details"` for `#details`.
+- Return a selector or an element that exists once the new route rendered.
+
+## VIBE7117: Web history without a window
+
+> createWebHistory() needs a browser window, but this environment has none.
+
+A web history reads and writes the URL of the browser window.
+
+### Fix
+
+- Use `createMemoryHistory()` in tests and in environments without a window.
+- Create the router in code that runs only in the browser.
 
 ## VIBE7118: Invalid param value
 

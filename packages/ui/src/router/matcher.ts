@@ -30,17 +30,24 @@ export interface Matcher {
 const DEFERRED: Record<string, string> = {
   components: 'named views are not supported; nest child routes, each with one component',
   alias: 'aliases are not supported; add a route that redirects to this one',
-  props: 'route props are not available yet; read the params from the route location',
   sensitive: 'paths always match case-insensitively',
   strict: 'a trailing slash is always optional',
   end: 'paths always match to their end',
-  scrollBehavior: 'scroll behavior is not available yet',
   linkActiveClass: 'the active classes of links are not configurable yet',
   linkExactActiveClass: 'the active classes of links are not configurable yet',
   parseQuery: 'queries are always parsed with URLSearchParams',
   stringifyQuery: 'queries are always written with URLSearchParams',
 };
-const RECORD_KEYS = ['path', 'name', 'component', 'children', 'redirect', 'meta', 'beforeEnter'];
+const RECORD_KEYS = [
+  'path',
+  'name',
+  'component',
+  'props',
+  'children',
+  'redirect',
+  'meta',
+  'beforeEnter',
+];
 
 /** Throws VIBE7103 for the first key of `options` that is not in `allowed`. */
 export function checkOptions(options: object, allowed: readonly string[], where: string): void {
@@ -91,6 +98,7 @@ export function createMatcher(routes: readonly RouteRecordRaw[]): Matcher {
       redirect: raw.redirect,
       beforeEnter,
       component: raw.component,
+      props: raw.props,
       children,
       parent,
     };

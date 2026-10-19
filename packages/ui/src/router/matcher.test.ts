@@ -386,7 +386,6 @@ describe('createMatcher', () => {
   it.each([
     ['components', 'named views'],
     ['alias', 'aliases'],
-    ['props', 'route props'],
     ['sensitive', 'case-insensitively'],
     ['strict', 'trailing slash'],
     ['end', 'to their end'],
