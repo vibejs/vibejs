@@ -52,10 +52,12 @@
     "build": "tsdown"
   },
   "dependencies": {
+    "@vibejs-org/contract": "workspace:*",
     "@vibejs-org/errors": "workspace:*"
   },
   "devDependencies": {
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "valibot": "catalog:"
   },
   "engines": {
     "node": "^24.15.0 || >=26"

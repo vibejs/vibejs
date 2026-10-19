@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": true,
+    "isolatedDeclarations": false,
+    "emitDeclarationOnly": false,
+    "rewriteRelativeImportExtensions": true,
+    "customConditions": [],
+    "outDir": "${configDir}/.tsbuild/emit",
+    "tsBuildInfoFile": "${configDir}/.tsbuild/emit/tsconfig.emit.tsbuildinfo"
+  },
+  "include": [],
+  "files": ["src/module/fixture.ts"]
+}
