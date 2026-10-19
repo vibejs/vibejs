@@ -92,13 +92,14 @@ export function createPipeline(
   const handler: unknown = Reflect.get(Object(controller), binding.key);
   const arrays = def.query ? arrayKeys(def.query) : new Set<string>();
 
+  // Object.fromEntries defines own keys, so `__proto__` stays a plain query key.
   function parseQuery(url: URL): Record<string, string | string[]> {
-    const query: Record<string, string | string[]> = {};
-    for (const key of new Set(url.searchParams.keys())) {
-      const all = url.searchParams.getAll(key);
-      query[key] = all.length > 1 || arrays.has(key) ? all : all[0];
-    }
-    return query;
+    return Object.fromEntries(
+      [...new Set(url.searchParams.keys())].map((key) => {
+        const all = url.searchParams.getAll(key);
+        return [key, all.length > 1 || arrays.has(key) ? all : all[0]];
+      }),
+    );
   }
 
   /** Reads and validates the inputs into `ctx`; runs once per request. */
@@ -160,17 +161,19 @@ export function createPipeline(
   }
 
   async function handleError(error: unknown, ctx: RequestContext): Promise<Response> {
-    let result: Response | HttpError | undefined;
+    let final = error;
     try {
       for (const filter of filters) {
-        result = await filter.catch(error, ctx);
-        if (result !== undefined) break;
+        const result = await filter.catch(error, ctx);
+        if (result instanceof Response) return result;
+        if (result !== undefined) {
+          final = result;
+          break;
+        }
       }
     } catch (thrown) {
-      return renderError(thrown, ctx.requestId, ctx.log);
+      final = thrown;
     }
-    if (result instanceof Response) return result;
-    const final = result ?? error;
     if (
       isClientVisible(final) &&
       !BUILTIN.has(final.code) &&
