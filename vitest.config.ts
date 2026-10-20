@@ -60,10 +60,11 @@ export default defineConfig({
           import('@vibejs-org/compiler/vite').then(
             ({ vibe }) => vibe(),
             (error: unknown) => {
+              // Node's ESM loader reports ERR_MODULE_NOT_FOUND; knip loads this config through jiti (CJS).
               if (
                 error instanceof Error &&
                 'code' in error &&
-                error.code === 'ERR_MODULE_NOT_FOUND'
+                (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'MODULE_NOT_FOUND')
               ) {
                 return null;
               }
