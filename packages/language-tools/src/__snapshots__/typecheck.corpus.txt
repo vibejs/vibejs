@@ -45,6 +45,7 @@ cases/_fail_spread-type/App.vibe(7,4): error TS2345: Argument of type '{ count: 
 cases/_fail_static-number-prop/App.vibe(6,20): error TS2322: Type 'string' is not assignable to type 'number'.
 cases/_fail_string-is/App.vibe(5,19): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Component<any>'.
   Type 'string' is not assignable to type 'ComponentDef'.
+cases/_fail_taken-key-payload/App.vibe(9,36): error TS2345: Argument of type 'PointerEvent' is not assignable to parameter of type 'string'.
 cases/_fail_taken-key/App.vibe(6,31): error TS2339: Property 'typoo' does not exist on type '{}'.
 cases/_fail_unknown-attr/App.vibe(2,8): error TS2353: Object literal may only specify known properties, and 'bogus' does not exist in type 'HTMLAttributes & EventHandlers<Events> & ReservedProps'.
 cases/_fail_unknown-event/App.vibe(7,21): error TS2353: Object literal may only specify known properties, and 'bogus' does not exist in type 'PropsOf<__VibeProps, __VibeEmits, __VibeModels>'.

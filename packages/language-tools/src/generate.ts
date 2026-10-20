@@ -20,7 +20,7 @@ export interface GeneratedFile {
 
 const CTX = ['$attrs', '$slots', '$emit', '$props'];
 /** Macro calls; comments and strings match first, so a macro named in them is not a call. */
-// ponytail: regex scan, misses a call inside a template literal `${}`; use the script AST if needed.
+// Limitation: regex scan, misses a call inside a template literal `${}`; use the script AST if needed.
 const MACROS =
   /\/\/[^\n]*|\/\*[\s\S]*?\*\/|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`|\b(define(?:Props|Emits|Slots|Model|Expose|Options))\s*[<(]/g;
 const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
@@ -111,7 +111,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
   });
   if (w.outlets) {
     const slots = [...w.outlets].map(([name, all]) => {
-      // ponytail: a name with only forwarded outlets has no props that do not read the slot itself,
+      // Limitation: a name with only forwarded outlets has no props that do not read the slot itself,
       // so they are `any`; type them from the forwarded props if a cycle-free form is found.
       const direct = all.filter((k) => !w.forwarded.has(k));
       const props = direct.map((k) => `typeof __vibe_s${k}`).join(' | ') || 'any';
