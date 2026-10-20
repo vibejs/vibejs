@@ -1,0 +1,200 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshots the files of component UserCard 1`] = `
+{
+  "ui/src/components/UserCard.test.ts": "import { mount } from '@vibejs-org/ui/testing';
+import { expect, it } from 'vitest';
+import UserCard from './UserCard.vibe';
+
+it('renders its title', () => {
+  const wrapper = mount(UserCard, { props: { title: 'Hello' } });
+  expect(wrapper.get('.user-card').text()).toBe('Hello');
+});
+",
+  "ui/src/components/UserCard.vibe": "<script setup lang="ts">
+defineProps<{ title: string }>();
+</script>
+
+<template>
+  <div class="user-card">{{ title }}</div>
+</template>
+",
+}
+`;
+
+exports[`snapshots the files of page Users 1`] = `
+{
+  "ui/src/pages/UsersPage.test.ts": "import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
+import { mount } from '@vibejs-org/ui/testing';
+import { expect, it } from 'vitest';
+import App from '../App.vibe';
+import { routes } from '../routes.ts';
+
+it('shows the Users page at /users', async () => {
+  const router = createRouter({ history: createMemoryHistory(), routes });
+  await router.push('/users');
+  const wrapper = mount(App, { plugins: [router] });
+  expect(wrapper.get('h1').text()).toBe('Users');
+});
+",
+  "ui/src/pages/UsersPage.vibe": "<template>
+  <h1>Users</h1>
+</template>
+",
+}
+`;
+
+exports[`snapshots the files of resource users 1`] = `
+{
+  "contracts/src/users.contract.ts": "import { defineContract, del, get, patch, post } from '@vibejs-org/contract';
+import * as v from 'valibot';
+
+export const User = v.object({ id: v.string(), name: v.string() });
+export type User = v.InferOutput<typeof User>;
+
+export const CreateUser = v.object({
+  name: v.pipe(v.string(), v.trim(), v.minLength(1)),
+});
+export type CreateUser = v.InferOutput<typeof CreateUser>;
+
+export const users = defineContract('/users', {
+  list: get('/', { response: v.array(User) }),
+  get: get('/:id', {
+    response: User,
+    errors: { USER_NOT_FOUND: 404 },
+  }),
+  create: post('/', { body: CreateUser, response: User }),
+  update: patch('/:id', {
+    body: CreateUser,
+    response: User,
+    errors: { USER_NOT_FOUND: 404 },
+  }),
+  remove: del('/:id', { errors: { USER_NOT_FOUND: 404 } }),
+});
+",
+  "server/src/users/users.controller.test.ts": "import { createClient } from '@vibejs-org/contract';
+import { JsonLogger } from '@vibejs-org/server';
+import { Test } from '@vibejs-org/server/testing';
+import { expect, it } from 'vitest';
+import { users } from '../../../contracts/src/users.contract.ts';
+import { AppModule, appOptions } from '../app.module.ts';
+
+async function setup() {
+  const app = await Test.createTestingModule({
+    imports: [AppModule],
+    ...appOptions,
+    logger: new JsonLogger({ level: 'silent' }),
+  }).compile();
+  const client = createClient({ users }, { baseUrl: '/api', fetch: app.fetch });
+  return { app, api: client.users };
+}
+
+it('creates, reads, updates, lists and removes users', async () => {
+  const { app, api } = await setup();
+  const created = await api.create({ body: { name: 'First' } });
+  if (!created.ok) throw new Error(created.error.code);
+  const { id } = created.data;
+  const found = await api.get({ params: { id } });
+  expect(found).toMatchObject({ ok: true, data: { id, name: 'First' } });
+  const updated = await api.update({ params: { id }, body: { name: 'Second' } });
+  expect(updated).toMatchObject({ ok: true, data: { id, name: 'Second' } });
+  expect(await api.list()).toMatchObject({ ok: true, data: [{ id, name: 'Second' }] });
+  expect(await api.remove({ params: { id } })).toMatchObject({ ok: true });
+  expect(await api.list()).toMatchObject({ ok: true, data: [] });
+  await app.close();
+});
+
+it('answers an unknown id with USER_NOT_FOUND', async () => {
+  const { app, api } = await setup();
+  const params = { id: 'missing' };
+  const results = [
+    await api.get({ params }),
+    await api.update({ params, body: { name: 'First' } }),
+    await api.remove({ params }),
+  ];
+  for (const r of results) {
+    expect(r).toMatchObject({ ok: false, error: { code: 'USER_NOT_FOUND', status: 404 } });
+  }
+  await app.close();
+});
+",
+  "server/src/users/users.controller.ts": "import { Controller, Handle, inject, type Ctx } from '@vibejs-org/server';
+import { users, type User } from '../../../contracts/src/users.contract.ts';
+import { UsersService } from './users.service.ts';
+
+@Controller(users)
+export class UsersController {
+  private readonly users = inject(UsersService);
+
+  @Handle(users.list)
+  list(): User[] {
+    return this.users.list();
+  }
+
+  @Handle(users.get)
+  get(ctx: Ctx<typeof users.get>): User {
+    const item = this.users.get(ctx.params.id);
+    return item ?? ctx.fail('USER_NOT_FOUND', \`No user \${ctx.params.id}\`);
+  }
+
+  @Handle(users.create)
+  create(ctx: Ctx<typeof users.create>): User {
+    return this.users.create(ctx.body);
+  }
+
+  @Handle(users.update)
+  update(ctx: Ctx<typeof users.update>): User {
+    const item = this.users.update(ctx.params.id, ctx.body);
+    return item ?? ctx.fail('USER_NOT_FOUND', \`No user \${ctx.params.id}\`);
+  }
+
+  @Handle(users.remove)
+  remove(ctx: Ctx<typeof users.remove>): void {
+    if (!this.users.remove(ctx.params.id)) {
+      ctx.fail('USER_NOT_FOUND', \`No user \${ctx.params.id}\`);
+    }
+  }
+}
+",
+  "server/src/users/users.module.ts": "import { Module } from '@vibejs-org/server';
+import { UsersController } from './users.controller.ts';
+import { UsersService } from './users.service.ts';
+
+@Module({ providers: [UsersService], controllers: [UsersController] })
+export class UsersModule {}
+",
+  "server/src/users/users.service.ts": "import type { CreateUser, User } from '../../../contracts/src/users.contract.ts';
+
+export class UsersService {
+  readonly #items = new Map<string, User>();
+
+  list(): User[] {
+    return [...this.#items.values()];
+  }
+
+  get(id: string): User | undefined {
+    return this.#items.get(id);
+  }
+
+  create(input: CreateUser): User {
+    const item = { ...input, id: crypto.randomUUID() };
+    this.#items.set(item.id, item);
+    return item;
+  }
+
+  /** Replaces the fields of \`id\`; \`undefined\` when there is none. */
+  update(id: string, input: CreateUser): User | undefined {
+    if (!this.#items.has(id)) return undefined;
+    const item = { ...input, id };
+    this.#items.set(id, item);
+    return item;
+  }
+
+  /** Removes \`id\`; \`false\` when there is none. */
+  remove(id: string): boolean {
+    return this.#items.delete(id);
+  }
+}
+",
+}
+`;

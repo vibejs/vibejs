@@ -6,6 +6,7 @@ import { entryMarkdown, explain, lookup } from './explain.ts';
 const ctx: Ctx = {
   version: '1.2.3',
   agent: { active: true },
+  consent: undefined,
   docsDir: '',
   cwd: '',
   now: () => 0,

@@ -76,6 +76,13 @@ it('builds the Node context from package.json, dist/docs and the process streams
   expect(err).toHaveBeenCalledWith('to stderr');
 });
 
+it('reads the consent from VIBEJS_USER_CONSENT; empty is none', () => {
+  vi.stubEnv('VIBEJS_USER_CONSENT', 'yes, overwrite it');
+  expect(nodeCtx().consent).toBe('yes, overwrite it');
+  vi.stubEnv('VIBEJS_USER_CONSENT', '');
+  expect(nodeCtx().consent).toBeUndefined();
+});
+
 describe('exec', () => {
   const ctx = nodeCtx();
   const cwd = process.cwd();

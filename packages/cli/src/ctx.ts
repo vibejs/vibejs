@@ -12,6 +12,8 @@ export interface ExecResult {
 export interface Ctx {
   version: string;
   agent: { active: boolean; name?: string };
+  /** The user's words from `VIBEJS_USER_CONSENT`, which let an agent overwrite files. */
+  consent: string | undefined;
   /** The bundled docs (`dist/docs`); it may not exist. */
   docsDir: string;
   cwd: string;
@@ -38,6 +40,7 @@ export function nodeCtx(): Ctx {
   return {
     version: manifest.version,
     agent: detectAgentMode(),
+    consent: process.env.VIBEJS_USER_CONSENT || undefined,
     // From src/ and from dist/bin.js alike.
     docsDir: fileURLToPath(new URL('../dist/docs', import.meta.url)),
     cwd: process.cwd(),

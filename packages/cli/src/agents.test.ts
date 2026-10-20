@@ -53,6 +53,9 @@ describe('renderBlock', () => {
     const codes = block.match(/VIBE\d{4}/g) ?? [];
     expect(codes.filter((code) => !CATALOG.some((e) => e.code === code))).toEqual([]);
     expect(block).toContain('`pnpm exec vibejs check --json` exits 0');
+    expect(block).toContain(
+      '- `pnpm exec vibejs g resource|component|page <name>` adds code with its tests; `--dry-run --json` previews it.',
+    );
   });
 });
 

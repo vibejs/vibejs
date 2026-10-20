@@ -1,5 +1,6 @@
 // Scaffolds with the real bin from packed tarballs of every package, installs with pnpm and npm,
-// then runs the app's own vibejs check, agents sync --check and build, and serves the build.
+// then runs the app's own vibejs check, agents sync --check, the generators and build, and serves
+// the build.
 import { spawn, spawnSync } from 'node:child_process';
 import {
   appendFileSync,
@@ -118,6 +119,29 @@ describe('pnpm', () => {
   );
 
   it(
+    'generates a resource, a page and a component that pass check at 100%, idempotently',
+    () => {
+      for (const args of [
+        ['resource', 'users'],
+        ['page', 'Users'],
+        ['component', 'UserCard'],
+      ]) {
+        const r = vibejs(app, 'g', ...args, '--json');
+        expect(JSON.parse(r.stdout)).toMatchObject({ ok: true, dryRun: false });
+        expect(r.status).toBe(0);
+      }
+      const check = vibejs(app, 'check', '--json');
+      expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, diagnostics: [] });
+      expect(check.status).toBe(0);
+      const again = vibejs(app, 'g', 'resource', 'users', '--json');
+      const ops: { op: string }[] = JSON.parse(again.stdout).ops;
+      expect(new Set(ops.map((o) => o.op))).toEqual(new Set(['skip']));
+      expect(again.status).toBe(0);
+    },
+    INSTALL,
+  );
+
+  it(
     'reports a type error in a .vibe template at its line and column',
     () => {
       const page = join(app, 'ui/src/pages/HomePage.vibe');
@@ -171,6 +195,8 @@ describe('pnpm', () => {
         const res = await fetch(`${url}/api/health`);
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ status: 'ok' });
+        // The generated resource is part of the built server.
+        expect(await (await fetch(`${url}/api/users`)).json()).toEqual([]);
       } finally {
         server.kill();
       }

@@ -31,6 +31,7 @@ afterAll(() => {
 const ctx = (dir = docsDir): Ctx => ({
   version: '1.2.3',
   agent: { active: true },
+  consent: undefined,
   docsDir: dir,
   cwd: '',
   now: () => 0,

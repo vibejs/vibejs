@@ -63,6 +63,7 @@ export function testCtx(cwd: string, agent = true): TestCtx {
   const ctx: Ctx = {
     version: '1.2.3',
     agent: { active: agent },
+    consent: undefined,
     docsDir: fileURLToPath(new URL('fixtures/docs', import.meta.url)),
     cwd,
     now: () => performance.now(),

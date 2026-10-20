@@ -9,6 +9,7 @@ import { di } from './commands/di.ts';
 import { docs } from './commands/docs.ts';
 import { errors } from './commands/errors.ts';
 import { explain } from './commands/explain.ts';
+import { generate } from './commands/generate.ts';
 import { logs } from './commands/logs.ts';
 import { request } from './commands/request.ts';
 import type { Ctx } from './ctx.ts';
@@ -35,6 +36,7 @@ export const COMMANDS: readonly CommandDef[] = [
   agents,
   di,
   request,
+  generate,
 ];
 
 /** Common wrong commands and what to run instead: a `vibejs` command or the `npm create` line. */
