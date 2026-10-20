@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import type { VibeError } from '@vibejs-org/errors';
 import type { CommandDef, OptionDef } from './command.ts';
+import { agents } from './commands/agents.ts';
 import { build } from './commands/build.ts';
 import { check } from './commands/check.ts';
 import { dev } from './commands/dev.ts';
@@ -21,7 +22,16 @@ import {
   type MissingInput,
 } from './output.ts';
 
-export const COMMANDS: readonly CommandDef[] = [explain, docs, check, dev, build, errors, logs];
+export const COMMANDS: readonly CommandDef[] = [
+  explain,
+  docs,
+  check,
+  dev,
+  build,
+  errors,
+  logs,
+  agents,
+];
 
 /** Common wrong commands and what to run instead: a `vibejs` command or the `npm create` line. */
 export const MISTAKES: Readonly<Record<string, string>> = {

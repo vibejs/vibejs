@@ -178,9 +178,19 @@ describe('pnpm errors', () => {
         '{ "devDependencies": { "@vibejs-org/errors": "workspace:*" } }',
       'packages/vscode/messages/extension.md':
         '## VIBE6101: Missing\n> Install {extension}.\n\n### Fix\n- Install it.\n',
+      'packages/vscode/src/extension.ts': '',
     });
     expect(run()).toBe(0);
     expect(get('packages/vscode/src/errors.gen.ts')).toContain('VIBE6101: ["Install {extension}."');
+  });
+
+  it('writes no errors.gen.ts for a package without src', () => {
+    put({
+      'packages/create-vibejs/package.json':
+        '{ "bin": { "create-vibejs": "./bin.js" }, "devDependencies": { "@vibejs-org/errors": "workspace:*" } }',
+    });
+    expect(run()).toBe(0);
+    expect(existsSync(join(root, 'packages/create-vibejs/src'))).toBe(false);
   });
 
   it('regenerates DOCS_BASE after a major bump', () => {

@@ -128,3 +128,27 @@ describe('bundled docs', () => {
     expect(Math.min(...times)).toBeLessThan(300);
   });
 });
+
+describe('agent files', () => {
+  const AGENTS = fileURLToPath(new URL('../dist/agents', import.meta.url));
+  const block = readFileSync(join(AGENTS, 'AGENTS.md'), 'utf8').replaceAll(
+    '{{exec}}',
+    'pnpm exec vibejs',
+  );
+
+  it('writes the template AGENTS.md and CLAUDE.md with the bundled docs index', () => {
+    const index = readFileSync(fileURLToPath(new URL('../dist/docs/index.txt', import.meta.url)));
+    expect(block).toContain(`\n${String(index).trim()}\n`);
+    expect(readFileSync(join(AGENTS, 'CLAUDE.md'), 'utf8')).toBe('@AGENTS.md\n');
+  });
+
+  it('names only commands that the built bin describes', () => {
+    const names = new Set([...block.matchAll(/\bvibejs ([a-z]+)\b/g)].map((m) => m[1]));
+    expect([...names].toSorted()).toEqual(['agents', 'check', 'dev', 'errors', 'explain']);
+    for (const name of names) {
+      const { status, stdout } = vibejs(name, '--help', '--json');
+      expect(single(stdout)).toMatchObject({ ok: true, commands: [{ name }] });
+      expect(status).toBe(0);
+    }
+  });
+});

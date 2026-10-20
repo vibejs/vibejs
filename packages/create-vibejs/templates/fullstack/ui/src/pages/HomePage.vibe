@@ -1,0 +1,17 @@
+<script setup lang="ts">
+import { inject, onMounted, ref } from '@vibejs-org/ui';
+import { API } from '../api.ts';
+
+const api = inject(API)!;
+const status = ref('checking');
+
+onMounted(async () => {
+  const r = await api.health.get();
+  status.value = r.ok ? r.data.status : r.error.code;
+});
+</script>
+
+<template>
+  <h1>vibe.js</h1>
+  <p>API status: <strong class="status">{{ status }}</strong></p>
+</template>

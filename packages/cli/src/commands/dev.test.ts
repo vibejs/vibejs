@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import type { ViteDevServer } from 'vite';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { copyApp, edit, portOf, testCtx, type TestCtx } from '../../test/app.ts';
+import { BEGIN } from '../agents.ts';
 import { readLog, type LogEntry } from '../dev/log.ts';
 import type { DevLock } from '../dev/lock.ts';
 import { exitCode } from '../output.ts';
@@ -511,5 +512,34 @@ describe('errors', () => {
       ),
     );
     await expect(run(root, { port: '0' })).rejects.toBeInstanceOf(Error);
+  });
+});
+
+describe('agent files', () => {
+  it('writes the AGENTS.md block and CLAUDE.md on start', async () => {
+    const r = await start();
+    expect(readFileSync(join(r.root, 'AGENTS.md'), 'utf8')).toContain(
+      '`npx --no vibejs check --json` exits 0',
+    );
+    expect(readFileSync(join(r.root, 'CLAUDE.md'), 'utf8')).toBe('@AGENTS.md\n');
+  });
+
+  it('logs malformed markers as a VIBE8601 warning and keeps serving', async () => {
+    const r = await start(app((at) => writeFileSync(join(at, 'AGENTS.md'), `${BEGIN}\n`)));
+    expect(r.events()[0]).toMatchObject({ event: 'log', level: 'warn', code: 'VIBE8601' });
+    expect(log(r)).toContainEqual(expect.objectContaining({ code: 'VIBE8601', source: 'vibejs' }));
+    expect(readFileSync(join(r.root, 'AGENTS.md'), 'utf8')).toBe(`${BEGIN}\n`);
+    expect((await get(r, '/api/health')).status).toBe(200);
+  });
+
+  it('logs any other failure as a warning without a code', async () => {
+    const root = app();
+    const t = testCtx(root, false);
+    t.ctx.docsDir = join(root, 'missing');
+    const result = dev.run({ values: { port: '0' }, positionals: [] }, t.ctx);
+    await vi.waitFor(() => expect(t.out.join('')).toContain('ready'), WAIT);
+    t.stop();
+    expect(await result).toMatchObject({ ok: true });
+    expect(t.err.join('')).toContain('[vibejs] Error: ENOENT');
   });
 });

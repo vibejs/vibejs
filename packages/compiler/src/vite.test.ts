@@ -130,10 +130,25 @@ describe('vibe() main module', () => {
         configResolved: (config: object) => void;
         transform: (this: object, code: string, id: string) => Promise<{ code: string }>;
       };
-      plugin.configResolved({ root: fixture, isProduction: false, command: 'serve' });
+      plugin.configResolved({ root: fixture, isProduction: false, command: 'serve', server: {} });
       const ctx = { environment: { config: { consumer: 'client' } } };
       const { code } = await plugin.transform.call(ctx, source, id);
       expect(code).toContain(`__hmrId: "${devId('src/App.vibe')}"`);
+    }
+  });
+
+  it('emits no hot-update code when the server has HMR off, as under Vitest', async () => {
+    const off = await createServer({
+      ...config(fixture),
+      server: { ...config(fixture).server, hmr: false },
+    });
+    try {
+      const { code } = (await off.environments.client.transformRequest('/src/App.vibe'))!;
+      expect(code).toContain('__file: "src/App.vibe"');
+      expect(code).not.toContain('createRecord');
+      expect(code).not.toContain('import.meta.hot');
+    } finally {
+      await off.close();
     }
   });
 

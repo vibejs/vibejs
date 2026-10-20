@@ -15,6 +15,7 @@ test-results/
 .playwright-mcp/
 packages/compiler/test/.tmp/
 packages/cli/src/catalog.gen.ts
+packages/create-vibejs/agents/
 docs/errors/
 docs/cli/
 docs/.snippets/

@@ -124,7 +124,8 @@ export function vibe(): Plugin {
     configResolved(config) {
       ({ root } = config);
       dev = !config.isProduction;
-      hot = config.command === 'serve' && dev;
+      // Vitest serves with HMR off: no hot-update code then.
+      hot = config.command === 'serve' && dev && config.server.hmr !== false;
       const { version: compiler } = manifest;
       const ui = uiVersion(root);
       if (ui !== compiler) throw vibeError('VIBE4902', { ui: ui ?? 'none', compiler });

@@ -32,7 +32,7 @@
   },
   "scripts": {
     "prebuild": "pnpm -w errors",
-    "build": "tsdown && node ../../docs/scripts/docs.ts bundle dist/docs"
+    "build": "tsdown && node ../../docs/scripts/docs.ts bundle dist/docs && node --input-type=module -e \"import { mkdirSync, readFileSync } from 'node:fs'; import { renderBlock, syncAgentFiles } from './src/agents.ts'; mkdirSync('dist/agents'); syncAgentFiles('dist/agents', renderBlock('{{exec}}', readFileSync('dist/docs/index.txt', 'utf8').trim()), true);\""
   },
   "dependencies": {
     "@vibejs-org/errors": "workspace:*",
