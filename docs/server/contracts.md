@@ -111,7 +111,7 @@ if (result.ok) {
 
 ## OpenAPI
 
-`generateOpenApi(contracts, options)` from `@vibejs-org/server/openapi` returns an OpenAPI 3.1 document for the same record of contracts the client takes. Serve it with a middleware:
+`generateOpenApi(contracts, options)` from `@vibejs-org/server/openapi` returns an OpenAPI 3.1 document for the same record of contracts the client takes. Serve it with a middleware. A middleware sees the full request path, base path included, so the recipe below answers `/api/openapi.json` under the base path `/api`:
 
 ```ts
 import { defineContract, get } from '@vibejs-org/contract';
@@ -125,7 +125,9 @@ const doc = generateOpenApi(
 );
 
 export const openapi: Middleware = (req, next) =>
-  new URL(req.url).pathname === '/openapi.json' ? Promise.resolve(Response.json(doc)) : next();
+  new URL(req.url).pathname.endsWith('/openapi.json')
+    ? Promise.resolve(Response.json(doc))
+    : next();
 ```
 
-Each schema is converted with its Standard JSON Schema converter. zod schemas carry one; wrap valibot schemas with `toStandardJsonSchema()` from `@valibot/to-json-schema`, or pass a `toJsonSchema(schema, io)` fallback. A schema that cannot be converted throws [VIBE9801](/errors/VIBE9801), and two different schemas with one name throw [VIBE9802](/errors/VIBE9802).
+Each schema is converted with its Standard JSON Schema converter. zod schemas carry one; wrap valibot schemas with `toStandardJsonSchema()` from `@valibot/to-json-schema`, or pass a `toJsonSchema(schema, io)` fallback. A schema that cannot be converted throws [VIBE9801](/errors/VIBE9801), two different schemas with one name throw [VIBE9802](/errors/VIBE9802), and an error status outside 400–599 throws [VIBE9803](/errors/VIBE9803).
