@@ -1,87 +1,42 @@
 // Scaffolds with the real bin from packed tarballs of every package, installs with pnpm and npm,
 // then runs the app's own vibejs check, agents sync --check, the generators and build, and serves
 // the build.
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import {
-  appendFileSync,
-  globSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { globSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import manifest from './package.json' with { type: 'json' };
-
-const PACKAGES = fileURLToPath(new URL('..', import.meta.url));
-const BIN = fileURLToPath(new URL('bin.js', import.meta.url));
-const SCOPED = ['cli', 'compiler', 'contract', 'errors', 'language-tools', 'server', 'ui'];
-const INSTALL = 10 * 60_000;
-
-// The children must not see the Vitest worker or the package manager that runs this test.
-const env = Object.fromEntries(
-  Object.entries(process.env).filter(([k]) => !/^(VITEST|npm_|pnpm_)/i.test(k)),
-);
-
-function run(cmd: string, args: string[], cwd: string, extra: Record<string, string> = {}) {
-  const r = spawnSync(cmd, args, {
-    cwd,
-    env: { ...env, ...extra },
-    encoding: 'utf8',
-    shell: process.platform === 'win32',
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  return { status: r.status, stdout: r.stdout, stderr: r.stderr };
-}
-
-/** Throws with the output when the command failed. */
-function must(r: ReturnType<typeof run>): string {
-  if (r.status !== 0) throw new Error(`exit ${r.status}\n${r.stdout}\n${r.stderr}`);
-  return r.stdout;
-}
+import {
+  cleanup,
+  env,
+  INSTALL,
+  installPnpm,
+  must,
+  pack,
+  run,
+  scaffold as create,
+  temp,
+  type Packs,
+} from './test/scaffold.ts';
 
 const vibejs = (app: string, ...args: string[]) =>
   run(process.execPath, [join(app, 'node_modules/@vibejs-org/cli/dist/bin.js'), ...args], app);
 
-const dirs: string[] = [];
-const temp = (prefix: string) => {
-  const dir = mkdtempSync(join(tmpdir(), prefix));
-  dirs.push(dir);
-  return dir;
-};
-afterAll(() => {
-  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
-}, INSTALL);
+afterAll(cleanup, INSTALL);
 
-let packs: string;
-/** The tarball of each scoped package, by full name. */
-const tarballs: Record<string, string> = {};
-let created: { files: { path: string }[]; filename: string };
+let tarballs: Packs['tarballs'];
+let created: Packs['created'];
 
 beforeAll(() => {
-  packs = temp('vibejs-packs-');
-  for (const name of [...SCOPED, 'create-vibejs']) {
-    const packed = JSON.parse(
-      must(run('pnpm', ['pack', '--json', '--pack-destination', packs], join(PACKAGES, name))),
-    );
-    if (name === 'create-vibejs') created = packed;
-    else tarballs[packed.name] = packed.filename;
-  }
+  ({ tarballs, created } = pack());
 }, INSTALL);
 
 /** A new app from the built bin, not installed. */
 function scaffold(pm: 'pnpm' | 'npm'): string {
   const app = join(temp(`vibejs-${pm}-`), 'app');
-  const r = run(process.execPath, [BIN, app, '--pm', pm, '--no-install'], tmpdir(), {
-    VIBEJS_AGENT: '1',
-  });
-  expect(JSON.parse(must(r))).toMatchObject({ ok: true, pm, installed: false });
+  expect(create(app, pm)).toMatchObject({ ok: true, pm, installed: false });
   return app;
 }
 
@@ -110,9 +65,7 @@ describe('pnpm', () => {
   let app: string;
   beforeAll(() => {
     app = scaffold('pnpm');
-    const overrides = Object.entries(tarballs).map(([name, file]) => `  '${name}': file:${file}`);
-    appendFileSync(join(app, 'pnpm-workspace.yaml'), `overrides:\n${overrides.join('\n')}\n`);
-    must(run('pnpm', ['install'], app));
+    installPnpm(app, tarballs);
   }, INSTALL);
 
   it(
