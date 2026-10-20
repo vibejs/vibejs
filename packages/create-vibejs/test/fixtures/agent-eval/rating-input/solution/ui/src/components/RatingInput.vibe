@@ -1,0 +1,18 @@
+<script setup lang="ts">
+const { max = 5 } = defineProps<{ max?: number }>();
+const rating = defineModel<number>({ default: () => 0 });
+const emit = defineEmits<{ change: [value: number] }>();
+
+function pick(star: number) {
+  rating.value = star;
+  emit('change', star);
+}
+</script>
+
+<template>
+  <span class="rating">
+    <button v-for="star in max" :key="star" type="button" @click="pick(star)">
+      {{ star <= rating ? '★' : '☆' }}
+    </button>
+  </span>
+</template>

@@ -1,0 +1,14 @@
+<script setup lang="ts">
+import { inject, useAsync } from '@vibejs-org/ui';
+import { API } from '../api.ts';
+
+const api = inject(API)!;
+const { data } = useAsync((signal) => api.projects.list(undefined, { signal }));
+</script>
+
+<template>
+  <h1>Projects</h1>
+  <ul v-if="data?.ok">
+    <li v-for="project in data.data" :key="project.id">{{ project.name }}</li>
+  </ul>
+</template>
