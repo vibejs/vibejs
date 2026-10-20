@@ -1,0 +1,41 @@
+name: VS Code extension
+
+# Publishes packages/vscode to the Visual Studio Marketplace and Open VSX when a
+# `vscode-v<version>` tag is pushed. The tag must match packages/vscode/package.json.
+on:
+  push:
+    tags: ['vscode-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vscode-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+      - run: pnpm build
+      - name: Assert the tag matches the extension version
+        run: |
+          version="$(node -p "require('./packages/vscode/package.json').version")"
+          [[ "$GITHUB_REF_NAME" == "vscode-v$version" ]] || { echo "Tag $GITHUB_REF_NAME does not match vscode-v$version"; exit 1; }
+          echo "VSIX=$RUNNER_TEMP/vibejs.vsix" >> "$GITHUB_ENV"
+      - run: pnpm run package --out "$VSIX"
+        working-directory: packages/vscode
+      - name: Publish to the Visual Studio Marketplace
+        run: pnpm exec vsce publish --packagePath "$VSIX"
+        working-directory: packages/vscode
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - name: Publish to Open VSX
+        run: pnpm exec ovsx publish "$VSIX"
+        working-directory: packages/vscode
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

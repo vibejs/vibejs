@@ -1,0 +1,134 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`language features > completion: a member access in a template expression > top 10 labels 1`] = `
+[
+  "at",
+  "charAt",
+  "charCodeAt",
+  "codePointAt",
+  "concat",
+  "endsWith",
+  "includes",
+  "indexOf",
+  "isWellFormed",
+  "lastIndexOf",
+]
+`;
+
+exports[`language features > completion: a tag name > top 10 labels 1`] = `
+[
+  "Child",
+  "__vibe",
+  "__vibe_setup",
+  "pick",
+  "picked",
+  "ref",
+  "rows",
+  "AbortController",
+  "AbortSignal",
+  "AbstractRange",
+]
+`;
+
+exports[`language features > completion: an attribute key on a component tag > top 10 labels 1`] = `
+[
+  "label",
+  "'aria-activedescendant'?",
+  "'aria-atomic'?",
+  "'aria-autocomplete'?",
+  "'aria-busy'?",
+  "'aria-checked'?",
+  "'aria-colcount'?",
+  "'aria-colindex'?",
+  "'aria-colspan'?",
+  "'aria-controls'?",
+]
+`;
+
+exports[`language features > definition: #slot: the defineSlots member > locations 1`] = `
+[
+  "cases/lsp/Child.vibe:4:15-4:18",
+]
+`;
+
+exports[`language features > definition: :prop: the defineProps member > locations 1`] = `
+[
+  "cases/lsp/Child.vibe:2:40-2:45",
+]
+`;
+
+exports[`language features > definition: a .vibe module specifier: its file (#64828 passes on this pin) > locations 1`] = `
+[
+  "cases/lsp/Child.vibe:1:1-1:1",
+]
+`;
+
+exports[`language features > definition: a component in .ts: its .vibe file > locations 1`] = `
+[
+  "cases/lsp/Child.vibe:1:1-1:1",
+]
+`;
+
+exports[`language features > definition: a nested .vibe module specifier: its file (#64828 passes on this pin) > locations 1`] = `
+[
+  "cases/lsp/components/Deep.vibe:1:1-1:1",
+]
+`;
+
+exports[`language features > definition: a self tag: the component itself > locations 1`] = `
+[
+  "cases/self/Loop.vibe:1:1-1:1",
+]
+`;
+
+exports[`language features > definition: a template binding: its <script setup> declaration > locations 1`] = `
+[
+  "cases/lsp/Parent.vibe:4:7-4:13",
+]
+`;
+
+exports[`language features > hover: @event on a component: the onX handler > markdown 1`] = `
+"\`\`\`typescript
+(property) onPick?: ((item: string) => void) | undefined
+\`\`\`
+"
+`;
+
+exports[`language features > hover: a scoped-slot param > markdown 1`] = `
+"\`\`\`typescript
+const item: string
+\`\`\`
+"
+`;
+
+exports[`language features > hover: a script binding in {{ }} > markdown 1`] = `
+"\`\`\`typescript
+const picked: string
+\`\`\`
+"
+`;
+
+exports[`language features > hover: a v-for item > markdown 1`] = `
+"\`\`\`typescript
+const row: string
+\`\`\`
+"
+`;
+
+exports[`language features > references: a component import: its tags and the .ts importer > locations 1`] = `
+[
+  "cases/lsp/Parent.vibe:13:4-13:9",
+  "cases/lsp/Parent.vibe:3:8-3:13",
+  "cases/lsp/main.ts:1:8-1:13",
+  "cases/lsp/main.ts:5:28-5:33",
+]
+`;
+
+exports[`language features > references: a script ref: its template uses > locations 1`] = `
+[
+  "cases/lsp/Parent.vibe:12:9-12:15",
+  "cases/lsp/Parent.vibe:13:18-13:24",
+  "cases/lsp/Parent.vibe:4:7-4:13",
+  "cases/lsp/Parent.vibe:7:3-7:9",
+]
+`;

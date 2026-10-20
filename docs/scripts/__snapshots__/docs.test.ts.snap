@@ -230,11 +230,15 @@ exports[`sidebar > groups the pages in the fixed order, by order and then path, 
     "items": [
       {
         "link": "/guides/getting-started",
-        "text": "Title 6",
+        "text": "Title 7",
       },
       {
         "link": "/guides/tutorial",
         "text": "Title 5",
+      },
+      {
+        "link": "/guides/editors",
+        "text": "Title 6",
       },
     ],
     "text": "Getting started",
@@ -243,11 +247,11 @@ exports[`sidebar > groups the pages in the fixed order, by order and then path, 
     "items": [
       {
         "link": "/server/modules",
-        "text": "Title 10",
+        "text": "Title 11",
       },
       {
         "link": "/server/",
-        "text": "Title 11",
+        "text": "Title 12",
       },
     ],
     "text": "Server",
@@ -256,7 +260,7 @@ exports[`sidebar > groups the pages in the fixed order, by order and then path, 
     "items": [
       {
         "link": "/guides/ai-agents",
-        "text": "Title 7",
+        "text": "Title 8",
       },
       {
         "link": "/cli/check",
@@ -273,11 +277,11 @@ exports[`sidebar > groups the pages in the fixed order, by order and then path, 
     "items": [
       {
         "link": "/guides/coming-from-x",
-        "text": "Title 9",
+        "text": "Title 10",
       },
       {
         "link": "/guides/extending",
-        "text": "Title 8",
+        "text": "Title 9",
       },
     ],
     "text": "Guides",

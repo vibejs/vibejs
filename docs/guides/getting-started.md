@@ -57,6 +57,8 @@ Install the recommended VS Code extensions that the app lists in `.vscode/extens
 
 Type checking runs project code, so it needs a trusted workspace. Without the TypeScript 7 extension or trust, the editor shows [VIBE6101](/errors/VIBE6101) or [VIBE6102](/errors/VIBE6102) and keeps highlighting.
 
+For Neovim and other editors, the known limitations and troubleshooting, see [Editor setup](./editors.md).
+
 ## Coding agents
 
 `AGENTS.md` holds a block of vibe.js rules for coding agents: the exact commands, the rules that agents get wrong most often, and an index of the docs that ship with the app in `node_modules/@vibejs-org/cli/dist/docs`, so an agent reads the docs of the installed version. `vibejs agents sync` and `vibejs dev` keep the block current; write your own notes outside its markers. See [CLI and AI agents](./ai-agents.md).

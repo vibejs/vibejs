@@ -3,41 +3,17 @@
 // Every run passes --force: tsc caches mapper output by package version, which stays the same
 // while the mapper changes in this repository.
 import { spawnSync } from 'node:child_process';
-import {
-  cpSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  symlinkSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
+import { childEnv as env, copyCorpus, TSC } from '../test/corpus.ts';
 
-const TSC = fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url));
-const FIXTURES = fileURLToPath(new URL('../test/fixtures/typecheck', import.meta.url));
-const PACKAGES = fileURLToPath(new URL('../..', import.meta.url));
 /** The line format that `vibejs check` parses (CONTRACTS C6). */
 const C6 = /^(.+?)\((\d+),(\d+)\): (error|warning) ([A-Z]+\d+): (.*)/;
 const VIRTUAL = 'virtual code produced by the content mapper';
 
-// The child must not see the Vitest worker that runs this test.
-const env = Object.fromEntries(
-  Object.entries(process.env).filter(([k]) => !k.startsWith('VITEST')),
-);
-
-// A temp copy with the mapper and ui linked as direct dependencies (a junction on Windows).
-const root = mkdtempSync(join(tmpdir(), 'vibejs-typecheck-'));
-cpSync(FIXTURES, root, { recursive: true });
-mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
-for (const name of ['language-tools', 'ui']) {
-  symlinkSync(join(PACKAGES, name), join(root, 'node_modules/@vibejs-org', name), 'junction');
-}
-afterAll(() => rmSync(root, { recursive: true, force: true }));
+const { root, dispose } = copyCorpus();
+afterAll(dispose);
 
 function tsc(cwd: string, ...args: string[]) {
   const { status, stdout, stderr } = spawnSync(

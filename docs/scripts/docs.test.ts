@@ -229,6 +229,7 @@ describe('sidebar', () => {
     'cli/index',
     'cli/check',
     'guides/tutorial',
+    'guides/editors',
     'guides/getting-started',
     'guides/ai-agents',
     'guides/extending',
@@ -242,6 +243,7 @@ describe('sidebar', () => {
     order: {
       'guides/getting-started': 1,
       'guides/tutorial': 2,
+      'guides/editors': 3,
       'guides/ai-agents': 1,
       'server/modules': 1,
     }[path],

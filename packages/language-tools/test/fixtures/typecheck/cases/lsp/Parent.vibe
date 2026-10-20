@@ -1,0 +1,19 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import Child from './Child.vibe'
+const picked = ref('')
+const rows = ['a', 'b']
+function pick(item: string) {
+  picked.value = item
+}
+</script>
+
+<template>
+  <p>{{ picked }}</p>
+  <Child :label="picked" :items="rows" @pick="pick">
+    <template #row="{ item }">{{ item.toUpperCase() }}</template>
+  </Child>
+  <ol>
+    <li v-for="row in rows" :key="row">{{ row.length }}</li>
+  </ol>
+</template>

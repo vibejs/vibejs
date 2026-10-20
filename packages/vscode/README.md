@@ -14,6 +14,8 @@ Type checking needs:
 
 When one of them is missing, the extension shows VIBE6101 or VIBE6102 and keeps highlighting.
 
+Setup for other editors, known limitations and troubleshooting: [Editor setup](https://vibejs.org/v0/guides/editors).
+
 ## License
 
 MIT. Third-party notices are in `THIRD-PARTY-NOTICES.md`.
