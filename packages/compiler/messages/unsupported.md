@@ -101,7 +101,7 @@ Templates are compiled ahead of time, so uncompiled markup is never shown.
 
 ## VIBE2910: Lifecycle listener
 
-> `{name}` is not supported.
+> `{name}` is an element lifecycle listener, and lifecycle listeners are not supported.
 
 Element lifecycle listeners such as `@vue:mounted` and `@vnode-mounted` are not events of the rendered element.
 

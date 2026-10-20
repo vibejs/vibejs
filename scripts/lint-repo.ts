@@ -192,6 +192,10 @@ export function main(root: string): number {
         at(header.start, 'upstream', `${repo} is not listed in ${noticesFile}`);
       }
     }
+    const forkedCompiler = /^packages\/compiler\/src\/.*(?<!\.test(-d)?)\.ts$/.test(file);
+    if (forkedCompiler && headers.length && !text.includes('Edits to re-apply on an upgrade:')) {
+      at(headers[0].start, 'upstream', 'list the "Edits to re-apply on an upgrade:" in the header');
+    }
 
     let open: Comment | undefined;
     const hintLines = new Set<number>(); // line starts of start/stop hint comments

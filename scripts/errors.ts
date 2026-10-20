@@ -105,6 +105,8 @@ export function parseMessages(
     const [first = '', ...prose] = intro.filter((line) => line.trim());
     if (!/^> \S/.test(first) || prose.some((line) => line.startsWith('>'))) {
       fail('exactly one "> message" line must follow the heading');
+    } else if (!prose.length) {
+      fail('a paragraph must explain the error after the "> message" line');
     }
     const message = first.slice(2).trim();
     const fixLines = (named.get('Fix') ?? []).filter((line) => line.trim());

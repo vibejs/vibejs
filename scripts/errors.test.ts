@@ -33,6 +33,8 @@ Prose for the docs only.
 ## VIBE9102: Old error (retired)
 > The old thing failed.
 
+Prose.
+
 ### Fix
 - Do the new thing.
 `;
@@ -45,7 +47,7 @@ const BASE: Record<string, string> = {
   'packages/server/src/inject.test.ts': "expect(error).toMatchObject({ code: 'VIBE9101' });",
   'packages/create-vibejs/package.json': '{ "bin": { "create-vibejs": "./bin.js" } }',
   'packages/create-vibejs/messages/create.md':
-    '## VIBE8101: Bad name\n> The name {name} is invalid.\n\n### Fix\n- Pick another name.\n',
+    '## VIBE8101: Bad name\n> The name {name} is invalid.\n\nProse.\n\n### Fix\n- Pick another name.\n',
   'packages/create-vibejs/bin.js': "fail('VIBE8101');",
   'packages/create-vibejs/bin.test.ts': "expect(run()).toMatchObject({ code: 'VIBE8101' });",
   'packages/ui/package.json': '{}',
@@ -108,9 +110,9 @@ describe('parseMessages', () => {
         title: 'Old error',
         message: 'The old thing failed.',
         fixes: ['Do the new thing.'],
-        body: '',
+        body: 'Prose.',
         retired: true,
-        source: '> The old thing failed.\n\n### Fix\n- Do the new thing.',
+        source: '> The old thing failed.\n\nProse.\n\n### Fix\n- Do the new thing.',
       },
     ]);
   });
@@ -166,7 +168,7 @@ describe('pnpm errors', () => {
       title: 'Old error',
       message: 'The old thing failed.',
       fixes: ['Do the new thing.'],
-      body: '',
+      body: 'Prose.',
       docs: 'https://vibejs.org/v0/errors/VIBE9102',
       retired: true,
     });
@@ -177,7 +179,7 @@ describe('pnpm errors', () => {
       'packages/vscode/package.json':
         '{ "devDependencies": { "@vibejs-org/errors": "workspace:*" } }',
       'packages/vscode/messages/extension.md':
-        '## VIBE6101: Missing\n> Install {extension}.\n\n### Fix\n- Install it.\n',
+        '## VIBE6101: Missing\n> Install {extension}.\n\nProse.\n\n### Fix\n- Install it.\n',
       'packages/vscode/src/extension.ts': '',
     });
     expect(run()).toBe(0);
@@ -213,7 +215,7 @@ describe('pnpm errors', () => {
   it('writes nothing when the catalog is invalid', () => {
     put({
       'packages/server/messages/bad.md':
-        '## VIBE0001: Wrong range\n> Message.\n\n### Fix\n- Fix.\n',
+        '## VIBE0001: Wrong range\n> Message.\n\nProse.\n\n### Fix\n- Fix.\n',
     });
     expect(run()).toBe(1);
     expect(errors).toEqual([
@@ -234,6 +236,8 @@ retired: true
 # VIBE9102: Old error
 
 > The old thing failed.
+
+Prose.
 
 ### Fix
 - Do the new thing.
@@ -286,21 +290,31 @@ describe('pnpm errors --check', () => {
   it.each([
     ['## VIBE91: Short', 'the heading must be "## VIBE####: Title"'],
     ['## VIBE9103: No message\n\n### Fix\n- Fix.', 'exactly one "> message" line'],
-    ['## VIBE9103: Two\n> One.\n> Two.\n\n### Fix\n- Fix.', 'exactly one "> message" line'],
-    ['## VIBE9103: Late\nProse.\n> Message.\n\n### Fix\n- Fix.', 'exactly one "> message" line'],
-    ['## VIBE9103: No fix\n> Message.', '"### Fix" must hold one or more "- " bullets'],
-    ['## VIBE9103: Prose fix\n> Message.\n\n### Fix\nJust do it.', '"### Fix" must hold'],
     [
-      '## VIBE9103: Odd\n> Message.\n\n### Fix\n- Fix.\n\n### Notes\nx',
+      '## VIBE9103: Two\n> One.\n> Two.\n\nProse.\n\n### Fix\n- Fix.',
+      'exactly one "> message" line',
+    ],
+    [
+      '## VIBE9103: Late\nProse.\n> Message.\n\nProse.\n\n### Fix\n- Fix.',
+      'exactly one "> message" line',
+    ],
+    ['## VIBE9103: No prose\n> Message.\n\n### Fix\n- Fix.', 'a paragraph must explain the error'],
+    ['## VIBE9103: No fix\n> Message.\n\nProse.', '"### Fix" must hold one or more "- " bullets'],
+    ['## VIBE9103: Prose fix\n> Message.\n\nProse.\n\n### Fix\nJust do it.', '"### Fix" must hold'],
+    [
+      '## VIBE9103: Odd\n> Message.\n\nProse.\n\n### Fix\n- Fix.\n\n### Notes\nx',
       'unexpected section "### Notes"',
     ],
-    ['## VIBE9103: Twice\n> Message.\n\n### Fix\n- A.\n\n### Fix\n- B.', 'a section appears twice'],
     [
-      '## VIBE9103: Case\n> No {Token}.\n\n### Fix\n- Fix.',
+      '## VIBE9103: Twice\n> Message.\n\nProse.\n\n### Fix\n- A.\n\n### Fix\n- B.',
+      'a section appears twice',
+    ],
+    [
+      '## VIBE9103: Case\n> No {Token}.\n\nProse.\n\n### Fix\n- Fix.',
       'malformed placeholder in "No {Token}."',
     ],
     [
-      '## VIBE9103: Open\n> Message.\n\n### Fix\n- Add {token.',
+      '## VIBE9103: Open\n> Message.\n\nProse.\n\n### Fix\n- Add {token.',
       'malformed placeholder in "Add {token."',
     ],
   ])('fails on a format error: %j', (entry, problem) => {
@@ -311,8 +325,10 @@ describe('pnpm errors --check', () => {
   // Rule 2
   it('fails on a code outside its package range', () => {
     put({
-      'packages/server/messages/zz.md': '## VIBE9900: Reserved\n> Message.\n\n### Fix\n- Fix.\n',
-      'packages/unknown/messages/zz.md': '## VIBE0500: Unlisted\n> Message.\n\n### Fix\n- Fix.\n',
+      'packages/server/messages/zz.md':
+        '## VIBE9900: Reserved\n> Message.\n\nProse.\n\n### Fix\n- Fix.\n',
+      'packages/unknown/messages/zz.md':
+        '## VIBE0500: Unlisted\n> Message.\n\nProse.\n\n### Fix\n- Fix.\n',
       'packages/unknown/package.json': '{}',
     });
     expect(check()).toEqual(
@@ -324,7 +340,9 @@ describe('pnpm errors --check', () => {
   });
 
   it('fails on a code duplicated repo-wide, retired codes included', () => {
-    put({ 'packages/ui/messages/zz.md': '## VIBE9102: Copy\n> Message.\n\n### Fix\n- Fix.\n' });
+    put({
+      'packages/ui/messages/zz.md': '## VIBE9102: Copy\n> Message.\n\nProse.\n\n### Fix\n- Fix.\n',
+    });
     expect(check()).toContain('VIBE9102 is defined in packages/server and packages/ui');
   });
 

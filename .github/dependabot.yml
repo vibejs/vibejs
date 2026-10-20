@@ -11,6 +11,9 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # A parser bump changes compiler output, so it gets a PR of its own (see CONTRIBUTING.md).
+      oxc-parser:
+        patterns: ['oxc-parser']
       npm:
         patterns: ['*']
     ignore:

@@ -28,14 +28,14 @@ error[VIBE2909]: `v-cloak` is not supported.
 fix: Remove `v-cloak`.
 docs: https://vibejs.org/v0/errors/VIBE2909
 
-error[VIBE2910]: `@vue:mounted` is not supported.
+error[VIBE2910]: `@vue:mounted` is an element lifecycle listener, and lifecycle listeners are not supported.
   --> template/unsupported/input.vibe:6:8
 6 |   <div @vue:mounted="count++"></div>
   |        ^^^^^^^^^^^^^^^^^^^^^^
 fix: Use `onMounted` or `onUnmounted` with a template ref in `<script setup lang="ts">`.
 docs: https://vibejs.org/v0/errors/VIBE2910
 
-error[VIBE2910]: `@vnode-mounted` is not supported.
+error[VIBE2910]: `@vnode-mounted` is an element lifecycle listener, and lifecycle listeners are not supported.
   --> template/unsupported/input.vibe:7:8
 7 |   <div @vnode-mounted="count++"></div>
   |        ^^^^^^^^^^^^^^^^^^^^^^^^

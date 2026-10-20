@@ -10,7 +10,7 @@ error[VIBE2502]: The `v-model` target must be a variable or a property.
 3 |   <input v-model="text + 1">
   |                   ^^^^^^^^
 fix: Bind a `ref` or a property, as in `v-model="form.name"`.
-fix: Use a value binding and an event listener for computed values.
+fix: Bind a computed value with `:value` and update its source in an `@input` handler.
 docs: https://vibejs.org/v0/errors/VIBE2502
 
 error[VIBE2503]: `i` is a `v-for` or `v-slot` local and cannot be assigned.
@@ -56,7 +56,7 @@ error[VIBE2508]: `v-model` cannot be used on `<input type="file">`.
   --> template/model-errors/input.vibe:9:22
 9 |   <input type="file" v-model="text">
   |                      ^^^^^^^^^^^^^^
-fix: Listen to `@change` and read `event.target.files`.
+fix: Listen to `@change` and read the files in the handler, as in `(event.target as HTMLInputElement).files`.
 docs: https://vibejs.org/v0/errors/VIBE2508
 
 error[VIBE2509]: The `v-model` argument `x` is allowed only as a static name on a component.
