@@ -719,6 +719,19 @@ describe('rule 13: workflows', () => {
     ]);
   });
 
+  it('sees past comments and catches every form of secrets access', () => {
+    const text = release(
+      'on:\n  workflow_dispatch:\n# note\n  push:\n    branches: [main]',
+      '          A: ${{ secrets["OTHER"] }}\n          B: ${{ toJSON(secrets) }}',
+    ).replace('      id-token: write', '      # id-token: write');
+    expect(lint({ [RELEASE]: text })).toEqual([
+      `${RELEASE}:1:1 workflow missing \`id-token: write\``,
+      `${RELEASE}:1:1 workflow triggers [workflow_dispatch, push]; use only workflow_dispatch`,
+      `${RELEASE}:23:18 workflow secrets: publish through trusted publishing`,
+      `${RELEASE}:24:25 workflow secrets: publish through trusted publishing`,
+    ]);
+  });
+
   it('requires every action of every workflow to be pinned to a commit SHA', () => {
     const file = '.github/workflows/ci.yml';
     const text = `jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v7\n      - uses: "a/b@${SHA}"\n`;

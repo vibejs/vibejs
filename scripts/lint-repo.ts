@@ -424,7 +424,9 @@ export function main(root: string): number {
       }
     }
     if (file !== '.github/workflows/release.yml') continue;
-    const on = /^on:(.*)\n((?:(?:[ \t].*)?\n)*)/m.exec(text);
+    // Blank comment lines, so they neither end the `on:` block nor count as required lines.
+    const yaml = text.replace(/^[ \t]*#.*$/gm, '');
+    const on = /^on:(.*)\n((?:(?:[ \t].*)?\n)*)/m.exec(yaml);
     const triggers = [
       ...(on?.[1].split(/[\s,[\]]+/) ?? []),
       ...Array.from(on?.[2].matchAll(/^ {2}([\w-]+):/gm) ?? [], (m) => m[1]),
@@ -432,11 +434,13 @@ export function main(root: string): number {
     if (triggers.join() !== 'workflow_dispatch') {
       reportFile(file, 'workflow', `triggers [${triggers.join(', ')}]; use only workflow_dispatch`);
     }
-    for (const match of text.matchAll(/\bsecrets\.(\w+)|\b(?:NPM_TOKEN|NODE_AUTH_TOKEN)\b/g)) {
+    for (const match of yaml.matchAll(
+      /\bsecrets\b(?:\.(\w+))?|\b(?:NPM_TOKEN|NODE_AUTH_TOKEN)\b/g,
+    )) {
       if (match[1] === 'RELEASE_APP_PRIVATE_KEY') continue;
       report(
         file,
-        text,
+        yaml,
         match.index,
         'workflow',
         `${match[0]}: publish through trusted publishing`,
@@ -448,7 +452,7 @@ export function main(root: string): number {
       'NPM_CONFIG_PROVENANCE: true',
       'github-token: ${{ steps.app-token.outputs.token }}',
     ];
-    for (const line of required.filter((r) => !text.includes(r))) {
+    for (const line of required.filter((r) => !yaml.includes(r))) {
       reportFile(file, 'workflow', `missing \`${line}\``);
     }
   }
