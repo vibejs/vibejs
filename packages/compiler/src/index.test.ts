@@ -38,6 +38,7 @@ describe('@vibejs-org/compiler', () => {
       'forEachIdentifier',
       'formatDiagnostic',
       'hyphenate',
+      'identifiersOf',
       'isAllowedGlobal',
       'isSimpleHandler',
       'parse',

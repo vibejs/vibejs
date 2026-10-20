@@ -6,6 +6,7 @@ export {
   capitalize,
   forEachIdentifier,
   hyphenate,
+  identifiersOf,
   isAllowedGlobal,
   isSimpleHandler,
 } from './expr/index.ts';
