@@ -14,6 +14,7 @@ Commands (always the local CLI, never a global one):
 - `npx --no vibejs errors --json` lists the errors of the running dev server.
 - Done = `npx --no vibejs check --json` exits 0 (types, lint, format, tests, coverage per file).
 - `npx --no vibejs g resource|component|page <name>` adds code with its tests; `--dry-run --json` previews it.
+- `npx --no vibejs routes --json`, `npx --no vibejs components --json` and `npx --no vibejs di --json` show the app's routes, components and providers; `npx --no vibejs request <METHOD> <path> --json` calls the API.
 - `npx --no vibejs agents sync` refreshes this block.
 
 Rules:
@@ -29,7 +30,7 @@ Rules:
 - Never add coverage-ignore comments; add tests.
 - TS1241 on `@Handle`: the handler must be `(ctx: Ctx<typeof contract.route>)` and return the route response type; do not cast or use `any`.
 
-[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|.:{index.md}|cli:{agents.md,build.md,check.md,dev.md,di.md,docs.md,errors.md,explain.md,generate.md,index.md,logs.md,mcp.md,request.md}|guides:{coming-from-nestjs.md,coming-from-vue-router.md,extending.md}|server:{configuration.md,contracts.md,handlers.md,index.md,modules.md,pipeline.md,testing.md}|ui:{data.md,routing.md,testing.md}
+[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|.:{index.md}|cli:{agents.md,build.md,check.md,components.md,dev.md,di.md,docs.md,errors.md,explain.md,generate.md,index.md,logs.md,mcp.md,request.md,routes.md}|guides:{coming-from-nestjs.md,coming-from-vue-router.md,extending.md}|server:{configuration.md,contracts.md,handlers.md,index.md,modules.md,pipeline.md,testing.md}|ui:{data.md,routing.md,testing.md}
 
 <!-- END:vibejs-agent-rules -->
 

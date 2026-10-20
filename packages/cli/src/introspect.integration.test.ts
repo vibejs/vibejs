@@ -15,9 +15,7 @@ const ENV = { ...process.env, VIBEJS_AGENT: '1' };
 let child: ChildProcess | undefined;
 afterAll(() => {
   child?.kill('SIGKILL');
-  // `vibejs dev` also writes the agent files, which examples/todo does not commit.
-  for (const file of ['.vibejs', 'AGENTS.md', 'CLAUDE.md'])
-    rmSync(`${TODO}/${file}`, { recursive: true, force: true });
+  rmSync(`${TODO}/.vibejs`, { recursive: true, force: true });
 });
 
 /** Runs the built bin in examples/todo; stdout must be one JSON document without colors. */
