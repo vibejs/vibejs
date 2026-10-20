@@ -17,6 +17,7 @@ function write(path: string, content: string): void {
 // The search rows match only this page, so new catalog entries never change their snapshots.
 write('docs/guide/quokka.md', '# Quokka guide\n\nA quokka page.\n');
 write('docs/index.txt', '[vibe.js docs index]|guide:{quokka.md}\n');
+write('skills/vibejs-quokka/SKILL.md', 'A quokka skill.\n');
 // A project with stub tools for `vibejs check`; `exec` below answers like a clean run.
 write('app/package.json', JSON.stringify({ devDependencies: { '@vibejs-org/cli': '0.0.0' } }));
 for (const [pkg, version, bin] of [
@@ -229,7 +230,7 @@ describe('--help --json', () => {
 });
 
 it('reads --json after -- as a docs query, not as the flag', async () => {
-  const result = await run(['docs', '--', '--json', 'quokka']);
+  const result = await run(['docs', '--', '--json', 'quokka', 'guide']);
   expect(result.code).toBe(0);
   expect(result.stdout).toMatch(/^guide\/quokka {2}Quokka guide\n/);
 });

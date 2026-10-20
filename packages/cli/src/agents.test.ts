@@ -1,4 +1,13 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,15 +17,18 @@ import {
   BEGIN,
   END,
   execPrefix,
-  projectBlock,
+  mcpServer,
+  projectAgentFiles,
   renderBlock,
   syncAgentFiles,
+  type AgentFiles,
   type AgentOp,
 } from './agents.ts';
 import { CATALOG } from './catalog.gen.ts';
 
 const INDEX = '[vibe.js docs index]|root: ./docs|.:{index.md}';
-const DOCS = fileURLToPath(new URL('../test/fixtures/docs', import.meta.url));
+const FIXTURES = fileURLToPath(new URL('../test/fixtures', import.meta.url));
+const SKILLS = fileURLToPath(new URL('../../../skills', import.meta.url));
 
 let root: string;
 beforeEach(() => {
@@ -30,6 +42,9 @@ const read = (file: string) => readFileSync(join(root, file), 'utf8');
 const crlf = (...list: string[]) => list.join('\r\n');
 const ops = (...list: AgentOp['op'][]): AgentOp[] =>
   (['AGENTS.md', 'CLAUDE.md'] as const).map((file, i) => ({ file, op: list[i] }));
+/** The AGENTS.md and CLAUDE.md ops of a sync without skills. */
+const sync = (block: string, write = true) =>
+  syncAgentFiles(root, { block, exec: 'npx --no vibejs', skills: {} }, write).slice(0, 2);
 
 describe('renderBlock', () => {
   const block = renderBlock('pnpm exec vibejs', INDEX);
@@ -68,11 +83,27 @@ it('maps each package manager to its exec prefix', () => {
   ]);
 });
 
-it('builds the project block from the docs index and the package manager', () => {
+it('maps an exec prefix to the .mcp.json entry that starts vibejs mcp', () => {
+  expect((['pnpm', 'npm', 'yarn', 'bun'] as const).map((pm) => mcpServer(execPrefix(pm)))).toEqual([
+    { command: 'pnpm', args: ['exec', 'vibejs', 'mcp'] },
+    { command: 'npx', args: ['--no', 'vibejs', 'mcp'] },
+    { command: 'yarn', args: ['vibejs', 'mcp'] },
+    { command: 'npx', args: ['--no', 'vibejs', 'mcp'] },
+  ]);
+});
+
+it('builds the agent files from the shipped docs index and skills and the package manager', () => {
   writeFileSync(join(root, 'pnpm-lock.yaml'), '');
-  expect(projectBlock(root, DOCS)).toBe(
-    renderBlock('pnpm exec vibejs', readFileSync(join(DOCS, 'index.txt'), 'utf8').trim()),
-  );
+  expect(projectAgentFiles(root, FIXTURES)).toEqual({
+    block: renderBlock(
+      'pnpm exec vibejs',
+      readFileSync(join(FIXTURES, 'docs/index.txt'), 'utf8').trim(),
+    ),
+    exec: 'pnpm exec vibejs',
+    skills: {
+      'vibejs-fixture': readFileSync(join(FIXTURES, 'skills/vibejs-fixture/SKILL.md'), 'utf8'),
+    },
+  } satisfies AgentFiles);
 });
 
 describe('syncAgentFiles', () => {
@@ -80,10 +111,10 @@ describe('syncAgentFiles', () => {
   const newer = renderBlock('npx --no vibejs', `${INDEX}|cli:{new.md}`);
 
   it('creates both files, then skips them', () => {
-    expect(syncAgentFiles(root, block, true)).toEqual(ops('create', 'create'));
+    expect(sync(block)).toEqual(ops('create', 'create'));
     expect(read('AGENTS.md')).toBe(`# AGENTS.md\n\n${block}\n\n## Project notes\n`);
     expect(read('CLAUDE.md')).toBe('@AGENTS.md\n');
-    expect(syncAgentFiles(root, block, true)).toEqual(ops('skip', 'skip'));
+    expect(sync(block)).toEqual(ops('skip', 'skip'));
   });
 
   it.each([
@@ -94,9 +125,9 @@ describe('syncAgentFiles', () => {
     const nl = before.includes('\r\n') ? '\r\n' : '\n';
     writeFileSync(join(root, 'AGENTS.md'), `${before}${block.replaceAll('\n', nl)}${after}`);
     writeFileSync(join(root, 'CLAUDE.md'), '@AGENTS.md\n');
-    expect(syncAgentFiles(root, newer, true)).toEqual(ops('update', 'skip'));
+    expect(sync(newer)).toEqual(ops('update', 'skip'));
     expect(read('AGENTS.md')).toBe(`${before}${newer.replaceAll('\n', nl)}${after}`);
-    expect(syncAgentFiles(root, newer, true)).toEqual(ops('skip', 'skip'));
+    expect(sync(newer)).toEqual(ops('skip', 'skip'));
   });
 
   it.each([
@@ -105,25 +136,25 @@ describe('syncAgentFiles', () => {
     ['# Notes\r\n', '# Notes\r\n\r\n'],
   ])('appends the block to an AGENTS.md without markers (%j)', (text, start) => {
     writeFileSync(join(root, 'AGENTS.md'), text);
-    expect(syncAgentFiles(root, block, true)[0]).toEqual({ file: 'AGENTS.md', op: 'update' });
+    expect(sync(block)[0]).toEqual({ file: 'AGENTS.md', op: 'update' });
     const nl = text.includes('\r\n') ? '\r\n' : '\n';
     expect(read('AGENTS.md')).toBe(`${start}${block.replaceAll('\n', nl)}${nl}`);
-    expect(syncAgentFiles(root, block, true)[0].op).toBe('skip');
+    expect(sync(block)[0].op).toBe('skip');
   });
 
   it('prepends @AGENTS.md once to a CLAUDE.md without it', () => {
     const own = crlf('# Claude', '@AGENTS.md.bak', '');
     writeFileSync(join(root, 'CLAUDE.md'), own);
-    expect(syncAgentFiles(root, block, true)[1]).toEqual({ file: 'CLAUDE.md', op: 'update' });
+    expect(sync(block)[1]).toEqual({ file: 'CLAUDE.md', op: 'update' });
     expect(read('CLAUDE.md')).toBe(`@AGENTS.md\n${own}`);
-    expect(syncAgentFiles(root, block, true)[1].op).toBe('skip');
+    expect(sync(block)[1].op).toBe('skip');
     writeFileSync(join(root, 'CLAUDE.md'), crlf('# Claude', '@AGENTS.md', ''));
-    expect(syncAgentFiles(root, block, true)[1].op).toBe('skip');
+    expect(sync(block)[1].op).toBe('skip');
   });
 
   it('only reports without write', () => {
     writeFileSync(join(root, 'AGENTS.md'), `x\n${block}\n`);
-    expect(syncAgentFiles(root, newer, false)).toEqual(ops('update', 'create'));
+    expect(sync(newer, false)).toEqual(ops('update', 'create'));
     expect(read('AGENTS.md')).toBe(`x\n${block}\n`);
     expect(() => read('CLAUDE.md')).toThrow('ENOENT');
   });
@@ -138,12 +169,119 @@ describe('syncAgentFiles', () => {
     writeFileSync(join(root, 'AGENTS.md'), text);
     let error: unknown;
     try {
-      syncAgentFiles(root, block, true);
+      sync(block);
     } catch (e) {
       error = e;
     }
     expect(isVibeError(error) && error.code).toBe('VIBE8601');
     expect(String(error)).toContain(`AGENTS.md has ${problem};`);
     expect(read('AGENTS.md')).toBe(text);
+  });
+});
+
+describe('skills and .mcp.json', () => {
+  const SKILL_DIRS = ['.agents/skills', '.claude/skills'];
+  const NAMES = ['vibejs-add-resource', 'vibejs-cover-100', 'vibejs-dev-loop'];
+  let files: AgentFiles;
+  beforeEach(() => {
+    // A CLI dist with the repo's skills.
+    const dist = join(root, 'dist');
+    cpSync(SKILLS, join(dist, 'skills'), { recursive: true });
+    cpSync(join(FIXTURES, 'docs'), join(dist, 'docs'), { recursive: true });
+    root = join(root, 'app');
+    mkdirSync(root);
+    files = projectAgentFiles(root, dist);
+  });
+  afterEach(() => {
+    root = join(root, '..');
+  });
+
+  const skillFiles = SKILL_DIRS.flatMap((dir) => NAMES.map((name) => `${dir}/${name}/SKILL.md`));
+  const MCP = { mcpServers: { vibejs: { command: 'npx', args: ['--no', 'vibejs', 'mcp'] } } };
+
+  it('writes both skill copies byte for byte and .mcp.json, then skips them all', () => {
+    expect(Object.keys(files.skills)).toEqual(NAMES);
+    expect(syncAgentFiles(root, files, true)).toEqual(
+      ['AGENTS.md', 'CLAUDE.md', ...skillFiles, '.mcp.json'].map((file) => ({
+        file,
+        op: 'create',
+      })),
+    );
+    for (const file of skillFiles) {
+      expect(read(file)).toBe(
+        readFileSync(join(SKILLS, file.split('/').at(-2)!, 'SKILL.md'), 'utf8'),
+      );
+    }
+    expect(read('.mcp.json')).toBe(`${JSON.stringify(MCP, null, 2)}\n`);
+    expect(new Set(syncAgentFiles(root, files, true).map((o) => o.op))).toEqual(new Set(['skip']));
+  });
+
+  it('removes other vibejs-* entries, updates a changed skill and keeps foreign entries', () => {
+    syncAgentFiles(root, files, true);
+    for (const dir of SKILL_DIRS) {
+      mkdirSync(join(root, dir, 'vibejs-old'));
+      writeFileSync(join(root, dir, 'vibejs-old/SKILL.md'), 'old');
+      mkdirSync(join(root, dir, 'my-skill'));
+      writeFileSync(join(root, dir, 'my-skill/SKILL.md'), 'mine');
+      writeFileSync(join(root, dir, 'notes.txt'), 'notes');
+    }
+    writeFileSync(join(root, '.claude/skills/vibejs-dev-loop/SKILL.md'), 'edited');
+    const changed = syncAgentFiles(root, files, true).filter((o) => o.op !== 'skip');
+    expect(changed).toEqual([
+      { file: '.agents/skills/vibejs-old', op: 'delete' },
+      { file: '.claude/skills/vibejs-dev-loop/SKILL.md', op: 'update' },
+      { file: '.claude/skills/vibejs-old', op: 'delete' },
+    ]);
+    for (const dir of SKILL_DIRS) {
+      expect(readdirSync(join(root, dir)).toSorted()).toEqual(['my-skill', 'notes.txt', ...NAMES]);
+      expect(read(`${dir}/my-skill/SKILL.md`)).toBe('mine');
+    }
+    expect(read('.claude/skills/vibejs-dev-loop/SKILL.md')).toBe(files.skills['vibejs-dev-loop']);
+  });
+
+  it('only reports a stale skill and a changed .mcp.json without write', () => {
+    syncAgentFiles(root, files, true);
+    mkdirSync(join(root, '.agents/skills/vibejs-old'));
+    const other = { mcpServers: { vibejs: { command: 'vibejs', args: ['mcp'] } } };
+    writeFileSync(join(root, '.mcp.json'), JSON.stringify(other));
+    expect(syncAgentFiles(root, files, false).filter((o) => o.op !== 'skip')).toEqual([
+      { file: '.agents/skills/vibejs-old', op: 'delete' },
+      { file: '.mcp.json', op: 'update' },
+    ]);
+    expect(existsSync(join(root, '.agents/skills/vibejs-old'))).toBe(true);
+    expect(read('.mcp.json')).toBe(JSON.stringify(other));
+  });
+
+  it('sets mcpServers.vibejs and keeps the other keys in order', () => {
+    const own = { mcpServers: { other: { command: 'other' } }, x: 1 };
+    writeFileSync(join(root, '.mcp.json'), JSON.stringify(own));
+    expect(syncAgentFiles(root, files, true).at(-1)).toEqual({ file: '.mcp.json', op: 'update' });
+    const merged = { mcpServers: { other: { command: 'other' }, ...MCP.mcpServers }, x: 1 };
+    expect(read('.mcp.json')).toBe(`${JSON.stringify(merged, null, 2)}\n`);
+    writeFileSync(join(root, '.mcp.json'), '{ "y": 2 }');
+    syncAgentFiles(root, files, true);
+    expect(read('.mcp.json')).toBe(`${JSON.stringify({ y: 2, ...MCP }, null, 2)}\n`);
+    // An equal entry is kept as written.
+    writeFileSync(join(root, '.mcp.json'), JSON.stringify(MCP));
+    expect(syncAgentFiles(root, files, true).at(-1)!.op).toBe('skip');
+  });
+
+  it.each([
+    ['not valid JSON', '{ "mcpServers": '],
+    ['not a JSON object', '[]'],
+    ['not a JSON object', 'null'],
+    ['a JSON object whose `mcpServers` is not an object', '{ "mcpServers": "vibejs" }'],
+  ])('throws VIBE8602 for .mcp.json %s and writes nothing (%s)', (problem, text) => {
+    writeFileSync(join(root, '.mcp.json'), text);
+    let error: unknown;
+    try {
+      syncAgentFiles(root, files, true);
+    } catch (e) {
+      error = e;
+    }
+    expect(isVibeError(error) && error.code).toBe('VIBE8602');
+    expect(String(error)).toContain(`.mcp.json is ${problem};`);
+    expect(readdirSync(root)).toEqual(['.mcp.json']);
+    expect(read('.mcp.json')).toBe(text);
   });
 });

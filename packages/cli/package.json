@@ -32,7 +32,7 @@
   },
   "scripts": {
     "prebuild": "pnpm -w errors",
-    "build": "tsdown && node ../../docs/scripts/docs.ts bundle dist/docs && node --input-type=module -e \"import { mkdirSync, readFileSync } from 'node:fs'; import { renderBlock, syncAgentFiles } from './src/agents.ts'; mkdirSync('dist/agents'); syncAgentFiles('dist/agents', renderBlock('{{exec}}', readFileSync('dist/docs/index.txt', 'utf8').trim()), true);\""
+    "build": "tsdown && node ../../docs/scripts/docs.ts bundle dist/docs && node --input-type=module -e \"import { cpSync, mkdirSync, readFileSync } from 'node:fs'; import { projectAgentFiles, renderBlock, syncAgentFiles } from './src/agents.ts'; cpSync('../../skills', 'dist/skills', { recursive: true }); const { skills } = projectAgentFiles('.', 'dist'); const block = renderBlock('{{exec}}', readFileSync('dist/docs/index.txt', 'utf8').trim()); mkdirSync('dist/agents'); syncAgentFiles('dist/agents', { block, exec: '{{exec}}', skills }, true);\""
   },
   "dependencies": {
     "@modelcontextprotocol/server": "catalog:",

@@ -2,6 +2,7 @@
 // then runs the app's own vibejs check, agents sync --check, the generators and build, and serves
 // the build.
 import { spawn, spawnSync } from 'node:child_process';
+import { once } from 'node:events';
 import {
   appendFileSync,
   globSync,
@@ -90,7 +91,17 @@ it('publishes only the bin, its manifest, docs, the template and the agent files
   const allowed = /^(?:bin\.js|package\.json|LICENSE|README\.md|templates\/.+|agents\/.+)$/;
   expect(created.files.map((f) => f.path).filter((path) => !allowed.test(path))).toEqual([]);
   expect(created.files.map((f) => f.path)).toEqual(
-    expect.arrayContaining(['bin.js', 'agents/AGENTS.md', 'templates/fullstack/_gitignore']),
+    expect.arrayContaining([
+      'bin.js',
+      'agents/AGENTS.md',
+      'agents/.mcp.json',
+      ...['.agents', '.claude'].flatMap((dir) =>
+        ['vibejs-add-resource', 'vibejs-cover-100', 'vibejs-dev-loop'].map(
+          (name) => `agents/${dir}/skills/${name}/SKILL.md`,
+        ),
+      ),
+      'templates/fullstack/_gitignore',
+    ]),
   );
   expect(statSync(created.filename).size).toBeLessThan(1024 * 1024);
 });
@@ -114,6 +125,54 @@ describe('pnpm', () => {
       expect(readFileSync(join(app, 'AGENTS.md'), 'utf8')).toContain(
         '`pnpm exec vibejs check --json`',
       );
+    },
+    INSTALL,
+  );
+
+  it(
+    'starts the .mcp.json server over stdio with the eight tools',
+    async () => {
+      const { command, args } = JSON.parse(readFileSync(join(app, '.mcp.json'), 'utf8')).mcpServers
+        .vibejs;
+      expect({ command, args }).toEqual({ command: 'pnpm', args: ['exec', 'vibejs', 'mcp'] });
+      const child = spawn(command, args, {
+        cwd: app,
+        env: { ...env, VIBEJS_AGENT: '1' },
+        shell: process.platform === 'win32',
+      });
+      let stdout = '';
+      child.stdout.setEncoding('utf8').on('data', (s: string) => (stdout += s));
+      const send = (message: object) =>
+        child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', ...message })}\n`);
+      const answered = async (id: number) =>
+        await expect.poll(() => stdout.includes(`"id":${id}`), { timeout: 60_000 }).toBe(true);
+      const clientInfo = { name: 'test', version: '1.0.0' };
+      send({
+        id: 1,
+        method: 'initialize',
+        params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo },
+      });
+      await answered(1);
+      send({ method: 'notifications/initialized' });
+      send({ id: 2, method: 'tools/list' });
+      await answered(2);
+      child.stdin.end();
+      await once(child, 'exit');
+      const lines = stdout
+        .trimEnd()
+        .split('\n')
+        .map((line) => JSON.parse(line));
+      expect(lines[0]).toMatchObject({ id: 1, result: { serverInfo: { name: 'vibejs' } } });
+      expect(lines[1].result.tools.map((t: { name: string }) => t.name)).toEqual([
+        'get_errors',
+        'get_logs',
+        'get_routes',
+        'get_di_graph',
+        'get_component_tree',
+        'check',
+        'request',
+        'explain',
+      ]);
     },
     INSTALL,
   );

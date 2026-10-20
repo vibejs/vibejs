@@ -1,5 +1,6 @@
+import { dirname } from 'node:path';
 import { isVibeError } from '@vibejs-org/errors';
-import { projectBlock, syncAgentFiles, type AgentOp } from '../agents.ts';
+import { projectAgentFiles, syncAgentFiles, type AgentOp } from '../agents.ts';
 import type { CommandDef } from '../command.ts';
 import { vibeError } from '../errors.gen.ts';
 import { envelopeError, type JsonEnvelope } from '../output.ts';
@@ -11,7 +12,8 @@ export interface AgentsResult extends JsonEnvelope {
 
 export const agents: CommandDef<AgentsResult> = {
   name: 'agents',
-  summary: 'Write the vibe.js rules block into AGENTS.md and `@AGENTS.md` into CLAUDE.md.',
+  summary:
+    'Write the vibe.js rules into AGENTS.md and CLAUDE.md, the vibejs-* skills into .agents/skills and .claude/skills, and the vibejs server into .mcp.json.',
   usage: 'vibejs agents sync [--check]',
   examples: ['vibejs agents sync', 'vibejs agents sync --check'],
   options: {
@@ -35,7 +37,8 @@ export const agents: CommandDef<AgentsResult> = {
     }
     let ops: AgentOp[];
     try {
-      ops = syncAgentFiles(root, projectBlock(root, ctx.docsDir), values.check !== true);
+      const files = projectAgentFiles(root, dirname(ctx.docsDir));
+      ops = syncAgentFiles(root, files, values.check !== true);
     } catch (error) {
       if (!isVibeError(error)) throw error;
       return { ...base, ok: false, next: ['vibejs agents sync'], error: envelopeError(error) };

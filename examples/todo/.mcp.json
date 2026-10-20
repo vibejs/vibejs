@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vibejs": {
+      "command": "npx",
+      "args": [
+        "--no",
+        "vibejs",
+        "mcp"
+      ]
+    }
+  }
+}

@@ -474,17 +474,19 @@ describe('rule 9: English only', () => {
     ]);
   });
 
-  it('rejects them in the full text of messages, docs and templates', () => {
+  it('rejects them in the full text of messages, docs, templates and skills', () => {
     expect(
       lint({
         'packages/server/messages/di.md': `## VIBE9101: Title\n> Hello${G}.\n`,
         'docs/guide/index.md': `a ${S}`,
         'packages/create-vibejs/templates/app/ui/src/App.vibe': `<template>${G}</template>`,
+        'skills/vibejs-x/SKILL.md': `# ${S}`,
       }),
     ).toEqual([
       'docs/guide/index.md:1:3 english text is English only',
       'packages/create-vibejs/templates/app/ui/src/App.vibe:1:11 english text is English only',
       'packages/server/messages/di.md:2:8 english text is English only',
+      'skills/vibejs-x/SKILL.md:1:3 english text is English only',
     ]);
   });
 

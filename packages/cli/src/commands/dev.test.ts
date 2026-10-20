@@ -516,12 +516,26 @@ describe('errors', () => {
 });
 
 describe('agent files', () => {
-  it('writes the AGENTS.md block and CLAUDE.md on start', async () => {
+  it('writes the AGENTS.md block, CLAUDE.md, the skills and .mcp.json on start', async () => {
     const r = await start();
     expect(readFileSync(join(r.root, 'AGENTS.md'), 'utf8')).toContain(
       '`npx --no vibejs check --json` exits 0',
     );
     expect(readFileSync(join(r.root, 'CLAUDE.md'), 'utf8')).toBe('@AGENTS.md\n');
+    for (const dir of ['.agents', '.claude']) {
+      expect(existsSync(join(r.root, dir, 'skills/vibejs-fixture/SKILL.md'))).toBe(true);
+    }
+    expect(JSON.parse(readFileSync(join(r.root, '.mcp.json'), 'utf8')).mcpServers.vibejs).toEqual({
+      command: 'npx',
+      args: ['--no', 'vibejs', 'mcp'],
+    });
+  });
+
+  it('logs an invalid .mcp.json as a VIBE8602 warning and keeps serving', async () => {
+    const r = await start(app((at) => writeFileSync(join(at, '.mcp.json'), '[]')));
+    expect(r.events()[0]).toMatchObject({ event: 'log', level: 'warn', code: 'VIBE8602' });
+    expect(readFileSync(join(r.root, '.mcp.json'), 'utf8')).toBe('[]');
+    expect((await get(r, '/api/health')).status).toBe(200);
   });
 
   it('logs malformed markers as a VIBE8601 warning and keeps serving', async () => {
