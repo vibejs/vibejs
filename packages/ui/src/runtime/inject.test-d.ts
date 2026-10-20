@@ -34,11 +34,11 @@ inject(key, 'a');
 inject(key, () => ref(0));
 expectTypeOf(hasInjectionContext()).toEqualTypeOf<boolean>();
 
-// A key is a symbol: a computed key, and not assignable to a key of another type.
+// A key is a symbol, not a unique symbol: computed keys widen to a symbol index signature.
+// It is not assignable to a key of another type.
 const label: InjectionKey<string> = Symbol();
 expectTypeOf({ [key]: ref(1), [label]: 'a' }).toEqualTypeOf<{
-  [key]: Ref<number>;
-  [label]: string;
+  [x: symbol]: Ref<number> | string;
 }>();
 expectTypeOf(label).toExtend<symbol>();
 expectTypeOf(label).not.toExtend<InjectionKey<number>>();
