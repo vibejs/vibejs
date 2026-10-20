@@ -25,7 +25,7 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 | `pnpm fmt`                              | Formats the repo with oxfmt                                                               |
 | `pnpm errors`                           | Regenerates the error files from `packages/*/messages/*.md`                               |
 | `pnpm run docs`                         | `pnpm build`, then the docs site: error pages, CLI reference, snippet check, `llms.txt`   |
-| `node scripts/use-ts-next.ts [version]` | Pins the TypeScript catalogs to a 7.1 nightly (the `ts-next` CI job)                      |
+| `node scripts/use-ts-next.ts [version]` | Pins the newest 7.1 nightly at least `minimumReleaseAge` old, or the given version        |
 
 ## Tests and coverage
 

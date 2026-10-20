@@ -1,6 +1,6 @@
 // Usage: node scripts/use-ts-next.ts [version]
 // Pins both `catalog.typescript` and `catalogs.ts-next.typescript` in pnpm-workspace.yaml to an
-// exact version, or to the registry's current `typescript@next` when no version is given.
+// exact version, or to the newest 7.1 nightly at least minimumReleaseAge old when no version is given.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -27,25 +27,47 @@ export function setTypescript(yaml: string, version: string): string {
   return lines.join('\n');
 }
 
-/** Returns the version behind the `next` dist-tag of typescript. */
-export async function nextVersion(): Promise<string> {
-  const res = await fetch('https://registry.npmjs.org/-/package/typescript/dist-tags');
+/** Returns the top-level `minimumReleaseAge` (minutes) of pnpm-workspace.yaml. */
+export function releaseAge(yaml: string): number {
+  const match = /^minimumReleaseAge: *(\d+) *$/m.exec(yaml);
+  if (!match) throw new Error('Expected minimumReleaseAge in the YAML');
+  return Number(match[1]);
+}
+
+/** Returns the newest typescript 7.1 nightly published at least `minutes` before `now`. */
+export async function nextVersion(minutes: number, now: number = Date.now()): Promise<string> {
+  const res = await fetch('https://registry.npmjs.org/typescript');
   if (!res.ok) throw new Error(`npm registry answered ${res.status}`);
-  const tags: unknown = await res.json();
-  if (
-    typeof tags === 'object' &&
-    tags !== null &&
-    'next' in tags &&
-    typeof tags.next === 'string'
-  ) {
-    return tags.next;
+  const body: unknown = await res.json();
+  const time =
+    typeof body === 'object' && body !== null && 'time' in body && typeof body.time === 'object'
+      ? body.time
+      : null;
+  const cutoff = now - minutes * 60_000;
+  let best: string | undefined;
+  let bestTime = -Infinity;
+  for (const [version, published] of Object.entries(time ?? {})) {
+    const at = Date.parse(String(published));
+    if (/^7\.1\.0-dev\.\d+\.\d+$/.test(version) && at <= cutoff && at > bestTime) {
+      best = version;
+      bestTime = at;
+    }
   }
-  throw new Error('npm registry: typescript has no next dist-tag');
+  if (best === undefined) {
+    throw new Error(`npm registry: no typescript 7.1 nightly is at least ${minutes} minutes old`);
+  }
+  return best;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const file = fileURLToPath(new URL('../pnpm-workspace.yaml', import.meta.url));
-  const version = process.argv[2] ?? (await nextVersion());
-  writeFileSync(file, setTypescript(readFileSync(file, 'utf8'), version));
-  console.log(`typescript ${version} in catalog and catalogs.ts-next`);
+  const yaml = readFileSync(file, 'utf8');
+  const arg = process.argv.at(2);
+  const version = arg ?? (await nextVersion(releaseAge(yaml)));
+  writeFileSync(file, setTypescript(yaml, version));
+  console.log(
+    arg === undefined
+      ? `typescript ${version} (newest 7.1 nightly at least minimumReleaseAge old) in catalog and catalogs.ts-next`
+      : `typescript ${version} in catalog and catalogs.ts-next`,
+  );
 }

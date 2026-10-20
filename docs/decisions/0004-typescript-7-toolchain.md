@@ -13,7 +13,7 @@ A prototype content mapper run against a pinned 7.1 nightly confirmed that `tsc 
 
 - The repository builds and type-checks with TypeScript 7.0 (`tsc -b`, pinned in the pnpm catalog), together with Vite 8, Vitest 5, tsdown, oxlint and oxfmt.
 - `.vibe` files are type-checked by `@vibejs-org/language-tools`, a TypeScript 7.1 content mapper. CI type-checks applications with `tsc -b --runExternalCode`; there is no separate type-checking CLI. Editors get the same results through the TypeScript language server, and a VS Code extension registers the mapper.
-- Until 7.1 is stable, the packages that need content mappers (language tools, the VS Code extension, the CLI, examples and docs) use a separate `catalog:ts-next` entry: an exact 7.1 nightly at least three days old. A non-blocking CI job runs the repository against the latest nightly to catch protocol changes early.
+- Until 7.1 is stable, the packages that need content mappers (language tools, the VS Code extension, the CLI, examples and docs) use a separate `catalog:ts-next` entry: an exact 7.1 nightly at least three days old. A non-blocking CI job runs the repository against the newest nightly that passes the repository's three-day release-age policy to catch protocol changes early.
 - When 7.1.x stable has been out for at least three days, one change moves the whole repository to it and removes `catalog:ts-next`.
 - If no stable 7.1 exists by 2027-01-31, an adapter for the TypeScript 6 JavaScript API is built around the same code generation.
 - The code generation is host-agnostic: one function from `.vibe` text to TypeScript, span maps and diagnostics, written to content-mapper constraints (strict mode only, no suppression comments in generated code, UTF-16 offsets).

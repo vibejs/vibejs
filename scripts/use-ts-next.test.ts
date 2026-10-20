@@ -1,9 +1,11 @@
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { nextVersion, setTypescript } from './use-ts-next.ts';
+import { nextVersion, releaseAge, setTypescript } from './use-ts-next.ts';
 
 const yaml = `packages:
   - packages/*
+
+minimumReleaseAge: 1440
 
 catalog:
   typescript: 7.0.2
@@ -33,24 +35,63 @@ describe('setTypescript', () => {
   });
 });
 
-describe('nextVersion', () => {
-  it('reads the next dist-tag from the registry', async () => {
-    const fetch = vi.fn<typeof globalThis.fetch>(async () =>
-      Response.json({ latest: '7.0.2', next: '7.1.0-dev.1' }),
+describe('releaseAge', () => {
+  it('reads the top-level minimumReleaseAge', () => {
+    expect(releaseAge(yaml)).toBe(1440);
+  });
+
+  it('fails when minimumReleaseAge is missing', () => {
+    expect(() => releaseAge(yaml.replace('minimumReleaseAge: 1440\n', ''))).toThrow(
+      'Expected minimumReleaseAge in the YAML',
     );
+  });
+});
+
+const now = Date.parse('2026-10-20T12:00:00.000Z');
+const day = 24 * 60;
+const time = {
+  created: '2012-10-01T00:00:00.000Z',
+  '7.0.2': '2026-10-01T00:00:00.000Z',
+  '7.1.0-dev.20261016.1': '2026-10-16T07:00:00.000Z',
+  '7.1.0-dev.20261017.1': '2026-10-17T12:00:00.000Z',
+  '7.1.0-dev.20261019.1': '2026-10-19T07:00:00.000Z',
+  '7.2.0-dev.20261010.1': '2026-10-10T07:00:00.000Z',
+};
+
+describe('nextVersion', () => {
+  it('picks the newest 7.1 nightly that is old enough', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json({ time }));
     vi.stubGlobal('fetch', fetch);
-    await expect(nextVersion()).resolves.toBe('7.1.0-dev.1');
-    expect(fetch).toHaveBeenCalledWith('https://registry.npmjs.org/-/package/typescript/dist-tags');
+    await expect(nextVersion(4 * day, now)).resolves.toBe('7.1.0-dev.20261016.1');
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledWith('https://registry.npmjs.org/typescript');
+  });
+
+  it('accepts a nightly published exactly at the cutoff', async () => {
+    vi.stubGlobal('fetch', async () => Response.json({ time }));
+    await expect(nextVersion(3 * day, now)).resolves.toBe('7.1.0-dev.20261017.1');
+  });
+
+  it('defaults to the current time', async () => {
+    vi.stubGlobal('fetch', async () => Response.json({ time }));
+    await expect(nextVersion(0)).resolves.toBe('7.1.0-dev.20261019.1');
   });
 
   it('fails on a registry error', async () => {
     vi.stubGlobal('fetch', async () => new Response(null, { status: 503 }));
-    await expect(nextVersion()).rejects.toThrow('npm registry answered 503');
+    await expect(nextVersion(3 * day, now)).rejects.toThrow('npm registry answered 503');
   });
 
-  it('fails when the registry has no next dist-tag', async () => {
-    vi.stubGlobal('fetch', async () => Response.json({ latest: '7.0.2' }));
-    await expect(nextVersion()).rejects.toThrow('typescript has no next dist-tag');
+  it('fails when no 7.1 nightly is old enough', async () => {
+    vi.stubGlobal('fetch', async () => Response.json({ time }));
+    await expect(nextVersion(5 * day, now)).rejects.toThrow(
+      `npm registry: no typescript 7.1 nightly is at least ${5 * day} minutes old`,
+    );
+  });
+
+  it('fails when the registry has no time map', async () => {
+    vi.stubGlobal('fetch', async () => Response.json({}));
+    await expect(nextVersion(0, now)).rejects.toThrow('no typescript 7.1 nightly');
   });
 });
 
@@ -73,6 +114,7 @@ describe('as a script', () => {
     process.argv = argv;
     vi.doUnmock('node:fs');
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it('pins the given version', async () => {
@@ -81,8 +123,10 @@ describe('as a script', () => {
     );
   });
 
-  it('pins typescript@next when no version is given', async () => {
-    vi.stubGlobal('fetch', async () => Response.json({ next: '7.1.0-dev.2' }));
-    expect(await runScript()).toBe(setTypescript(yaml, '7.1.0-dev.2'));
+  it('pins the newest nightly at least minimumReleaseAge old when no version is given', async () => {
+    vi.useFakeTimers({ now, toFake: ['Date'] });
+    vi.stubGlobal('fetch', async () => Response.json({ time }));
+    // minimumReleaseAge: 1440 (one day) admits 20261019.1; the repository's 4320 would not.
+    expect(await runScript()).toBe(setTypescript(yaml, '7.1.0-dev.20261019.1'));
   });
 });

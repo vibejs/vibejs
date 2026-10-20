@@ -105,8 +105,6 @@ jobs:
           install: false
       - run: node scripts/use-ts-next.ts
       - run: pnpm install --no-frozen-lockfile
-        env:
-          pnpm_config_minimum_release_age: 0
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm typecheck
       - run: pnpm test --run
