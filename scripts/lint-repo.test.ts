@@ -487,6 +487,14 @@ describe('rule 7: notices', () => {
     expect(lint({ [notices]: credit('vuejs/core', '1234567', file) })).toEqual([
       `${file}:1:1 upstream ${notices} names no commit abcdef0123 under vuejs/core`,
     ]);
+    expect(
+      lint({
+        [notices]: credit('vuejs/core', 'abcdef0123', file).replace(
+          'vuejs/core',
+          'vuejs/core-vapor',
+        ),
+      }),
+    ).toEqual([`${file}:1:1 upstream vuejs/core is not listed in ${notices}`]);
   });
 
   it('rejects a workspace path that a notices file names but that does not exist', () => {
@@ -509,6 +517,9 @@ describe('rule 7: notices', () => {
     expect(lint({ 'packages/ui/THIRD-PARTY-NOTICES.md': '' })).toContain(
       `${config}:1:26 upstream tiny is bundled but not named in ${notices}`,
     );
+    // A name inside another name does not credit it; a backticked name does.
+    put({ [notices]: '## tinyglobby\n\nAlso `dep`.\n' });
+    expect(lint()).toEqual([`${config}:1:26 upstream tiny is bundled but not named in ${notices}`]);
     put({ [config]: 'export default { deps: {} };\n' });
     expect(lint()).toEqual([]);
   });

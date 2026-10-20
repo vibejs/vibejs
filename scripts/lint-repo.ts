@@ -47,6 +47,12 @@ const GLOBALS = /^(?:globalThis|window|self|global)$/;
 // comments, and start/stop anywhere on a raw source line, strings and prose included.
 const HINT = /^\s*(?:istanbul|[cv]8|node:coverage)\s+ignore\b/;
 const START_STOP = /(?:istanbul|[cv]8|node:coverage)\s+ignore\s+(?:start|stop)(?=\W|$)/;
+/** A `## name` or `### name` notices heading; the name ends at whitespace or the line end. */
+const heading = (name: string): RegExp =>
+  new RegExp(`^#{2,3} ${name.replaceAll('.', '\\.')}(?=\\s|$)`, 'm');
+/** Whether notices credit a package by a heading or a backticked name. */
+const credits = (notices: string, name: string): boolean =>
+  heading(name).test(notices) || notices.includes(`\`${name}\``);
 const VALID_HINT = /^ v8 ignore (next|if|else|start|stop) -- @preserve (\S(?:.*\S)?) $/;
 const UPSTREAM = /^ Upstream: ([\w.-]+\/[\w.-]+)@([0-9a-f]{7,40}) \S+ \([^()]+\)$/;
 /** Generated, installed or out-of-scope trees. */
@@ -192,7 +198,7 @@ export function main(root: string): number {
       }
       const [, repo, sha] = match;
       // The notices section of the project: its `## <repo>` heading up to the next heading.
-      const start = new RegExp(`^#{2,3} ${repo.replaceAll('.', '\\.')}\\b`, 'm').exec(notices);
+      const start = heading(repo).exec(notices);
       if (!start) {
         at(header.start, 'upstream', `${repo} is not listed in ${noticesFile}`);
         continue;
@@ -432,7 +438,7 @@ export function main(root: string): number {
     const list = /\balwaysBundle:\s*\[([^\]]*)\]/.exec(text);
     for (const match of list?.[1].matchAll(/['"]([^'"]+)['"]/g) ?? []) {
       const name = match[1];
-      if (name.startsWith('@vibejs-org/') || credited.includes(name)) continue;
+      if (name.startsWith('@vibejs-org/') || credits(credited, name)) continue;
       report(file, text, list!.index, 'upstream', `${name} is bundled but not named in ${notices}`);
     }
   }

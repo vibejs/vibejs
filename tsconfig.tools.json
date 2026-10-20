@@ -18,7 +18,8 @@
     "packages/*/src/**/*.vibe.test.ts",
     "packages/ui/test/vibe.d.ts",
     "packages/contract/src/**/*.integration.test.ts",
-    "packages/contract/test/fixtures/ui-bundle"
+    "packages/contract/test/fixtures/ui-bundle",
+    "docs/scripts/docs.integration.test.ts"
   ],
   "references": [
     { "path": "packages/errors" },

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { basename, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { parseMessages } from '../../scripts/errors.ts';
 import { DISAMBIGUATION, loadSource, main, SITE } from './docs.ts';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
@@ -45,11 +46,9 @@ describe('the docs build', () => {
   afterAll(() => rmSync(out, { recursive: true, force: true }));
 
   it('writes a non-empty page for every catalog code, retired included, and no other', () => {
-    // Every `## VIBE####: Title` heading of the catalogs, as scripts/errors.ts parses them.
     const codes = globSync('packages/*/messages/*.md', { cwd: ROOT }).flatMap((file) =>
-      Array.from(
-        readFileSync(join(ROOT, file), 'utf8').matchAll(/^## (VIBE\d{4}): /gm),
-        (m) => m[1],
+      parseMessages(file.split('/')[1], file, readFileSync(join(ROOT, file), 'utf8')).entries.map(
+        (entry) => entry.code,
       ),
     );
     const pages = globSync('VIBE*.md', { cwd: join(DOCS, 'errors') });
