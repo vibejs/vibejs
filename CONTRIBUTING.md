@@ -21,6 +21,7 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 | `pnpm test`                             | Vitest, node and dom projects (watch mode; add `--run` for one run)                                                               |
 | `pnpm test:coverage`                    | Vitest node, dom and browser projects with the 100% per-file gate                                                                 |
 | `pnpm test:integration`                 | `pnpm build`, then the integration project against `dist`                                                                         |
+| `pnpm e2e [--no-browser]`               | Packs the packages and runs the docs tutorial, an npm app and `examples/todo` in browsers                                         |
 | `pnpm build`                            | tsdown, publint and attw for every package                                                                                        |
 | `pnpm fmt`                              | Formats the repo with oxfmt                                                                                                       |
 | `pnpm errors`                           | Regenerates the error files from `packages/*/messages/*.md`                                                                       |

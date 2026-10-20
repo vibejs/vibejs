@@ -6,7 +6,7 @@
     "isolatedDeclarations": false,
     "rootDir": "."
   },
-  "include": ["scripts", "scripts/fixtures/*.json", ".vitepress/config.ts"],
+  "include": ["scripts", "test", "scripts/fixtures/*.json", ".vitepress/config.ts"],
   "references": [
     { "path": "../packages/compiler" },
     { "path": "../packages/contract" },
