@@ -16,18 +16,8 @@ function record(id: string): HmrRecord | undefined {
   return found;
 }
 
-/**
- * The record's def and every def its instances run: each re-executed module exports a new def
- * object under the same id, and instances a parent recreated from it read that object.
- */
-function defs(found: HmrRecord): Set<ComponentDef> {
-  const all = new Set([found.def]);
-  for (const instance of found.instances) all.add(instance.def);
-  return all;
-}
-
 export const hmr: {
-  /** Registers `def` under `id`; `false` when `id` is known, which keeps the existing def. */
+  /** Registers `def` under `id`; `false` when `id` is known, which adds `def` to its defs. */
   createRecord(id: string, def: ComponentDef): boolean;
   /** A template-only edit: swaps the render and renders each live instance again, keeping its state. */
   rerender(id: string, render: ComponentDef['render']): void;
@@ -35,21 +25,25 @@ export const hmr: {
   reload(id: string, def: ComponentDef): void;
 } = {
   createRecord(id, def) {
-    if (records.has(id)) return false;
-    records.set(id, { def, instances: new Set() });
+    const found = records.get(id);
+    if (found) {
+      found.defs.add(def);
+      return false;
+    }
+    records.set(id, { defs: new Set([def]), instances: new Set() });
     return true;
   },
   rerender(id, render) {
     const found = record(id);
     if (!found) return;
-    for (const def of defs(found)) def.render = render;
+    for (const def of found.defs) def.render = render;
     // A copy: rerendering adds and removes the instances of recursive components.
     for (const instance of Array.from(found.instances)) rerenderComponent(instance);
   },
   reload(id, def) {
     const found = record(id);
     if (!found) return;
-    for (const target of defs(found)) {
+    for (const target of found.defs) {
       for (const key of Object.keys(target)) {
         if (!Object.hasOwn(def, key)) Reflect.deleteProperty(target, key);
       }

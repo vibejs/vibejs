@@ -5,7 +5,7 @@ import type { ComponentDef } from '../internal.ts';
 import { effectScope } from '../reactivity/effectScope.ts';
 import { ref } from '../reactivity/ref.ts';
 import { createApp } from './app.ts';
-import type { Block } from './block.ts';
+import { createIf, type Block } from './block.ts';
 import { createComponent } from './component.ts';
 import { hmr } from './hmr.ts';
 import { inject } from './inject.ts';
@@ -51,14 +51,13 @@ function mount(def: ComponentDef) {
   return { host, app };
 }
 
-test('createRecord returns true once and keeps the first def of an id', () => {
+test('createRecord returns true once and adds later defs of an id to its record', () => {
   const { def, id } = recorded('a');
   const other: ComponentDef = { render: () => [] };
-  const otherRender = other.render;
   expect(hmr.createRecord(id, other)).toBe(false);
   hmr.rerender(id, emptyRender);
   expect(def.render).toBe(emptyRender);
-  expect(other.render).toBe(otherRender);
+  expect(other.render).toBe(emptyRender);
 });
 
 test('rerender keeps the setup state, the instance and the position of the block', async () => {
@@ -242,6 +241,31 @@ test('rerender and reload update instances of a later def object with the same i
   expect(host.innerHTML).toBe('<p>c:0</p>');
   hmr.reload(id, { __hmrId: id, setup: () => ({ count: ref(7) }), render: renderLabel('d') });
   expect(host.innerHTML).toBe('<p>d:7</p>');
+});
+
+test('a later def without a live instance gets later edits before it is created', async () => {
+  const { id } = recorded('v1');
+  const v2: ComponentDef = { __hmrId: id, render: renderLabel('v2') };
+  hmr.createRecord(id, v2);
+  hmr.reload(id, v2);
+  const show = ref(false);
+  const { host } = mount({
+    render: () =>
+      createIf(
+        () => show.value,
+        () => createComponent(v2),
+      ),
+  });
+  const v3: ComponentDef = {
+    __hmrId: id,
+    setup: () => ({ count: ref(3) }),
+    render: renderLabel('v3'),
+  };
+  hmr.createRecord(id, v3);
+  hmr.reload(id, v3);
+  show.value = true;
+  await nextTick();
+  expect(host.textContent).toBe('v3:3');
 });
 
 test('rerender and reload of an unknown id warn VIBE5501 and reload the page', () => {
