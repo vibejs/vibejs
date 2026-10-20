@@ -1,8 +1,8 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages-private/dts-test/inject.test-d.ts (MIT)
 // Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors
 //
-// Edits: `expectType` became `expectTypeOf`; the vibe.js cases come first. Dropped, not in
-// vibe.js: the Options API `provide` option of `defineComponent`.
+// Edits: `expectType` became `expectTypeOf`; the vibe.js cases come first; a key of another type
+// is an error. Dropped, not in vibe.js: the Options API `provide` option of `defineComponent`.
 import { expectTypeOf } from 'vitest';
 import { ref, type Ref } from '../reactivity/ref.ts';
 import type { App } from './app.ts';
@@ -34,6 +34,15 @@ inject(key, 'a');
 inject(key, () => ref(0));
 expectTypeOf(hasInjectionContext()).toEqualTypeOf<boolean>();
 
+// A key is a symbol, not a unique symbol: computed keys widen to a symbol index signature.
+// It is not assignable to a key of another type.
+const label: InjectionKey<string> = Symbol();
+expectTypeOf({ [key]: ref(1), [label]: 'a' }).toEqualTypeOf<{
+  [x: symbol]: Ref<number> | string;
+}>();
+expectTypeOf(label).toExtend<symbol>();
+expectTypeOf(label).not.toExtend<InjectionKey<number>>();
+
 // Ported cases.
 provide('foo', 123);
 provide(123, 123);
@@ -60,6 +69,7 @@ provide(injectionKeyRef, ref({}));
 // an explicit type parameter
 provide<Cube>('cube', { size: 123 });
 provide<Cube>(123, { size: 123 });
+// @ts-expect-error the key provides a Ref<Cube>, not a Cube (a branded key, unlike upstream)
 provide<Cube>(injectionKeyRef, { size: 123 });
 // @ts-expect-error size is a number
 provide<Cube>('cube', { size: 'foo' });

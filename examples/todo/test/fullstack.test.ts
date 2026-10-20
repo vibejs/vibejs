@@ -29,11 +29,8 @@ async function setup(path = '/') {
   const router = createRouter({ history: createMemoryHistory(), routes });
   await router.push(path);
   const wrapper = mount(App, {
-    plugins: [
-      router,
-      flagsPlugin({ fetch: app.fetch }),
-      (ui) => void ui.provide(API, createApi(app.fetch)),
-    ],
+    plugins: [router, flagsPlugin({ fetch: app.fetch })],
+    provide: { [API]: createApi(app.fetch) },
   });
   await flushPromises();
   return { service, seeded, router, wrapper };

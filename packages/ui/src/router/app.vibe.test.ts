@@ -27,7 +27,7 @@ const routes = defineRoutes([
 async function setup() {
   const router = createRouter({ history: createMemoryHistory(), routes });
   router.beforeEach((to) => (to.meta.auth ? { name: 'login' } : undefined));
-  const wrapper = mount(App, { plugins: [router, (app) => void app.provide(API, api)] });
+  const wrapper = mount(App, { plugins: [router], provide: { [API]: api } });
   await router.isReady();
   const go = async (to: string) => {
     await router.push(to);

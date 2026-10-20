@@ -44,7 +44,7 @@ it('counts clicks', async () => {
 
 - `props`: the props, including `on*` listeners. Required when the component has required props.
 - `slots`: slot content by name, as text, a component, or a function of the slot props that returns text or nodes.
-- `provide`: values the app provides, by key.
+- `provide`: values the app provides, by key, such as `{ [API]: api }` for an `InjectionKey`.
 - `plugins`: plugins the app installs, in order, such as the router.
 - `attachTo`: where the host element is appended, an element or a selector; `document.body` by default.
 
