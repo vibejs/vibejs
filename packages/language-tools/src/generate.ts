@@ -61,6 +61,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
     handles: 0,
     outlets: analysis.macros.slots ? undefined : new Map(),
     slots: 0,
+    exposes: exposed,
     inSelf: 0,
     forwarded: new Set(),
     refs: new Map(),
@@ -110,10 +111,11 @@ export function generate(fileName: string, text: string): GeneratedFile {
   });
   if (w.outlets) {
     const slots = [...w.outlets].map(([name, all]) => {
-      // ponytail: a name with only forwarded outlets keeps them, and so its cycle.
+      // ponytail: a name with only forwarded outlets has no props that do not read the slot itself,
+      // so they are `any`; type them from the forwarded props if a cycle-free form is found.
       const direct = all.filter((k) => !w.forwarded.has(k));
-      const ks = direct.length > 0 ? direct : all;
-      return `${key(name)}?: (props: ${ks.map((k) => `typeof __vibe_s${k}`).join(' | ')}) => unknown`;
+      const props = direct.map((k) => `typeof __vibe_s${k}`).join(' | ') || 'any';
+      return `${key(name)}?: (props: ${props}) => unknown`;
     });
     b.add(`type __VibeSlots = ${members(slots)};\n`);
   }

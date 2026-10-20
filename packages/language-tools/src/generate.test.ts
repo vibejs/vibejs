@@ -100,6 +100,35 @@ defineSlots<{ a: (props: { x: number }) => unknown }>()
     );
   });
 
+  it('leaves the content of a dynamic v-slot on a component untyped', () => {
+    const text = generate('A.vibe', '<template><C v-slot:[n]="p">{{ p }}</C></template>\n').text;
+    expect(text).not.toContain('slotParams');
+    expect(text).not.toContain('(p)');
+  });
+
+  it('types a valueless outlet name as the slot named ""', () => {
+    expect(generate('A.vibe', '<template><slot name /></template>\n').text).toContain(
+      "type __VibeSlots = { ''?: (props: typeof __vibe_s0) => unknown };",
+    );
+  });
+
+  it('types a slot with only forwarded outlets as any', () => {
+    const source =
+      '<template><Loop><template #a="p"><slot name="a" :x="p.x" /></template></Loop></template>\n';
+    expect(generate('Loop.vibe', source).text).toContain(
+      'type __VibeSlots = { a?: (props: any) => unknown };',
+    );
+  });
+
+  it('types a ref on the self tag as unknown once the file exposes values', () => {
+    const tag = '<template><Tree ref="t" /></template>\n';
+    const exposes = `<script setup lang="ts">\ndefineExpose({})\n</script>\n${tag}`;
+    expect(generate('Tree.vibe', exposes).text).toContain('type __VibeRefs = { t: unknown };');
+    expect(generate('Tree.vibe', tag).text).toContain(
+      'type __VibeRefs = { t: typeof __vibe_c0.exposed };',
+    );
+  });
+
   // `generic` (VIBE1013) is an SFC-structure error in 1000-1199, so C6 forwards it as before.
   it('forwards generic as before, and none of the slot diagnostics of the compiler', () => {
     const source = `<script setup lang="ts" generic="T">

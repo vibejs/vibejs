@@ -37,6 +37,8 @@ export interface Walk {
   outlets: Map<string, number[]> | undefined;
   /** The number of inferred outlets (`__vibe_sK`) emitted so far. */
   slots: number;
+  /** Whether the file calls `defineExpose`. */
+  exposes: boolean;
   /** The number of self tags whose slot content is being walked. */
   inSelf: number;
   /**
@@ -199,6 +201,7 @@ const content = (node: TemplateChildNode) =>
 function slots(el: ElementNode, w: Walk, locals: Locals, tag: [number, number]): void {
   const owner = w.handles - 1;
   const own = directive(el, 'slot');
+  if (own?.arg?.isStatic === false) return el.children.forEach((node) => untyped(node, w));
   if (own) return slotBlock(w, owner, own, tag, el.children, locals);
   children(el.children.filter(slotTemplate), w, locals, owner);
   const rest = el.children.filter((node) => !slotTemplate(node));
@@ -293,7 +296,8 @@ function emit(el: ElementNode, w: Walk, locals: Locals): void {
   if (kind === 'el') line(w, '__vibe.el(__vibe.tags.').atom(el.tag, ...tag, Preset.BOUND);
   else if (kind === 'custom') line(w, '__vibe.customElement(');
   else if (kind === 'slot') {
-    const slot = outletName?.value?.content ?? 'default';
+    // A valueless `name` renders the slot named "".
+    const slot = outletName ? (outletName.value?.content ?? '') : 'default';
     if (w.outlets) {
       const k = w.slots++;
       if (w.inSelf > 0) w.forwarded.add(k);
@@ -450,8 +454,11 @@ function ref(node: AttributeNode, p: Props, el: ElementNode): void {
         : undefined;
   const tag = binding && binding + path.map((m) => `['${m}']`).join('');
   // ponytail: a `v-for` local (or an unresolved name) as the tag still goes through `__vibe_cN`.
+  // ponytail: a ref on the file's own tag is `unknown` once it exposes values, which may read that
+  // ref (a type cycle through `__VibeExposed`); check whether `defineExpose` reads it if needed.
+  const self = el.tag === p.w.own && p.w.exposes;
   const type =
-    p.kind === 'dynamic' || p.kind === 'slot'
+    p.kind === 'dynamic' || p.kind === 'slot' || self
       ? 'unknown'
       : p.kind === 'el' || p.kind === 'custom'
         ? `${map} extends Record<'${el.tag}', infer E> ? E : Element`

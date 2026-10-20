@@ -21,7 +21,7 @@ const __vibe_setup = { node };
       }
   }
 }
-type __VibeSlots = { item?: (props: typeof __vibe_s0) => unknown; only?: (props: typeof __vibe_s2) => unknown };
+type __VibeSlots = { item?: (props: typeof __vibe_s0) => unknown; only?: (props: any) => unknown };
 type __VibeExposed = {};
 type __VibeRefs = {};
 type __VibeModels = {};

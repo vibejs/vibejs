@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { expectType } from '../../expect.ts'
+import Loop from './Loop.vibe'
 import Tree from './Tree.vibe'
 import type { Node } from './types.ts'
 const root: Node = { label: 'root', children: [] }
@@ -9,4 +10,7 @@ const root: Node = { label: 'root', children: [] }
   <Tree :node="root">
     <template #item="{ node }">{{ expectType<Node>()(node) }}{{ node.label }}</template>
   </Tree>
+  <Loop :depth="2">
+    <template #only="{ x }">{{ x }}</template>
+  </Loop>
 </template>
