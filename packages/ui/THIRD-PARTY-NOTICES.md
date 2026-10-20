@@ -7,7 +7,11 @@
 - Repository: https://github.com/stackblitz/alien-signals
 - Version: 3.2.1, commit `8734d386d925025d0e99419bd9161c17b112c5ee`
 - License: MIT
-- Used in: `packages/ui/src/reactivity/system.ts` (the reactive graph core, shipped in the `@vibejs-org/ui` dist) and the ported specs in `packages/ui/src/reactivity/system.test.ts` and `conformance.test.ts`
+- Used in (shipped in the `@vibejs-org/ui` dist):
+  - `packages/ui/src/reactivity/system.ts`
+- Used in (tests, not shipped):
+  - `packages/ui/src/reactivity/conformance.test.ts`
+  - `packages/ui/src/reactivity/system.test.ts`
 
 ```text
 MIT License
@@ -38,7 +42,56 @@ SOFTWARE.
 - Repository: https://github.com/vuejs/core
 - Version: v3.5.44, commit `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`
 - License: MIT
-- Used in: `packages/ui/src/reactivity/reactive.ts`, `baseHandlers.ts`, `collectionHandlers.ts`, `arrayInstrumentations.ts` and `dep.ts` (the reactive proxies) and `packages/ui/src/runtime/scheduler.ts`, `errorHandling.ts` and `watch.ts` (the scheduler and watchers) and `dom.ts`, `events.ts`, `for.ts` and `vModel.ts` (the DOM setters, event modifiers, keyed list reconciliation and form models) and `app.ts`, `props.ts`, `inject.ts`, `lifecycle.ts` and `templateRef.ts` (the app API, emits and models, provide/inject, lifecycle hooks and template refs), shipped in the `@vibejs-org/ui` dist; `packages/ui/src/dom-types.ts` (the DOM attribute and event types from `packages/runtime-dom/src/jsx.ts`, shipped in the `@vibejs-org/ui` dist types); the ported runtime specs in `packages/ui/src/runtime/scheduler.test.ts`, `errorHandling.test.ts`, `watch.test.ts`, `dom.test.ts`, `events.test.ts`, `vModel.test.ts`, `lifecycle.test.ts`, `inject.test.ts` and `app.test.ts`; and the ported reactivity specs in `packages/ui/src/reactivity/ref.test.ts`, `computed.test.ts`, `effectScope.test.ts`, `reactive.test.ts`, `reactiveArray.test.ts`, `readonly.test.ts`, `shallowReactive.test.ts`, `shallowReadonly.test.ts`, `collectionMap.test.ts`, `collectionSet.test.ts`, `collectionWeakMap.test.ts`, `collectionWeakSet.test.ts` and `collectionShallowReadonly.test.ts` (tests, not shipped); and the ported type tests from `packages-private/dts-test` in `packages/ui/src/reactivity/ref.test-d.ts`, `computed.test-d.ts` and `reactive.test-d.ts` and `packages/ui/src/runtime/watch.test-d.ts`, `inject.test-d.ts`, `templateRef.test-d.ts` and `app.test-d.ts` (type tests, not shipped)
+- Used in (shipped in the `@vibejs-org/ui` dist):
+  - `packages/ui/src/dom-types.ts` (the DOM attribute and event types from `packages/runtime-dom/src/jsx.ts`, shipped in the dist types)
+  - `packages/ui/src/reactivity/arrayInstrumentations.ts`
+  - `packages/ui/src/reactivity/baseHandlers.ts`
+  - `packages/ui/src/reactivity/collectionHandlers.ts`
+  - `packages/ui/src/reactivity/dep.ts`
+  - `packages/ui/src/reactivity/reactive.ts`
+  - `packages/ui/src/runtime/app.ts`
+  - `packages/ui/src/runtime/dom.ts`
+  - `packages/ui/src/runtime/errorHandling.ts`
+  - `packages/ui/src/runtime/events.ts`
+  - `packages/ui/src/runtime/for.ts`
+  - `packages/ui/src/runtime/inject.ts`
+  - `packages/ui/src/runtime/lifecycle.ts`
+  - `packages/ui/src/runtime/props.ts`
+  - `packages/ui/src/runtime/scheduler.ts`
+  - `packages/ui/src/runtime/templateRef.ts`
+  - `packages/ui/src/runtime/vModel.ts`
+  - `packages/ui/src/runtime/watch.ts`
+- Used in (tests, not shipped):
+  - `packages/ui/src/reactivity/collectionMap.test.ts`
+  - `packages/ui/src/reactivity/collectionSet.test.ts`
+  - `packages/ui/src/reactivity/collectionShallowReadonly.test.ts`
+  - `packages/ui/src/reactivity/collectionWeakMap.test.ts`
+  - `packages/ui/src/reactivity/collectionWeakSet.test.ts`
+  - `packages/ui/src/reactivity/computed.test.ts`
+  - `packages/ui/src/reactivity/effectScope.test.ts`
+  - `packages/ui/src/reactivity/reactive.test.ts`
+  - `packages/ui/src/reactivity/reactiveArray.test.ts`
+  - `packages/ui/src/reactivity/readonly.test.ts`
+  - `packages/ui/src/reactivity/ref.test.ts`
+  - `packages/ui/src/reactivity/shallowReactive.test.ts`
+  - `packages/ui/src/reactivity/shallowReadonly.test.ts`
+  - `packages/ui/src/runtime/app.test.ts`
+  - `packages/ui/src/runtime/dom.test.ts`
+  - `packages/ui/src/runtime/errorHandling.test.ts`
+  - `packages/ui/src/runtime/events.test.ts`
+  - `packages/ui/src/runtime/inject.test.ts`
+  - `packages/ui/src/runtime/lifecycle.test.ts`
+  - `packages/ui/src/runtime/scheduler.test.ts`
+  - `packages/ui/src/runtime/vModel.test.ts`
+  - `packages/ui/src/runtime/watch.test.ts`
+- Used in (type tests from `packages-private/dts-test`, not shipped):
+  - `packages/ui/src/reactivity/computed.test-d.ts`
+  - `packages/ui/src/reactivity/reactive.test-d.ts`
+  - `packages/ui/src/reactivity/ref.test-d.ts`
+  - `packages/ui/src/runtime/app.test-d.ts`
+  - `packages/ui/src/runtime/inject.test-d.ts`
+  - `packages/ui/src/runtime/templateRef.test-d.ts`
+  - `packages/ui/src/runtime/watch.test-d.ts`
 - `packages/runtime-dom/src/jsx.ts` is based on the DefinitelyTyped definitions in `types/react/index.d.ts` (https://github.com/DefinitelyTyped/DefinitelyTyped), published under the MIT license. Its upstream header credits the copyrights of the original definition to: AssureSign <http://www.assuresign.com>, Microsoft <https://microsoft.com>, John Reilly <https://github.com/johnnyreilly>, Benoit Benezech <https://github.com/bbenezech>, Patricio Zavolinsky <https://github.com/pzavolinsky>, Digiguru <https://github.com/digiguru>, Eric Anderson <https://github.com/ericanderson>, Dovydas Navickas <https://github.com/DovydasNavickas>, Josh Rutherford <https://github.com/theruther4d>, Guilherme Hübner <https://github.com/guilhermehubner>, Ferdy Budhidharma <https://github.com/ferdaber>, Johann Rakotoharisoa <https://github.com/jrakotoharisoa>, Olivier Pascal <https://github.com/pascaloliv>, Martin Hochel <https://github.com/hotell>, Frank Li <https://github.com/franklixuefei>, Jessica Franco <https://github.com/Jessidhia>, Saransh Kataria <https://github.com/saranshkataria>, Kanitkorn Sujautra <https://github.com/lukyth> and Sebastian Silbermann <https://github.com/eps1lon>.
 
 ```text
@@ -70,7 +123,11 @@ THE SOFTWARE.
 - Repository: https://github.com/vuejs/router
 - Version: v4.6.4, commit `47b95baae1ebdeb564bd1adf8168c9e9d6d09d0a`
 - License: MIT
-- Used in: `packages/ui/src/router/path.ts` (the path scores and the score comparator, shipped in the `@vibejs-org/ui` dist) and the ported specs in `packages/ui/src/router/path.test.ts` and `matcher.test.ts` (tests, not shipped)
+- Used in (shipped in the `@vibejs-org/ui` dist):
+  - `packages/ui/src/router/path.ts`
+- Used in (tests, not shipped):
+  - `packages/ui/src/router/matcher.test.ts`
+  - `packages/ui/src/router/path.test.ts`
 
 ```text
 The MIT License (MIT)

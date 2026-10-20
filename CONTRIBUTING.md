@@ -37,7 +37,7 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 - The only allowed hint is `/* v8 ignore next|if|else|start|stop -- @preserve <reason> */`. Each one needs an entry `{ "file": "<path>", "reason": "<reason>" }` in `coverage-ignores.json`, and an entry without its hint fails. In forked upstream code the reason starts with `upstream-defensive:`. New allowlist entries need maintainer approval in review.
 - `__DEV__` is a real global: `packages/ui/vitest.setup.ts` sets it to `true` and a test toggles it with `vi.stubGlobal('__DEV__', false)`. Read it only inside function bodies in `packages/ui/src`.
 
-`scripts/lint-repo.ts` enforces what oxlint and tsc cannot: the ignore hints, the `__DEV__` and decorator scope, dependency specs, tsconfig references, published manifests and LICENSE copies, `// Upstream:` headers against `THIRD-PARTY-NOTICES.md`, the `.nvmrc` pin, English-only text, and public-text hygiene (no local paths, no email addresses outside an allowlist, no positioning of vibe.js relative to other frameworks). Each finding is one `file:line:col rule message` line.
+`scripts/lint-repo.ts` enforces what oxlint and tsc cannot: the ignore hints, the `__DEV__` and decorator scope, dependency specs, tsconfig references, published manifests and LICENSE copies, `// Upstream:` headers against `THIRD-PARTY-NOTICES.md` (project, commit and file), the paths the notices name, third-party `alwaysBundle` entries, the `.nvmrc` pin, English-only text, and public-text hygiene (no local paths, no email addresses outside an allowlist, no positioning of vibe.js relative to other frameworks). Each finding is one `file:line:col rule message` line.
 
 ## Pull requests
 
@@ -86,7 +86,7 @@ The VS Code extension releases on its own: bump the version in `packages/vscode/
 
 1. For each file listed in the package's `THIRD-PARTY-NOTICES.md`, diff the upstream path between the pinned commit and the new release tag.
 2. Apply the upstream changes, then re-apply every edit listed in the file's header. Update the list when an edit changes or is no longer needed.
-3. Update the commit SHA in each header and the version and commit in `THIRD-PARTY-NOTICES.md`.
+3. Update the commit SHA in each header and the version and commit in `THIRD-PARTY-NOTICES.md`. `scripts/lint-repo.ts` fails while a header's commit or file is missing from its project's section of the notices.
 4. Port the upstream changes to the ported specs (the test files listed in the notices) and run `pnpm check`.
 5. Re-check every `upstream-defensive:` entry in `coverage-ignores.json`: delete the hint and its entry when the branch is gone or now covered.
 

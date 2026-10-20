@@ -1,6 +1,6 @@
 // Usage: node scripts/lint-repo.ts
 // Enforces the repo rules that oxlint and tsc cannot: coverage hints, __DEV__ and decorator scope,
-// dependency specs, tsconfig references, manifests, Upstream headers, the Node pin, English-only
+// dependency specs, tsconfig references, manifests, Upstream headers and notices, the Node pin, English-only
 // text, public-text hygiene (local paths, email addresses, positioning) and workflow pins. Prints one
 // `file:line:col rule message` line per finding and exits 1 when there is any. Rules 10-12 scan
 // the files git would commit (tracked, or untracked and not ignored); the others glob the tree.
@@ -47,8 +47,14 @@ const GLOBALS = /^(?:globalThis|window|self|global)$/;
 // comments, and start/stop anywhere on a raw source line, strings and prose included.
 const HINT = /^\s*(?:istanbul|[cv]8|node:coverage)\s+ignore\b/;
 const START_STOP = /(?:istanbul|[cv]8|node:coverage)\s+ignore\s+(?:start|stop)(?=\W|$)/;
+/** A `## name` or `### name` notices heading; the name ends at whitespace or the line end. */
+const heading = (name: string): RegExp =>
+  new RegExp(`^#{2,3} ${name.replaceAll('.', '\\.')}(?=\\s|$)`, 'm');
+/** Whether notices credit a package by a heading or a backticked name. */
+const credits = (notices: string, name: string): boolean =>
+  heading(name).test(notices) || notices.includes(`\`${name}\``);
 const VALID_HINT = /^ v8 ignore (next|if|else|start|stop) -- @preserve (\S(?:.*\S)?) $/;
-const UPSTREAM = /^ Upstream: ([\w.-]+\/[\w.-]+)@[0-9a-f]{7,40} \S+ \([^()]+\)$/;
+const UPSTREAM = /^ Upstream: ([\w.-]+\/[\w.-]+)@([0-9a-f]{7,40}) \S+ \([^()]+\)$/;
 /** Generated, installed or out-of-scope trees. */
 const IGNORE = [
   '**/node_modules/**',
@@ -185,11 +191,26 @@ export function main(root: string): number {
     const noticesFile = `${/^packages\/[^/]+\//.exec(file)?.[0] ?? ''}THIRD-PARTY-NOTICES.md`;
     const notices = exists(noticesFile) ? read(noticesFile) : '';
     for (const header of headers) {
-      const repo = UPSTREAM.exec(header.value)?.[1];
-      if (repo === undefined) {
+      const match = UPSTREAM.exec(header.value);
+      if (!match) {
         at(header.start, 'upstream', 'use `// Upstream: <repo>@<sha> <path> (<license>)`');
-      } else if (!notices.includes(repo)) {
+        continue;
+      }
+      const [, repo, sha] = match;
+      // The notices section of the project: its `## <repo>` heading up to the next heading.
+      const start = heading(repo).exec(notices);
+      if (!start) {
         at(header.start, 'upstream', `${repo} is not listed in ${noticesFile}`);
+        continue;
+      }
+      const rest = notices.slice(start.index + 1);
+      const section = rest.slice(0, rest.search(/\n#{1,3} |$/));
+      const shas = section.match(/\b[0-9a-f]{7,40}\b/g) ?? [];
+      if (!shas.some((s) => s.startsWith(sha) || sha.startsWith(s))) {
+        at(header.start, 'upstream', `${noticesFile} names no commit ${sha} under ${repo}`);
+      }
+      if (!section.includes(`\`${file}\``)) {
+        at(header.start, 'upstream', `${noticesFile} does not name ${file} under ${repo}`);
       }
     }
     const forkedCompiler = /^packages\/compiler\/src\/.*(?<!\.test(-d)?)\.ts$/.test(file);
@@ -391,6 +412,35 @@ export function main(root: string): number {
   const published = [...manifests.values()].filter((pkg) => pkg.private !== true);
   for (const name of PUBLISHED.filter((n) => !published.some((pkg) => pkg.name === n))) {
     reportFile('package.json', 'manifest', `C1 package ${name} has no public manifest`);
+  }
+
+  // Rule 7: every workspace file a notices file names exists, and every third-party package a
+  // build always bundles is credited in that package's notices.
+  const dirs = [...manifests.keys()]
+    .filter((file) => file.startsWith('packages/'))
+    .map((file) => posix.dirname(file).slice('packages/'.length));
+  const named = new RegExp(
+    `\\bpackages/(?:${dirs.join('|')})/[^\\s\`'"()\\]]*[^\\s\`'"()\\],.;:]`,
+    'g',
+  );
+  for (const file of glob(['THIRD-PARTY-NOTICES.md', 'packages/*/THIRD-PARTY-NOTICES.md'])) {
+    const text = read(file);
+    for (const match of text.matchAll(named)) {
+      if (!existsSync(join(root, match[0]))) {
+        report(file, text, match.index, 'upstream', `${match[0]} does not exist`);
+      }
+    }
+  }
+  for (const file of glob('packages/*/tsdown.config.ts')) {
+    const text = read(file);
+    const notices = `${posix.dirname(file)}/THIRD-PARTY-NOTICES.md`;
+    const credited = exists(notices) ? read(notices) : '';
+    const list = /\balwaysBundle:\s*\[([^\]]*)\]/.exec(text);
+    for (const match of list?.[1].matchAll(/['"]([^'"]+)['"]/g) ?? []) {
+      const name = match[1];
+      if (name.startsWith('@vibejs-org/') || credits(credited, name)) continue;
+      report(file, text, list!.index, 'upstream', `${name} is bundled but not named in ${notices}`);
+    }
   }
 
   // Rule 8: the Node pin.
