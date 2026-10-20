@@ -663,6 +663,84 @@ describe('rule 12: positioning', () => {
   });
 });
 
+describe('rule 13: workflows', () => {
+  const SHA = 'a'.repeat(40);
+  const RELEASE = '.github/workflows/release.yml';
+  const release = (on: string, extra = ''): string =>
+    [
+      'name: Release',
+      on,
+      'permissions: {}',
+      'jobs:',
+      '  release:',
+      '    permissions:',
+      '      id-token: write',
+      '    steps:',
+      `      - uses: actions/checkout@${SHA} # v7.0.1`,
+      '      - uses: ./.github/actions/local',
+      `      - uses: 'docker://alpine:3'`,
+      `      - uses: changesets/action@${SHA}`,
+      '        with:',
+      '          github-token: ${{ steps.app-token.outputs.token }}',
+      '          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}',
+      '          publish-script: pnpm changeset publish',
+      '        env:',
+      '          NPM_CONFIG_PROVENANCE: true',
+      extra,
+      '',
+    ].join('\n');
+
+  it('passes a dispatch-only release workflow that publishes through trusted publishing', () => {
+    expect(lint({ [RELEASE]: release('on:\n  workflow_dispatch:\n\n  # manual only') })).toEqual(
+      [],
+    );
+    expect(lint({ [RELEASE]: release('on: [workflow_dispatch]') })).toEqual([]);
+  });
+
+  it('rejects other triggers, other secrets and npm tokens', () => {
+    const text = release(
+      'on:\n  workflow_dispatch:\n  push:\n    branches: [main]',
+      '          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}',
+    );
+    expect(lint({ [RELEASE]: text })).toEqual([
+      `${RELEASE}:1:1 workflow triggers [workflow_dispatch, push]; use only workflow_dispatch`,
+      `${RELEASE}:22:11 workflow NODE_AUTH_TOKEN: publish through trusted publishing`,
+      `${RELEASE}:22:32 workflow secrets.NPM_TOKEN: publish through trusted publishing`,
+    ]);
+    expect(lint({ [RELEASE]: 'on: push\n' })).toEqual([
+      `${RELEASE}:1:1 workflow missing \`NPM_CONFIG_PROVENANCE: true\``,
+      `${RELEASE}:1:1 workflow missing \`github-token: \${{ steps.app-token.outputs.token }}\``,
+      `${RELEASE}:1:1 workflow missing \`id-token: write\``,
+      `${RELEASE}:1:1 workflow missing \`publish-script: pnpm changeset publish\``,
+      `${RELEASE}:1:1 workflow triggers [push]; use only workflow_dispatch`,
+    ]);
+    expect(lint({ [RELEASE]: release('') })).toEqual([
+      `${RELEASE}:1:1 workflow triggers []; use only workflow_dispatch`,
+    ]);
+  });
+
+  it('sees past comments and catches every form of secrets access', () => {
+    const text = release(
+      'on:\n  workflow_dispatch:\n# note\n  push:\n    branches: [main]',
+      '          A: ${{ secrets["OTHER"] }}\n          B: ${{ toJSON(secrets) }}',
+    ).replace('      id-token: write', '      # id-token: write');
+    expect(lint({ [RELEASE]: text })).toEqual([
+      `${RELEASE}:1:1 workflow missing \`id-token: write\``,
+      `${RELEASE}:1:1 workflow triggers [workflow_dispatch, push]; use only workflow_dispatch`,
+      `${RELEASE}:23:18 workflow secrets: publish through trusted publishing`,
+      `${RELEASE}:24:25 workflow secrets: publish through trusted publishing`,
+    ]);
+  });
+
+  it('requires every action of every workflow to be pinned to a commit SHA', () => {
+    const file = '.github/workflows/ci.yml';
+    const text = `jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v7\n      - uses: "a/b@${SHA}"\n`;
+    expect(lint({ [file]: text })).toEqual([
+      `${file}:4:9 workflow pin actions/checkout@v7 to a 40-character commit SHA`,
+    ]);
+  });
+});
+
 describe('as a script', () => {
   const argv = process.argv;
   afterEach(() => {

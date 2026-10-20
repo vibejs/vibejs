@@ -79,7 +79,8 @@ it('a dev server keeps state on template and style edits and resets it on a scri
 
   // Script: remounted with the new initial value, without a page reload.
   edit('ref(0)', 'ref(10)');
-  await expect.poll(text).toBe('10');
+  // A remount re-imports the module, which can outlast the default 1 s poll on a CI runner.
+  await expect.poll(text, { timeout: 10_000 }).toBe('10');
   expect(await marker()).toBe(true);
 
   expect(errors).toEqual([]);

@@ -1,7 +1,7 @@
 // Usage: node scripts/lint-repo.ts
 // Enforces the repo rules that oxlint and tsc cannot: coverage hints, __DEV__ and decorator scope,
 // dependency specs, tsconfig references, manifests, Upstream headers, the Node pin, English-only
-// text, and public-text hygiene (local paths, email addresses, positioning). Prints one
+// text, public-text hygiene (local paths, email addresses, positioning) and workflow pins. Prints one
 // `file:line:col rule message` line per finding and exits 1 when there is any. Rules 10-12 scan
 // the files git would commit (tracked, or untracked and not ignored); the others glob the tree.
 import { execFileSync } from 'node:child_process';
@@ -63,7 +63,7 @@ const IGNORE = [
 // Rules 10-12 match text that must never be committed. Each pattern is written so that its own
 // source text does not match it.
 /** Rule 10: machine-local and agent-session paths. */
-const LOCAL_PATH = new RegExp(
+export const LOCAL_PATH = new RegExp(
   [
     String.raw`(?<![\w.-])\/(?:Users|home)\/[^/\s]+\/`,
     String.raw`\b[A-Za-z]:\\Users\\`,
@@ -411,6 +411,49 @@ export function main(root: string): number {
     if (text.includes('\0')) continue; // A NUL byte marks a binary file.
     for (const match of text.matchAll(new RegExp(TURKISH, 'g'))) {
       report(file, text, match.index, 'english', 'text is English only');
+    }
+  }
+
+  // Rule 13: workflows pin every action to a commit; the release workflow stays dormant and
+  // publishes only through trusted publishing.
+  for (const file of glob('.github/workflows/*.{yml,yaml}')) {
+    const text = read(file);
+    for (const match of text.matchAll(/\buses:\s*['"]?([^\s'"#]+)/g)) {
+      if (!/^(?:\.\/|docker:\/\/)|@[0-9a-f]{40}$/.test(match[1])) {
+        report(file, text, match.index, 'workflow', `pin ${match[1]} to a 40-character commit SHA`);
+      }
+    }
+    if (file !== '.github/workflows/release.yml') continue;
+    // Blank comment lines, so they neither end the `on:` block nor count as required lines.
+    const yaml = text.replace(/^[ \t]*#.*$/gm, '');
+    const on = /^on:(.*)\n((?:(?:[ \t].*)?\n)*)/m.exec(yaml);
+    const triggers = [
+      ...(on?.[1].split(/[\s,[\]]+/) ?? []),
+      ...Array.from(on?.[2].matchAll(/^ {2}([\w-]+):/gm) ?? [], (m) => m[1]),
+    ].filter(Boolean);
+    if (triggers.join() !== 'workflow_dispatch') {
+      reportFile(file, 'workflow', `triggers [${triggers.join(', ')}]; use only workflow_dispatch`);
+    }
+    for (const match of yaml.matchAll(
+      /\bsecrets\b(?:\.(\w+))?|\b(?:NPM_TOKEN|NODE_AUTH_TOKEN)\b/g,
+    )) {
+      if (match[1] === 'RELEASE_APP_PRIVATE_KEY') continue;
+      report(
+        file,
+        yaml,
+        match.index,
+        'workflow',
+        `${match[0]}: publish through trusted publishing`,
+      );
+    }
+    const required = [
+      'id-token: write',
+      'publish-script: pnpm changeset publish',
+      'NPM_CONFIG_PROVENANCE: true',
+      'github-token: ${{ steps.app-token.outputs.token }}',
+    ];
+    for (const line of required.filter((r) => !yaml.includes(r))) {
+      reportFile(file, 'workflow', `missing \`${line}\``);
     }
   }
 

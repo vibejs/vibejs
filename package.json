@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage --project node --project dom --project browser",
     "test:integration": "pnpm build && vitest run --project integration --project perf && pnpm --filter \"./examples/*\" test",
     "build": "pnpm -r --filter \"./packages/*\" build",
+    "pack-check": "node scripts/pack-check.ts",
     "check": "pnpm errors --check && oxfmt --check --disable-nested-config && pnpm lint && pnpm test:coverage",
     "errors": "node scripts/errors.ts",
     "docs": "pnpm build && pnpm --dir docs build",
