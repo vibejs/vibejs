@@ -39,7 +39,7 @@ export function inject(key: InjectionKey<unknown> | string, ...rest: unknown[]):
   const provides =
     currentApp?.provides ?? instance?.parent?.provides ?? instance?.appContext.provides;
   if (!provides) {
-    warn(vibeError('VIBE5205', { api: 'inject' }));
+    if (__DEV__) warn(vibeError('VIBE5205', { api: 'inject' }));
     return undefined;
   }
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a key is a symbol or a string
@@ -47,7 +47,7 @@ export function inject(key: InjectionKey<unknown> | string, ...rest: unknown[]):
   if (k in provides) return provides[k];
   const [def, factory] = rest;
   if (rest.length) return factory && isFunction(def) ? def() : def;
-  warn(vibeError('VIBE5206', { key: String(key) }), instance);
+  if (__DEV__) warn(vibeError('VIBE5206', { key: String(key) }), instance);
   return undefined;
 }
 

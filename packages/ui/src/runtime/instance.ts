@@ -160,7 +160,7 @@ export function setCurrentApp(app: AppContext | null): AppContext | null {
 
 /** The current instance for a setup-only API; outside setup, warns VIBE5205 and returns null. */
 export function setupInstance(api: string): ComponentInstance | null {
-  if (!currentInstance) warn(vibeError('VIBE5205', { api }));
+  if (__DEV__ && !currentInstance) warn(vibeError('VIBE5205', { api }));
   return currentInstance;
 }
 

@@ -17,7 +17,7 @@ export function useTemplateRef<T = unknown, K extends string = string>(key: K): 
   const r = shallowRef<T | null>(null);
   const instance = setupInstance('useTemplateRef');
   if (instance) {
-    if (key in instance.refs) warn(vibeError('VIBE5208', { key }), instance);
+    if (__DEV__ && key in instance.refs) warn(vibeError('VIBE5208', { key }), instance);
     instance.refs[key] = r;
   }
   return r;
@@ -50,7 +50,7 @@ export function setRef(
   }
   const r = owner?.refs[ref];
   if (!r) {
-    warn(vibeError('VIBE5208', { key: ref }), owner);
+    if (__DEV__) warn(vibeError('VIBE5208', { key: ref }), owner);
     return;
   }
   if (inFor) {

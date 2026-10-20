@@ -107,8 +107,10 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
       const { install } = (plugin as { install?: unknown } | undefined) ?? {};
       const fn = isFunction(install) ? install : plugin;
       if (plugins.has(plugin) || !isFunction(fn)) {
-        const problem = plugins.has(plugin) ? 'a plugin that is already installed' : 'no plugin';
-        warn(vibeError('VIBE5304', { problem }), null, context.config);
+        if (__DEV__) {
+          const problem = plugins.has(plugin) ? 'a plugin that is already installed' : 'no plugin';
+          warn(vibeError('VIBE5304', { problem }), null, context.config);
+        }
       } else {
         plugins.add(plugin);
         Reflect.apply(fn, plugin, [app, ...options]);
@@ -122,7 +124,7 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
     },
     mount(container) {
       if (instance) {
-        warn(vibeError('VIBE5302'), null, context.config);
+        if (__DEV__) warn(vibeError('VIBE5302'), null, context.config);
         return exposed;
       }
       const el = typeof container === 'string' ? query(container) : container;
@@ -152,7 +154,7 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
     },
     unmount() {
       if (!instance || unmounted) {
-        warn(vibeError('VIBE5305'), null, context.config);
+        if (__DEV__) warn(vibeError('VIBE5305'), null, context.config);
         return;
       }
       unmounted = true;

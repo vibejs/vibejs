@@ -53,7 +53,7 @@ export class EffectScopeImpl implements EffectScope {
 
   run<T>(fn: () => T): T | undefined {
     if (!this.active) {
-      if (this.warnOnRun) warn(vibeError('VIBE5005'));
+      if (__DEV__ && this.warnOnRun) warn(vibeError('VIBE5005'));
       return undefined;
     }
     const prev = activeEffectScope;
@@ -116,5 +116,5 @@ export function getCurrentScope(): EffectScope | undefined {
 /** Registers `fn` to run when the active scope stops; warns VIBE5006 when there is none. */
 export function onScopeDispose(fn: () => void, failSilently = false): void {
   if (activeEffectScope) activeEffectScope.cleanups.push(fn);
-  else if (!failSilently) warn(vibeError('VIBE5006', { api: 'onScopeDispose' }));
+  else if (__DEV__ && !failSilently) warn(vibeError('VIBE5006', { api: 'onScopeDispose' }));
 }

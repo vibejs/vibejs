@@ -71,7 +71,7 @@ export function useRoute(name?: string): AnyLocation {
 function addGuard(kind: 'leave' | 'update', api: string, guard: NavigationGuard): void {
   const record = inject(recordKey, null);
   if (!record) {
-    warn(vibeError('VIBE7112', { api }), currentInstance);
+    if (__DEV__) warn(vibeError('VIBE7112', { api }), currentInstance);
     return;
   }
   // Typed by the registered routes: the assertion is needed once `Register` is augmented.

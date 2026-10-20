@@ -21,10 +21,9 @@ export type VibeErrorFactory<T extends ErrorTable> = <C extends keyof T & ErrorC
 /** The docs page of a code; non-empty args become the query the page renders the message from. */
 export function docsUrl(code: ErrorCode, args: Args = {}): string {
   // Not `query.size`: Safari 16.4-16.x and Chrome 111-112 (Vite 8 baseline) lack it.
-  const query = new URLSearchParams(
-    Object.entries(args).map(([k, v]) => [k, String(v)]),
-  ).toString();
-  return query ? `${DOCS_BASE}${code}?${query}` : DOCS_BASE + code;
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- numbers convert like strings
+  const query = new URLSearchParams(args as Record<string, string>).toString();
+  return DOCS_BASE + code + (query && `?${query}`);
 }
 
 /**

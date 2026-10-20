@@ -277,6 +277,10 @@ test('rerender and reload of an unknown id warn VIBE5501 and reload the page', (
   expect(warnedCodes(warn)).toEqual(['VIBE5501', 'VIBE5501']);
   expect(warn.mock.calls[0][0]).toMatch(/no record for the component unknown/);
   expect(reload).toHaveBeenCalledTimes(2);
+  vi.stubGlobal('__DEV__', false);
+  hmr.rerender('unknown', () => []);
+  expect(warn).toHaveBeenCalledTimes(2);
+  expect(reload).toHaveBeenCalledTimes(3);
 });
 
 test('an instance of an id without a record registers nothing', () => {

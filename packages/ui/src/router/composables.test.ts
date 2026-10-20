@@ -252,6 +252,17 @@ describe('onBeforeRouteLeave and onBeforeRouteUpdate', () => {
     );
     expect(warns.map((msg) => /^\[(VIBE\d+)\]/.exec(msg)?.[1])).toEqual(['VIBE7112', 'VIBE7112']);
     expect(warns[0]).toContain('onBeforeRouteLeave()');
+    vi.stubGlobal('__DEV__', false);
+    mountComposable(() => onBeforeRouteLeave(() => false), {
+      plugins: [
+        router,
+        handlers(
+          () => {},
+          (msg) => warns.push(msg),
+        ),
+      ],
+    });
+    expect(warns).toHaveLength(2);
   });
 
   it('run on update and leave, can block, follow a reused instance and stop on unmount', async () => {

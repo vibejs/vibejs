@@ -37,7 +37,7 @@ function entries(source: unknown): [values: unknown[], keys?: string[]] {
     const keys = Object.keys(source);
     return [keys.map((key) => source[key]), keys];
   }
-  warn(vibeError('VIBE5401', { type: typeof source }));
+  if (__DEV__) warn(vibeError('VIBE5401', { type: typeof source }));
   return [[]];
 }
 

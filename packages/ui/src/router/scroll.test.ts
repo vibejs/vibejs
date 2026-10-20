@@ -98,6 +98,9 @@ describe('the default scroll behavior', () => {
     expect(scrollIntoView.mock.contexts[0]).toBe(target);
     await go(router, '/b#missing');
     expect(warnedCodes(warnHandler)).toEqual(['VIBE7116']);
+    vi.stubGlobal('__DEV__', false);
+    await go(router, '/a#missing');
+    expect(warnHandler).toHaveBeenCalledOnce();
   });
 
   it('restores the scroll that pagehide saved in the entry, after a reload', async () => {

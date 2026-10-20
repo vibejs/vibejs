@@ -72,6 +72,10 @@ describe('api: createApp', () => {
       '[VIBE5302] The app is already mounted, so the second app.mount() did nothing.',
     ]);
     expect(warnedCodes(spy)).toContain('VIBE5302');
+    vi.stubGlobal('__DEV__', false);
+    app2.mount(root3);
+    expect(root3.innerHTML).toBe('');
+    expect(spy).toHaveBeenCalledOnce();
   });
 
   test('mount by selector, and VIBE5303 for a missing target in dev and prod', () => {
@@ -84,6 +88,21 @@ describe('api: createApp', () => {
     expect(thrownCode(() => createApp(comp(() => '')).mount('#missing'))).toBe('VIBE5303');
     vi.stubGlobal('__DEV__', false);
     expect(() => createApp(comp(() => '')).mount('#missing')).toThrow(
+      '[VIBE5303] https://vibejs.org/v0/errors/VIBE5303?target=%23missing',
+    );
+  });
+
+  test('a prod VIBE5303 is exactly the code and the docs URL with the args, and a VibeError', () => {
+    vi.stubGlobal('__DEV__', false);
+    let error: unknown;
+    try {
+      createApp(comp(() => '')).mount('#missing');
+    } catch (thrown) {
+      error = thrown;
+    }
+    expect(isVibeError(error, 'VIBE5303')).toBe(true);
+    expect(error).toHaveProperty(
+      'message',
       '[VIBE5303] https://vibejs.org/v0/errors/VIBE5303?target=%23missing',
     );
   });
@@ -118,6 +137,9 @@ describe('api: createApp', () => {
     app.unmount();
     expect(root.innerHTML).toBe('');
     app.unmount();
+    expect(spy).toHaveBeenCalledTimes(2);
+    vi.stubGlobal('__DEV__', false);
+    createApp(comp(() => 0)).unmount();
     expect(spy).toHaveBeenCalledTimes(2);
   });
 

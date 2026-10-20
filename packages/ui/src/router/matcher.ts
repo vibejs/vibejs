@@ -123,7 +123,7 @@ export function createMatcher(routes: readonly RouteRecordRaw[]): Matcher {
         const params = matchPath(parser, path);
         if (params) return located(record, params);
       }
-      warn(vibeError('VIBE7106', { path }));
+      if (__DEV__) warn(vibeError('VIBE7106', { path }));
       return located(undefined, {});
     },
     resolveName(name, raw) {

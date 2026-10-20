@@ -62,7 +62,7 @@ export function setText(n: Node, text: string): void {
 
 const xlinkNS = 'http://www.w3.org/1999/xlink';
 /** Boolean attributes: present for a truthy value or `''`, removed otherwise. */
-const booleanAttrs = new Set(
+const booleanAttrs = /* @__PURE__ */ new Set(
   'itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,playsinline,readonly,async,autofocus,autoplay,controls,default,defer,disabled,inert,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected'.split(
     ',',
   ),
