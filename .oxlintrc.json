@@ -154,7 +154,7 @@
             ],
             "patterns": [
               {
-                "group": ["@vibejs-org/server/*", "node:*"],
+                "group": ["@vibejs-org/server/*", "todo-flags/server", "node:*"],
                 "message": "ui code must not import the server or Node modules; share contracts instead."
               },
               {
@@ -168,7 +168,7 @@
     },
     {
       // Contract files import only the contract package and a schema library (CONTRACTS C7).
-      "files": ["examples/*/contracts/**"],
+      "files": ["examples/*/contracts/**", "examples/todo-flags/contract/**"],
       "rules": {
         "eslint/no-restricted-imports": [
           "error",

@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import { inject, useAsync } from '@vibejs-org/ui';
+import { useRoute } from '@vibejs-org/ui/router';
+import { API } from '../api.ts';
+
+const api = inject(API)!;
+const route = useRoute('todo');
+const { data: todo } = useAsync((signal) =>
+  api.todos.get({ params: { id: route.params.id } }, { signal }),
+);
+</script>
+
+<template>
+  <section>
+    <h1 v-if="todo?.ok">{{ todo.data.title }}</h1>
+    <p v-else-if="todo" class="error">{{ todo.error.code }}</p>
+  </section>
+</template>

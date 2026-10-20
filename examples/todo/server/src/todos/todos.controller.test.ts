@@ -39,6 +39,19 @@ it('lists, creates and toggles todos over app.fetch', async () => {
   expect(toggled).toMatchObject({ ok: true, data: { id: created.data.id, done: true } });
 });
 
+it('gets one todo, or TODO_NOT_FOUND', async () => {
+  const created = await api.todos.create({ body: { title: 'a' } });
+  if (!created.ok) throw new Error(created.error.code);
+  expect(await api.todos.get({ params: { id: created.data.id } })).toMatchObject({
+    ok: true,
+    data: created.data,
+  });
+  expect(await api.todos.get({ params: { id: 'missing' } })).toMatchObject({
+    ok: false,
+    error: { code: 'TODO_NOT_FOUND', status: 404 },
+  });
+});
+
 it('removes a todo with 204', async () => {
   const created = await api.todos.create({ body: { title: 'a' } });
   if (!created.ok) throw new Error(created.error.code);

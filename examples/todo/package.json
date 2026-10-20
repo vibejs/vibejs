@@ -4,12 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "vibejs dev",
-    "test": "tsc -b --runExternalCode --force && vitest run"
+    "build": "vibejs build",
+    "check": "vibejs check",
+    "test": "vibejs check --json && vibejs build"
   },
   "dependencies": {
     "@vibejs-org/contract": "workspace:*",
     "@vibejs-org/server": "workspace:*",
     "@vibejs-org/ui": "workspace:*",
+    "todo-flags": "workspace:*",
     "valibot": "catalog:"
   },
   "devDependencies": {
@@ -17,9 +20,14 @@
     "@vibejs-org/cli": "workspace:*",
     "@vibejs-org/compiler": "workspace:*",
     "@vibejs-org/language-tools": "workspace:*",
+    "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "playwright": "catalog:",
     "typescript": "catalog:ts-next",
     "vite": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "vscode-jsonrpc": "catalog:"
   }
 }
