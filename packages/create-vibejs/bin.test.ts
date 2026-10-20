@@ -25,6 +25,11 @@ beforeEach(() => {
   mkdirSync(join(cwd, 'agents'));
   writeFileSync(join(cwd, 'agents/AGENTS.md'), '# AGENTS.md\n\nRun `{{exec}} check --json`.\n');
   writeFileSync(join(cwd, 'agents/CLAUDE.md'), '@AGENTS.md\n');
+  for (const dir of ['.agents', '.claude']) {
+    mkdirSync(join(cwd, 'agents', dir, 'skills/vibejs-x'), { recursive: true });
+    writeFileSync(join(cwd, 'agents', dir, 'skills/vibejs-x/SKILL.md'), 'Run `vibejs check`.\n');
+  }
+  writeFileSync(join(cwd, 'agents/.mcp.json'), '{"mcpServers":{"vibejs":{"command":"{{exec}}"}}}');
 });
 afterEach(() => {
   rmSync(cwd, { recursive: true, force: true });
@@ -158,7 +163,16 @@ describe('agent mode', () => {
     const written = files('apps/web');
     expect(written).toContain('.gitignore');
     expect(written).not.toContain('_gitignore');
-    expect(written).toEqual(expect.arrayContaining(['AGENTS.md', 'CLAUDE.md', 'ui/src/App.vibe']));
+    expect(written).toEqual(
+      expect.arrayContaining([
+        'AGENTS.md',
+        'CLAUDE.md',
+        '.agents/skills/vibejs-x/SKILL.md',
+        '.claude/skills/vibejs-x/SKILL.md',
+        '.mcp.json',
+        'ui/src/App.vibe',
+      ]),
+    );
     for (const file of readdirSync(join(cwd, 'apps/web'), {
       recursive: true,
       withFileTypes: true,
@@ -213,6 +227,14 @@ describe('agent mode', () => {
   });
 });
 
+/** The `mcpServer(execPrefix(pm))` entries of @vibejs-org/cli. */
+const MCP = {
+  pnpm: { command: 'pnpm', args: ['exec', 'vibejs', 'mcp'] },
+  npm: { command: 'npx', args: ['--no', 'vibejs', 'mcp'] },
+  yarn: { command: 'yarn', args: ['vibejs', 'mcp'] },
+  bun: { command: 'npx', args: ['--no', 'vibejs', 'mcp'] },
+};
+
 describe('package manager', () => {
   it.each([
     [['--pm', 'bun'], {}, 'bun'],
@@ -228,6 +250,12 @@ describe('package manager', () => {
     expect(await main(['app', '--no-install', ...argv], t.ctx)).toBe(0);
     expect(t.json().pm).toBe(pm);
     expect(read('app/AGENTS.md')).toContain(`Run \`${EXEC[pm]} check --json\`.`);
+    expect(read('app/.mcp.json')).toBe(
+      `${JSON.stringify({ mcpServers: { vibejs: MCP[pm] } }, null, 2)}\n`,
+    );
+    for (const dir of ['.agents', '.claude']) {
+      expect(read(`app/${dir}/skills/vibejs-x/SKILL.md`)).toBe('Run `vibejs check`.\n');
+    }
   });
 
   it('runs the CLI with the execPrefix table of @vibejs-org/cli', () => {

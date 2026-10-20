@@ -173,8 +173,24 @@ describe('agent files', () => {
     expect(readFileSync(join(AGENTS, 'CLAUDE.md'), 'utf8')).toBe('@AGENTS.md\n');
   });
 
-  it('names only commands that the built bin describes', () => {
-    const names = new Set([...block.matchAll(/\bvibejs ([a-z]+)\b/g)].map((m) => m[1]));
+  it('ships the skills in both skill directories and .mcp.json', () => {
+    for (const name of ['vibejs-add-resource', 'vibejs-cover-100', 'vibejs-dev-loop']) {
+      const skill = readFileSync(new URL(`../../../skills/${name}/SKILL.md`, import.meta.url));
+      for (const dir of ['.agents/skills', '.claude/skills']) {
+        expect(readFileSync(join(AGENTS, dir, name, 'SKILL.md'))).toEqual(skill);
+      }
+    }
+    expect(JSON.parse(readFileSync(join(AGENTS, '.mcp.json'), 'utf8'))).toEqual({
+      mcpServers: { vibejs: { command: '{{exec}}', args: ['mcp'] } },
+    });
+  });
+
+  it('names only commands that the built bin describes, in the block and the skills', () => {
+    const skills = ['vibejs-add-resource', 'vibejs-cover-100', 'vibejs-dev-loop'].map((name) =>
+      readFileSync(join(AGENTS, '.agents/skills', name, 'SKILL.md'), 'utf8'),
+    );
+    const text = [block, ...skills].join('\n');
+    const names = new Set([...text.matchAll(/\bvibejs ([a-z]+)\b/g)].map((m) => m[1]));
     expect([...names].toSorted()).toEqual([
       'agents',
       'check',
@@ -184,6 +200,8 @@ describe('agent files', () => {
       'errors',
       'explain',
       'g',
+      'logs',
+      'mcp',
       'request',
       'routes',
     ]);

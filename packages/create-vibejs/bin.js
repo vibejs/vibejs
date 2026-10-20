@@ -43,7 +43,8 @@ const DEFAULT_DIR = 'vibejs-app';
 const MANAGERS = ['pnpm', 'npm', 'yarn', 'bun'];
 
 /**
- * How a project runs its local CLI: the `execPrefix` table of @vibejs-org/cli.
+ * How a project runs its local CLI: the `execPrefix` table of @vibejs-org/cli. `.mcp.json` runs
+ * `<exec> mcp`, as `mcpServer` of @vibejs-org/cli writes it.
  * @type {Record<PackageManager, string>}
  */
 export const EXEC = {
@@ -167,10 +168,13 @@ export async function main(argv, ctx) {
       .replaceAll('0.0.0-template', `^${ctx.version}`)
       .replace('"name": "vibejs-app"', `"name": ${JSON.stringify(name)}`),
   );
-  for (const file of ['AGENTS.md', 'CLAUDE.md']) {
-    const text = readFileSync(join(ctx.agentsDir, file), 'utf8');
-    writeFileSync(join(target, file), text.replaceAll('{{exec}}', EXEC[pm]));
-  }
+  // The output of `vibejs agents sync` for the package manager: what the app's own sync writes.
+  cpSync(ctx.agentsDir, target, { recursive: true });
+  const agentsMd = join(target, 'AGENTS.md');
+  writeFileSync(agentsMd, readFileSync(agentsMd, 'utf8').replaceAll('{{exec}}', EXEC[pm]));
+  const [command, ...args] = EXEC[pm].split(' ');
+  const mcp = { mcpServers: { vibejs: { command, args: [...args, 'mcp'] } } };
+  writeFileSync(join(target, '.mcp.json'), `${JSON.stringify(mcp, null, 2)}\n`);
 
   const install = `${pm} install`;
   const run = [`${pm} run dev`, `${pm} run check`];

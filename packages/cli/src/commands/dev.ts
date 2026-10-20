@@ -1,6 +1,7 @@
 import { setTimeout as sleep } from 'node:timers/promises';
+import { dirname } from 'node:path';
 import { isVibeError } from '@vibejs-org/errors';
-import { projectBlock, syncAgentFiles } from '../agents.ts';
+import { projectAgentFiles, syncAgentFiles } from '../agents.ts';
 import type { CommandDef } from '../command.ts';
 import { createDevLog, LOG_FILE, type LogEntry } from '../dev/log.ts';
 import { claimLock, readLiveLock, removeLock, writeLock } from '../dev/lock.ts';
@@ -84,9 +85,10 @@ export const dev: CommandDef<DevResult> = {
             ctx.err(`[${e.source}] ${e.msg}\n`);
         },
       });
-      // The agent files never stop dev: a malformed AGENTS.md (VIBE8601) stays as it is.
+      // The agent files never stop dev: a malformed AGENTS.md (VIBE8601) or .mcp.json (VIBE8602)
+      // stays as it is.
       try {
-        syncAgentFiles(root, projectBlock(root, ctx.docsDir), true);
+        syncAgentFiles(root, projectAgentFiles(root, dirname(ctx.docsDir)), true);
       } catch (error) {
         const coded = isVibeError(error) ? { msg: error.message, code: error.code } : undefined;
         log.write({ level: 'warn', source: 'vibejs', ...(coded ?? { msg: String(error) }) });

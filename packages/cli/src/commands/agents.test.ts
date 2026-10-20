@@ -1,6 +1,6 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, expect, it } from 'vitest';
 import { testCtx } from '../../test/app.ts';
 import { BEGIN } from '../agents.ts';
@@ -31,17 +31,32 @@ it('writes the agent files with the project package manager, then skips them', a
     ops: [
       { file: 'AGENTS.md', op: 'create' },
       { file: 'CLAUDE.md', op: 'create' },
+      { file: '.agents/skills/vibejs-fixture/SKILL.md', op: 'create' },
+      { file: '.claude/skills/vibejs-fixture/SKILL.md', op: 'create' },
+      { file: '.mcp.json', op: 'create' },
     ],
   } satisfies AgentsResult);
   expect(readFileSync(join(root, 'AGENTS.md'), 'utf8')).toContain('`yarn vibejs check --json`');
-  expect((await run()).ops.map((o) => o.op)).toEqual(['skip', 'skip']);
-  expect(agents.human(r)).toBe('AGENTS.md: create\nCLAUDE.md: create');
+  expect(JSON.parse(readFileSync(join(root, '.mcp.json'), 'utf8')).mcpServers.vibejs).toEqual({
+    command: 'yarn',
+    args: ['vibejs', 'mcp'],
+  });
+  expect((await run()).ops.map((o) => o.op)).toEqual(['skip', 'skip', 'skip', 'skip', 'skip']);
+  expect(agents.human(r)).toBe(
+    [
+      'AGENTS.md: create',
+      'CLAUDE.md: create',
+      '.agents/skills/vibejs-fixture/SKILL.md: create',
+      '.claude/skills/vibejs-fixture/SKILL.md: create',
+      '.mcp.json: create',
+    ].join('\n'),
+  );
 });
 
 it('--check writes nothing and fails while a file is out of date', async () => {
   const r = await run({ check: true });
   expect(r).toMatchObject({ ok: false, next: ['vibejs agents sync'] });
-  expect(r.ops.map((o) => o.op)).toEqual(['create', 'create']);
+  expect(new Set(r.ops.map((o) => o.op))).toEqual(new Set(['create']));
   expect(exitCode(r)).toBe(1);
   expect(existsSync(join(root, 'AGENTS.md'))).toBe(false);
   expect(agents.human(r)).toContain('Out of date; run `vibejs agents sync`.');
@@ -50,6 +65,29 @@ it('--check writes nothing and fails while a file is out of date', async () => {
   const current = await run({ check: true });
   expect(current.ok).toBe(true);
   expect(exitCode(current)).toBe(0);
+});
+
+it.each([
+  ['a changed skill', '.claude/skills/vibejs-fixture/SKILL.md', 'update'],
+  ['a stale skill directory', '.agents/skills/vibejs-old', 'delete'],
+  ['a changed .mcp.json', '.mcp.json', 'update'],
+] as const)('--check fails on %s and writes nothing', async (_, file, op) => {
+  await run();
+  const written = op === 'delete' ? `${file}/SKILL.md` : file;
+  mkdirSync(join(root, dirname(written)), { recursive: true });
+  writeFileSync(join(root, written), '{}');
+  const r = await run({ check: true });
+  expect(r.ops.filter((o) => o.op !== 'skip')).toEqual([{ file, op }]);
+  expect(exitCode(r)).toBe(1);
+  expect(readFileSync(join(root, written), 'utf8')).toBe('{}');
+});
+
+it('reports an invalid .mcp.json as VIBE8602 with exit 1', async () => {
+  writeFileSync(join(root, '.mcp.json'), '[]');
+  const r = await run();
+  expect(r).toMatchObject({ ok: false, ops: [], error: { code: 'VIBE8602' } });
+  expect(exitCode(r)).toBe(1);
+  expect(existsSync(join(root, 'AGENTS.md'))).toBe(false);
 });
 
 it('reports malformed markers as VIBE8601 with exit 1', async () => {

@@ -400,11 +400,12 @@ export function main(root: string): number {
     reportFile('.nvmrc', 'node-pin', `Node ${nvmrc} differs from the devEngines Node ${engine}`);
   }
 
-  // Rule 9: the full text of messages, docs and templates.
+  // Rule 9: the full text of messages, docs, templates and skills.
   for (const file of glob([
     'packages/*/messages/**',
     'docs/**',
     'packages/create-vibejs/templates/**',
+    'skills/**',
   ])) {
     const text = read(file);
     if (text.includes('\0')) continue; // A NUL byte marks a binary file.

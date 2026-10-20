@@ -15,7 +15,7 @@ Commands (always the local CLI, never a global one):
 - Done = `npx --no vibejs check --json` exits 0 (types, lint, format, tests, coverage per file).
 - `npx --no vibejs g resource|component|page <name>` adds code with its tests; `--dry-run --json` previews it.
 - `npx --no vibejs routes --json`, `npx --no vibejs components --json` and `npx --no vibejs di --json` show the app's routes, components and providers; `npx --no vibejs request <METHOD> <path> --json` calls the API.
-- `npx --no vibejs agents sync` refreshes this block.
+- `npx --no vibejs mcp` serves these commands to MCP clients; `npx --no vibejs agents sync` refreshes this block, the skills and `.mcp.json`.
 
 Rules:
 

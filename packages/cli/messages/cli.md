@@ -239,3 +239,13 @@ A `vibejs dev` server is running for this project, so `vibejs request` sends the
 ### Fix
 
 - Restore or delete both marker lines, then run `vibejs agents sync`.
+
+## VIBE8602: Invalid .mcp.json
+
+> .mcp.json is {problem}; vibejs agents sync only sets mcpServers.vibejs in a JSON object.
+
+`vibejs agents sync`, `vibejs dev` and `create-vibejs` register the `vibejs mcp` server for coding agents under `mcpServers.vibejs` in `.mcp.json` and keep every other key. When the file is not valid JSON, not a JSON object, or its `mcpServers` is not an object, that entry cannot be set without losing the file's content, so nothing is written. `vibejs dev` logs this as a warning and keeps running.
+
+### Fix
+
+- Make `.mcp.json` valid JSON with an object `mcpServers`, or delete it, then run `vibejs agents sync`.

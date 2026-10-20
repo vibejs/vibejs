@@ -25,6 +25,7 @@ const MESSAGES = {
   VIBE8503: ["Invalid request input: {reason}.","Pass `--data` as JSON or `@file`, and `-H` as `Name: value`."],
   VIBE8504: ["`ui/src/routes.ts` cannot be read statically: {reason}.","Keep `export const routes = defineRoutes([...])` with an array literal; see the router docs."],
   VIBE8601: ["{file} has {problem}; vibejs agents sync only edits text between one BEGIN and one END marker.","Restore or delete both marker lines, then run `vibejs agents sync`."],
+  VIBE8602: [".mcp.json is {problem}; vibejs agents sync only sets mcpServers.vibejs in a JSON object.","Make `.mcp.json` valid JSON with an object `mcpServers`, or delete it, then run `vibejs agents sync`."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);
