@@ -20,14 +20,16 @@ const directive = (el: ElementNode, name: string) =>
 
 /**
  * Walked into: elements, components, outlets and fragments, and the slot templates with a static
- * name and no `v-for` directly inside a component; not a plain `<template>`.
+ * name and no `v-for` directly inside a component; not a plain `<template>`. A component whose own
+ * `v-slot` has a dynamic name is `'tag'`: its props are walked, its content is not.
  */
 const typed = (el: ElementNode, inComponent: boolean) => {
   const slot = el.props.find((p) => p.type === NodeTypes.DIRECTIVE && p.name === 'slot');
+  const name = slot?.type === NodeTypes.DIRECTIVE && slot.arg?.isStatic !== false;
   if (el.tagType === ElementTypes.TEMPLATE && slot) {
-    const name = slot.type === NodeTypes.DIRECTIVE && slot.arg?.isStatic !== false;
     return inComponent && name && !directive(el, 'for');
   }
+  if (el.tagType === ElementTypes.COMPONENT && slot && !name) return 'tag';
   return el.tagType !== ElementTypes.ELEMENT || el.tag !== 'template';
 };
 
@@ -52,13 +54,14 @@ function expressions(nodes: TemplateChildNode[], inComponent = false): [number, 
       if (node.tagType === ElementTypes.TEMPLATE && p.name !== 'bind' && p.name !== 'slot') {
         return [];
       }
-      if (p.name === 'slot') return [range(p.exp)];
+      if (p.name === 'slot') return walked === true ? [range(p.exp)] : [];
       const html = p.name === 'html' || p.name === 'text';
       return ['show', 'bind', 'on', 'model'].includes(p.name) || (html && intrinsic)
         ? [range(p.exp)]
         : [];
     });
-    const inner = walked ? expressions(node.children, node.tagType === ElementTypes.COMPONENT) : [];
+    const inner =
+      walked === true ? expressions(node.children, node.tagType === ElementTypes.COMPONENT) : [];
     return [...own, ...inner];
   });
 }

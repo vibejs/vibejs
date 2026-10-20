@@ -30,6 +30,7 @@ function emit(
     handles: 0,
     outlets: new Map(),
     slots: 0,
+    exposes: false,
     inSelf: 0,
     forwarded: new Set<number>(),
     refs,

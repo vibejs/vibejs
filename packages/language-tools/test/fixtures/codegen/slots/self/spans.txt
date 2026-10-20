@@ -20,4 +20,4 @@
 #19 Verbatim BOUND o[325,329) "node" → v[533,537) "node"
 #20 Verbatim EXPR o[331,332) "n" → v[539,540) "n"
 #21 Verbatim BOUND o[363,367) "only" → v[603,607) "only"
-#22 Atom ANCHOR o[0,0) "" → v[839,947) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
+#22 Atom ANCHOR o[0,0) "" → v[826,934) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"

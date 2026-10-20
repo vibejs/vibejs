@@ -5,6 +5,7 @@ import List from './List.vibe'
 import type { Item } from './types.ts'
 const rows: Item[] = [{ id: 1, name: 'a' }]
 const loading = false
+const slotName = 'item'
 const dynamic: Component<any> = List
 const cell = useTemplateRef('cell')
 expectType<TemplateRef<HTMLSpanElement>>()(cell)
@@ -22,6 +23,7 @@ expectType<TemplateRef<HTMLSpanElement>>()(cell)
   <List :rows="rows">
     <p>Implicit default content</p>
   </List>
+  <List :rows="rows" v-slot:[slotName]="p">{{ p.anything }}</List>
   <List :rows="rows" v-slot>Default through v-slot</List>
   <List :rows="rows" v-slot="{ total }">{{ expectType<number>()(total) }}</List>
   <component :is="dynamic" :rows="rows">

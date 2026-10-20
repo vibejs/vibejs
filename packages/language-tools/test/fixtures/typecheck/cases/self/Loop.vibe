@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const { depth } = defineProps<{ depth: number }>()
+</script>
+
+<template>
+  <Loop v-for="i in depth" :key="i" :depth="depth - 1">
+    <template #only="p"><slot name="only" :x="p.x" /></template>
+  </Loop>
+</template>

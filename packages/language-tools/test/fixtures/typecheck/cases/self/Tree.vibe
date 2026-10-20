@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { useTemplateRef } from '@vibejs-org/ui'
 import type { Node } from './types.ts'
 const { node } = defineProps<{ node: Node }>()
+const first = useTemplateRef('first')
+defineExpose({ first })
 </script>
 
 <template>
   <slot name="item" :node="node">{{ node.label }}</slot>
   <ul>
     <li v-for="child in node.children" :key="child.label">
-      <Tree :node="child">
+      <Tree ref="first" :node="child">
         <template #item="{ node: n }"><slot name="item" :node="n" /></template>
       </Tree>
     </li>
