@@ -16,7 +16,8 @@ export interface RequestResult extends JsonEnvelope {
   request?: { method: string; url: string };
   response?: {
     status: number;
-    headers: Record<string, string>;
+    /** `set-cookie` is a list: one entry per header line. */
+    headers: Record<string, string | string[]>;
     body: unknown;
     truncated?: { shown: number; total: number };
   };
@@ -27,7 +28,7 @@ export interface RequestResult extends JsonEnvelope {
 }
 
 const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-/** The agent-mode caps (C9): body characters and log entries. */
+/** The agent-mode caps (C9): body bytes (UTF-8) and log entries. */
 const AGENT_BODY = 20 * 1024;
 const MAX_LOGS = 50;
 
@@ -71,14 +72,24 @@ function requestInit(
   return { method, headers, body: text };
 }
 
-/** The response as C9 reports it; the body is cut to `max` characters. */
+/** The response as C9 reports it; the body is cut to `max` UTF-8 bytes, on a character boundary. */
 async function read(res: Response, max: number): Promise<NonNullable<RequestResult['response']>> {
   const text = await res.text();
-  const headers = Object.fromEntries(res.headers);
-  const truncated = text.length > max ? { shown: max, total: text.length } : undefined;
-  let body: unknown = truncated ? text.slice(0, max) : text;
-  if (text === '') body = null;
-  else if (!truncated && /json/.test(headers['content-type'] ?? '')) {
+  const headers: Record<string, string | string[]> = Object.fromEntries(res.headers);
+  const cookies = res.headers.getSetCookie();
+  if (cookies.length) headers['set-cookie'] = cookies;
+  const total = Buffer.byteLength(text);
+  let body: unknown = text;
+  let truncated: { shown: number; total: number } | undefined;
+  if (total > max) {
+    const bytes = Buffer.from(text);
+    let shown = max;
+    // Back off to the first byte of the character that `max` falls inside.
+    while ((bytes[shown] & 0xc0) === 0x80) shown--;
+    body = bytes.toString('utf8', 0, shown);
+    truncated = { shown, total };
+  } else if (text === '') body = null;
+  else if (/json/.test(res.headers.get('content-type') ?? '')) {
     try {
       body = JSON.parse(text);
     } catch {
@@ -170,7 +181,7 @@ export const request: CommandDef<RequestResult> = {
     }
 
     const next: string[] = [];
-    const type = response.headers['content-type'] ?? '';
+    const type = String(response.headers['content-type'] ?? '');
     const code: unknown = Object(response.body).code;
     const entry =
       type.startsWith('application/problem+json') && typeof code === 'string'

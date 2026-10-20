@@ -3,6 +3,7 @@ import { rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterAll, expect, it, vi } from 'vitest';
 import type { DiResult } from './commands/di.ts';
+import { loadAppModule, withServerRunner } from './dev/app-module.ts';
 import type { RequestResult } from './commands/request.ts';
 
 const BIN = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
@@ -27,12 +28,17 @@ function vibejs(...args: string[]): { status: number | null; result: DiResult & 
   return { status, result: JSON.parse(stdout) };
 }
 
-it('di --json describes the todo modules', () => {
+// The todo server test pins inspect() to its committed snapshot; di must report the same modules.
+it('di --json describes the todo modules', async () => {
   const { status, result } = vibejs('di', '--json');
   expect(status).toBe(0);
   expect(result.ok).toBe(true);
-  expect(result.modules).toMatchSnapshot();
-});
+  const expected = await withServerRunner(TODO, async (runner) => {
+    const { server, AppModule, appOptions } = await loadAppModule(runner, TODO);
+    return server.inspect(AppModule, appOptions).modules;
+  });
+  expect(result.modules).toEqual(expected);
+}, 30_000);
 
 it('request runs in process without a dev server', () => {
   const { status, result } = vibejs('request', 'GET', '/api/todos');

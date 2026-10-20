@@ -259,6 +259,27 @@ describe('through the dev server', () => {
     expect((await run(root, ['GET', '/api/items'])).response).toMatchObject({ body: '{' });
   });
 
+  it('reports every set-cookie header', async () => {
+    const root = app();
+    const headers = new Headers([
+      ['set-cookie', 'a=1'],
+      ['set-cookie', 'b=2'],
+    ]);
+    live(root, async () => new Response(null, { headers }));
+    const r = await run(root, ['GET', '/api/items']);
+    expect(r.response!.headers).toEqual({ 'set-cookie': ['a=1', 'b=2'] });
+  });
+
+  it('cuts the body by UTF-8 bytes without splitting a character', async () => {
+    const root = app();
+    // U+00E9 is 2 bytes and U+1F600 is 4: byte 20 KB falls inside a character.
+    const text = 'a' + '\u00e9'.repeat(10 * 1024 - 1) + '\u{1F600}'.repeat(10);
+    live(root, async () => new Response(text));
+    const r = await run(root, ['GET', '/api/items']);
+    expect(r.response!.truncated).toEqual({ shown: 20 * 1024 - 1, total: 20 * 1024 - 1 + 40 });
+    expect(r.response!.body).toBe(text.slice(0, 10 * 1024));
+  });
+
   it('keeps a body without a content type as text', async () => {
     const root = app();
     live(root, async () => new Response(new TextEncoder().encode('bytes')));
