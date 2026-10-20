@@ -122,7 +122,7 @@ export function createProps(instance: ComponentInstance): Record<string, unknown
         return prop === undefined ? undefined : get(prop);
       },
       set: (_, key) => {
-        warn(vibeError('VIBE5203', { key: String(key) }), instance);
+        if (__DEV__) warn(vibeError('VIBE5203', { key: String(key) }), instance);
         return true;
       },
       has: (_, key) => propKey(key) !== undefined,
@@ -176,7 +176,7 @@ function modifiersOf(instance: ComponentInstance, name: string): Record<string, 
  */
 export function createEmit(instance: ComponentInstance): EmitFn<Record<string, unknown[]>> {
   return (event, ...args) => {
-    if (!instance.def.__emits?.includes(event)) {
+    if (__DEV__ && !instance.def.__emits?.includes(event)) {
       warn(vibeError('VIBE5202', { name: instance.name ?? 'Anonymous', event }), instance);
     }
     const names = [`on${capitalize(event)}`, `on${capitalize(camelize(event))}`];

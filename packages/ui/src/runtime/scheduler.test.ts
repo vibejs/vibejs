@@ -17,7 +17,8 @@ import {
   nextTick,
   queueJob,
   queuePostFlushCb,
-  SchedulerJobFlags,
+  ALLOW_RECURSE,
+  DISPOSED,
   type SchedulerJob,
 } from './scheduler.ts';
 
@@ -502,7 +503,7 @@ describe('scheduler', () => {
         }
       },
       undefined,
-      SchedulerJobFlags.ALLOW_RECURSE,
+      ALLOW_RECURSE,
     );
     queueJob(recursive);
     await nextTick();
@@ -517,7 +518,7 @@ describe('scheduler', () => {
         }
       },
       undefined,
-      SchedulerJobFlags.ALLOW_RECURSE,
+      ALLOW_RECURSE,
     );
     queuePostFlushCb(cb);
     await nextTick();
@@ -525,7 +526,7 @@ describe('scheduler', () => {
   });
 
   test('recursive jobs can only be queued once non-recursively', async () => {
-    const recursive = job(vi.fn<() => void>(), 1, SchedulerJobFlags.ALLOW_RECURSE);
+    const recursive = job(vi.fn<() => void>(), 1, ALLOW_RECURSE);
 
     queueJob(recursive);
     queueJob(recursive);
@@ -547,7 +548,7 @@ describe('scheduler', () => {
         }
       }),
       1,
-      SchedulerJobFlags.ALLOW_RECURSE,
+      ALLOW_RECURSE,
     );
 
     queueJob(recursive);
@@ -576,7 +577,7 @@ describe('scheduler', () => {
         }
       }),
       2,
-      SchedulerJobFlags.ALLOW_RECURSE,
+      ALLOW_RECURSE,
     );
 
     queueJob(job2);
@@ -592,7 +593,7 @@ describe('scheduler', () => {
 
     // simulate parent component that toggles child
     const job1 = () => {
-      job2.flags = (job2.flags ?? 0) | SchedulerJobFlags.DISPOSED;
+      job2.flags = (job2.flags ?? 0) | DISPOSED;
     };
     // simulate child that's triggered by the same reactive change that
     // triggers its toggle
@@ -781,7 +782,7 @@ describe('recursion guard', () => {
         queueJob(recursive);
       },
       undefined,
-      SchedulerJobFlags.ALLOW_RECURSE,
+      ALLOW_RECURSE,
     );
     const after = vi.fn<() => void>();
     queueJob(recursive);
@@ -804,7 +805,7 @@ describe('recursion guard', () => {
         if (++runs < 150) queueJob(recursive);
       },
       undefined,
-      SchedulerJobFlags.ALLOW_RECURSE,
+      ALLOW_RECURSE,
     );
     queueJob(recursive);
     await nextTick();

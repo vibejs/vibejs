@@ -143,62 +143,23 @@ export function createArrayInstrumentations(
         return entry;
       });
     },
-    every(this: unknown[], ...args: unknown[]) {
-      return apply(this, 'every', args);
-    },
     filter(this: unknown[], ...args: unknown[]) {
       return apply(this, 'filter', args, wrapItems);
     },
     find(this: unknown[], ...args: unknown[]) {
       return apply(this, 'find', args, wrapItem);
     },
-    findIndex(this: unknown[], ...args: unknown[]) {
-      return apply(this, 'findIndex', args);
-    },
     findLast(this: unknown[], ...args: unknown[]) {
       return apply(this, 'findLast', args, wrapItem);
     },
-    findLastIndex(this: unknown[], ...args: unknown[]) {
-      return apply(this, 'findLastIndex', args);
-    },
-    forEach(this: unknown[], ...args: unknown[]) {
-      return apply(this, 'forEach', args);
-    },
-    includes(this: unknown[], ...args: unknown[]) {
-      return search(this, 'includes', args);
-    },
-    indexOf(this: unknown[], ...args: unknown[]) {
-      return search(this, 'indexOf', args);
-    },
     join(this: unknown[], separator?: string) {
       return read(this).join(separator);
-    },
-    lastIndexOf(this: unknown[], ...args: unknown[]) {
-      return search(this, 'lastIndexOf', args);
-    },
-    map(this: unknown[], ...args: unknown[]) {
-      return apply(this, 'map', args);
-    },
-    pop(this: unknown[]) {
-      return mutate(this, 'pop', []);
-    },
-    push(this: unknown[], ...args: unknown[]) {
-      return mutate(this, 'push', args);
     },
     reduce(this: unknown[], fn: Callback, ...args: unknown[]) {
       return reduce(this, 'reduce', fn, args);
     },
     reduceRight(this: unknown[], fn: Callback, ...args: unknown[]) {
       return reduce(this, 'reduceRight', fn, args);
-    },
-    shift(this: unknown[]) {
-      return mutate(this, 'shift', []);
-    },
-    some(this: unknown[], ...args: unknown[]) {
-      return apply(this, 'some', args);
-    },
-    splice(this: unknown[], ...args: unknown[]) {
-      return mutate(this, 'splice', args);
     },
     toReversed(this: unknown[]) {
       return read(this).toReversed();
@@ -209,13 +170,23 @@ export function createArrayInstrumentations(
     toSpliced(this: unknown[], ...args: unknown[]) {
       return read(this).toSpliced(...args);
     },
-    unshift(this: unknown[], ...args: unknown[]) {
-      return mutate(this, 'unshift', args);
-    },
     values(this: unknown[]) {
       return iterate(this, 'values', wrapItem);
     },
   };
-
+  // The methods that only forward their arguments, by the helper they forward to.
+  const forward = (
+    names: string,
+    run: (self: unknown[], method: string, args: unknown[]) => unknown,
+  ): void => {
+    for (const name of names.split(',')) {
+      methods[name] = function (this: unknown[], ...args: unknown[]) {
+        return run(this, name, args);
+      };
+    }
+  };
+  forward('every,findIndex,findLastIndex,forEach,map,some', apply);
+  forward('includes,indexOf,lastIndexOf', search);
+  forward('pop,push,shift,splice,unshift', mutate);
   return methods;
 }

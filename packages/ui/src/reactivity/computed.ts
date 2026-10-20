@@ -5,14 +5,17 @@ import { warn } from '../warn.ts';
 import {
   activeSub,
   cycle,
+  DIRTY,
   endTracking,
+  MUTABLE,
+  PENDING,
   releaseDeps,
   startTracking,
   system,
   type Dependency,
 } from './core.ts';
 import type { Ref } from './ref.ts';
-import { ReactiveFlags, type Link } from './system.ts';
+import type { Link } from './system.ts';
 
 const { link, checkDirty, shallowPropagate } = system;
 
@@ -43,7 +46,7 @@ export class ComputedRefImpl<T = unknown> implements Dependency {
   depsTail: Link | undefined = undefined;
   subs: Link | undefined = undefined;
   subsTail: Link | undefined = undefined;
-  flags: number = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
+  flags: number = MUTABLE | DIRTY;
   currentValue: T | undefined = undefined;
   readonly __v_isRef = true;
   /** A computed without a setter is readonly. */
@@ -59,13 +62,10 @@ export class ComputedRefImpl<T = unknown> implements Dependency {
 
   get value(): T {
     const flags = this.flags;
-    if (
-      flags & ReactiveFlags.Dirty ||
-      (flags & ReactiveFlags.Pending && checkDirty(this.deps!, this))
-    ) {
+    if (flags & DIRTY || (flags & PENDING && checkDirty(this.deps!, this))) {
       if (this.update() && this.subs !== undefined) shallowPropagate(this.subs);
-    } else if (flags & ReactiveFlags.Pending) {
-      this.flags = flags & ~ReactiveFlags.Pending;
+    } else if (flags & PENDING) {
+      this.flags = flags & ~PENDING;
     }
     if (activeSub !== undefined) link(this, activeSub, cycle);
     return this.currentValue!;
@@ -73,11 +73,11 @@ export class ComputedRefImpl<T = unknown> implements Dependency {
 
   set value(value: T) {
     if (this.setter) this.setter(value);
-    else warn(vibeError('VIBE5003'));
+    else if (__DEV__) warn(vibeError('VIBE5003'));
   }
 
   update(): boolean {
-    const prev = startTracking(this, ReactiveFlags.Mutable);
+    const prev = startTracking(this, MUTABLE);
     try {
       const oldValue = this.currentValue;
       return hasChanged(oldValue, (this.currentValue = this.getter(oldValue)));
@@ -88,7 +88,7 @@ export class ComputedRefImpl<T = unknown> implements Dependency {
 
   unwatched(): void {
     if (this.depsTail === undefined) return;
-    this.flags = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
+    this.flags = MUTABLE | DIRTY;
     releaseDeps(this);
   }
 }

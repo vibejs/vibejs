@@ -19,16 +19,13 @@ export interface SchedulerJob {
   loc?: string | undefined;
 }
 
-export const SchedulerJobFlags = {
-  /** In a queue and not run yet; queueing it again does nothing. */
-  QUEUED: 1,
-  /** May queue itself again while it runs (watch callbacks, render effects). */
-  ALLOW_RECURSE: 2,
-  /** Never runs again, e.g. the job of a stopped watcher. */
-  DISPOSED: 4,
-} as const;
-
-const { QUEUED, ALLOW_RECURSE, DISPOSED } = SchedulerJobFlags;
+// Constants, which the bundler inlines (it keeps object reads).
+/** In a queue and not run yet; queueing it again does nothing. */
+const QUEUED = 1;
+/** May queue itself again while it runs (watch callbacks, render effects). */
+export const ALLOW_RECURSE = 2;
+/** Never runs again, e.g. the job of a stopped watcher. */
+export const DISPOSED = 4;
 const RECURSION_LIMIT = 100;
 
 const queue: SchedulerJob[] = [];

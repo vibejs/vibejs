@@ -23,8 +23,11 @@ const proto = (target: object): Collection => Reflect.getPrototypeOf(target) as 
 const has = (target: Collection, key: unknown): boolean => proto(target).has.call(target, key);
 const get = (target: Collection, key: unknown): unknown => proto(target).get.call(target, key);
 
-const ignored = (operation: string, key: string): void =>
-  warn(vibeError('VIBE5002', { operation, key }));
+/** Warns VIBE5002 for `key`, or for all entries when there is none (`clear`). */
+const ignored = (operation: string, ...key: unknown[]): void => {
+  if (__DEV__)
+    warn(vibeError('VIBE5002', { operation, key: key.length ? quote(key[0]) : 'all entries' }));
+};
 const quote = (key: unknown): string => {
   try {
     return `"${String(key)}"`;
@@ -34,15 +37,85 @@ const quote = (key: unknown): string => {
   }
 };
 
+/** The write methods of the readonly modes: they warn VIBE5002 and change nothing. */
+export const readonlyWriters: Record<PropertyKey, unknown> = {
+  add(this: Collection, value: unknown) {
+    ignored('add', value);
+    return this;
+  },
+  set(this: Collection, key: unknown) {
+    ignored('set', key);
+    return this;
+  },
+  delete(key: unknown) {
+    ignored('delete', key);
+    return false;
+  },
+  clear() {
+    ignored('clear');
+  },
+};
+
+/** The write methods of the mutable modes: they store raw values (as-is when `shallow`) and trigger. */
+export function mutableWriters(shallow: boolean): Record<PropertyKey, unknown> {
+  return {
+    add(this: Collection, value: unknown) {
+      const target = toRaw(this);
+      const rawValue = toRaw(value);
+      const hadValue = has(target, value) || (rawValue !== value && has(target, rawValue));
+      if (!hadValue) {
+        const added = shallow || isShallow(value) || isReadonly(value) ? value : rawValue;
+        target.add(added);
+        trigger(target, 'add', added);
+      }
+      return this;
+    },
+    set(this: Collection, key: unknown, value: unknown) {
+      if (!shallow && !isShallow(value) && !isReadonly(value)) value = toRaw(value);
+      const target = toRaw(this);
+      let hadKey = has(target, key);
+      if (!hadKey) {
+        key = toRaw(key);
+        hadKey = has(target, key);
+      }
+      const oldValue = get(target, key);
+      target.set(key, value);
+      if (!hadKey) trigger(target, 'add', key);
+      else if (hasChanged(value, oldValue)) trigger(target, 'set', key);
+      return this;
+    },
+    delete(this: Collection, key: unknown) {
+      const target = toRaw(this);
+      let hadKey = has(target, key);
+      if (!hadKey) {
+        key = toRaw(key);
+        hadKey = has(target, key);
+      }
+      const result = target.delete(key);
+      if (hadKey) trigger(target, 'delete', key);
+      return result;
+    },
+    clear(this: Collection) {
+      const target = toRaw(this);
+      const hadItems = target.size !== 0;
+      const result = target.clear();
+      if (hadItems) trigger(target, 'clear');
+      return result;
+    },
+  };
+}
+
 /**
  * The proxy handler of `Map`, `Set`, `WeakMap` and `WeakSet` in one mode: it answers the flags and
  * returns instrumented methods. A method that the target does not have (iteration on a weak
  * collection) is not instrumented. Keys and values are wrapped with `wrap`, never ref-unwrapped.
+ * `writers` are the write methods of the mode: `readonlyWriters` or `mutableWriters(shallow)`.
  */
 export function createCollectionHandler(
   readonly: boolean,
   shallow: boolean,
   wrap: Wrap,
+  writers: Record<PropertyKey, unknown>,
 ): ProxyHandler<Collection> {
   /** Iterators yield wrapped values; `keys()` of a Map does not track value changes. */
   function iterate(
@@ -115,73 +188,8 @@ export function createCollectionHandler(
     [Symbol.iterator](this: Collection) {
       return iterate(this, Symbol.iterator);
     },
+    ...writers,
   };
-
-  if (readonly) {
-    Object.assign(methods, {
-      add(this: Collection, value: unknown) {
-        ignored('add', quote(value));
-        return this;
-      },
-      set(this: Collection, key: unknown) {
-        ignored('set', quote(key));
-        return this;
-      },
-      delete(key: unknown) {
-        ignored('delete', quote(key));
-        return false;
-      },
-      clear() {
-        ignored('clear', 'all entries');
-      },
-    });
-  } else {
-    Object.assign(methods, {
-      add(this: Collection, value: unknown) {
-        const target = toRaw(this);
-        const rawValue = toRaw(value);
-        const hadValue = has(target, value) || (rawValue !== value && has(target, rawValue));
-        if (!hadValue) {
-          const added = shallow || isShallow(value) || isReadonly(value) ? value : rawValue;
-          target.add(added);
-          trigger(target, 'add', added);
-        }
-        return this;
-      },
-      set(this: Collection, key: unknown, value: unknown) {
-        if (!shallow && !isShallow(value) && !isReadonly(value)) value = toRaw(value);
-        const target = toRaw(this);
-        let hadKey = has(target, key);
-        if (!hadKey) {
-          key = toRaw(key);
-          hadKey = has(target, key);
-        }
-        const oldValue = get(target, key);
-        target.set(key, value);
-        if (!hadKey) trigger(target, 'add', key);
-        else if (hasChanged(value, oldValue)) trigger(target, 'set', key);
-        return this;
-      },
-      delete(this: Collection, key: unknown) {
-        const target = toRaw(this);
-        let hadKey = has(target, key);
-        if (!hadKey) {
-          key = toRaw(key);
-          hadKey = has(target, key);
-        }
-        const result = target.delete(key);
-        if (hadKey) trigger(target, 'delete', key);
-        return result;
-      },
-      clear(this: Collection) {
-        const target = toRaw(this);
-        const hadItems = target.size !== 0;
-        const result = target.clear();
-        if (hadItems) trigger(target, 'clear');
-        return result;
-      },
-    });
-  }
 
   return {
     get(target, key, receiver: object) {

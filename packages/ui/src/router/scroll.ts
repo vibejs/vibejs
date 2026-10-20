@@ -38,7 +38,7 @@ function scrollTo(position: ScrollPosition, config: AppConfig | undefined): void
     ? document.getElementById(decodeURIComponent(el.slice(1)))
     : document.querySelector(el);
   if (target) target.scrollIntoView({ behavior });
-  else warn(vibeError('VIBE7116', { el }), null, config);
+  else if (__DEV__) warn(vibeError('VIBE7116', { el }), null, config);
 }
 
 /** The scrolling of a web history's navigations; the router takes over `scrollRestoration`. */

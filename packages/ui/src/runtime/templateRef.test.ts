@@ -136,6 +136,14 @@ test('warns VIBE5208 for a duplicate key and for a key without useTemplateRef, s
     render: () => [],
   });
   expect(spy).toHaveBeenCalledTimes(3);
+  mount({
+    render: () => {
+      const el = document.createElement('i');
+      setRef(el, 'missing');
+      return el;
+    },
+  });
+  expect(spy).toHaveBeenCalledTimes(3);
 });
 
 test('useTemplateRef() outside setup returns a ref that stays null, with VIBE5205', () => {

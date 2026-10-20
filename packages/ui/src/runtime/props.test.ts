@@ -269,6 +269,11 @@ describe('emit', () => {
     vi.stubGlobal('__DEV__', false);
     create({}).ctx.emit('pick');
     expect(spy).toHaveBeenCalledTimes(1);
+    vi.stubGlobal('__DEV__', true);
+    create({}).ctx.emit('pick');
+    expect(spy).toHaveBeenLastCalledWith(
+      expect.stringMatching(/^\[VIBE5202\] The component Anonymous emitted pick/),
+    );
   });
 });
 

@@ -1,7 +1,13 @@
 import { ReactiveEffect } from '../reactivity/core.ts';
 import { handleError } from './errorHandling.ts';
 import { callHooks, currentInstance, currentParent, withInstance } from './instance.ts';
-import { queueJob, queuePostFlushCb, SchedulerJobFlags, type SchedulerJob } from './scheduler.ts';
+import {
+  ALLOW_RECURSE,
+  DISPOSED,
+  queueJob,
+  queuePostFlushCb,
+  type SchedulerJob,
+} from './scheduler.ts';
 
 let order = 0;
 
@@ -51,10 +57,10 @@ export function renderEffect(fn: () => void, loc?: string): void {
     job.loc = loc;
   }
   job.order = order++;
-  job.flags = SchedulerJobFlags.ALLOW_RECURSE;
+  job.flags = ALLOW_RECURSE;
   effect.scheduler = () => queueJob(job);
   effect.onStop = () => {
-    job.flags! |= SchedulerJobFlags.DISPOSED;
+    job.flags! |= DISPOSED;
   };
   effect.run();
 }

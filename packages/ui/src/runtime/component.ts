@@ -181,7 +181,12 @@ function decorateRoot(instance: ComponentInstance): void {
     root.scope?.run(() => apply(root.nodes));
   } else if (root instanceof Element) apply(root);
   // A component root takes the attributes as its own props (`isSingleRoot`).
-  else if (attrs && !(root instanceof ComponentInstance) && Object.keys(instance.attrs).length) {
+  else if (
+    __DEV__ &&
+    attrs &&
+    !(root instanceof ComponentInstance) &&
+    Object.keys(instance.attrs).length
+  ) {
     warn(vibeError('VIBE5201', { name: instance.name ?? 'Anonymous' }), instance);
   }
 }

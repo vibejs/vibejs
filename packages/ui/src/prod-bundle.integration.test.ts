@@ -23,6 +23,23 @@ const sentences = [...generated.matchAll(/^ {2}VIBE5\d{3}: \["((?:[^"\\]|\\.)*)"
   ([, message]) => message.split(/\{\w+\}/).reduce((a, b) => (b.length > a.length ? b : a)),
 );
 
+/**
+ * The VIBE5xxx codes of the ui source that are only passed to `warn()`, which is dev only: a prod
+ * bundle drops their `vibeError()` calls. Codes that are also thrown or logged stay.
+ */
+const warnOnly = (() => {
+  const warned = new Set<string>();
+  const other = new Set<string>();
+  const files = readdirSync(import.meta.dirname, { recursive: true, encoding: 'utf8' });
+  for (const name of files.filter((path) => /(?<!\.test(?:-d)?)\.ts$/.test(path))) {
+    const text = readFileSync(join(import.meta.dirname, name), 'utf8');
+    for (const [, prefix, id] of text.matchAll(/(warn\(\s*)?vibeError\(\s*'(VIBE5\d{3})'/g)) {
+      (prefix ? warned : other).add(id);
+    }
+  }
+  return [...warned].filter((id) => !other.has(id));
+})();
+
 beforeAll(async () => {
   await build({
     config: false,
@@ -39,9 +56,12 @@ beforeAll(async () => {
   code = readFileSync(join(outDir, file), 'utf8');
 });
 
-it('bundles the counter for prod without HMR code or dev messages, and it still counts', async () => {
+it('bundles the counter for prod without HMR code, dev messages or warn-only codes, and it still counts', async () => {
   expect(sentences.length).toBeGreaterThan(20);
   expect(sentences.every((text) => text.length >= 10)).toBe(true);
+  expect(warnOnly.length).toBeGreaterThan(15);
+  // The codes that the counter path throws or logs in prod.
+  expect(warnOnly).not.toContain('VIBE5102');
   for (const text of [
     'createRecord',
     'rerender',
@@ -49,6 +69,7 @@ it('bundles the counter for prod without HMR code or dev messages, and it still 
     'at <',
     'location.reload',
     ...sentences,
+    ...warnOnly,
   ]) {
     expect(code).not.toContain(text);
   }
@@ -63,7 +84,9 @@ it('bundles the counter for prod without HMR code or dev messages, and it still 
   expect(button.textContent).toBe('2');
 });
 
-// Known failure: over the C10 7 kB budget; tracked for the I2 size optimization.
+// Known failure: 10,182 B gzip, 3,014 B over the C10 7 kB budget. What remains is reachable from
+// every app (root attribute fallthrough, deep `ref()` reactivity, JSON interpolation), so closing
+// the gap needs a contract or behavior change, which is an owner decision.
 it.fails('bundles the counter for prod in at most 7 kB gzip (CONTRACTS C10)', () => {
   expect(gzipSync(code, { level: 9 }).length).toBeLessThanOrEqual(7168);
 });

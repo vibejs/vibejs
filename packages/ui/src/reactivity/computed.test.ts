@@ -226,6 +226,10 @@ describe('reactivity/computed', () => {
 
     expect(warn).toHaveBeenLastCalledWith(vibeError('VIBE5003').message);
     expect(vibeError('VIBE5003').message).toMatch(/^\[VIBE5003\] Cannot assign/);
+    vi.stubGlobal('__DEV__', false);
+    Reflect.set(plusOne, 'value', 5);
+    expect(plusOne.value).toBe(2);
+    expect(warn).toHaveBeenCalledOnce();
   });
 
   // https://github.com/vuejs/core/pull/5912#issuecomment-1497596875

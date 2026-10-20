@@ -4,15 +4,17 @@ import {
   activeSub,
   batchDepth,
   cycle,
+  DIRTY,
   endBatch,
   flush,
+  MUTABLE,
   runDepth,
   startBatch,
   system,
   type Dependency,
 } from './core.ts';
 import type { Ref } from './ref.ts';
-import { ReactiveFlags, type Link } from './system.ts';
+import type { Link } from './system.ts';
 
 const { link, propagate, shallowPropagate } = system;
 
@@ -42,7 +44,7 @@ export const ARRAY_ITERATE_KEY: unique symbol = Symbol('Array iterate');
 export class Dep implements Dependency {
   subs: Link | undefined = undefined;
   subsTail: Link | undefined = undefined;
-  flags: number = ReactiveFlags.Mutable;
+  flags: number = MUTABLE;
   readonly target: object;
   readonly key: unknown;
 
@@ -53,14 +55,14 @@ export class Dep implements Dependency {
 
   /** Marks the key changed and notifies its subscribers, as a ref write does. */
   trigger(): void {
-    this.flags = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
+    this.flags = MUTABLE | DIRTY;
     propagate(this.subs!, runDepth > 0);
     if (!batchDepth) flush();
   }
 
   /** The proxy handler compared the values before triggering, so a dirty key always changed. */
   update(): boolean {
-    this.flags = ReactiveFlags.Mutable;
+    this.flags = MUTABLE;
     return true;
   }
 
@@ -83,7 +85,7 @@ export function track(target: object, key: unknown): void {
   let dep = keys.get(key);
   if (dep === undefined) {
     keys.set(key, (dep = new Dep(target, key)));
-  } else if (dep.flags & ReactiveFlags.Dirty) {
+  } else if (dep.flags & DIRTY) {
     // Read again after a change that no subscriber checked yet: settle it now, as a ref read does,
     // so that a later check does not count the same change twice.
     dep.update();

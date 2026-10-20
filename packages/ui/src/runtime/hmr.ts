@@ -10,7 +10,7 @@ import { hmrRecords as records, type ComponentInstance, type HmrRecord } from '.
 function record(id: string): HmrRecord | undefined {
   const found = records.get(id);
   if (!found) {
-    warn(vibeError('VIBE5501', { id }));
+    if (__DEV__) warn(vibeError('VIBE5501', { id }));
     location.reload();
   }
   return found;

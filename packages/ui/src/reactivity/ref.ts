@@ -3,7 +3,17 @@ import { vibeError } from '../errors.gen.ts';
 import { hasChanged, isFunction, isIntegerKey, isObject } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { ComputedRefImpl, type ComputedRef, type WritableComputedRef } from './computed.ts';
-import { activeSub, batchDepth, cycle, flush, runDepth, system, type Dependency } from './core.ts';
+import {
+  activeSub,
+  batchDepth,
+  cycle,
+  DIRTY,
+  flush,
+  MUTABLE,
+  runDepth,
+  system,
+  type Dependency,
+} from './core.ts';
 import {
   flag,
   getDepFromReactive,
@@ -14,7 +24,7 @@ import {
   toRaw,
 } from './dep.ts';
 import { isProxy, toReactive } from './reactive.ts';
-import { ReactiveFlags, type Link } from './system.ts';
+import type { Link } from './system.ts';
 
 const { link, propagate, shallowPropagate } = system;
 
@@ -105,7 +115,7 @@ export type ToRefs<T = any> = { [K in keyof T]: ToRef<T[K]> };
 export class RefImpl<T = unknown> implements Dependency {
   subs: Link | undefined = undefined;
   subsTail: Link | undefined = undefined;
-  flags: number = ReactiveFlags.Mutable;
+  flags: number = MUTABLE;
   /** The last written value, unwrapped from its proxy unless stored as-is. */
   rawValue: T;
   currentValue: T;
@@ -120,7 +130,7 @@ export class RefImpl<T = unknown> implements Dependency {
   }
 
   get value(): T {
-    if (this.flags & ReactiveFlags.Dirty && this.update() && this.subs !== undefined) {
+    if (this.flags & DIRTY && this.update() && this.subs !== undefined) {
       shallowPropagate(this.subs);
     }
     if (activeSub !== undefined) link(this, activeSub, cycle);
@@ -134,14 +144,14 @@ export class RefImpl<T = unknown> implements Dependency {
     if (!hasChanged(raw, this.rawValue)) return;
     this.rawValue = raw;
     this.pendingValue = asIs ? raw : toReactive(raw);
-    this.flags = ReactiveFlags.Mutable | ReactiveFlags.Dirty;
+    this.flags = MUTABLE | DIRTY;
     if (this.subs === undefined) return;
     propagate(this.subs, runDepth > 0);
     if (!batchDepth) flush();
   }
 
   update(): boolean {
-    this.flags = ReactiveFlags.Mutable;
+    this.flags = MUTABLE;
     return hasChanged(this.currentValue, (this.currentValue = this.pendingValue));
   }
 
@@ -251,7 +261,7 @@ export function toRef(source: unknown, key?: PropertyKey, defaultValue?: unknown
 
 export function toRefs<T extends object>(object: T): ToRefs<T>;
 export function toRefs(object: Record<PropertyKey, unknown>): any {
-  if (!isReactive(object) && !isReadonly(object)) warn(vibeError('VIBE5004'));
+  if (__DEV__ && !isReactive(object) && !isReadonly(object)) warn(vibeError('VIBE5004'));
   const refs: any = Array.isArray(object) ? Array.from({ length: object.length }) : {};
   for (const key in object) refs[key] = new PropertyRef(object, key);
   return refs;

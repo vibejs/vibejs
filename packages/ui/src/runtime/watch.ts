@@ -12,7 +12,13 @@ import { hasChanged, isFunction, isObject } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { callWithAsyncErrorHandling, callWithErrorHandling } from './errorHandling.ts';
 import { currentInstance } from './instance.ts';
-import { queueJob, queuePostFlushCb, SchedulerJobFlags, type SchedulerJob } from './scheduler.ts';
+import {
+  ALLOW_RECURSE,
+  DISPOSED,
+  queueJob,
+  queuePostFlushCb,
+  type SchedulerJob,
+} from './scheduler.ts';
 
 export type WatchSource<T = any> = Ref<T, any> | ComputedRef<T> | (() => T);
 export type OnCleanup = (cleanupFn: () => void) => void;
@@ -63,7 +69,7 @@ let activeCleanups: (() => void)[] | undefined;
  */
 export function onWatcherCleanup(cleanupFn: () => void, failSilently = false): void {
   if (activeCleanups) activeCleanups.push(cleanupFn);
-  else if (!failSilently) warn(vibeError('VIBE5006', { api: 'onWatcherCleanup' }));
+  else if (__DEV__ && !failSilently) warn(vibeError('VIBE5006', { api: 'onWatcherCleanup' }));
 }
 
 export function watch<T, I extends Readonly<boolean> = false>(
@@ -115,7 +121,8 @@ export function watchSyncEffect(effect: WatchEffect): WatchHandle {
 }
 
 function invalidSource(value: unknown): undefined {
-  warn(vibeError('VIBE5007', { type: Object.prototype.toString.call(value).slice(8, -1) }));
+  if (__DEV__)
+    warn(vibeError('VIBE5007', { type: Object.prototype.toString.call(value).slice(8, -1) }));
   return undefined;
 }
 
@@ -224,7 +231,7 @@ function doWatch(
     if (once) stop();
   };
   // A callback may write what its source reads; it then runs again in the same flush.
-  if (cb) job.flags = SchedulerJobFlags.ALLOW_RECURSE;
+  if (cb) job.flags = ALLOW_RECURSE;
   if (__DEV__) job.instance = instance;
   if (flush === 'sync') {
     effect.scheduler = job;
@@ -244,7 +251,7 @@ function doWatch(
     }
   };
   effect.onStop = () => {
-    job.flags = (job.flags ?? 0) | SchedulerJobFlags.DISPOSED;
+    job.flags = (job.flags ?? 0) | DISPOSED;
     runCleanups();
   };
 

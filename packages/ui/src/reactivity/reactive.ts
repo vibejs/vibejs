@@ -4,9 +4,9 @@ import { vibeError } from '../errors.gen.ts';
 import { isObject } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { createArrayInstrumentations, type Wrap } from './arrayInstrumentations.ts';
-import { createBaseHandler } from './baseHandlers.ts';
-import { createCollectionHandler } from './collectionHandlers.ts';
-import { flag, isReactive, isReadonly, isShallow } from './dep.ts';
+import { ARRAY_WRAP, createMutableHandler, createReadonlyHandler } from './baseHandlers.ts';
+import { createCollectionHandler, mutableWriters, readonlyWriters } from './collectionHandlers.ts';
+import { flag, isReadonly } from './dep.ts';
 import type { Builtin, RawSymbol, Ref, ShallowReactiveBrand, UnwrapRefSimple } from './ref.ts';
 
 declare const ReactiveMarkerSymbol: unique symbol;
@@ -63,31 +63,37 @@ function toReadonly<T>(value: T): T {
   return isObject(value) ? (readonly(value) as T) : value;
 }
 
-const toReadonlyReactive: Wrap = (value) => toReadonly(toReactive(value));
-
 /** How the items of `array` are wrapped when read through it (it may be readonly(reactive(x))). */
 export function wrapperFor(array: unknown[]): Wrap {
-  if (isShallow(array)) return identity;
-  if (!isReadonly(array)) return toReactive;
-  return isReactive(array) ? toReadonlyReactive : toReadonly;
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- only a proxy answers ARRAY_WRAP
+  return (array as Partial<Record<typeof ARRAY_WRAP, Wrap>>)[ARRAY_WRAP] ?? toReactive;
 }
 
-const arrayMethods = createArrayInstrumentations(wrapperFor);
+const arrayMethods = /* @__PURE__ */ createArrayInstrumentations(wrapperFor);
 
-const handlers = (
-  readonly: boolean,
+// Only the modes an app uses ship: each set of handlers is built where its API uses it.
+const mutable = (
   shallow: boolean,
   wrap: Wrap,
   proxies: WeakMap<object, object>,
 ): [ProxyHandler<any>, ProxyHandler<any>] => [
-  createBaseHandler(readonly, shallow, wrap, proxies, arrayMethods),
-  createCollectionHandler(readonly, shallow, wrap),
+  createMutableHandler(shallow, wrap, proxies, arrayMethods),
+  createCollectionHandler(false, shallow, wrap, mutableWriters(shallow)),
 ];
 
-const mutableHandlers = handlers(false, false, toReactive, reactiveMap);
-const shallowReactiveHandlers = handlers(false, true, identity, shallowReactiveMap);
-const readonlyHandlers = handlers(true, false, toReadonly, readonlyMap);
-const shallowReadonlyHandlers = handlers(true, true, identity, shallowReadonlyMap);
+const immutable = (
+  shallow: boolean,
+  wrap: Wrap,
+  proxies: WeakMap<object, object>,
+): [ProxyHandler<any>, ProxyHandler<any>] => [
+  createReadonlyHandler(shallow, wrap, proxies),
+  createCollectionHandler(true, shallow, wrap, readonlyWriters),
+];
+
+const mutableHandlers = /* @__PURE__ */ mutable(false, toReactive, reactiveMap);
+const shallowReactiveHandlers = /* @__PURE__ */ mutable(true, identity, shallowReactiveMap);
+const readonlyHandlers = /* @__PURE__ */ immutable(false, toReadonly, readonlyMap);
+const shallowReadonlyHandlers = /* @__PURE__ */ immutable(true, identity, shallowReadonlyMap);
 
 const targetTypes: Partial<Record<string, 1 | 2>> = {
   Object: 1,
@@ -106,7 +112,7 @@ function createReactiveObject(
   proxies: WeakMap<object, object>,
 ): unknown {
   if (!isObject(target)) {
-    warn(vibeError('VIBE5001', { api, value: String(target) }));
+    if (__DEV__) warn(vibeError('VIBE5001', { api, value: String(target) }));
     return target;
   }
   // Already a proxy; only readonly() wraps a reactive proxy again.

@@ -9,6 +9,15 @@ export interface Dependency extends ReactiveNode {
   unwatched(): void;
 }
 
+// The bits of `ReactiveFlags` as constants, which the bundler inlines (it keeps object reads).
+const NONE: typeof ReactiveFlags.None = 0;
+export const MUTABLE: typeof ReactiveFlags.Mutable = 1;
+const WATCHING: typeof ReactiveFlags.Watching = 2;
+const RECURSED_CHECK: typeof ReactiveFlags.RecursedCheck = 4;
+const RECURSED: typeof ReactiveFlags.Recursed = 8;
+export const DIRTY: typeof ReactiveFlags.Dirty = 16;
+export const PENDING: typeof ReactiveFlags.Pending = 32;
+
 // Our flag bits, above those of system.ts.
 const PAUSED = 1 << 6;
 const NOTIFIED = 1 << 7;
@@ -29,7 +38,7 @@ export const system: ReturnType<typeof createReactiveSystem> = createReactiveSys
   update: (node: Dependency): boolean => node.update(),
   notify(effect: ReactiveEffect): void {
     // Not notified again until it has run or found itself clean.
-    effect.flags &= ~ReactiveFlags.Watching;
+    effect.flags &= ~WATCHING;
     queue.push(effect);
   },
   unwatched: (node: Dependency): void => node.unwatched(),
@@ -57,7 +66,7 @@ export function flush(): void {
   } finally {
     // An effect threw: the ones left keep their subscriptions and run on the next change.
     while (flushIndex < queue.length) {
-      queue[flushIndex++].flags |= ReactiveFlags.Watching | ReactiveFlags.Recursed;
+      queue[flushIndex++].flags |= WATCHING | RECURSED;
     }
     queue.length = flushIndex = 0;
   }
@@ -67,14 +76,14 @@ export function flush(): void {
 export function startTracking(sub: ReactiveNode, flags: number): ReactiveNode | undefined {
   ++cycle;
   sub.depsTail = undefined;
-  sub.flags = flags | ReactiveFlags.RecursedCheck;
+  sub.flags = flags | RECURSED_CHECK;
   return setActiveSub(sub);
 }
 
 /** Ends a tracking run and unlinks the deps that it did not read again. */
 export function endTracking(sub: ReactiveNode, prevSub: ReactiveNode | undefined): void {
   activeSub = prevSub;
-  sub.flags &= ~ReactiveFlags.RecursedCheck;
+  sub.flags &= ~RECURSED_CHECK;
   purgeDeps(sub);
 }
 
@@ -98,7 +107,7 @@ function purgeDeps(sub: ReactiveNode): void {
 export class ReactiveEffect<T = unknown> implements ReactiveNode {
   deps: Link | undefined = undefined;
   depsTail: Link | undefined = undefined;
-  flags: number = ReactiveFlags.Watching;
+  flags: number = WATCHING;
   fn: () => T;
   scheduler: (() => void) | undefined = undefined;
   /** Runs after `stop()`, for example a watcher's cleanups. */
@@ -109,21 +118,17 @@ export class ReactiveEffect<T = unknown> implements ReactiveNode {
     const scope = activeEffectScope;
     // Created inside a stopped scope: nothing could stop it, so it starts stopped.
     if (scope?.active) scope.effects.push(this);
-    else if (scope) this.flags = ReactiveFlags.None;
+    else if (scope) this.flags = NONE;
   }
 
   /** Whether a dep changed since the last run. Recomputes stale computed deps to find out. */
   get dirty(): boolean {
     const flags = this.flags;
-    if (
-      flags & ReactiveFlags.Dirty ||
-      (flags & ReactiveFlags.Pending && checkDirty(this.deps!, this))
-    ) {
+    if (flags & DIRTY || (flags & PENDING && checkDirty(this.deps!, this))) {
       return true;
     }
-    if (flags & ReactiveFlags.Pending) {
-      this.flags =
-        (flags & ~(ReactiveFlags.Pending | ReactiveFlags.Recursed)) | ReactiveFlags.Watching;
+    if (flags & PENDING) {
+      this.flags = (flags & ~(PENDING | RECURSED)) | WATCHING;
     }
     return false;
   }
@@ -131,7 +136,7 @@ export class ReactiveEffect<T = unknown> implements ReactiveNode {
   run(): T {
     // A stopped effect (no flags, as in system.ts) still runs its function, but tracks nothing.
     if (!this.flags) return this.fn();
-    const prev = startTracking(this, (this.flags & PAUSED) | ReactiveFlags.Watching);
+    const prev = startTracking(this, (this.flags & PAUSED) | WATCHING);
     ++runDepth;
     try {
       return this.fn();
@@ -142,7 +147,7 @@ export class ReactiveEffect<T = unknown> implements ReactiveNode {
   }
 
   stop(): void {
-    this.flags = ReactiveFlags.None;
+    this.flags = NONE;
     releaseDeps(this);
     this.onStop?.();
   }
