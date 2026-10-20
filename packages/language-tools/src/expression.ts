@@ -128,6 +128,8 @@ export interface Mode {
   features?: number;
 }
 
+const PLAIN: Mode = {};
+
 /**
  * Emits the template expression at the original range [start, end), verbatim. Names bound to setup
  * bindings or props get BOUND spans; write roots among them are written through `__vibe_w` (setup)
@@ -140,20 +142,20 @@ export function expression(
   b: CodeBuilder,
   names: Names,
   source: string,
-  [start, end]: [number, number],
+  range: [number, number],
   locals: ReadonlySet<string>,
-  { pattern = false, target = false, features }: Mode = {},
+  { pattern = false, target = false, features }: Mode = PLAIN,
 ): void {
+  // Index reads: destructuring a tuple allocates an iterator until the function is optimized.
+  const start = range[0];
+  const end = range[1];
   const expr = features ?? Preset.EXPR;
   let at = start;
   const text = source.slice(start, end);
   // A pattern (a v-for alias) is walked as an assignment target; the names it declares stay as they are.
-  const walked = pattern
-    ? ([`[${text}] = []`, start - 1] as const)
-    : target
-      ? ([`(${text}) = 0`, start - 1] as const)
-      : ([text, start] as const);
-  eachIdentifier(...walked, (name, from, to, { local, writeRoot }) => {
+  const walked = pattern ? `[${text}] = []` : target ? `(${text}) = 0` : text;
+  const offset = pattern || target ? start - 1 : start;
+  eachIdentifier(walked, offset, (name, from, to, { local, writeRoot }) => {
     if (local || locals.has(name) || (pattern && writeRoot)) return;
     const setup = names.setup.has(name);
     if (!setup && !names.ctx.has(name)) {
@@ -161,7 +163,7 @@ export function expression(
       names.unknown = true;
       b.verbatim(at, from, expr);
       // `{ a }` becomes `{ a: __vibe_unknown.a }`; the error is on the value.
-      const short = shorthand(walked[0], from - walked[1]);
+      const short = shorthand(walked, from - offset);
       if (short) b.verbatim(from, to, expr).add(': ');
       b.atom(`${UNKNOWN}.`, from, from, Preset.NONE);
       b.verbatim(from, to, short ? Preset.NONE : expr);
