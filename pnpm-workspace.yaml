@@ -51,6 +51,8 @@ catalog:
   reactive-framework-test-suite: 0.1.0
   vitepress: 2.0.0-alpha.20
   vscode-jsonrpc: ^9.0.3
+  '@modelcontextprotocol/server': ^2.3.1
+  '@modelcontextprotocol/client': ^2.3.1
 
 catalogs:
   ts-next:
