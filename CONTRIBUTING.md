@@ -58,6 +58,26 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 - The 8 npm packages version together (one changesets `fixed` group).
 - There are no per-PR changesets before v0.1.0. v0.1.0 ships with a single "Initial release" changeset, added when the release is prepared.
 - After v0.1.0, every PR with a user-visible change adds a changeset with `pnpm changeset`.
+- The CI `build` job runs `pnpm pack-check`: it packs every public package and checks that the tarball holds only built output, `README.md`, `LICENSE` and the notices, that every entry point exists, and that dependency specs are resolved.
+
+### Release runbook (maintainers)
+
+`.github/workflows/release.yml` runs only when a maintainer dispatches it from `main`. It publishes through npm trusted publishing (OIDC) with provenance and holds no npm token.
+
+One-time setup:
+
+1. Create the npm organization `@vibejs-org`.
+2. Create a GitHub App with contents and pull-requests write access, install it on the repository, and add its client ID as the `RELEASE_APP_CLIENT_ID` repository variable and its private key as the `RELEASE_APP_PRIVATE_KEY` secret. The release PR is opened with the App's token, so that CI runs on it.
+3. Bootstrap: a trusted publisher can only be bound to a package that exists. Publish the real 0.1.0 builds of the 8 packages once with a short-lived npm token, bind each package's trusted publisher to `vibejs/vibejs` and `release.yml`, set each package to "require two-factor authentication and disallow tokens", and revoke the token.
+
+Every release after that:
+
+1. Merge the PRs with their changesets.
+2. Dispatch the Release workflow. It opens or updates the "chore: release" PR, which bumps the versions and changelogs.
+3. Merge the "chore: release" PR.
+4. Dispatch the Release workflow again. With no pending changesets it publishes the new versions.
+
+The VS Code extension releases on its own: bump the version in `packages/vscode/package.json`, merge, and push a `vscode-v<version>` tag. `.github/workflows/vscode.yml` publishes it to the Visual Studio Marketplace and Open VSX with the `VSCE_PAT` and `OVSX_PAT` secrets.
 
 ## Upgrading forked code
 

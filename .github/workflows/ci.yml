@@ -33,6 +33,7 @@ jobs:
         with:
           cache: true
       - run: pnpm build
+      - run: node scripts/pack-check.ts
       - run: git diff --exit-code
 
   test:
