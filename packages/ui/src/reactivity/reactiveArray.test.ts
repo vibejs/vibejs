@@ -967,3 +967,11 @@ describe('reactive arrays', () => {
     expect(spy).toHaveBeenCalledTimes(2);
   });
 });
+
+test('the instrumented array methods keep their native names', () => {
+  const arr: any = reactive([]);
+  for (const name of ['every', 'forEach', 'map', 'includes', 'indexOf', 'push', 'splice', 'find']) {
+    expect(arr[name]).not.toBe((Array.prototype as any)[name]);
+    expect(arr[name].name).toBe(name);
+  }
+});

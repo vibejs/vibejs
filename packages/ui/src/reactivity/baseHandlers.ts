@@ -45,7 +45,8 @@ export const ARRAY_WRAP: unique symbol = Symbol('array wrap');
  * The `get` trap of plain objects and arrays in one mode. `wrap` converts nested objects on read
  * (`toReactive`, `toReadonly`, or identity in the shallow modes) and `proxies` is the cache of the
  * mode, which tells the proxy's own receiver apart from other objects. Only the mutable modes
- * pass `arrayMethods`.
+ * pass `arrayMethods`. `reactiveWrap` is what the array methods apply when the target is a
+ * reactive proxy (deep readonly: `readonly(reactive(item))`, also over a shallow reactive array).
  */
 function createGetter(
   readonly: boolean,
@@ -53,6 +54,7 @@ function createGetter(
   wrap: Wrap,
   proxies: WeakMap<object, object>,
   arrayMethods?: Record<PropertyKey, unknown>,
+  reactiveWrap = wrap,
 ): ProxyHandler<Raw>['get'] {
   return (target, key, receiver: object) => {
     switch (key) {
@@ -71,12 +73,9 @@ function createGetter(
           Object.getPrototypeOf(target) === Object.getPrototypeOf(receiver)
           ? target
           : undefined;
-      case ARRAY_WRAP: {
-        // A deep readonly proxy over a reactive array wraps the reactive proxy's items again.
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- only a proxy answers ARRAY_WRAP
-        const inner = shallow ? undefined : (target[ARRAY_WRAP] as Wrap | undefined);
-        return inner ? (value: unknown) => wrap(inner(value)) : wrap;
-      }
+      case ARRAY_WRAP:
+        // Only a readonly proxy has a reactive proxy as its target.
+        return target.__v_isReactive ? reactiveWrap : wrap;
     }
     const isArray = Array.isArray(target);
     if (arrayMethods) {
@@ -103,9 +102,10 @@ export function createReadonlyHandler(
   shallow: boolean,
   wrap: Wrap,
   proxies: WeakMap<object, object>,
+  reactiveWrap?: Wrap,
 ): ProxyHandler<Raw> {
   return {
-    get: createGetter(true, shallow, wrap, proxies),
+    get: createGetter(true, shallow, wrap, proxies, undefined, reactiveWrap),
     set: (_, key) => {
       ignored('set', key);
       return true;

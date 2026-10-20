@@ -180,9 +180,12 @@ export function createArrayInstrumentations(
     run: (self: unknown[], method: string, args: unknown[]) => unknown,
   ): void => {
     for (const name of names.split(',')) {
-      methods[name] = function (this: unknown[], ...args: unknown[]) {
-        return run(this, name, args);
-      };
+      // A computed method key keeps the native method's name.
+      ({ [name]: methods[name] } = {
+        [name](this: unknown[], ...args: unknown[]) {
+          return run(this, name, args);
+        },
+      });
     }
   };
   forward('every,findIndex,findLastIndex,forEach,map,some', apply);

@@ -8,7 +8,7 @@ import { vibeError } from '../errors.gen.ts';
 import { computed } from './computed.ts';
 import { ReactiveEffect } from './core.ts';
 import { isReactive, isReadonly, toRaw } from './dep.ts';
-import { isProxy, markRaw, reactive, readonly } from './reactive.ts';
+import { isProxy, markRaw, reactive, readonly, shallowReactive } from './reactive.ts';
 import { ref, shallowRef, triggerRef } from './ref.ts';
 
 function effect(fn: () => unknown): ReactiveEffect {
@@ -589,6 +589,23 @@ describe('readonly(reactive(array)) element access', () => {
     expect(merged[0]).toBe(input[0]);
     expect(isReadonly(merged[1])).toBe(false);
     expect(isReactive(merged[1])).toBe(true);
+  });
+
+  test('readonly(shallowReactive(array)) methods return readonly(reactive(item))', () => {
+    // As upstream: an index read is readonly(item), the array methods wrap the reactive item.
+    const raw = [{ a: 1 }];
+    const state = readonly(shallowReactive(raw));
+    const item = readonly(reactive(raw[0]));
+
+    expect(isReactive(state[0])).toBe(false);
+    expect(state.find(() => true)).toBe(item);
+    const seen: unknown[] = [];
+    state.forEach((x) => seen.push(x));
+    expect(seen[0]).toBe(item);
+    expect(isReadonly(item)).toBe(true);
+    expect(isReactive(item)).toBe(true);
+    expect(state.includes(item)).toBe(true);
+    expect(state.includes(raw[0])).toBe(true);
   });
 
   test('concat preserves elements from a non-reactive readonly argument', () => {

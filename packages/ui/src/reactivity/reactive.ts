@@ -85,14 +85,17 @@ const immutable = (
   shallow: boolean,
   wrap: Wrap,
   proxies: WeakMap<object, object>,
+  reactiveWrap?: Wrap,
 ): [ProxyHandler<any>, ProxyHandler<any>] => [
-  createReadonlyHandler(shallow, wrap, proxies),
+  createReadonlyHandler(shallow, wrap, proxies, reactiveWrap),
   createCollectionHandler(true, shallow, wrap, readonlyWriters),
 ];
 
 const mutableHandlers = /* @__PURE__ */ mutable(false, toReactive, reactiveMap);
 const shallowReactiveHandlers = /* @__PURE__ */ mutable(true, identity, shallowReactiveMap);
-const readonlyHandlers = /* @__PURE__ */ immutable(false, toReadonly, readonlyMap);
+const readonlyHandlers = /* @__PURE__ */ immutable(false, toReadonly, readonlyMap, (value) =>
+  toReadonly(toReactive(value)),
+);
 const shallowReadonlyHandlers = /* @__PURE__ */ immutable(true, identity, shallowReadonlyMap);
 
 const targetTypes: Partial<Record<string, 1 | 2>> = {
