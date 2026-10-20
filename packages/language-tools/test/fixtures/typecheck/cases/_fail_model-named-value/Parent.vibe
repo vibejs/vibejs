@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import { ref, type Ref } from '@vibejs-org/ui'
+import Child from './Child.vibe'
+const n: Ref<number> = ref(0)
+</script>
+
+<template>
+  <Child v-model="n" />
+</template>

@@ -118,7 +118,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
   const models = analysis.macros.models.map(({ name, binding, required }) => {
     const value = `(typeof ${binding})['value']`;
     const modifiers = name === 'modelValue' ? 'modelModifiers' : `${name}Modifiers`;
-    return `${key(name)}${required ? '' : '?'}: ${value}; ${key(`onUpdate:${name}`)}?: (value: ${value}) => void; ${key(modifiers)}?: (typeof ${binding})[1]`;
+    return `${key(name)}${required ? '' : '?'}: ${value}; ${key(`onUpdate:${name}`)}?: (__vibe_value: ${value}) => void; ${key(modifiers)}?: (typeof ${binding})[1]`;
   });
   if (w.outlets) {
     const slots = [...w.outlets].map(([name, all]) => {

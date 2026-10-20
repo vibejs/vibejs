@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import { ref } from '@vibejs-org/ui'
+import Child from './Child.vibe'
+const text = ref('')
+</script>
+
+<template>
+  <Child v-model="text" />
+</template>

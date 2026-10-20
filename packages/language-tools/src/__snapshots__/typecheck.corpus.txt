@@ -20,6 +20,8 @@ cases/_fail_model-checkbox/App.vibe(7,35): error TS1360: Type 'string' does not 
 cases/_fail_model-component/App.vibe(8,10): error TS2322: Type 'boolean' is not assignable to type 'string'.
 cases/_fail_model-component/App.vibe(8,19): error TS2322: Type 'string' is not assignable to type 'boolean'.
 cases/_fail_model-const/App.vibe(6,19): error TS2540: Cannot assign to 'label' because it is a read-only property.
+cases/_fail_model-named-value/Parent.vibe(8,10): error TS2322: Type 'number' is not assignable to type 'string'.
+cases/_fail_model-named-value/Parent.vibe(8,19): error TS2322: Type 'string' is not assignable to type 'number'.
 cases/_fail_model-number/App.vibe(7,26): error TS2322: Type 'number' is not assignable to type 'string'.
 cases/_fail_model-prop/App.vibe(6,19): error TS2540: Cannot assign to 'label' because it is a read-only property.
 cases/_fail_model-taken-key/App.vibe(10,49): error TS2540: Cannot assign to 'label' because it is a read-only property.

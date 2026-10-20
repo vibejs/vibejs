@@ -96,3 +96,76 @@ it('passes the fixed vibe fence', { timeout: 60_000 }, () => {
   expect(main(docs)).toBe(0);
   expect(errors).toEqual([]);
 });
+
+const IMPORTS = `---
+title: Imports
+---
+
+# Imports
+
+\`\`\`ts [theme.ts]
+export const theme: string = 'light';
+\`\`\`
+
+\`\`\`vibe
+<script setup lang="ts">
+import { missing } from './theme.ts';
+</script>
+
+<template>
+  <p>{{ missing }}</p>
+</template>
+\`\`\`
+`;
+
+it('checks a relative .ts import against the titled sibling fence', { timeout: 60_000 }, () => {
+  writeFileSync(join(docs, 'imports.md'), IMPORTS);
+  expect(main(docs)).toBe(1);
+  expect(errors).toEqual([
+    `imports.md:13:10 TS2305 Module '"./theme.ts"' has no exported member 'missing'.`,
+  ]);
+});
+
+it('passes a relative .ts import of an exported name', { timeout: 60_000 }, () => {
+  writeFileSync(join(docs, 'imports.md'), IMPORTS.replaceAll('missing', 'theme'));
+  expect(main(docs)).toBe(0);
+  expect(errors).toEqual([]);
+});
+
+const SLOTS = `---
+title: Slots
+---
+
+# Slots
+
+\`\`\`vibe [ItemList.vibe]
+<script setup lang="ts">
+defineSlots<{ default?: (props: { item: string }) => unknown }>();
+const { items } = defineProps<{ items: string[] }>();
+</script>
+
+<template>
+  <slot v-for="item in items" :key="item" :item="item" />
+</template>
+\`\`\`
+
+\`\`\`vibe
+<script setup lang="ts">
+import ItemList from './ItemList.vibe';
+</script>
+
+<template>
+  <ItemList :items="['a']">
+    <template #default="{ item }">{{ item.toFixed() }}</template>
+  </ItemList>
+</template>
+\`\`\`
+`;
+
+it('types the slot props of a titled sibling .vibe fence', { timeout: 60_000 }, () => {
+  writeFileSync(join(docs, 'slots.md'), SLOTS);
+  expect(main(docs)).toBe(1);
+  expect(errors).toEqual([
+    "slots.md:25:43 TS2551 Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?",
+  ]);
+});

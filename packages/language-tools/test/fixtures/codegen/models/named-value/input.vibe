@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const value = defineModel<string>({ required: true })
+const size = defineModel<number>('value')
+</script>
+
+<template>
+  <p>{{ value }} {{ size }}</p>
+  <input v-model="value">
+</template>

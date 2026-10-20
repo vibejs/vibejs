@@ -20,7 +20,7 @@ const __vibe_setup = { model, title, titleModifiers, count };
 type __VibeSlots = {};
 type __VibeExposed = {};
 type __VibeRefs = {};
-type __VibeModels = { modelValue: (typeof model)['value']; 'onUpdate:modelValue'?: (value: (typeof model)['value']) => void; modelModifiers?: (typeof model)[1]; title?: (typeof title)['value']; 'onUpdate:title'?: (value: (typeof title)['value']) => void; titleModifiers?: (typeof title)[1]; 'first-count'?: (typeof count)['value']; 'onUpdate:first-count'?: (value: (typeof count)['value']) => void; 'first-countModifiers'?: (typeof count)[1] };
+type __VibeModels = { modelValue: (typeof model)['value']; 'onUpdate:modelValue'?: (__vibe_value: (typeof model)['value']) => void; modelModifiers?: (typeof model)[1]; title?: (typeof title)['value']; 'onUpdate:title'?: (__vibe_value: (typeof title)['value']) => void; titleModifiers?: (typeof title)[1]; 'first-count'?: (typeof count)['value']; 'onUpdate:first-count'?: (__vibe_value: (typeof count)['value']) => void; 'first-countModifiers'?: (typeof count)[1] };
 export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();
 import * as __vibe from '@vibejs-org/ui/tooling';
 import { defineModel } from '@vibejs-org/ui/tooling';
