@@ -1,5 +1,7 @@
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync, globSync, readFileSync, realpathSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join, relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { VibeError } from '@vibejs-org/errors';
 import { vibeError } from './errors.gen.ts';
 
@@ -98,4 +100,30 @@ export function resolveTool(
     return { bin: file === undefined ? '' : join(at, file), version: manifest.version };
   }
   return undefined;
+}
+
+/** The `.vibe` files under `dir`, relative to `root` and sorted; a directory named `*.vibe` is not one. */
+export function vibeFiles(root: string, dir = '.'): string[] {
+  return globSync('**/*.vibe', {
+    cwd: join(root, dir),
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.*/**'],
+    withFileTypes: true,
+  })
+    .filter((d) => d.isFile())
+    .map((d) => relative(root, join(d.parentPath, d.name)))
+    .toSorted();
+}
+
+/** The project's own `@vibejs-org/compiler` (resolved from `root`), never one next to the CLI. Missing → VIBE8005. */
+export async function projectCompiler(
+  root: string,
+): Promise<typeof import('@vibejs-org/compiler') | VibeError> {
+  // Found in the project's node_modules like the tools of `check`, never through NODE_PATH.
+  if (!resolveTool(root, '@vibejs-org/compiler', '')) {
+    const install = installCommand(packageManager(root), ['@vibejs-org/compiler']);
+    const minimum = 'the required version';
+    return vibeError('VIBE8005', { tool: '@vibejs-org/compiler', minimum, install });
+  }
+  const entry = createRequire(join(root, 'package.json')).resolve('@vibejs-org/compiler');
+  return import(pathToFileURL(entry).href);
 }

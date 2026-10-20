@@ -33,7 +33,9 @@ it('serves the todo project over stdio to an MCP client', async () => {
   expect(tools.map((t) => t.name)).toEqual([
     'get_errors',
     'get_logs',
+    'get_routes',
     'get_di_graph',
+    'get_component_tree',
     'check',
     'request',
     'explain',

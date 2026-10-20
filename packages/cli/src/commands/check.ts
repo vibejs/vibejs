@@ -1,7 +1,5 @@
-import { globSync, readFileSync, rmSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { join, relative } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { readFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
 import { DOCS_BASE, type VibeError } from '@vibejs-org/errors';
 import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
 import {
@@ -22,7 +20,14 @@ import {
   type JsonEnvelope,
   type Step,
 } from '../output.ts';
-import { findRoot, installCommand, packageManager, resolveTool } from '../project.ts';
+import {
+  findRoot,
+  installCommand,
+  packageManager,
+  projectCompiler,
+  resolveTool,
+  vibeFiles,
+} from '../project.ts';
 
 const STEPS = ['types', 'lint', 'format', 'test'] as const;
 type StepName = (typeof STEPS)[number];
@@ -43,17 +48,6 @@ const VIBE_TOOLS: [pkg: string, bin: string][] = [
   ['@vibejs-org/language-tools', ''],
   ['@vibejs-org/compiler', ''],
 ];
-
-/** The project's `.vibe` files, root-relative and sorted; a directory named `*.vibe` is not one. */
-const vibeFiles = (root: string) =>
-  globSync('**/*.vibe', {
-    cwd: root,
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.*/**'],
-    withFileTypes: true,
-  })
-    .filter((d) => d.isFile())
-    .map((d) => relative(root, join(d.parentPath, d.name)))
-    .toSorted();
 
 const OUT = '.vibejs/check';
 /** The arguments of each step. Report paths are absolute: Vitest resolves them against its own `root`. */
@@ -263,10 +257,8 @@ export const check: CommandDef<CheckResult> = {
     const compiled: CheckDiagnostic[] = [];
     if (vibe.length) {
       // The project's compiler, the one the gate found and the mapper uses, not one next to the CLI.
-      const entry = createRequire(join(root, 'package.json')).resolve('@vibejs-org/compiler');
-      const { compile }: typeof import('@vibejs-org/compiler') = await import(
-        pathToFileURL(entry).href
-      );
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the gate above found it
+      const { compile } = (await projectCompiler(root)) as typeof import('@vibejs-org/compiler');
       for (const file of vibe) {
         const filename = join(root, file);
         const source = readFileSync(filename, 'utf8');

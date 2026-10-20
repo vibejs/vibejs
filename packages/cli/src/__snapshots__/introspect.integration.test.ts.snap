@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`components --json lists TodoList 1`] = `
+[
+  {
+    "diagnostics": [],
+    "file": "ui/src/TodoList.vibe",
+    "models": [],
+    "name": "TodoList",
+    "props": [],
+    "types": {},
+  },
+]
+`;

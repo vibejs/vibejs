@@ -5,15 +5,15 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
-  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CatalogEntry } from '../catalog.gen.ts';
 import type { Ctx, ExecResult } from '../ctx.ts';
+import { compilerSrc, installCompiler } from '../../test/app.ts';
 import { exitCode, type CheckDiagnostic, type CheckResult } from '../output.ts';
 import { check, enrich } from './check.ts';
 
@@ -35,22 +35,6 @@ function install(pkg: string, version: string, bin?: string): void {
   write(`node_modules/${pkg}/package.json`, JSON.stringify({ name: pkg, version, bin }));
 }
 
-/**
- * Installs @vibejs-org/compiler as a link to a package that re-exports the workspace compiler's
- * source. The link target is outside node_modules, so Vitest transforms the TypeScript it loads.
- */
-const compilerSrc = fileURLToPath(new URL('../../../compiler/src/index.ts', import.meta.url));
-
-function installCompiler(): void {
-  write('compiler/package.json', JSON.stringify({ version: '0.0.0', exports: './index.js' }));
-  write(
-    'compiler/index.js',
-    `export * from ${JSON.stringify(compilerSrc.replaceAll('\\', '/'))};\n`,
-  );
-  mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
-  symlinkSync(join(root, 'compiler'), join(root, 'node_modules/@vibejs-org/compiler'), 'junction');
-}
-
 // Transforming the compiler tree once, here, keeps it out of the first test's timeout.
 beforeAll(() => import(pathToFileURL(compilerSrc).href), 60_000);
 
@@ -68,7 +52,7 @@ beforeEach(() => {
   install('vitest', '5.0.5', 'vitest.mjs');
   install('@vitest/coverage-v8', '5.0.5');
   install('@vibejs-org/language-tools', '0.0.0');
-  installCompiler();
+  installCompiler(root);
 });
 
 afterEach(() => {

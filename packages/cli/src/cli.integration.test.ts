@@ -175,7 +175,18 @@ describe('agent files', () => {
 
   it('names only commands that the built bin describes', () => {
     const names = new Set([...block.matchAll(/\bvibejs ([a-z]+)\b/g)].map((m) => m[1]));
-    expect([...names].toSorted()).toEqual(['agents', 'check', 'dev', 'errors', 'explain', 'g']);
+    expect([...names].toSorted()).toEqual([
+      'agents',
+      'check',
+      'components',
+      'dev',
+      'di',
+      'errors',
+      'explain',
+      'g',
+      'request',
+      'routes',
+    ]);
     for (const name of names) {
       const { status, stdout } = vibejs(name, '--help', '--json');
       const command = COMMANDS.find((c) => c.name === name || c.aliases?.includes(name))!;

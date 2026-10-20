@@ -72,6 +72,29 @@ Call it to see what the dev server, the browser and the backend printed.",
   {
     "_meta": undefined,
     "annotations": undefined,
+    "description": "List the API routes and the UI routes, without starting a server or running UI code.
+Call it to find the handler of an endpoint or the page of a UI path.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "enum": [
+            "api",
+            "ui",
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "get_routes",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
     "description": "Show the modules and providers of the backend, without constructing any provider.
 Call it before adding or wiring a provider, a module or an injection.",
     "execution": undefined,
@@ -89,6 +112,25 @@ Call it before adding or wiring a provider, a module or an injection.",
       "type": "object",
     },
     "name": "get_di_graph",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "List the .vibe components with their props, models and types, without running them.
+Call it before using or changing a component, to see its props, models and types.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "name": {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "get_component_tree",
     "title": undefined,
   },
   {

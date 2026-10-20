@@ -40,6 +40,7 @@ export function renderBlock(exec: string, index: string): string {
     `- \`${exec} errors --json\` lists the errors of the running dev server.`,
     `- Done = \`${exec} check --json\` exits 0 (types, lint, format, tests, coverage per file).`,
     `- \`${exec} g resource|component|page <name>\` adds code with its tests; \`--dry-run --json\` previews it.`,
+    `- \`${exec} routes --json\`, \`${exec} components --json\` and \`${exec} di --json\` show the app's routes, components and providers; \`${exec} request <METHOD> <path> --json\` calls the API.`,
     `- \`${exec} agents sync\` refreshes this block.`,
     '',
     'Rules:',

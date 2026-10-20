@@ -95,3 +95,30 @@ export async function sourceVite(original: () => Promise<Vite>): Promise<Vite> {
     createServer: (config) => vite.createServer(vite.mergeConfig(config!, source)),
   };
 }
+
+/**
+ * The workspace compiler's source. A project gets it through `installCompiler`; importing it once
+ * in a `beforeAll` keeps its transform out of the first test's timeout.
+ */
+export const compilerSrc: string = fileURLToPath(
+  new URL('../../compiler/src/index.ts', import.meta.url),
+);
+
+/**
+ * Installs @vibejs-org/compiler in `root` as a link to a package that re-exports the workspace
+ * compiler's source. The link target is outside node_modules, so Vitest transforms the TypeScript
+ * it loads.
+ */
+export function installCompiler(root: string): void {
+  mkdirSync(join(root, 'compiler'));
+  writeFileSync(
+    join(root, 'compiler/package.json'),
+    JSON.stringify({ version: '0.0.0', exports: './index.js' }),
+  );
+  writeFileSync(
+    join(root, 'compiler/index.js'),
+    `export * from ${JSON.stringify(compilerSrc.replaceAll('\\', '/'))};\n`,
+  );
+  mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
+  symlinkSync(join(root, 'compiler'), join(root, 'node_modules/@vibejs-org/compiler'), 'junction');
+}
