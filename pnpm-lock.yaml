@@ -413,6 +413,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      '@vibejs-org/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
       '@vibejs-org/compiler':
         specifier: workspace:*
         version: link:../../packages/compiler

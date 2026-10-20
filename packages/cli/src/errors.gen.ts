@@ -16,6 +16,9 @@ const MESSAGES = {
   VIBE8302: ["`{file}` is not fully covered: {uncovered}.","Add tests for the listed ranges; never add coverage-ignore comments."],
   VIBE8303: ["`{file}` is not formatted.","Run `vibejs check --fix`."],
   VIBE8304: ["Building the {part} failed: {reason}.","Fix the reported error and run `vibejs build` again."],
+  VIBE8501: ["Could not load `server/src/app.module.ts`: {reason}.","Fix the error at the reported location, then run the command again."],
+  VIBE8502: ["The request to `{url}` could not be made: {reason}.","Start the dev server again with `vibejs dev`, or stop it so the request runs in process."],
+  VIBE8503: ["Invalid request input: {reason}.","Pass `--data` as JSON or `@file`, and `-H` as `Name: value`."],
   VIBE8601: ["{file} has {problem}; vibejs agents sync only edits text between one BEGIN and one END marker.","Restore or delete both marker lines, then run `vibejs agents sync`."],
 } as const;
 

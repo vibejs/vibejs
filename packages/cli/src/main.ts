@@ -5,10 +5,12 @@ import { agents } from './commands/agents.ts';
 import { build } from './commands/build.ts';
 import { check } from './commands/check.ts';
 import { dev } from './commands/dev.ts';
+import { di } from './commands/di.ts';
 import { docs } from './commands/docs.ts';
 import { errors } from './commands/errors.ts';
 import { explain } from './commands/explain.ts';
 import { logs } from './commands/logs.ts';
+import { request } from './commands/request.ts';
 import type { Ctx } from './ctx.ts';
 import { vibeError } from './errors.gen.ts';
 import {
@@ -31,6 +33,8 @@ export const COMMANDS: readonly CommandDef[] = [
   errors,
   logs,
   agents,
+  di,
+  request,
 ];
 
 /** Common wrong commands and what to run instead: a `vibejs` command or the `npm create` line. */

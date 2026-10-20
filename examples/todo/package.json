@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vibejs dev",
     "test": "tsc -b --runExternalCode --force && vitest run"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@vibejs-org/cli": "workspace:*",
     "@vibejs-org/compiler": "workspace:*",
     "@vibejs-org/language-tools": "workspace:*",
     "jsdom": "catalog:",

@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`output > answers --help as JSON and as text 1`] = `
+"vibejs 1.2.3
+
+vibejs request <METHOD> <path> [--data JSON|@file] [-H 'Name: value']...
+  Call an API route: through the running dev server, or in process when none runs.
+  $ vibejs request GET /api/todos
+  $ vibejs request POST /api/todos --data '{"title":"Write docs"}'
+  --data  The JSON body, inline or as @file.
+  -H, --header  A request header, 'Name: value'; repeatable.
+
+Global options:
+  --json  Print one JSON object (on by default in agent mode).
+  -h, --help  Describe the commands and their options.
+  --version  Print the vibejs version.
+"
+`;
+
+exports[`output > prints the status, the body and the docs for people 1`] = `
+"500 Internal Server Error
+{
+  "type": "about:blank",
+  "title": "Internal Server Error",
+  "status": 500,
+  "code": "VIBE9503",
+  "requestId": "r1"
+}
+Docs: https://vibejs.org/v0/errors/VIBE9503
+Fix: Read the logged \`cause\` and fix the code that threw it.
+Fix: Throw an \`HttpError\`, or call \`ctx.fail()\` with a declared error code, when the error is meant for the client.
+"
+`;

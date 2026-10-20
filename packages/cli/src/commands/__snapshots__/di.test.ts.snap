@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`output > answers --help as JSON and as text 1`] = `
+"vibejs 1.2.3
+
+vibejs di [--module NAME] [--token NAME]
+  Show the modules and providers of the backend, without constructing any provider.
+  $ vibejs di
+  $ vibejs di --token TodosService
+  --module  Only the module NAME, wherever it is imported.
+  --token  Only the modules that provide or export NAME.
+
+Global options:
+  --json  Print one JSON object (on by default in agent mode).
+  -h, --help  Describe the commands and their options.
+  --version  Print the vibejs version.
+"
+`;
+
+exports[`output > prints one block per module for people 1`] = `
+"AppModule > CoreModule (global)
+  providers: Clock
+  exports: Clock
+  imports: -
+
+AppModule > UsersModule
+  providers: ThrowingService
+  exports: ThrowingService
+  imports: -
+
+AppModule > AdminModule
+  providers: Logger
+  exports: -
+  imports: UsersModule
+
+AppModule
+  providers: -
+  exports: -
+  imports: CoreModule, UsersModule, AdminModule
+"
+`;

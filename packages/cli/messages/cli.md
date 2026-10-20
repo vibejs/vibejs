@@ -148,6 +148,36 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 
 - Fix the reported error and run `vibejs build` again.
 
+## VIBE8501: App module failed to load
+
+> Could not load `server/src/app.module.ts`: {reason}.
+
+`vibejs di` and `vibejs request` (when no dev server runs) load `server/src/app.module.ts` and the project's `@vibejs-org/server` in process. Importing the module, or creating the application for a request, threw an error that has no VIBE code of its own; an error with a code is reported as itself.
+
+### Fix
+
+- Fix the error at the reported location, then run the command again.
+
+## VIBE8502: Request failed
+
+> The request to `{url}` could not be made: {reason}.
+
+A `vibejs dev` server is running for this project, so `vibejs request` sends the request to it, but the server did not answer. It may have stopped or crashed while the request was on its way.
+
+### Fix
+
+- Start the dev server again with `vibejs dev`, or stop it so the request runs in process.
+
+## VIBE8503: Invalid request input
+
+> Invalid request input: {reason}.
+
+`vibejs request <METHOD> <path>` takes a path that starts with `/`, a `--data` body that is JSON (inline, or `@file` read relative to the current directory) and only for methods that take a body, and `-H` headers written as `Name: value`.
+
+### Fix
+
+- Pass `--data` as JSON or `@file`, and `-H` as `Name: value`.
+
 ## VIBE8601: Malformed agent rules markers
 
 > {file} has {problem}; vibejs agents sync only edits text between one BEGIN and one END marker.

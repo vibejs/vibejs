@@ -18,10 +18,9 @@ import {
 } from 'vite';
 import { vibeError } from '../errors.gen.ts';
 import { envelopeError } from '../output.ts';
+import { APP_MODULE, loadAppModule } from './app-module.ts';
 import type { DevHealth } from './lock.ts';
 import type { DevLog, LogEntry } from './log.ts';
-
-const APP_MODULE = 'server/src/app.module.ts';
 
 const isCode = (value: unknown): value is ErrorCode =>
   typeof value === 'string' && /^VIBE\d{4}$/.test(value);
@@ -65,7 +64,7 @@ export function viteLogger(root: string, log: DevLog, base: Logger): Logger {
 /** A logger of the project's `@vibejs-org/server` that writes `source: 'server'` entries. */
 export function serverLogger(
   Base: typeof Server.Logger,
-  log: DevLog,
+  log: Pick<DevLog, 'write'>,
   fields: Server.LogFields = {},
 ): Server.Logger {
   const write = (level: LogEntry['level'], msg: string, more?: Server.LogFields) => {
@@ -133,24 +132,10 @@ export function vibejsDev(o: {
       await app?.close();
       app = undefined;
       runner.clearCache();
-      const mod: Record<string, unknown> = await runner.import(join(o.root, APP_MODULE));
-      const { AppModule, appOptions } = mod;
-      if (typeof AppModule !== 'function' || typeof appOptions !== 'object' || !appOptions) {
-        const names = Object.keys(mod);
-        const found = names.length ? `the exports ${names.join(', ')}` : 'no exports';
-        throw vibeError('VIBE8202', { found });
-      }
-      const options: Server.AppOptions = appOptions;
-      // The UI is served at the root, so a root-mounted backend would shadow it.
-      if (!options.basePath) throw vibeError('VIBE8205');
-      const server: typeof Server = await runner.import('@vibejs-org/server');
+      const { server, AppModule, appOptions } = await loadAppModule(runner, o.root);
       const logger = serverLogger(server.Logger, o.log);
-      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- create() rejects a class that is not a module
-      app = await server.VibeFactory.create(AppModule as Server.ModuleImport, {
-        ...options,
-        logger,
-      });
-      basePath = options.basePath;
+      app = await server.VibeFactory.create(AppModule, { ...appOptions, logger });
+      ({ basePath } = appOptions);
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Vite middlewares receive HTTP/1 requests
       handler = toNodeHandler(app.fetch) as NodeHttp1Handler;
       failure = undefined;
