@@ -1,8 +1,24 @@
-import { analyzeScript, compile, parse } from '@vibejs-org/compiler';
-import { describe, expect, it } from 'vitest';
+import {
+  analyzeScript,
+  compile,
+  forEachIdentifier,
+  identifiersOf,
+  parse,
+} from '@vibejs-org/compiler';
+import { describe, expect, it, vi } from 'vitest';
 import { CODEGEN, codegen, compiler } from '../test/fixtures.ts';
 import { formatSpans } from './dump.ts';
+import { UNKNOWN } from './expression.ts';
 import { generate } from './generate.ts';
+
+vi.mock('@vibejs-org/compiler', async (original) => {
+  const real = await original<typeof import('@vibejs-org/compiler')>();
+  return {
+    ...real,
+    forEachIdentifier: vi.fn<typeof real.forEachIdentifier>(real.forEachIdentifier),
+    identifiersOf: vi.fn<typeof real.identifiersOf>(real.identifiersOf),
+  };
+});
 
 describe('codegen fixtures', () => {
   it.each(codegen)('%s', async (name, source) => {
@@ -10,6 +26,24 @@ describe('codegen fixtures', () => {
     const dir = `${CODEGEN}/${name.slice(0, name.lastIndexOf('/'))}`;
     await expect(file.text).toMatchFileSnapshot(`${dir}/virtual.ts`);
     await expect(`${formatSpans(file, source)}\n`).toMatchFileSnapshot(`${dir}/spans.txt`);
+  });
+});
+
+describe('batched parse', () => {
+  it.each([
+    ...codegen,
+    [
+      'Dynamic.vibe',
+      `<script setup lang="ts">\nconst a = 'k'\n</script>\n<template><p :[a||b]="a + 1" @[a&&b]="a()"></p></template>\n`,
+    ],
+  ])('%s parses its walked texts in one batch', (name, source) => {
+    vi.mocked(forEachIdentifier).mockClear();
+    vi.mocked(identifiersOf).mockClear();
+    generate(name, source);
+    expect(vi.mocked(identifiersOf).mock.calls.length).toBeLessThanOrEqual(1);
+    // Only the shorthand probes, built on demand, are parsed one by one.
+    const alone = vi.mocked(forEachIdentifier).mock.calls.map(([text]) => text);
+    expect(alone.filter((t) => !t.startsWith('0, ') && !t.includes(UNKNOWN))).toStrictEqual([]);
   });
 });
 

@@ -144,8 +144,8 @@ const slotTemplate = (node: TemplateChildNode) =>
 const PLAIN = new Set(['if', 'else-if', 'show', 'bind', 'on', 'html', 'text', 'model']);
 
 /**
- * The texts that `children` walks, as it wraps them: plain, `(x) = 0` targets and `[x] = []`
- * aliases. They are parsed together before the walk.
+ * The texts that `children` walks, as it wraps them: plain, `(x) = 0` targets, `[x] = []` aliases
+ * and the dynamic arguments of `v-bind`. They are parsed together before the walk.
  */
 export function walkedTexts(nodes: TemplateChildNode[], source: string): string[] {
   const texts: string[] = [];
@@ -167,6 +167,10 @@ export function walkedTexts(nodes: TemplateChildNode[], source: string): string[
       } else if (prop.name === 'slot') alias(prop.exp);
       else if (PLAIN.has(prop.name)) texts.push(text(prop.exp!));
       if (prop.name === 'model') texts.push(`(${text(prop.exp!)}) = 0`);
+      if (prop.name === 'bind' && prop.arg?.isStatic === false) {
+        const [start, end] = range(prop.arg);
+        texts.push(source.slice(start + 1, end - 1));
+      }
     }
     node.children.forEach(visit);
   };

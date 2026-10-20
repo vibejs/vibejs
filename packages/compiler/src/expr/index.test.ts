@@ -136,6 +136,14 @@ describe('identifiersOf', () => {
     ]);
   });
 
+  it('parses a batch once when a text ends in a line comment', () => {
+    const batch = ['a // b', ...Array.from({ length: 50 }, (_, i) => `x${i}`)];
+    const expected = batch.map(alone);
+    vi.mocked(parseSync).mockClear();
+    expect(identifiersOf(batch)).toStrictEqual(expected);
+    expect(parseSync).toHaveBeenCalledOnce();
+  });
+
   it('returns nothing for no texts', () => {
     expect(identifiersOf([])).toStrictEqual([]);
     expect(parseSync).not.toHaveBeenCalled();

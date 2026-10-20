@@ -62,12 +62,13 @@ export function identifiersOf(texts: readonly string[]): Ref[][] {
   const alone = new Set<number>();
   let batch = texts.map((_, i) => i);
   while (batch.length > 0) {
-    // Each text is a statement `(text);`, wrapped as `forEachIdentifier` wraps it, one per line.
+    // Each text is a statement `(text\n);`, wrapped as `forEachIdentifier` wraps it. The line break
+    // ends a trailing line comment inside the text's own slot.
     const starts: number[] = [];
     let code = '';
     for (const i of batch) {
       starts.push(code.length);
-      code += `(${texts[i]});\n`;
+      code += `(${texts[i]}\n);\n`;
     }
     const { program, errors, module } = parseSync('e.ts', code, PARSE_OPTIONS);
     const root: Node = { ...program };
@@ -97,7 +98,7 @@ export function identifiersOf(texts: readonly string[]): Ref[][] {
       const whole =
         !placed.has(slot) &&
         statement.start === starts[slot] &&
-        statement.end === starts[slot] + texts[batch[slot]].length + 3;
+        statement.end === starts[slot] + texts[batch[slot]].length + 4;
       const node = whole ? children(statement, 'expression')[0] : undefined;
       placed.set(slot, node && node.start > starts[slot] ? node : undefined);
     }

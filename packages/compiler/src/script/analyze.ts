@@ -249,7 +249,6 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
   // Everything else that reads the whole tree: misplaced macros, `await`, template refs.
   const byValue = new Map<Node, string>();
   const wrapped = new Set<Node>();
-  /** `fns` is the number of functions around `n`. */
   /** A call by the name of its callee. */
   const scanCall = (n: Node, callee: Node, name: string) => {
     const args = children(n, 'arguments');
@@ -271,6 +270,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
     }
     if (imported.has(name) && args[0]?.type === 'Identifier') byValue.set(args[0], name);
   };
+  /** `fns` is the number of functions around `n`. */
   const scan = (n: Node, fns: number): void => {
     const callee = n.type === 'CallExpression' ? first(n, 'callee')! : undefined;
     const name = str(callee);
