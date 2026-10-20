@@ -3,7 +3,8 @@
 // the real tsc and the .vibe content mapper, and prints each diagnostic as
 // `page.md:line:col TSnnnn message`. Exits 1 on any diagnostic. Hidden setup above `// ---cut---`
 // is checked too; intentional errors use `// @ts-expect-error`. A fence titled with a file path
-// (```vibe [ui/src/App.vibe]) is a file of an app, checked in that app by the tutorial test.
+// (```vibe [ui/src/App.vibe]) is a file of an app: only the tutorial has them, and the tutorial
+// test checks them in a real app.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -34,15 +35,25 @@ const VIBE_MODULE = `declare module '*.vibe' {
 `;
 const DIAGNOSTIC = /^(?:.*[\\/])?(\d+)\.(?:ts|vibe)\((\d+),(\d+)\): error (TS\d+): (.*)$/;
 
+/** The page whose `[file]`-titled fences the tutorial test runs. */
+const TUTORIAL = 'guides/tutorial.md';
+
 /**
  * The `ts` and `vibe` fences without a `[file]` title: the info string's leading language name,
- * as VitePress reads it, is `ts` or `vibe`.
+ * as VitePress reads it, is `ts` or `vibe`. A titled one outside the tutorial throws, since
+ * nothing would check it.
  */
 export function extractSnippets(md: string, file: string): Snippet[] {
   const lines = md.split('\n');
   return fences(lines).flatMap((fence) => {
     const ext = /^[\w-]*/.exec(fence.info)![0];
-    if ((ext !== 'ts' && ext !== 'vibe') || /\[[^\]]+\]/.test(fence.info)) return [];
+    if (ext !== 'ts' && ext !== 'vibe') return [];
+    if (/\[[^\]]+\]/.test(fence.info)) {
+      if (file === TUTORIAL) return [];
+      throw new Error(
+        `${file}:${fence.open + 1}: a [file]-titled ${ext} fence is checked only in ${TUTORIAL}`,
+      );
+    }
     const code = lines.slice(fence.open + 1, fence.close).join('\n');
     return [{ file, mdLine: fence.open + 1, ext, code }];
   });

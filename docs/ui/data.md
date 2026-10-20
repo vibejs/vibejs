@@ -22,6 +22,25 @@ The todo page of the example app loads one todo by the id in the URL:
 
 `API` is the injection key under which the app provides its client.
 
+`loading` and `refresh()` show progress and load again on demand:
+
+```vibe
+<script setup lang="ts">
+import { useAsync } from '@vibejs-org/ui';
+
+const { data, loading, refresh } = useAsync(async (signal) => {
+  const res = await fetch('/api/health', { signal });
+  return (await res.json()) as { status: string };
+});
+</script>
+
+<template>
+  <p v-if="loading">Loading…</p>
+  <p v-else>Status: {{ data?.status ?? 'unknown' }}</p>
+  <button type="button" :disabled="loading" @click="refresh()">Reload</button>
+</template>
+```
+
 ## Tracking and reruns
 
 `fn` runs again when a reactive value that it read **before its first `await`** changes. Above, `route.params.id` is read synchronously, so moving from `/todos/1` to `/todos/2` loads the new todo while the page stays on screen. A value read after an `await` is not tracked: read every input first, then await.

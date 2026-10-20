@@ -105,6 +105,9 @@ function toPage(path: string, markdown: string): Page {
   }
   const title = meta.get('title') ?? heading(markdown.replace(FRONTMATTER, '').split('\n')) ?? path;
   const order = meta.has('order') ? Number(meta.get('order')) : undefined;
+  if (order !== undefined && !Number.isFinite(order)) {
+    throw new Error(`${path}.md: frontmatter order must be a number, not ${meta.get('order')}`);
+  }
   return { path, title, description: meta.get('description'), order, markdown };
 }
 
@@ -123,14 +126,16 @@ const REGION = /^\s*(?:\/\/|<!--)\s*#(end)?region\b\s*([\w-]*)\s*(?:-->)?\s*$/;
 /**
  * Replaces each `<<< @/<path>[#region][{lang}]` line (`@` is docsDir) with a fenced block of the
  * file, or of the lines between its `#region <name>` and `#endregion <name>` markers, without any
- * marker line. The language is `{lang}`, else the file extension. `page` names the page in errors.
+ * marker line and dedented, as VitePress renders it; a `<<<` line inside a fence stays. The language
+ * is `{lang}`, else the file extension. `page` names the page in errors.
  */
 export function expandIncludes(md: string, docsDir: string, page: string): string {
-  return md
-    .split('\n')
-    .map((line) => {
+  const all = md.split('\n');
+  const fenced = fences(all);
+  return all
+    .map((line, i) => {
       const [, path, region, lang] = INCLUDE.exec(line) ?? [];
-      if (!path) return line;
+      if (!path || fenced.some(({ open, close }) => i > open && i <= close)) return line;
       const file = join(docsDir, path);
       if (!existsSync(file)) throw new Error(`${page}: no file ${path} to include`);
       let lines = readFileSync(file, 'utf8')
@@ -147,6 +152,10 @@ export function expandIncludes(md: string, docsDir: string, page: string): strin
           throw new Error(`${page}: no region ${region} in ${path} to include`);
         }
         lines = lines.slice(start + 1, stop).filter((l) => !REGION.test(l));
+        const indent = Math.min(
+          ...lines.filter((l) => l.trim()).map((l) => /^[ \t]*/.exec(l)![0].length),
+        );
+        lines = lines.map((l) => l.slice(indent));
       }
       const code = lines.join('\n');
       const ticks = '`'.repeat(

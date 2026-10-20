@@ -87,18 +87,22 @@ vibejs docs template type error
 - `vibejs request GET /api/users` calls a route through the running server, or in process when none runs;
 - `vibejs di` shows the modules and providers of the server.
 
+`vibejs routes` lists the API routes and the UI routes, and `vibejs components` lists the `.vibe` components with their props, models and type arguments. Neither needs a running dev server.
+
 ## MCP
 
 `vibejs mcp` serves the commands to an agent as [MCP](https://modelcontextprotocol.io) tools over stdio. Each tool answers like its `--json` command:
 
-| Tool           | Command                                   |
-| -------------- | ----------------------------------------- |
-| `get_errors`   | `vibejs errors`                           |
-| `get_logs`     | `vibejs logs`                             |
-| `get_di_graph` | `vibejs di`                               |
-| `check`        | `vibejs check`                            |
-| `request`      | `vibejs request`                          |
-| `explain`      | `vibejs docs`: a code, a page or a search |
+| Tool                 | Command                                   |
+| -------------------- | ----------------------------------------- |
+| `get_errors`         | `vibejs errors`                           |
+| `get_logs`           | `vibejs logs`                             |
+| `get_routes`         | `vibejs routes`                           |
+| `get_di_graph`       | `vibejs di`                               |
+| `get_component_tree` | `vibejs components`                       |
+| `check`              | `vibejs check`                            |
+| `request`            | `vibejs request`                          |
+| `explain`            | `vibejs docs`: a code, a page or a search |
 
 With `--read-only`, the `request` tool accepts only `GET`, `HEAD` and `OPTIONS`.
 

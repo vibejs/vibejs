@@ -17,17 +17,17 @@ import {
   temp,
   type Packs,
 } from '../../packages/create-vibejs/test/scaffold.ts';
+import { fences } from './docs.ts';
 import { tutorialSteps, type TutorialStep } from './tutorial.ts';
 
 const TUTORIAL = fileURLToPath(new URL('../guides/tutorial.md', import.meta.url));
-const steps = tutorialSteps(readFileSync(TUTORIAL, 'utf8'));
+const MD = readFileSync(TUTORIAL, 'utf8');
+const steps = tutorialSteps(MD);
 // JSON results and dev events, as an agent sees them.
 const AGENT = { VIBEJS_AGENT: '1' };
 
 let tarballs: Packs['tarballs'];
 let cwd: string;
-/** The file of the last `write` step. */
-let written = '';
 
 beforeAll(() => {
   ({ tarballs } = pack());
@@ -69,34 +69,44 @@ async function serve(command: string) {
   }
 }
 
-/** Runs a command; with exit code 1, also whether a TS2322 points into the file written last. */
+/** The lines of the ```txt fence that follows the 1-based line `mdLine`: the output the page shows. */
+function shownOutput(mdLine: number): string[] {
+  const lines = MD.split('\n');
+  const next = fences(lines).find((fence) => fence.open >= mdLine);
+  if (next?.info !== 'txt') throw new Error(`tutorial.md:${mdLine}: no txt output after the step`);
+  return lines.slice(next.open + 1, next.close);
+}
+
+/** Runs a command: its exit code and its errors as `vibejs check` prints them (first lines). */
 function runStep(command: string) {
   const [, name] = /^pnpm create vibejs (\S+)$/.exec(command) ?? [];
   const [, dir] = /^cd (\S+)$/.exec(command) ?? [];
   if (name) {
     scaffold(join(cwd, name), 'pnpm');
     installPnpm(join(cwd, name), tarballs);
-    return { status: 0, typeError: false };
+    return { status: 0, errors: [] };
   }
   if (dir) {
     cwd = join(cwd, dir);
-    return { status: 0, typeError: false };
+    return { status: 0, errors: [] };
   }
   const [cmd, ...args] = command.split(' ');
   const r = run(cmd, args, cwd, AGENT);
   if (r.status !== 0 && r.status !== 1) throw new Error(`${command}: ${r.stdout}\n${r.stderr}`);
-  const { diagnostics = [] }: { diagnostics?: { code: string; loc: string }[] } = JSON.parse(
+  const {
+    diagnostics = [],
+  }: { diagnostics?: Record<'code' | 'loc' | 'message' | 'severity', string>[] } = JSON.parse(
     r.stdout,
   );
-  const at = new RegExp(`^${written}:\\d+:\\d+$`);
-  const typeError = diagnostics.some((d) => d.code === 'TS2322' && at.test(d.loc));
-  return { status: r.status, typeError };
+  const errors = diagnostics
+    .filter((d) => d.severity === 'error')
+    .map((d) => `${d.loc}  error  ${d.code}  ${d.message.split('\n')[0]}`);
+  return { status: r.status, errors };
 }
 
 async function perform(step: TutorialStep) {
   if (step.kind === 'run') return runStep(step.command);
   if (step.kind === 'serve') return serve(step.command);
-  written = step.file;
   mkdirSync(dirname(join(cwd, step.file)), { recursive: true });
   writeFileSync(join(cwd, step.file), step.code);
   return readFileSync(join(cwd, step.file), 'utf8');
@@ -104,7 +114,7 @@ async function perform(step: TutorialStep) {
 
 const expected = (step: TutorialStep) =>
   step.kind === 'run'
-    ? { status: step.exit, typeError: step.exit === 1 }
+    ? { status: step.exit, errors: step.exit === 1 ? shownOutput(step.mdLine) : [] }
     : step.kind === 'serve'
       ? { ready: true, health: [200, { status: 'ok' }], users: [200, []] }
       : step.code;

@@ -13,11 +13,6 @@ describe('extractSnippets', () => {
     ['meta after ts', '```ts {2}\na;\nb;\n```', [{ mdLine: 1, code: 'a;\nb;' }]],
     ['highlighted lines without a space', '```ts{2}\na;\n```', [{ mdLine: 1, code: 'a;' }]],
     ['line numbers', '```ts:line-numbers {1}\na;\n```', [{ mdLine: 1, code: 'a;' }]],
-    [
-      'a file title (a file of an app, ignored)',
-      '```ts [a.ts]\na;\n```\n```vibe {1} [A.vibe]\n<template />\n```',
-      [],
-    ],
     ['a tilde fence', '~~~ts\na;\n~~~', [{ mdLine: 1, code: 'a;' }]],
     [
       'a longer closing fence, not a shorter or other marker or an info string',
@@ -47,6 +42,15 @@ describe('extractSnippets', () => {
   ])('handles %s', (_, md, expected) => {
     expect(extractSnippets(md, 'guide.md')).toEqual(
       expected.map((snippet) => ({ file: 'guide.md', ext: 'ts', ...snippet })),
+    );
+  });
+
+  it('skips [file]-titled fences on the tutorial and throws on them elsewhere', () => {
+    const md =
+      '```sh [a.sh]\nls\n```\n```ts [a.ts]\na;\n```\n```vibe {1} [A.vibe]\n<template />\n```';
+    expect(extractSnippets(md, 'guides/tutorial.md')).toEqual([]);
+    expect(() => extractSnippets(md, 'guide.md')).toThrow(
+      'guide.md:4: a [file]-titled ts fence is checked only in guides/tutorial.md',
     );
   });
 });

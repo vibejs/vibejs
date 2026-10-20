@@ -96,6 +96,11 @@ describe('loadSource', () => {
     expect(loadSource(tmp).map((p) => p.order)).toEqual([2, undefined]);
   });
 
+  it('throws on a non-numeric frontmatter order, naming the page', () => {
+    writeFileSync(join(tmp, 'a.md'), '---\norder: first\n---\n');
+    expect(() => loadSource(tmp)).toThrow('a.md: frontmatter order must be a number, not first');
+  });
+
   it('unescapes single-quoted frontmatter', () => {
     writeFileSync(join(tmp, 'q.md'), "---\ntitle: 'It''s here'\n- not a key\n---\n");
     expect(loadSource(tmp)[0].title).toBe("It's here");
@@ -161,8 +166,8 @@ describe('expandIncludes', () => {
       '```ts\nconst b = 2;\nconst c = 3;\n```',
     ],
     ['a nested region', '<<< @/src/flags.ts#inner', '```ts\nconst c = 3;\n```'],
-    ['an HTML comment region', '<<< @/src/App.vibe#body', '```vibe\n  <p>Hi</p>\n```'],
-    ['a {lang} override', '<<< @/src/App.vibe#body{html}', '```html\n  <p>Hi</p>\n```'],
+    ['an HTML comment region, dedented', '<<< @/src/App.vibe#body', '```vibe\n<p>Hi</p>\n```'],
+    ['a {lang} override', '<<< @/src/App.vibe#body{html}', '```html\n<p>Hi</p>\n```'],
     [
       'a file with fences, in a longer fence',
       '<<< @/src/ticks.md',
@@ -177,8 +182,18 @@ describe('expandIncludes', () => {
   it('resolves @ against docsDir, also to files outside it', () => {
     mkdirSync(join(tmp, 'docs'));
     expect(expandIncludes('<<< @/../src/App.vibe#body', join(tmp, 'docs'), 'p.md')).toBe(
-      '```vibe\n  <p>Hi</p>\n```',
+      '```vibe\n<p>Hi</p>\n```',
     );
+  });
+
+  it('dedents a region by its least indented non-blank line', () => {
+    writeFileSync(join(tmp, 'src/i.ts'), '// #region r\n    a;\n\n  b;\n// #endregion r\n');
+    expect(expandIncludes('<<< @/src/i.ts#r', tmp, 'p.md')).toBe('```ts\n  a;\n\nb;\n```');
+  });
+
+  it('leaves <<< lines inside fences as they are', () => {
+    const md = '````md\n<<< @/src/nope.ts\n````\n~~~\n<<< @/src/nope.ts\n~~~';
+    expect(expandIncludes(md, tmp, 'p.md')).toBe(md);
   });
 
   it('leaves other lines, and <<< lines in other forms, as they are', () => {
