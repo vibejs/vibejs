@@ -5,8 +5,8 @@
 //                    compressed docs index line of the AGENTS.md block
 //   llms <outDir>    writes llms.txt and llms-full.txt, error pages included
 import { execFileSync } from 'node:child_process';
-import { globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, posix, sep } from 'node:path';
+import { existsSync, globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, extname, join, posix, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DOCS_BASE } from '@vibejs-org/errors';
 
@@ -15,6 +15,8 @@ export interface Page {
   path: string;
   title: string;
   description?: string;
+  /** The place in its sidebar group, from frontmatter `order`. */
+  order?: number;
   markdown: string;
 }
 
@@ -102,7 +104,11 @@ function toPage(path: string, markdown: string): Page {
     }
   }
   const title = meta.get('title') ?? heading(markdown.replace(FRONTMATTER, '').split('\n')) ?? path;
-  return { path, title, description: meta.get('description'), markdown };
+  const order = meta.has('order') ? Number(meta.get('order')) : undefined;
+  if (order !== undefined && !Number.isFinite(order)) {
+    throw new Error(`${path}.md: frontmatter order must be a number, not ${meta.get('order')}`);
+  }
+  return { path, title, description: meta.get('description'), order, markdown };
 }
 
 /** Every `*.md` page under docsDir outside `EXCLUDE`, sorted by path; `errors/**` only on request. */
@@ -112,6 +118,76 @@ export function loadSource(docsDir: string, o: { errors?: boolean } = {}): Page[
     .map((file) => file.replaceAll(sep, '/'))
     .toSorted()
     .map((file) => toPage(file.slice(0, -3), readFileSync(join(docsDir, file), 'utf8')));
+}
+
+const INCLUDE = /^<<< @\/([^#{\s]+)(?:#([\w-]+))?(?:\{(\w+)\})?\s*$/;
+const REGION = /^\s*(?:\/\/|<!--)\s*#(end)?region\b\s*([\w-]*)\s*(?:-->)?\s*$/;
+
+/**
+ * Replaces each `<<< @/<path>[#region][{lang}]` line (`@` is docsDir) with a fenced block of the
+ * file, or of the lines between its `#region <name>` and `#endregion <name>` markers, without any
+ * marker line and dedented, as VitePress renders it; a `<<<` line inside a fence stays. The language
+ * is `{lang}`, else the file extension. `page` names the page in errors.
+ */
+export function expandIncludes(md: string, docsDir: string, page: string): string {
+  const all = md.split('\n');
+  const fenced = fences(all);
+  return all
+    .map((line, i) => {
+      const [, path, region, lang] = INCLUDE.exec(line) ?? [];
+      if (!path || fenced.some(({ open, close }) => i > open && i <= close)) return line;
+      const file = join(docsDir, path);
+      if (!existsSync(file)) throw new Error(`${page}: no file ${path} to include`);
+      let lines = readFileSync(file, 'utf8')
+        .replace(/\r?\n$/, '')
+        .split(/\r?\n/);
+      if (region) {
+        const marker = (end: boolean) =>
+          lines.findIndex((l) => {
+            const m = REGION.exec(l);
+            return m?.[2] === region && (m[1] === 'end') === end;
+          });
+        const [start, stop] = [marker(false), marker(true)];
+        if (start === -1 || stop < start) {
+          throw new Error(`${page}: no region ${region} in ${path} to include`);
+        }
+        lines = lines.slice(start + 1, stop).filter((l) => !REGION.test(l));
+        const indent = Math.min(
+          ...lines.filter((l) => l.trim()).map((l) => /^[ \t]*/.exec(l)![0].length),
+        );
+        lines = lines.map((l) => l.slice(indent));
+      }
+      const code = lines.join('\n');
+      const ticks = '`'.repeat(
+        Math.max(3, ...[...code.matchAll(/`+/g)].map(([m]) => m.length + 1)),
+      );
+      return `${ticks}${lang || extname(path).slice(1)}\n${code}\n${ticks}`;
+    })
+    .join('\n');
+}
+
+/** The sidebar groups in order; `guides/*` pages not named here go to 'Guides'. */
+const GROUPS: [text: string, member: (path: string) => boolean][] = [
+  ['Getting started', (p) => p === 'guides/getting-started' || p === 'guides/tutorial'],
+  ['UI', (p) => p.startsWith('ui/')],
+  ['Server', (p) => p.startsWith('server/')],
+  ['CLI and AI agents', (p) => p === 'guides/ai-agents' || p.startsWith('cli/')],
+  ['Guides', (p) => p.startsWith('guides/')],
+];
+
+/** The site sidebar: each page in the first of `GROUPS` it belongs to, by `order`, then path. */
+export function sidebar(
+  pages: readonly Page[],
+): { text: string; items: { text: string; link: string }[] }[] {
+  const groups = Map.groupBy(pages, (page) => GROUPS.findIndex(([, member]) => member(page.path)));
+  return GROUPS.flatMap(([text], i) => {
+    // Stable: pages without an order stay sorted by path, after those with one.
+    const last = Number.MAX_SAFE_INTEGER;
+    const items = sortBy(groups.get(i) ?? [], (page) => page.path)
+      .toSorted((a, b) => (a.order ?? last) - (b.order ?? last))
+      .map((page) => ({ text: page.title, link: `/${page.path.replace(/(^|\/)index$/, '$1')}` }));
+    return items.length ? [{ text, items }] : [];
+  });
 }
 
 /** Backtick and tilde fences of at least 3 markers, closed by the same marker at least as long. */
@@ -356,8 +432,15 @@ export function main(argv: string[], docsDir = DOCS, bin = BIN): number {
     console.error(USAGE);
     return 2;
   }
+  // The CLI bundle and llms-full.txt show the included code, as the site does.
+  const included = (pages: Page[]) =>
+    pages.map((page) => ({
+      ...page,
+      markdown: expandIncludes(page.markdown, docsDir, `${page.path}.md`),
+    }));
   if (command === 'llms') {
-    for (const [name, text] of Object.entries(llms(loadSource(docsDir, { errors: true })))) {
+    const pages = included(loadSource(docsDir, { errors: true }));
+    for (const [name, text] of Object.entries(llms(pages))) {
       write(join(outDir, name), text);
     }
     return 0;
@@ -370,7 +453,7 @@ export function main(argv: string[], docsDir = DOCS, bin = BIN): number {
   }
   // docs/cli/ is generated by the docs build: the bundle takes the reference from the bin itself.
   const pages = [
-    ...loadSource(docsDir).filter((page) => topDir(page.path) !== 'cli'),
+    ...included(loadSource(docsDir).filter((page) => topDir(page.path) !== 'cli')),
     ...[...cli].map(([path, text]) => toPage(path, text)),
   ];
   const index = docsIndex(pages);

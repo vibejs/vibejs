@@ -3,6 +3,7 @@ import { dirname } from 'node:path';
 import { isVibeError } from '@vibejs-org/errors';
 import { projectAgentFiles, syncAgentFiles } from '../agents.ts';
 import type { CommandDef } from '../command.ts';
+import { SSR_OPTIONS } from '../dev/app-module.ts';
 import { createDevLog, LOG_FILE, type LogEntry } from '../dev/log.ts';
 import { claimLock, readLiveLock, removeLock, writeLock } from '../dev/lock.ts';
 import { vibeError } from '../errors.gen.ts';
@@ -111,6 +112,7 @@ export const dev: CommandDef<DevResult> = {
           forwardConsole: { unhandledErrors: true, logLevels: ['error', 'warn'] },
         },
         plugins: [plugin],
+        ssr: SSR_OPTIONS,
       });
       // Vite exits on SIGTERM by itself; vibejs dev stops it and reports, as on SIGINT.
       for (const listener of process.listeners('SIGTERM').slice(sigterm)) {

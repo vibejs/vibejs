@@ -18,9 +18,11 @@ import {
   DISAMBIGUATION,
   docsIndex,
   EXCLUDE,
+  expandIncludes,
   llms,
   loadSource,
   main,
+  sidebar,
   SITE,
   stripCut,
   toAgentMarkdown,
@@ -88,6 +90,17 @@ describe('loadSource', () => {
     expect(pages.find((p) => p.path === 'errors/VIBE0001')?.title).toBe('Fixture error');
   });
 
+  it('reads a numeric frontmatter order', () => {
+    writeFileSync(join(tmp, 'a.md'), '---\norder: 2 # second\n---\n');
+    writeFileSync(join(tmp, 'b.md'), '# B\n');
+    expect(loadSource(tmp).map((p) => p.order)).toEqual([2, undefined]);
+  });
+
+  it('throws on a non-numeric frontmatter order, naming the page', () => {
+    writeFileSync(join(tmp, 'a.md'), '---\norder: first\n---\n');
+    expect(() => loadSource(tmp)).toThrow('a.md: frontmatter order must be a number, not first');
+  });
+
   it('unescapes single-quoted frontmatter', () => {
     writeFileSync(join(tmp, 'q.md'), "---\ntitle: 'It''s here'\n- not a key\n---\n");
     expect(loadSource(tmp)[0].title).toBe("It's here");
@@ -115,6 +128,132 @@ describe('loadSource', () => {
     writeFileSync(join(tmp, 'b.md'), `${fenced}\n# Real\n`);
     expect(loadSource(tmp).map((p) => p.title)).toEqual(['a', 'Real']);
     expect(toAgentMarkdown(loadSource(tmp)[0], 'package')).toMatch(/^# a\n/);
+  });
+});
+
+describe('expandIncludes', () => {
+  beforeEach(() => {
+    mkdirSync(join(tmp, 'src'));
+    writeFileSync(
+      join(tmp, 'src/flags.ts'),
+      [
+        'const a = 1;',
+        '// #region outer',
+        'const b = 2;',
+        '  // #region inner',
+        'const c = 3;',
+        '  // #endregion inner',
+        '// #endregion outer',
+        '',
+      ].join('\n'),
+    );
+    writeFileSync(
+      join(tmp, 'src/App.vibe'),
+      '<template>\n  <!-- #region body -->\n  <p>Hi</p>\n  <!-- #endregion body -->\n</template>\n',
+    );
+    writeFileSync(join(tmp, 'src/ticks.md'), 'Use:\n\n```sh\nls\n```\n');
+  });
+
+  it.each([
+    [
+      'a whole file',
+      '<<< @/src/flags.ts',
+      '```ts\nconst a = 1;\n// #region outer\nconst b = 2;\n  // #region inner\nconst c = 3;\n  // #endregion inner\n// #endregion outer\n```',
+    ],
+    [
+      'a // region, without nested markers',
+      '<<< @/src/flags.ts#outer',
+      '```ts\nconst b = 2;\nconst c = 3;\n```',
+    ],
+    ['a nested region', '<<< @/src/flags.ts#inner', '```ts\nconst c = 3;\n```'],
+    ['an HTML comment region, dedented', '<<< @/src/App.vibe#body', '```vibe\n<p>Hi</p>\n```'],
+    ['a {lang} override', '<<< @/src/App.vibe#body{html}', '```html\n<p>Hi</p>\n```'],
+    [
+      'a file with fences, in a longer fence',
+      '<<< @/src/ticks.md',
+      '````md\nUse:\n\n```sh\nls\n```\n````',
+    ],
+  ])('includes %s', (_, line, expected) => {
+    expect(expandIncludes(`Before\n${line}\nAfter`, tmp, 'p.md')).toBe(
+      `Before\n${expected}\nAfter`,
+    );
+  });
+
+  it('resolves @ against docsDir, also to files outside it', () => {
+    mkdirSync(join(tmp, 'docs'));
+    expect(expandIncludes('<<< @/../src/App.vibe#body', join(tmp, 'docs'), 'p.md')).toBe(
+      '```vibe\n<p>Hi</p>\n```',
+    );
+  });
+
+  it('dedents a region by its least indented non-blank line', () => {
+    writeFileSync(join(tmp, 'src/i.ts'), '// #region r\n    a;\n\n  b;\n// #endregion r\n');
+    expect(expandIncludes('<<< @/src/i.ts#r', tmp, 'p.md')).toBe('```ts\n  a;\n\nb;\n```');
+  });
+
+  it('leaves <<< lines inside fences as they are', () => {
+    const md = '````md\n<<< @/src/nope.ts\n````\n~~~\n<<< @/src/nope.ts\n~~~';
+    expect(expandIncludes(md, tmp, 'p.md')).toBe(md);
+  });
+
+  it('leaves other lines, and <<< lines in other forms, as they are', () => {
+    const md = '<<< ./src/flags.ts\n  <<< @/src/flags.ts\ntext <<< @/src/flags.ts';
+    expect(expandIncludes(md, tmp, 'p.md')).toBe(md);
+  });
+
+  it.each([
+    ['a missing file', '<<< @/src/nope.ts', 'guides/p.md: no file src/nope.ts to include'],
+    [
+      'a missing region',
+      '<<< @/src/flags.ts#nope',
+      'guides/p.md: no region nope in src/flags.ts to include',
+    ],
+    [
+      'a region without its end',
+      '<<< @/src/flags.ts#open',
+      'guides/p.md: no region open in src/flags.ts to include',
+    ],
+  ])('throws on %s, naming the page and the path', (_, line, message) => {
+    writeFileSync(join(tmp, 'src/flags.ts'), '// #region open\nx;\n');
+    expect(() => expandIncludes(line, tmp, 'guides/p.md')).toThrow(message);
+  });
+});
+
+describe('sidebar', () => {
+  const pages = [
+    'index',
+    'errors/VIBE0001',
+    'zeta/notes',
+    'cli/index',
+    'cli/check',
+    'guides/tutorial',
+    'guides/getting-started',
+    'guides/ai-agents',
+    'guides/extending',
+    'guides/coming-from-x',
+    'server/modules',
+    'server/index',
+  ].map((path, i): Page => ({
+    path,
+    title: `Title ${i}`,
+    markdown: '',
+    order: {
+      'guides/getting-started': 1,
+      'guides/tutorial': 2,
+      'guides/ai-agents': 1,
+      'server/modules': 1,
+    }[path],
+  }));
+
+  it('groups the pages in the fixed order, by order and then path, without error, landing or other pages', () => {
+    expect(sidebar(pages)).toMatchSnapshot();
+  });
+
+  it('leaves out empty groups', () => {
+    expect(sidebar(pages.filter((p) => p.path.startsWith('server/'))).map((g) => g.text)).toEqual([
+      'Server',
+    ]);
+    expect(sidebar([])).toEqual([]);
   });
 });
 
@@ -366,6 +505,18 @@ describe('main', () => {
     expect(main(['cli', out], FIXTURE, bin)).toBe(0);
     expect(files(out)).toEqual(['check.md', 'docs.md', 'explain.md', 'index.md']);
     expect(readFileSync(join(out, 'explain.md'), 'utf8')).toBe(cliPages(help).get('cli/explain'));
+  });
+
+  it('bundle and llms show the included code', () => {
+    const docs = join(tmp, 'docs');
+    cpSync(FIXTURE, docs, { recursive: true });
+    writeFileSync(join(docs, 'part.ts'), 'export const included = 1;\n');
+    writeFileSync(join(docs, 'zeta/notes.md'), '# Notes\n\n<<< @/part.ts\n');
+    expect(main(['bundle', join(tmp, 'bundle')], docs, bin)).toBe(0);
+    expect(main(['llms', join(tmp, 'llms')], docs, bin)).toBe(0);
+    const code = '```ts\nexport const included = 1;\n```';
+    expect(readFileSync(join(tmp, 'bundle/zeta/notes.md'), 'utf8')).toContain(code);
+    expect(readFileSync(join(tmp, 'llms/llms-full.txt'), 'utf8')).toContain(code);
   });
 
   it('bundle writes the agent pages, the CLI pages and index.txt, never errors/', () => {

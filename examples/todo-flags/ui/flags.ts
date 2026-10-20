@@ -10,6 +10,7 @@ import {
 } from '@vibejs-org/ui';
 import { flags } from '../contract/flags.contract.ts';
 
+// #region plugin
 export interface FlagsPluginOptions {
   /** Where the API is mounted; `/api` by default. */
   baseUrl?: string;
@@ -32,9 +33,12 @@ export const flagsPlugin =
       if (r.ok) state.value = r.data;
     });
   };
+// #endregion plugin
 
+// #region composable
 /** Whether the flag `name` is on; always `false` in an app without `flagsPlugin()`. */
 export function useFlag(name: string): Readonly<Ref<boolean>> {
   const state = inject(FLAGS, null);
   return computed(() => state?.value[name] === true);
 }
+// #endregion composable

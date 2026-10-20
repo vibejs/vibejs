@@ -16,30 +16,30 @@ description: Load data with useAsync, keep it in sync with the route, abort stal
 - `loading`: a ref that is `true` while a run is in progress.
 - `refresh()`: runs `fn` again; the promise resolves once that run is over and never rejects.
 
+The todo page of the example app loads one todo by the id in the URL:
+
+<<< @/../examples/todo/ui/src/pages/TodoPage.vibe
+
+`API` is the injection key under which the app provides its client.
+
+`loading` and `refresh()` show progress and load again on demand:
+
 ```vibe
 <script setup lang="ts">
-import { inject, useAsync } from '@vibejs-org/ui';
-import { useRoute } from '@vibejs-org/ui/router';
-import { API } from '../api.ts';
+import { useAsync } from '@vibejs-org/ui';
 
-const api = inject(API)!;
-const route = useRoute('todo');
-const { data, loading, refresh } = useAsync((signal) =>
-  api.todos.one({ params: { id: route.params.id } }, { signal }),
-);
+const { data, loading, refresh } = useAsync(async (signal) => {
+  const res = await fetch('/api/health', { signal });
+  return (await res.json()) as { status: string };
+});
 </script>
 
 <template>
   <p v-if="loading">Loading…</p>
-  <article v-else-if="data?.ok">
-    <h1>{{ data.data.title }}</h1>
-    <button type="button" @click="refresh()">Reload</button>
-  </article>
-  <p v-else-if="data" role="alert">{{ data.error.code }}</p>
+  <p v-else>Status: {{ data?.status ?? 'unknown' }}</p>
+  <button type="button" :disabled="loading" @click="refresh()">Reload</button>
 </template>
 ```
-
-`API` is the injection key under which the app provides its client.
 
 ## Tracking and reruns
 

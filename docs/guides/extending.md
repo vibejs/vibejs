@@ -1,6 +1,6 @@
 ---
 title: Extending vibe.js
-description: Package reusable server features as configurable modules, middleware, guards, interceptors, filters and metadata.
+description: Package reusable features as UI plugins and composables, and as configurable server modules, middleware, guards, interceptors, filters and metadata.
 ---
 
 # Extending vibe.js
@@ -90,4 +90,32 @@ See [Modules and providers](../server/modules.md) and [Middleware, guards, inter
 
 ## UI
 
-UI plugins with `app.use()` and provide/inject are documented together with the UI guides.
+### Plugins
+
+A plugin is a function that receives the app, or an object with an `install(app)` method. `app.use(plugin, ...options)` installs it once. A plugin provides values to every component with `app.provide()`, and registers cleanup with `app.onUnmount()`.
+
+The feature flags package of the example todo app exports a plugin factory: it takes options, loads the flags once, and provides them under a private injection key.
+
+<<< @/../examples/todo-flags/ui/flags.ts#plugin
+
+The application installs it next to the router:
+
+```ts
+import { createApp, type Component, type Plugin } from '@vibejs-org/ui';
+declare const App: Component;
+declare function flagsPlugin(): Plugin;
+// ---cut---
+createApp(App).use(flagsPlugin()).mount('#app');
+```
+
+### Provide and inject
+
+`app.provide(key, value)` makes a value available to every component of the app; `provide(key, value)` in a component's setup makes it available to that component's descendants. `inject(key)` reads the nearest one, and `inject(key, fallback)` returns `fallback` when nothing provides `key`. Type keys with `InjectionKey<T>`, a symbol that carries the type of its value, so `inject()` returns that type.
+
+### Composables
+
+A composable is a function that setup calls to reuse stateful logic: it may read injections, create refs and computed values, and register lifecycle hooks of the calling component. The flags package reads its injection in a composable, so components never see the key, and an app without the plugin gets `false` for every flag:
+
+<<< @/../examples/todo-flags/ui/flags.ts#composable
+
+A page then calls `useFlag('removeDone')` in its setup and uses the ref in its template.

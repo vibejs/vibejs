@@ -10,7 +10,9 @@
   "references": [
     { "path": "../packages/compiler" },
     { "path": "../packages/contract" },
+    { "path": "../packages/create-vibejs" },
     { "path": "../packages/errors" },
+    { "path": "../packages/language-tools" },
     { "path": "../packages/server" },
     { "path": "../packages/ui" }
   ]

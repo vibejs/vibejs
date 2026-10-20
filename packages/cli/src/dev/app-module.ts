@@ -6,6 +6,13 @@ import { vibeError } from '../errors.gen.ts';
 
 export const APP_MODULE = 'server/src/app.module.ts';
 
+/**
+ * The runner's SSR options: `@vibejs-org/server` keeps the decorator metadata in module state,
+ * so the app and `loadAppModule()` must share one instance. Vite externalizes an installed (not
+ * linked) package for the app's imports only, which would load a second one.
+ */
+export const SSR_OPTIONS: { noExternal: string[] } = { noExternal: ['@vibejs-org/server'] };
+
 export interface LoadedApp {
   server: typeof Server;
   AppModule: Server.ModuleImport;
@@ -51,6 +58,7 @@ export async function withServerRunner<T>(
     logLevel: 'silent',
     appType: 'custom',
     server: { middlewareMode: true, watch: null, ws: false },
+    ssr: SSR_OPTIONS,
   });
   const runner = createServerModuleRunner(vite.environments.ssr, { hmr: false });
   try {

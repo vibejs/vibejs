@@ -9,5 +9,5 @@
     "rootDir": "."
   },
   "references": [{ "path": "../cli" }, { "path": "../errors" }],
-  "include": ["bin.js", "*.test.ts", "package.json"]
+  "include": ["bin.js", "*.test.ts", "test/*.ts", "package.json"]
 }

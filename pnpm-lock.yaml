@@ -397,12 +397,18 @@ importers:
       '@vibejs-org/errors':
         specifier: workspace:*
         version: link:../packages/errors
+      '@vibejs-org/language-tools':
+        specifier: workspace:*
+        version: link:../packages/language-tools
       '@vibejs-org/server':
         specifier: workspace:*
         version: link:../packages/server
       '@vibejs-org/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      create-vibejs:
+        specifier: workspace:*
+        version: link:../packages/create-vibejs
       typescript:
         specifier: catalog:ts-next
         version: 7.1.0-dev.20261015.1

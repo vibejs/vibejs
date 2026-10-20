@@ -224,6 +224,67 @@ Source: https://vibejs.org/v0/errors/VIBE0001
 "
 `;
 
+exports[`sidebar > groups the pages in the fixed order, by order and then path, without error, landing or other pages 1`] = `
+[
+  {
+    "items": [
+      {
+        "link": "/guides/getting-started",
+        "text": "Title 6",
+      },
+      {
+        "link": "/guides/tutorial",
+        "text": "Title 5",
+      },
+    ],
+    "text": "Getting started",
+  },
+  {
+    "items": [
+      {
+        "link": "/server/modules",
+        "text": "Title 10",
+      },
+      {
+        "link": "/server/",
+        "text": "Title 11",
+      },
+    ],
+    "text": "Server",
+  },
+  {
+    "items": [
+      {
+        "link": "/guides/ai-agents",
+        "text": "Title 7",
+      },
+      {
+        "link": "/cli/check",
+        "text": "Title 4",
+      },
+      {
+        "link": "/cli/",
+        "text": "Title 3",
+      },
+    ],
+    "text": "CLI and AI agents",
+  },
+  {
+    "items": [
+      {
+        "link": "/guides/coming-from-x",
+        "text": "Title 9",
+      },
+      {
+        "link": "/guides/extending",
+        "text": "Title 8",
+      },
+    ],
+    "text": "Guides",
+  },
+]
+`;
+
 exports[`toAgentMarkdown > renders the fixture guide in both modes 1`] = `
 "# Getting: started
 
