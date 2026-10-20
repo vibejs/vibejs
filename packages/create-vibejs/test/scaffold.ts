@@ -1,7 +1,7 @@
 // Packs every package and scaffolds apps from the tarballs with the real bin, as a user would
 // after a release: the integration tests of create-vibejs and the docs tutorial share these.
 import { spawnSync } from 'node:child_process';
-import { appendFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -92,4 +92,19 @@ export function installPnpm(app: string, tarballs: Packs['tarballs']): void {
   const overrides = Object.entries(tarballs).map(([name, file]) => `  '${name}': file:${file}`);
   appendFileSync(join(app, 'pnpm-workspace.yaml'), `overrides:\n${overrides.join('\n')}\n`);
   must(run('pnpm', ['install'], app));
+}
+
+/** Points the `@vibejs-org/*` packages of an npm app at the tarballs and installs it. */
+export function installNpm(app: string, tarballs: Packs['tarballs']): void {
+  const file = join(app, 'package.json');
+  const pkg = JSON.parse(readFileSync(file, 'utf8'));
+  // npm accepts an override of a direct dependency only with the same spec. The keys stay
+  // sorted, as the app's formatter wants them.
+  const specs = Object.entries(tarballs).map(([name, tarball]) => [name, `file:${tarball}`]);
+  for (const [name, spec] of specs) {
+    for (const deps of [pkg.dependencies, pkg.devDependencies]) if (deps[name]) deps[name] = spec;
+  }
+  pkg.overrides = { ...Object.fromEntries(specs), ...pkg.overrides };
+  writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
+  must(run('npm', ['install', '--no-audit', '--no-fund'], app));
 }
