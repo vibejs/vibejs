@@ -23,7 +23,8 @@
     "vibejs": "./dist/bin.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/mcp-*.js"
   ],
   "type": "module",
   "sideEffects": false,
