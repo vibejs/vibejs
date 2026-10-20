@@ -55,7 +55,7 @@ export default defineConfig({
       },
       {
         // The built vibe() compiles `.vibe` imports. Loaded lazily: knip, `pnpm check` and the other
-        // projects load this config before the compiler's dist exists.
+        // projects load this config before the compiler's dist exists. Any other error is rethrown.
         plugins: [
           import('@vibejs-org/compiler/vite').then(
             ({ vibe }) => vibe(),

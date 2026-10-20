@@ -97,7 +97,14 @@ describe('main', () => {
   it('writes the snippets of every page but error pages, and the tsconfig', () => {
     expect(main(docs, fakeTsc('', 0))).toBe(0);
     const dir = join(docs, '.snippets');
-    expect(readdirSync(dir).toSorted()).toEqual(['0.ts', '1.ts', 'package.json', 'tsconfig.json']);
+    expect(readdirSync(dir).toSorted()).toEqual([
+      '0.ts',
+      '1.ts',
+      'package.json',
+      'tsconfig.json',
+      'vibe.d.ts',
+    ]);
+    expect(readFileSync(join(dir, 'vibe.d.ts'), 'utf8')).toContain("declare module '*.vibe'");
     expect(readFileSync(join(dir, '1.ts'), 'utf8')).toContain('// ---cut---\n');
     const tsconfig = JSON.parse(readFileSync(join(dir, 'tsconfig.json'), 'utf8'));
     expect(tsconfig).toMatchObject({

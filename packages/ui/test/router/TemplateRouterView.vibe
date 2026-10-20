@@ -1,0 +1,29 @@
+<script setup lang="ts">
+import { computed, inject, provide, type ComputedRef } from '@vibejs-org/ui';
+import { useRouter } from '@vibejs-org/ui/router';
+
+const router = useRouter();
+// The index in `matched` of this view, provided by the parent view.
+const depth = inject<ComputedRef<number> | null>('template-view-depth', null);
+const index = computed(() => {
+  const { matched } = router.currentRoute.value;
+  let i = depth?.value ?? 0;
+  while (matched[i] && !matched[i].component) i++;
+  return i;
+});
+provide(
+  'template-view-depth',
+  computed(() => index.value + 1),
+);
+const record = computed(() => router.currentRoute.value.matched[index.value]);
+const props = computed(() => {
+  const route = router.currentRoute.value;
+  const value = record.value?.props;
+  if (value === true) return route.params;
+  return typeof value === 'function' ? value(route) : value || {};
+});
+</script>
+
+<template>
+  <component :is="record?.component" v-bind="props" />
+</template>

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { links, page } from '../../test/router/components.ts';
 import { flushPromises, mount } from '../testing/mount.ts';
-import { RouterView } from './components.ts';
+import { RouterLink, RouterView } from './components.ts';
 import { createWebHistory } from './history.ts';
 import { createRouter } from './router.ts';
 import type { NavigationGuard, Router, RouterHistory } from './types.ts';
@@ -112,7 +112,7 @@ describe('createWebHistory in a browser', () => {
 
   it('leaves modified and middle clicks on a RouterLink to the browser', async () => {
     const { router } = await setup();
-    const nav = mount(links({ to: '/a' }), { plugins: [router] });
+    const nav = mount(links(RouterLink, { to: '/a' }), { plugins: [router] });
     const link = nav.get('a').element;
     let prevented: boolean[] = [];
     // Runs after the link's handler, and keeps the browser from opening a tab.

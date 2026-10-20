@@ -4,7 +4,13 @@ import App from './App.vibe';
 import { API, createApi } from './api.ts';
 import { routes } from './routes.ts';
 
-createApp(App)
-  .use(createRouter({ history: createWebHistory(), routes }))
-  .provide(API, createApi())
-  .mount('#app');
+const router = createRouter({ history: createWebHistory(), routes });
+
+// Types route names and params in every router API, RouterLink included.
+declare module '@vibejs-org/ui/router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+createApp(App).use(router).provide(API, createApi()).mount('#app');

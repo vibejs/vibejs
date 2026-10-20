@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import { RouterLink, RouterView, useRoute } from '@vibejs-org/ui/router'
+
+// Register types the params of a named route.
+const id: string = useRoute('user').params.id
+</script>
+
+<template>
+  <nav>
+    <RouterLink :to="{ name: 'user', params: { id: 1 } }">User 1</RouterLink>
+    <RouterLink to="/" class="nav" target="_blank">Home</RouterLink>
+  </nav>
+  <p>{{ id }}</p>
+  <RouterView />
+</template>

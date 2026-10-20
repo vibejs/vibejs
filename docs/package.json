@@ -6,11 +6,14 @@
     "build": "node ../scripts/errors.ts --docs errors && node scripts/docs.ts cli cli && node scripts/check-snippets.ts . && vitepress build && node scripts/docs.ts llms .vitepress/dist"
   },
   "devDependencies": {
+    "@vibejs-org/compiler": "workspace:*",
     "@vibejs-org/contract": "workspace:*",
     "@vibejs-org/errors": "workspace:*",
     "@vibejs-org/server": "workspace:*",
+    "@vibejs-org/ui": "workspace:*",
     "typescript": "catalog:ts-next",
     "valibot": "catalog:",
-    "vitepress": "catalog:"
+    "vitepress": "catalog:",
+    "vitest": "catalog:"
   }
 }

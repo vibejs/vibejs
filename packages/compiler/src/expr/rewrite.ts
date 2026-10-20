@@ -48,6 +48,8 @@ const INSTANCE = new Set([
   '$nextTick',
   '$watch',
   '$forceUpdate',
+  '$route',
+  '$router',
 ]);
 const CONTEXT: ReadonlyMap<string, string> = new Map([
   ['$attrs', '$ctx.attrs'],

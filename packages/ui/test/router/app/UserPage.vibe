@@ -1,0 +1,23 @@
+<script setup lang="ts">
+import { inject, ref, useAsync } from '@vibejs-org/ui';
+import { onBeforeRouteLeave, useRoute } from '@vibejs-org/ui/router';
+import { API } from './api.ts';
+
+const api = inject(API)!;
+const route = useRoute('user');
+const { data, loading } = useAsync((signal) =>
+  api.users.one({ params: { id: Number(route.params.id) } }, { signal }),
+);
+const draft = ref('');
+// Unsaved text keeps the page.
+onBeforeRouteLeave(() => draft.value === '');
+</script>
+
+<template>
+  <section>
+    <p v-if="loading" class="loading">Loading</p>
+    <h1 v-else-if="data?.ok">{{ data.data.name }}</h1>
+    <p v-else-if="data" class="error">{{ data.error.message }}</p>
+    <input v-model="draft" />
+  </section>
+</template>

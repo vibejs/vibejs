@@ -186,7 +186,10 @@ expectTypeOf(link.isActive).toEqualTypeOf<ComputedRef<boolean>>();
 expectTypeOf<ReturnType<typeof link.navigate>>().toEqualTypeOf<
   Promise<NavigationFailure | undefined>
 >();
-expectTypeOf<ComponentProps<typeof RouterLink>>().toEqualTypeOf<RouterLinkProps>();
+expectTypeOf<ComponentProps<typeof RouterLink>>().toExtend<RouterLinkProps>();
+// The attributes of `<a>` fall through.
+expectTypeOf<ComponentProps<typeof RouterLink>>().toHaveProperty('target');
+expectTypeOf<ComponentProps<typeof RouterLink>>().toHaveProperty('class');
 expectTypeOf<RouterLinkProps['to']>().toEqualTypeOf<RouteLocationRaw>();
 expectTypeOf<ComponentSlots<typeof RouterLink>>().toEqualTypeOf<{ default?: Slot<{}> }>();
 // RouterView takes no props.

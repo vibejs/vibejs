@@ -1,0 +1,13 @@
+<script setup lang="ts">
+import { RouterLink, RouterView } from '@vibejs-org/ui/router';
+</script>
+
+<template>
+  <div>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+      <RouterLink :to="{ name: 'user', params: { id: 1 } }">User 1</RouterLink>
+    </nav>
+    <main><RouterView /></main>
+  </div>
+</template>
