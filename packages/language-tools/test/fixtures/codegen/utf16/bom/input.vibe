@@ -1,0 +1,7 @@
+﻿<script setup lang="ts">
+const label = 'rocket'
+</script>
+
+<template>
+  <p>🚀 {{ label }} {{ label.toFixed() }}</p>
+</template>

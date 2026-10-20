@@ -6,11 +6,11 @@ type __VibeEmits = {};
 const __vibe_setup = { items };
 {
   const { items } = __vibe.unrefs(__vibe_setup);
-  const { alert, window, missing, fallback } = {};
-  __vibe.el(__vibe.tags.p)({ title: String(items.length), onClick: () => { alert(window.innerWidth) } });
+  const __vibe_unknown = {};
+  __vibe.el(__vibe.tags.p)({ title: String(items.length), onClick: () => { __vibe_unknown.alert(__vibe_unknown.window.innerWidth) } });
     (Math.max(...items));
-    ({ items, missing });
-  for (const [{ a = fallback }] of __vibe.vFor(items)) {
+    ({ items, missing: __vibe_unknown.missing });
+  for (const [{ a = __vibe_unknown.fallback }] of __vibe.vFor(items)) {
     __vibe.el(__vibe.tags.p)({ });
       (a);
   }

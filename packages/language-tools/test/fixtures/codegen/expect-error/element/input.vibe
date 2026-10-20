@@ -1,0 +1,9 @@
+<script setup lang="ts">
+const count = 1
+</script>
+
+<template>
+  <!-- @vibe-expect-error -->
+  <input :value="count" @input="count = $event">
+  <p :title="count" />
+</template>

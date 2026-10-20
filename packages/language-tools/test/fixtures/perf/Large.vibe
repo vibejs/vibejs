@@ -1,0 +1,300 @@
+<script setup lang="ts">
+import { computed, ref, useTemplateRef } from '@vibejs-org/ui'
+import Row from './Row.vibe'
+import Panel from './Panel.vibe'
+
+interface Item {
+  id: number
+  name: string
+  done: boolean
+  tags: string[]
+}
+
+const { title, limit = 10 } = defineProps<{ title: string; limit?: number }>()
+const emit = defineEmits<{ select: [id: number]; clear: [] }>()
+const query = defineModel<string>('query', { default: '' })
+const list = useTemplateRef('list')
+
+const items0 = ref<Item[]>([{ id: 0, name: 'item 0', done: false, tags: ['a'] }])
+const open0 = ref(false)
+const count0 = computed(() => items0.value.filter((item) => item.done).length)
+function toggle0(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items1 = ref<Item[]>([{ id: 1, name: 'item 1', done: false, tags: ['a'] }])
+const open1 = ref(false)
+const count1 = computed(() => items1.value.filter((item) => item.done).length)
+function toggle1(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items2 = ref<Item[]>([{ id: 2, name: 'item 2', done: false, tags: ['a'] }])
+const open2 = ref(false)
+const count2 = computed(() => items2.value.filter((item) => item.done).length)
+function toggle2(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items3 = ref<Item[]>([{ id: 3, name: 'item 3', done: false, tags: ['a'] }])
+const open3 = ref(false)
+const count3 = computed(() => items3.value.filter((item) => item.done).length)
+function toggle3(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items4 = ref<Item[]>([{ id: 4, name: 'item 4', done: false, tags: ['a'] }])
+const open4 = ref(false)
+const count4 = computed(() => items4.value.filter((item) => item.done).length)
+function toggle4(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items5 = ref<Item[]>([{ id: 5, name: 'item 5', done: false, tags: ['a'] }])
+const open5 = ref(false)
+const count5 = computed(() => items5.value.filter((item) => item.done).length)
+function toggle5(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items6 = ref<Item[]>([{ id: 6, name: 'item 6', done: false, tags: ['a'] }])
+const open6 = ref(false)
+const count6 = computed(() => items6.value.filter((item) => item.done).length)
+function toggle6(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items7 = ref<Item[]>([{ id: 7, name: 'item 7', done: false, tags: ['a'] }])
+const open7 = ref(false)
+const count7 = computed(() => items7.value.filter((item) => item.done).length)
+function toggle7(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items8 = ref<Item[]>([{ id: 8, name: 'item 8', done: false, tags: ['a'] }])
+const open8 = ref(false)
+const count8 = computed(() => items8.value.filter((item) => item.done).length)
+function toggle8(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const items9 = ref<Item[]>([{ id: 9, name: 'item 9', done: false, tags: ['a'] }])
+const open9 = ref(false)
+const count9 = computed(() => items9.value.filter((item) => item.done).length)
+function toggle9(item: Item): void {
+  item.done = !item.done
+  emit('select', item.id)
+}
+
+const label97 = 'x'
+const label98 = 'x'
+</script>
+
+<template>
+  <h1 ref="list">{{ title }} ({{ limit }})</h1>
+  <input v-model="query" @keydown.enter="emit('clear')">
+  <Panel :title="title" v-if="open0">
+    <template #header="{ count: n0 }">{{ n0 }} / {{ count0 }}</template>
+    <Row v-for="row0 in items0" :key="row0.id" :item="row0" @select="toggle0(row0)">
+      <span :class="{ done: row0.done }">{{ row0.name.toUpperCase() }}</span>
+      <input v-model="row0.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count0 > limit" @click="open0 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open1">
+    <template #header="{ count: n1 }">{{ n1 }} / {{ count1 }}</template>
+    <Row v-for="row1 in items1" :key="row1.id" :item="row1" @select="toggle1(row1)">
+      <span :class="{ done: row1.done }">{{ row1.name.toUpperCase() }}</span>
+      <input v-model="row1.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count1 > limit" @click="open1 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open2">
+    <template #header="{ count: n2 }">{{ n2 }} / {{ count2 }}</template>
+    <Row v-for="row2 in items2" :key="row2.id" :item="row2" @select="toggle2(row2)">
+      <span :class="{ done: row2.done }">{{ row2.name.toUpperCase() }}</span>
+      <input v-model="row2.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count2 > limit" @click="open2 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open3">
+    <template #header="{ count: n3 }">{{ n3 }} / {{ count3 }}</template>
+    <Row v-for="row3 in items3" :key="row3.id" :item="row3" @select="toggle3(row3)">
+      <span :class="{ done: row3.done }">{{ row3.name.toUpperCase() }}</span>
+      <input v-model="row3.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count3 > limit" @click="open3 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open4">
+    <template #header="{ count: n4 }">{{ n4 }} / {{ count4 }}</template>
+    <Row v-for="row4 in items4" :key="row4.id" :item="row4" @select="toggle4(row4)">
+      <span :class="{ done: row4.done }">{{ row4.name.toUpperCase() }}</span>
+      <input v-model="row4.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count4 > limit" @click="open4 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open5">
+    <template #header="{ count: n5 }">{{ n5 }} / {{ count5 }}</template>
+    <Row v-for="row5 in items5" :key="row5.id" :item="row5" @select="toggle5(row5)">
+      <span :class="{ done: row5.done }">{{ row5.name.toUpperCase() }}</span>
+      <input v-model="row5.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count5 > limit" @click="open5 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open6">
+    <template #header="{ count: n6 }">{{ n6 }} / {{ count6 }}</template>
+    <Row v-for="row6 in items6" :key="row6.id" :item="row6" @select="toggle6(row6)">
+      <span :class="{ done: row6.done }">{{ row6.name.toUpperCase() }}</span>
+      <input v-model="row6.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count6 > limit" @click="open6 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open7">
+    <template #header="{ count: n7 }">{{ n7 }} / {{ count7 }}</template>
+    <Row v-for="row7 in items7" :key="row7.id" :item="row7" @select="toggle7(row7)">
+      <span :class="{ done: row7.done }">{{ row7.name.toUpperCase() }}</span>
+      <input v-model="row7.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count7 > limit" @click="open7 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open8">
+    <template #header="{ count: n8 }">{{ n8 }} / {{ count8 }}</template>
+    <Row v-for="row8 in items8" :key="row8.id" :item="row8" @select="toggle8(row8)">
+      <span :class="{ done: row8.done }">{{ row8.name.toUpperCase() }}</span>
+      <input v-model="row8.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count8 > limit" @click="open8 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open9">
+    <template #header="{ count: n9 }">{{ n9 }} / {{ count9 }}</template>
+    <Row v-for="row9 in items9" :key="row9.id" :item="row9" @select="toggle9(row9)">
+      <span :class="{ done: row9.done }">{{ row9.name.toUpperCase() }}</span>
+      <input v-model="row9.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count9 > limit" @click="open9 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open0">
+    <template #header="{ count: n10 }">{{ n10 }} / {{ count0 }}</template>
+    <Row v-for="row10 in items0" :key="row10.id" :item="row10" @select="toggle0(row10)">
+      <span :class="{ done: row10.done }">{{ row10.name.toUpperCase() }}</span>
+      <input v-model="row10.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count0 > limit" @click="open0 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open1">
+    <template #header="{ count: n11 }">{{ n11 }} / {{ count1 }}</template>
+    <Row v-for="row11 in items1" :key="row11.id" :item="row11" @select="toggle1(row11)">
+      <span :class="{ done: row11.done }">{{ row11.name.toUpperCase() }}</span>
+      <input v-model="row11.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count1 > limit" @click="open1 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open2">
+    <template #header="{ count: n12 }">{{ n12 }} / {{ count2 }}</template>
+    <Row v-for="row12 in items2" :key="row12.id" :item="row12" @select="toggle2(row12)">
+      <span :class="{ done: row12.done }">{{ row12.name.toUpperCase() }}</span>
+      <input v-model="row12.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count2 > limit" @click="open2 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open3">
+    <template #header="{ count: n13 }">{{ n13 }} / {{ count3 }}</template>
+    <Row v-for="row13 in items3" :key="row13.id" :item="row13" @select="toggle3(row13)">
+      <span :class="{ done: row13.done }">{{ row13.name.toUpperCase() }}</span>
+      <input v-model="row13.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count3 > limit" @click="open3 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open4">
+    <template #header="{ count: n14 }">{{ n14 }} / {{ count4 }}</template>
+    <Row v-for="row14 in items4" :key="row14.id" :item="row14" @select="toggle4(row14)">
+      <span :class="{ done: row14.done }">{{ row14.name.toUpperCase() }}</span>
+      <input v-model="row14.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count4 > limit" @click="open4 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open5">
+    <template #header="{ count: n15 }">{{ n15 }} / {{ count5 }}</template>
+    <Row v-for="row15 in items5" :key="row15.id" :item="row15" @select="toggle5(row15)">
+      <span :class="{ done: row15.done }">{{ row15.name.toUpperCase() }}</span>
+      <input v-model="row15.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count5 > limit" @click="open5 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open6">
+    <template #header="{ count: n16 }">{{ n16 }} / {{ count6 }}</template>
+    <Row v-for="row16 in items6" :key="row16.id" :item="row16" @select="toggle6(row16)">
+      <span :class="{ done: row16.done }">{{ row16.name.toUpperCase() }}</span>
+      <input v-model="row16.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count6 > limit" @click="open6 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open7">
+    <template #header="{ count: n17 }">{{ n17 }} / {{ count7 }}</template>
+    <Row v-for="row17 in items7" :key="row17.id" :item="row17" @select="toggle7(row17)">
+      <span :class="{ done: row17.done }">{{ row17.name.toUpperCase() }}</span>
+      <input v-model="row17.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count7 > limit" @click="open7 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <Panel :title="title" v-if="open8">
+    <template #header="{ count: n18 }">{{ n18 }} / {{ count8 }}</template>
+    <Row v-for="row18 in items8" :key="row18.id" :item="row18" @select="toggle8(row18)">
+      <span :class="{ done: row18.done }">{{ row18.name.toUpperCase() }}</span>
+      <input v-model="row18.done" type="checkbox">
+    </Row>
+  </Panel>
+  <p v-else-if="count8 > limit" @click="open8 = true">{{ query }}</p>
+  <p v-else>none</p>
+
+  <slot name="footer" :total="limit" />
+  <slot name="footer" :total="limit" />
+  <slot name="footer" :total="limit" />
+  <slot name="footer" :total="limit" />
+  <slot name="footer" :total="limit" />
+</template>

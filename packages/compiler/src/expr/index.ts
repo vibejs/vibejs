@@ -1,4 +1,4 @@
-import { parseExpression, parseHandler, parseStatements } from './parse.ts';
+import { parseExpression, parseSimpleHandler, parseStatements } from './parse.ts';
 import { walk, type Identifier, type RefInfo } from './walk.ts';
 
 /** The globals a template reads by their bare name. */
@@ -42,8 +42,7 @@ export function forEachIdentifier(
 
 /** Whether a v-on value is a member path (`a`, `a.b`, `a['b']`, `a?.b`) or a function or arrow. */
 export function isSimpleHandler(expr: string): boolean {
-  const parsed = parseHandler(expr);
-  return 'kind' in parsed && parsed.kind !== 'statements';
+  return parseSimpleHandler(expr) !== undefined;
 }
 
 /** `'foo-bar'` -> `'fooBar'` */

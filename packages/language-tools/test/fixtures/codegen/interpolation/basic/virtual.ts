@@ -7,11 +7,11 @@ type __VibeEmits = {};
 const __vibe_setup = { user };
 {
   const { user } = __vibe.unrefs(__vibe_setup);
-  const { missing } = {};
+  const __vibe_unknown = {};
   __vibe.el(__vibe.tags.p)({ });
     (user.name);
     (`${user.name}!`);
-    (missing);
+    (__vibe_unknown.missing);
   ((x => x)(user));
 }
 type __VibeSlots = {};

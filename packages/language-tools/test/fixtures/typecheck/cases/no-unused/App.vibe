@@ -1,0 +1,23 @@
+<script setup lang="ts">
+import { ref, useTemplateRef } from '@vibejs-org/ui'
+import List from './List.vibe'
+const rows = ref(['a', 'b'])
+const picked = ref('')
+const text = ref('')
+const input = useTemplateRef('input')
+function focus(): void {
+  input.value?.focus()
+}
+</script>
+
+<template>
+  <input ref="input" v-model="text">
+  <List v-model="picked" :rows="rows" @pick="(row) => (picked = row)">
+    <template #header="{ count }">{{ count }} rows</template>
+    <template #item="{ row, active }">
+      <span :class="{ active }" @click="focus">{{ row }}</span>
+    </template>
+    <p>{{ $attrs.title }} {{ text }}</p>
+  </List>
+  <p v-for="(row, i) in rows" :key="row">{{ i }}</p>
+</template>

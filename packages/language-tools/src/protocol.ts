@@ -35,10 +35,18 @@ interface MapperDiagnostic {
   code: number;
   messageText: string;
 }
+/** `[originalStart, originalLength, virtualStart, virtualEnd, policy]`; policy 1 is Expect. */
+type DiagnosticDirective = [number, number, number, number, 1];
+interface DiagnosticDirectives {
+  directives: DiagnosticDirective[];
+  /** Reported at a directive's original range when it suppresses nothing. */
+  unusedExpectDirectiveDiagnostics: { code: number; messageText: string }[];
+}
 export interface TransformResult {
   text: string;
   extension: '.ts';
   mappings?: SpanMapping[];
+  diagnosticDirectives?: DiagnosticDirectives;
   diagnostics: MapperDiagnostic[];
 }
 

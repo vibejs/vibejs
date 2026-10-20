@@ -1,0 +1,14 @@
+<script setup lang="ts">
+import Child from './Child.vibe'
+const count = 1
+</script>
+
+<template>
+  <!-- @vibe-expect-error -->
+  <Child title="a" :count="count" />
+  <p>
+    text
+    <!-- @vibe-expect-error -->
+  </p>
+  <p>{{ count.toUpperCase() }}</p>
+</template>

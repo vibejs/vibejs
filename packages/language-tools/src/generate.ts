@@ -1,8 +1,8 @@
 import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@vibejs-org/compiler';
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
-import type { Names } from './expression.ts';
+import { resetWalks, UNKNOWN, type Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
-import { children, CTX_TYPES, key, type Walk } from './template.ts';
+import { children, CTX_TYPES, expectErrors, key, type Walk } from './template.ts';
 
 /** A forwarded compiler diagnostic; `code` is the numeric part of VIBE####. */
 export interface LanguageDiagnostic {
@@ -12,9 +12,18 @@ export interface LanguageDiagnostic {
   length: number;
 }
 
+/** A `<!-- @vibe-expect-error -->`: `start`/`length` in the original text, `[virtualStart, virtualEnd)` in `text`. */
+export interface ExpectErrorDirective {
+  start: number;
+  length: number;
+  virtualStart: number;
+  virtualEnd: number;
+}
+
 export interface GeneratedFile {
   text: string;
   spans: SpanMapping[];
+  directives: ExpectErrorDirective[];
   diagnostics: LanguageDiagnostic[];
 }
 
@@ -30,6 +39,7 @@ const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
  * on user input; `text` is not changed (CRLF passes through).
  */
 export function generate(fileName: string, text: string): GeneratedFile {
+  resetWalks();
   const { descriptor, diagnostics } = parse(text, { filename: fileName });
   const analysis = analyzeScript(descriptor);
   const b = new CodeBuilder(text);
@@ -45,9 +55,11 @@ export function generate(fileName: string, text: string): GeneratedFile {
     ctx,
     usedSetup: new Set(),
     usedCtx: new Set(),
-    unknown: new Map(),
+    unknown: false,
     writes: false,
   };
+  const nodes = descriptor.template?.ast.children ?? [];
+  const [expected, targets] = expectErrors(nodes);
   const w: Walk = {
     b: new CodeBuilder(text),
     names,
@@ -66,18 +78,20 @@ export function generate(fileName: string, text: string): GeneratedFile {
     forwarded: new Set(),
     refs: new Map(),
     loops: 0,
+    targets,
+    expecting: false,
   };
-  children(descriptor.template?.ast.children ?? [], w, new Set());
+  children(nodes, w, new Set());
 
   const used = [...names.usedSetup];
   b.add(`const __vibe_setup = { ${used.join(', ')} };\n{`);
-  /** `const { a, b } = from;` with spans to the declarations (LINK) or to the first use (NONE). */
-  const destructure = (list: [string, [number, number] | null, number][], from: string) => {
+  /** `const { a, b } = from;` with LINK spans to the declarations. */
+  const destructure = (list: [string, [number, number] | null][], from: string) => {
     if (list.length === 0) return;
     b.add('\n  const { ');
-    list.forEach(([name, at, features], i) => {
+    list.forEach(([name, at], i) => {
       if (i > 0) b.add(', ');
-      if (at) b.atom(name, ...at, features);
+      if (at) b.atom(name, ...at, Preset.LINK);
       else b.add(name);
     });
     b.add(` } = ${from};`);
@@ -91,16 +105,13 @@ export function generate(fileName: string, text: string): GeneratedFile {
     [...names.usedCtx].map((name) => link(name, ctx)),
     '__vibe_ctx',
   );
-  // Other names fail at their first use instead of resolving from lib.dom, as they do at runtime.
-  destructure(
-    [...names.unknown].map(([name, at]) => [name, at, Preset.NONE]),
-    '{}',
-  );
+  if (names.unknown) b.add(`\n  const ${UNKNOWN} = {};`);
   if (names.writes) {
     const lets = used.filter((name) => analysis.bindings.get(name)!.kind === 'let');
     const letNames = lets.map((name) => `'${name}'`).join(' | ') || 'never';
     b.add(`\n  const __vibe_w = __vibe.writable<typeof __vibe_setup, ${letNames}>(__vibe_setup);`);
   }
+  const shift = b.text.length;
   b.append(w.b).add('\n}\n');
 
   const refs = [...w.refs].map(([name, type]) => `${key(name)}: ${type}`);
@@ -134,16 +145,23 @@ export function generate(fileName: string, text: string): GeneratedFile {
   if (macros.size > 0)
     b.add(`import { ${[...macros].join(', ')} } from '@vibejs-org/ui/tooling';\n`);
 
+  // A directive without a walked target gets an empty range at the end: tsc reports it unused.
+  const end = b.text.length;
+  const directives = expected.map(({ start, length, virtual }) => {
+    const [virtualStart, virtualEnd] = virtual?.map((v) => v + shift) ?? [end, end];
+    return { start, length, virtualStart, virtualEnd };
+  });
   return {
     text: b.text,
     spans: b.spans,
+    directives,
     diagnostics: diagnostics.filter(forwarded).map(toLanguage),
   };
 }
 
-/** A destructured name with a LINK span to its declaration. */
+/** A destructured name and its declaration. */
 const link = (name: string, decls: ReadonlyMap<string, [number, number] | null>) =>
-  [name, decls.get(name)!, Preset.LINK] as [string, [number, number] | null, number];
+  [name, decls.get(name)!] as [string, [number, number] | null];
 
 /** An object type literal. */
 const members = (list: string[]) => (list.length > 0 ? `{ ${list.join('; ')} }` : '{}');

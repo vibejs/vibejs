@@ -9,6 +9,7 @@ const source = {
 };
 const special = ['**/*.browser.test.ts', '**/*.integration.test.ts', '**/*.vibe.test.ts'];
 const uiSetup = ['packages/ui/vitest.setup.ts'];
+const PERF = 'packages/language-tools/src/perf.integration.test.ts';
 
 export default defineConfig({
   test: {
@@ -84,6 +85,17 @@ export default defineConfig({
             'examples/*/test/**/*.integration.test.ts',
             '**/*.vibe.test.ts',
           ],
+          exclude: [...configDefaults.exclude, PERF],
+        },
+      },
+      {
+        // The time budgets run alone, after the other integration tests: parallel tsc runs would
+        // slow the measured thread.
+        test: {
+          name: 'perf',
+          environment: 'node',
+          include: [PERF],
+          sequence: { groupOrder: 1 },
         },
       },
     ],
