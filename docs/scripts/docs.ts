@@ -168,7 +168,10 @@ export function expandIncludes(md: string, docsDir: string, page: string): strin
 
 /** The sidebar groups in order; `guides/*` pages not named here go to 'Guides'. */
 const GROUPS: [text: string, member: (path: string) => boolean][] = [
-  ['Getting started', (p) => p === 'guides/getting-started' || p === 'guides/tutorial'],
+  [
+    'Getting started',
+    (p) => ['guides/getting-started', 'guides/tutorial', 'guides/editors'].includes(p),
+  ],
   ['UI', (p) => p.startsWith('ui/')],
   ['Server', (p) => p.startsWith('server/')],
   ['CLI and AI agents', (p) => p === 'guides/ai-agents' || p.startsWith('cli/')],

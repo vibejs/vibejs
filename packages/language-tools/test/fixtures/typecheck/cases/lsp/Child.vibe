@@ -1,0 +1,11 @@
+<script setup lang="ts">
+const { label, items } = defineProps<{ label: string; items: string[] }>()
+const emit = defineEmits<{ pick: [item: string] }>()
+defineSlots<{ row: (props: { item: string }) => unknown }>()
+</script>
+
+<template>
+  <ul :title="label">
+    <li v-for="item in items" :key="item" @click="emit('pick', item)"><slot name="row" :item="item" /></li>
+  </ul>
+</template>
