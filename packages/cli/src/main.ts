@@ -11,6 +11,7 @@ import { errors } from './commands/errors.ts';
 import { explain } from './commands/explain.ts';
 import { generate } from './commands/generate.ts';
 import { logs } from './commands/logs.ts';
+import { mcp } from './commands/mcp.ts';
 import { request } from './commands/request.ts';
 import type { Ctx } from './ctx.ts';
 import { vibeError } from './errors.gen.ts';
@@ -37,6 +38,7 @@ export const COMMANDS: readonly CommandDef[] = [
   di,
   request,
   generate,
+  mcp,
 ];
 
 /** Common wrong commands and what to run instead: a `vibejs` command or the `npm create` line. */
@@ -113,7 +115,8 @@ function fail(
   return [{ ok: false, command, version: ctx.version, next: [next], error }];
 }
 
-async function dispatch(argv: string[], ctx: Ctx): Promise<Outcome> {
+/** Parses `argv` like the bin and runs the command; never prints. */
+export async function dispatch(argv: string[], ctx: Ctx): Promise<Outcome> {
   const at = argv.findIndex((arg) => !arg.startsWith('-'));
   let def: CommandDef | undefined;
   if (at !== -1) {

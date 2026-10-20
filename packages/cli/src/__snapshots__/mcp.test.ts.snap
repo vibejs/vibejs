@@ -1,0 +1,199 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lists the tools in C9 order, each with its input schema 1`] = `
+[
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "List the unresolved build errors and the latest runtime errors from .vibejs/dev.log.
+Call it first when something is broken, and again after a fix to confirm.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "limit": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "name": "get_errors",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "Show the newest .vibejs/dev.log entries, filtered by level, source, text and time.
+Call it to see what the dev server, the browser and the backend printed.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "grep": {
+          "type": "string",
+        },
+        "level": {
+          "enum": [
+            "error",
+            "warn",
+            "info",
+            "debug",
+          ],
+          "type": "string",
+        },
+        "limit": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "since": {
+          "description": "An ISO time, or <n>s, <n>m, <n>h ago.",
+          "type": "string",
+        },
+        "source": {
+          "enum": [
+            "vite",
+            "browser",
+            "server",
+            "vibejs",
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "get_logs",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "Show the modules and providers of the backend, without constructing any provider.
+Call it before adding or wiring a provider, a module or an injection.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "module": {
+          "type": "string",
+        },
+        "token": {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "get_di_graph",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "Type-check, lint, format-check and test the project with coverage, concurrently.
+Call it after every change; it reports diagnostics with docs links and fixes.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "max": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "only": {
+          "items": {
+            "enum": [
+              "types",
+              "lint",
+              "format",
+              "test",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "name": "check",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "Call an API route: through the running dev server, or in process when none runs.
+Call it to try a route after changing a handler or a contract.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "body": {
+          "description": "The JSON body.",
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string",
+          },
+          "propertyNames": {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "method": {
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "HEAD",
+            "OPTIONS",
+          ],
+          "type": "string",
+        },
+        "path": {
+          "description": "The URL path, starting with the API prefix, e.g. /api/todos.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "method",
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "request",
+    "title": undefined,
+  },
+  {
+    "_meta": undefined,
+    "annotations": undefined,
+    "description": "Look up a VIBE code, open a docs page by path, or search the bundled docs, offline.
+Call it with a VIBE code from any result, a docs path, or words to search the docs.",
+    "execution": undefined,
+    "icons": undefined,
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "query": {
+          "description": "A VIBE code, a docs path or search words.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "query",
+      ],
+      "type": "object",
+    },
+    "name": "explain",
+    "title": undefined,
+  },
+]
+`;

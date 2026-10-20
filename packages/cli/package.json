@@ -35,12 +35,15 @@
     "build": "tsdown && node ../../docs/scripts/docs.ts bundle dist/docs && node --input-type=module -e \"import { mkdirSync, readFileSync } from 'node:fs'; import { renderBlock, syncAgentFiles } from './src/agents.ts'; mkdirSync('dist/agents'); syncAgentFiles('dist/agents', renderBlock('{{exec}}', readFileSync('dist/docs/index.txt', 'utf8').trim()), true);\""
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "catalog:",
     "@vibejs-org/errors": "workspace:*",
     "oxc-parser": "catalog:",
     "srvx": "catalog:",
-    "std-env": "catalog:"
+    "std-env": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "catalog:",
     "@vibejs-org/compiler": "workspace:*",
     "@vibejs-org/contract": "workspace:*",
     "@vibejs-org/language-tools": "workspace:*",
