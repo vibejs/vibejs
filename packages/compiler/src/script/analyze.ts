@@ -454,7 +454,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
     });
   }
 
-  function options(callee: Node, args: Node[]): void {
+  function options(callee: Node, args: readonly Node[]): void {
     const [arg] = args;
     const valid =
       args.length === 1 &&

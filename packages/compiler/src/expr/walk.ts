@@ -64,11 +64,16 @@ const isNode = (value: unknown): value is Node =>
 
 export const isIdentifier = (node: Node): node is Identifier => node.type === 'Identifier';
 
-/** The nodes under `node[key]`, which holds a node, an array of nodes (with holes) or nothing. */
-export const children = (node: Node, key: string): Node[] => {
+const NONE: readonly Node[] = [];
+
+/**
+ * The nodes under `node[key]`, which holds a node, an array of nodes (with `null` holes) or
+ * nothing. An array without holes is returned as it is: callers only read the result.
+ */
+export const children = (node: Node, key: string): readonly Node[] => {
   const value = node[key];
-  if (Array.isArray(value)) return value.filter(isNode);
-  return isNode(value) ? [value] : [];
+  if (Array.isArray(value)) return value.every(isNode) ? value : value.filter(isNode);
+  return isNode(value) ? [value] : NONE;
 };
 
 /** The identifiers under `node[key]`. */
@@ -90,7 +95,7 @@ const declaratorIds = (declaration: Node): Identifier[] =>
   children(declaration, 'declarations').flatMap((d) => children(d, 'id').flatMap(patternIds));
 
 /** The names a statement list declares in its own block: `let`, `const`, functions and classes. */
-function blockIds(statements: Node[]): Identifier[] {
+function blockIds(statements: readonly Node[]): Identifier[] {
   return statements.flatMap((s) => {
     if (s.type === 'VariableDeclaration' && s.kind !== 'var') return declaratorIds(s);
     return s.type === 'FunctionDeclaration' || s.type === 'ClassDeclaration' ? ids(s, 'id') : [];
@@ -106,7 +111,7 @@ function varIds(node: Node): Identifier[] {
 }
 
 /** The statements of a scope-creating statement list. */
-function statementsOf(node: Node): Node[] {
+function statementsOf(node: Node): readonly Node[] {
   return node.type === 'SwitchStatement'
     ? children(node, 'cases').flatMap((c) => children(c, 'consequent'))
     : children(node, 'body');
