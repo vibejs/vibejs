@@ -1,0 +1,6 @@
+import { Module } from '@vibejs-org/server';
+import { HealthController } from './health.controller.ts';
+import { HealthService } from './health.service.ts';
+
+@Module({ providers: [HealthService], controllers: [HealthController] })
+export class HealthModule {}
