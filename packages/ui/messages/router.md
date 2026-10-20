@@ -52,6 +52,8 @@ A named navigation builds the path from `params`. A required param must have a n
 
 > No route is named {name}.
 
+A navigation by `name`, `router.resolve()` and `RouterLink` look the name up among the routes passed to `createRouter()`, nested children included. A name that no route declares cannot be turned into a path, so the navigation throws.
+
 ### Fix
 
 - Use the `name` of a route passed to `createRouter()`.

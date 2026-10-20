@@ -1,7 +1,8 @@
 // Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages/compiler-sfc/src/style/pluginScoped.ts (MIT)
 // Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors
 //
-// Edits:
+// Edits to re-apply on an upgrade:
+// - this header;
 // - The scope attribute is `[data-vb-<id>]` and keyframe names get the suffix `-<id>`, where `id`
 //   is the component's 8-hex id. The plugin is named `vibe-scoped`; `pluginScoped` is a named
 //   function that returns the plugin object.

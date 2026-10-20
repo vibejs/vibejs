@@ -1,5 +1,6 @@
+import { DOCS_BASE } from '@vibejs-org/errors';
 import { expect, it, vi } from 'vitest';
-import type { CatalogEntry } from '../catalog.gen.ts';
+import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
 import type { Ctx } from '../ctx.ts';
 import { entryMarkdown, explain, lookup } from './explain.ts';
 
@@ -83,3 +84,15 @@ it('marks a retired entry and skips an empty body', () => {
     ].join('\n'),
   );
 });
+
+it.each(CATALOG.map((entry) => [entry.code, entry] as const))(
+  'renders %s with its message, body, fixes and docs URL',
+  (code, entry) => {
+    const markdown = entryMarkdown(entry);
+    expect(entry.body).not.toBe('');
+    for (const part of [code, entry.title, `> ${entry.message}`, entry.body, ...entry.fixes]) {
+      expect(markdown).toContain(part);
+    }
+    expect(markdown).toContain(`Docs: ${DOCS_BASE}${code}`);
+  },
+);

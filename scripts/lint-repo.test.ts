@@ -177,7 +177,7 @@ describe('rule 1: coverage hints', () => {
   it('passes an upstream-defensive: hint with an entry in forked code, and requires the prefix there', () => {
     const file = 'packages/compiler/src/tokenizer.ts';
     const header =
-      '// Upstream: vuejs/core@0123abc packages/compiler-core/src/tokenizer.ts (MIT)\n';
+      '// Upstream: vuejs/core@0123abc packages/compiler-core/src/tokenizer.ts (MIT)\n// Edits to re-apply on an upgrade: none.\n';
     put({
       'packages/compiler/THIRD-PARTY-NOTICES.md': '## vuejs/core (MIT)\n',
       'coverage-ignores.json': entry(file, 'upstream-defensive: unreachable state'),
@@ -190,7 +190,7 @@ describe('rule 1: coverage hints', () => {
     put({ 'coverage-ignores.json': entry(file, 'unreachable state') });
     expect(
       lint({ [file]: `${header}/* v8 ignore else -- @preserve unreachable state */` }),
-    ).toEqual([`${file}:2:1 coverage-hint forked upstream code uses upstream-defensive: reasons`]);
+    ).toEqual([`${file}:3:1 coverage-hint forked upstream code uses upstream-defensive: reasons`]);
   });
 });
 
@@ -425,8 +425,26 @@ describe('rule 7: Upstream headers', () => {
       }),
     ).toEqual([
       'packages/compiler/src/a.ts:1:1 upstream fb55/htmlparser2 is not listed in packages/compiler/THIRD-PARTY-NOTICES.md',
+      'packages/compiler/src/a.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
       'packages/ui/src/b.ts:1:1 upstream vuejs/core is not listed in packages/ui/THIRD-PARTY-NOTICES.md',
       'scripts/c.ts:1:1 upstream use `// Upstream: <repo>@<sha> <path> (<license>)`',
+    ]);
+  });
+
+  it('requires upgrade notes in a forked compiler source, not in its tests or other packages', () => {
+    put({ 'packages/compiler/THIRD-PARTY-NOTICES.md': '## vuejs/core (MIT)\n' });
+    const header = '// Upstream: vuejs/core@abcdef0 packages/compiler-sfc/src/a.ts (MIT)\n';
+    expect(
+      lint({
+        'packages/compiler/src/a.ts': `${header}export {};`,
+        'packages/compiler/src/b.ts': `${header}// Edits to re-apply on an upgrade:\n// - none.\nexport {};`,
+        'packages/compiler/src/c.ts': `${header}export {};\n// Edits to re-apply on an upgrade:\n`,
+        'packages/compiler/src/a.test.ts': header,
+        'packages/compiler/src/a.test-d.ts': header,
+      }),
+    ).toEqual([
+      'packages/compiler/src/a.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
+      'packages/compiler/src/c.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
     ]);
   });
 });

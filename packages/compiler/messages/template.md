@@ -315,7 +315,7 @@ The target is written on every change, so it must be an assignable name or membe
 ### Fix
 
 - Bind a `ref` or a property, as in `v-model="form.name"`.
-- Use a value binding and an event listener for computed values.
+- Bind a computed value with `:value` and update its source in an `@input` handler.
 
 ## VIBE2503: v-model on a template local
 
@@ -379,7 +379,7 @@ A file input is read-only from scripts.
 
 ### Fix
 
-- Listen to `@change` and read `event.target.files`.
+- Listen to `@change` and read the files in the handler, as in `(event.target as HTMLInputElement).files`.
 
 ## VIBE2509: v-model argument
 
@@ -471,7 +471,7 @@ A component receives a fixed set of slots.
 
 ### Fix
 
-- Loop inside the slot template instead.
+- Put the `v-for` on an element inside the slot template.
 - Pass the list as a prop and let the component render its slot per item.
 
 ## VIBE2607: Dynamic slot outlet name

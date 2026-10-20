@@ -59,6 +59,21 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 - There are no per-PR changesets before v0.1.0. v0.1.0 ships with a single "Initial release" changeset, added when the release is prepared.
 - After v0.1.0, every PR with a user-visible change adds a changeset with `pnpm changeset`.
 
+## Upgrading forked code
+
+`packages/compiler` and `packages/ui` contain files derived from other projects. Each one starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header. Each forked compiler source also lists its `Edits to re-apply on an upgrade:` in that header, and `scripts/lint-repo.ts` requires the list there; the forked UI sources do not carry the list yet. To move a fork to a new upstream release:
+
+1. For each file listed in the package's `THIRD-PARTY-NOTICES.md`, diff the upstream path between the pinned commit and the new release tag.
+2. Apply the upstream changes, then re-apply every edit listed in the file's header. Update the list when an edit changes or is no longer needed.
+3. Update the commit SHA in each header and the version and commit in `THIRD-PARTY-NOTICES.md`.
+4. Port the upstream changes to the ported specs (the test files listed in the notices) and run `pnpm check`.
+5. Re-check every `upstream-defensive:` entry in `coverage-ignores.json`: delete the hint and its entry when the branch is gone or now covered.
+
+## Dependencies
+
+- Dependabot opens one weekly PR for npm updates. `oxc-parser` is a group of its own, so a parser bump is tested alone.
+- `oxc-parser` is on 0.x, where the caret range of the catalog admits patches only. A minor bump is made by hand: edit its range in the `catalog` of `pnpm-workspace.yaml`, run `pnpm install`, and merge only with green `test` and `integration` jobs.
+
 ## Error messages
 
 Every error a package throws has a code (`VIBE####`) and an entry in `packages/<pkg>/messages/*.md`. `pnpm errors` turns those files into the typed `vibeError()` of the package, the CLI catalog and the docs pages. `pnpm check` runs `pnpm errors --check`.
@@ -88,6 +103,7 @@ Prose that explains the error. It appears only in the docs, never in runtime cod
 
 - One `## VIBE####: Title` heading per entry.
 - Exactly one `>` message line, right after the heading: one concrete sentence that names the values involved.
+- At least one paragraph of prose follows the message line and explains when the error happens.
 - `### Fix` with at least one bullet. Write each fix as an imperative alternative ("Add …", "Import …").
 - `### Example` is optional.
 - Placeholders are `{camelCase}`. Every placeholder becomes a required, type-checked argument.
