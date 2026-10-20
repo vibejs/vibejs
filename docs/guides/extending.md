@@ -92,7 +92,7 @@ See [Modules and providers](../server/modules.md) and [Middleware, guards, inter
 
 ### Plugins
 
-A plugin is a function that receives the app, or an object with an `install(app)` method. `app.use(plugin, ...options)` installs it once. A plugin provides values to every component with `app.provide()`, and registers cleanup with `app.onUnmount()`.
+A plugin is a function that receives the app, or an object with an `install(app)` method. `app.use(plugin, ...options)` installs it once, and checks the options against the plugin's `Plugin<Options>` type; a second call with the same plugin warns [VIBE5304](/errors/VIBE5304) and does nothing. A plugin provides values to every component with `app.provide()`, and registers cleanup with `app.onUnmount()`.
 
 The feature flags package of the example todo app exports a plugin factory: it takes options, loads the flags once, and provides them under a private injection key.
 
@@ -119,3 +119,8 @@ A composable is a function that setup calls to reuse stateful logic: it may read
 <<< @/../examples/todo-flags/ui/flags.ts#composable
 
 A page then calls `useFlag('removeDone')` in its setup and uses the ref in its template.
+
+### Limits
+
+- There are no global components, custom directives, mixins or global properties: `app.component()`, `app.directive()` and `app.mixin()` throw [VIBE5301](/errors/VIBE5301). Export components for import, element behavior as composables that take a template ref, and shared values through `app.provide()`.
+- Packages that ship `.vibe` components are planned for v0.2. Until then, a package exports plugins, composables, injection keys and types.

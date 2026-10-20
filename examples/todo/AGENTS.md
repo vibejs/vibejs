@@ -30,7 +30,7 @@ Rules:
 - Never add coverage-ignore comments; add tests.
 - TS1241 on `@Handle`: the handler must be `(ctx: Ctx<typeof contract.route>)` and return the route response type; do not cast or use `any`.
 
-[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|.:{index.md}|cli:{agents.md,build.md,check.md,components.md,dev.md,di.md,docs.md,errors.md,explain.md,generate.md,index.md,logs.md,mcp.md,request.md,routes.md}|guides:{ai-agents.md,coming-from-nestjs.md,coming-from-vue-router.md,extending.md,getting-started.md,tutorial.md}|server:{configuration.md,contracts.md,handlers.md,index.md,modules.md,pipeline.md,testing.md}|ui:{data.md,routing.md,testing.md}
+[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|.:{index.md}|cli:{agents.md,build.md,check.md,components.md,dev.md,di.md,docs.md,errors.md,explain.md,generate.md,index.md,logs.md,mcp.md,request.md,routes.md}|guides:{ai-agents.md,coming-from-nestjs.md,coming-from-vue.md,coming-from-vue-router.md,extending.md,getting-started.md,tutorial.md}|server:{configuration.md,contracts.md,handlers.md,index.md,modules.md,pipeline.md,testing.md}|ui:{components.md,data.md,index.md,lifecycle.md,provide-inject.md,reactivity.md,routing.md,template-syntax.md,testing.md}
 
 <!-- END:vibejs-agent-rules -->
 

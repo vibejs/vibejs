@@ -26,12 +26,16 @@ const TSC = createRequire(import.meta.url)
   .resolve('typescript/package.json')
   .replace(/package\.json$/, 'bin/tsc');
 const BASE = fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url));
-/** Types a `.vibe` import in a snippet as a component without a typed signature. */
+/**
+ * Types a `.vibe` import in a snippet as a component without a typed signature (any props and
+ * slots), and a relative `.ts` import, a module another fence of the page shows, as untyped.
+ */
 const VIBE_MODULE = `declare module '*.vibe' {
   import type { Component, Handle } from '@vibejs-org/ui';
-  const component: Component<(props: any) => Handle<any, any, any>>;
+  const component: Component<(props: any) => Handle<Record<string, (props: any) => unknown>, any, any>>;
   export default component;
 }
+declare module '*.ts';
 `;
 const DIAGNOSTIC = /^(?:.*[\\/])?(\d+)\.(?:ts|vibe)\((\d+),(\d+)\): error (TS\d+): (.*)$/;
 

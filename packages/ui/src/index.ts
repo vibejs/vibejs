@@ -16,6 +16,7 @@ export type {
 } from './component.ts';
 export type {
   ClassValue,
+  CSSProperties,
   HTMLAttributes,
   IntrinsicElementAttributes,
   ReservedProps,

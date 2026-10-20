@@ -10,7 +10,7 @@
 // oxlint-disable typescript/no-explicit-any -- upstream attribute types bind any value on purpose
 import type * as CSS from 'csstype';
 
-interface CSSProperties
+export interface CSSProperties
   extends CSS.Properties<string | number>, CSS.PropertiesHyphen<string | number> {
   /**
    * The index signature was removed to enable closed typing for style

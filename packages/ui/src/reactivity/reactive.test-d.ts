@@ -1,3 +1,8 @@
+// Upstream: vuejs/core@bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c packages-private/dts-test/reactivity.test-d.ts (MIT)
+// Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors
+//
+// Edits: the ported cases follow the vibe.js cases; `describe` blocks became comments and
+// `expectType` became `expectTypeOf`.
 import { expectTypeOf } from 'vitest';
 import { isReactive, isReadonly, isShallow, toRaw } from './dep.ts';
 import {
@@ -73,3 +78,89 @@ expectTypeOf(isProxy).toEqualTypeOf<(value: unknown) => boolean>();
 expectTypeOf(toRaw(state)).toEqualTypeOf(state);
 // @ts-expect-error reactive() takes an object
 reactive(1);
+
+// Ported cases.
+// DeepReadonly
+const deep = readonly({ obj: { k: 'v' } });
+// @ts-expect-error a readonly key cannot be written
+deep.obj = { k: 'w' };
+// @ts-expect-error a nested readonly key cannot be written
+deep.obj.k = 'x';
+
+// #4180: readonly ref
+expectTypeOf(readonly(ref({ count: 1 }))).toExtend<Ref>();
+
+// markRaw
+class Test<T> {
+  declare item: Ref<T>;
+}
+const test = new Test<number>();
+const plain = { ref: ref(1) };
+const marked = reactive({
+  class: { raw: markRaw(test), reactive: test },
+  plain: { raw: markRaw(plain), reactive: plain },
+});
+expectTypeOf(marked.class.raw).toExtend<Test<number>>();
+// it should unwrap
+expectTypeOf(marked.class.reactive).not.toExtend<Test<number>>();
+expectTypeOf(marked.plain.raw.ref).toEqualTypeOf<Ref<number>>();
+expectTypeOf(marked.plain.reactive.ref).toEqualTypeOf<number>();
+
+// shallowReadonly ref unwrap
+const shallowTop = shallowReadonly({ count: { n: ref(1) } });
+// @ts-expect-error a shallow readonly key cannot be written
+shallowTop.count = { n: ref(2) };
+expectTypeOf(shallowTop.count.n).toEqualTypeOf<Ref<number>>();
+shallowTop.count.n.value = 123;
+
+// #3819: tuples keep their refs
+expectTypeOf(reactive([ref(0)] as const)[0]).toEqualTypeOf<Ref<number>>();
+const tuple: [Ref<number>] = [ref(0)];
+expectTypeOf(reactive(tuple)[0]).toEqualTypeOf<Ref<number>>();
+
+// Map and WeakMap values keep refs but unwrap refs nested in objects.
+expectTypeOf(reactive(new Map<string, Ref<number>>()).get('a')!).toEqualTypeOf<Ref<number>>();
+expectTypeOf(
+  reactive(new Map<string, { wrap: Ref<number> }>()).get('a')!.wrap,
+).toEqualTypeOf<number>();
+expectTypeOf(reactive(new WeakMap<object, Ref<number>>()).get({})!).toEqualTypeOf<Ref<number>>();
+expectTypeOf(
+  reactive(new WeakMap<object, { wrap: Ref<number> }>()).get({})!.wrap,
+).toEqualTypeOf<number>();
+class ExtendedMap extends Map<string, { wrap: Ref<number> }> {
+  foo = ref('foo');
+  bar = 1;
+}
+const extendedMap = reactive(new ExtendedMap());
+expectTypeOf(extendedMap.foo).toEqualTypeOf<string>();
+expectTypeOf(extendedMap.bar).toEqualTypeOf<number>();
+expectTypeOf(extendedMap.get('a')!.wrap).toEqualTypeOf<number>();
+
+// Set and WeakSet
+expectTypeOf(reactive(new Set<Ref<number>>())).toExtend<Set<Ref<number>>>();
+expectTypeOf(reactive(new Set<{ wrap: Ref<number> }>())).toExtend<Set<{ wrap: number }>>();
+expectTypeOf(reactive(new WeakSet<Ref<number>>())).toExtend<WeakSet<Ref<number>>>();
+expectTypeOf(reactive(new WeakSet<{ wrap: Ref<number> }>())).toExtend<WeakSet<{ wrap: number }>>();
+class ExtendedSet extends Set<{ wrap: Ref<number> }> {
+  foo = ref('foo');
+  bar = 1;
+}
+const extendedSet = reactive(new ExtendedSet());
+expectTypeOf(extendedSet.foo).toEqualTypeOf<string>();
+expectTypeOf(extendedSet.bar).toEqualTypeOf<number>();
+
+// A reactive array is assignable to a record.
+const arr = reactive(['']);
+const record: Record<number, string> = arr;
+expectTypeOf(record[0]).toEqualTypeOf<string>();
+const indexed: { [key: number]: string } = arr;
+expectTypeOf(indexed[0]).toEqualTypeOf<string>();
+
+// The shallowReactive marker does not leak into value unions.
+const shallowState = shallowReactive({ a: { title: 'A' }, b: { title: 'B' } });
+declare const shallowValue: (typeof shallowState)[keyof typeof shallowState];
+expectTypeOf(shallowValue.title).toEqualTypeOf<string>();
+// A shallowReactive type accepts a plain object.
+let shallowValues: typeof shallowState = shallowState;
+shallowValues = { a: { title: 'C' }, b: { title: 'D' } };
+expectTypeOf(shallowValues).toEqualTypeOf(shallowState);

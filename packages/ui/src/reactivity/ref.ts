@@ -22,8 +22,14 @@ declare const RefSymbol: unique symbol;
 declare const ShallowRefMarker: unique symbol;
 /** The type-only brand of `markRaw()` values, which are never unwrapped. */
 export declare const RawSymbol: unique symbol;
-/** The type-only brand of `shallowReactive()` values, which are never unwrapped. */
-export declare const ShallowReactiveMarker: unique symbol;
+/**
+ * The type-only brand of `shallowReactive()` values, which are never unwrapped. A private class
+ * member keeps it out of `keyof`, indexed access and plain object assignments.
+ */
+declare class ShallowReactiveBrandClass {
+  private __shallowReactiveBrand?: never;
+}
+export type ShallowReactiveBrand = ShallowReactiveBrandClass;
 
 export interface Ref<T = any, S = T> {
   get value(): T;
@@ -61,13 +67,16 @@ export type UnwrapRef<T> =
       ? UnwrapRefSimple<V>
       : UnwrapRefSimple<T>;
 
+// DOM nodes and windows are not unwrapped (upstream adds them through `RefUnwrapBailTypes`).
 export type UnwrapRefSimple<T> = T extends
   | Builtin
+  | Node
+  | Window
   | Ref
   | ((...args: any[]) => unknown)
   | { [RawSymbol]?: true }
   ? T
-  : T extends { [ShallowReactiveMarker]?: true }
+  : T extends ShallowReactiveBrand
     ? T
     : T extends Map<infer K, infer V>
       ? Map<K, UnwrapRefSimple<V>> & UnwrapRef<Omit<T, keyof Map<any, any>>>
