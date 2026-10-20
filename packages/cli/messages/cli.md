@@ -39,6 +39,8 @@ The first word after `vibejs` must be a command, and every option must belong to
 
 `vibejs check` runs the type checker, linter, formatter and test runner installed in the project, never global copies, so every result matches what the project's own scripts report. It needs TypeScript 7.1 or newer, which runs the content mapper for `.vibe` files.
 
+`vibejs components` reads `.vibe` files with the project's own `@vibejs-org/compiler`, so it needs that package installed.
+
 ### Fix
 
 - Run `{install}` in the project root.

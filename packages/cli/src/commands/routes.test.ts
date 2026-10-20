@@ -95,6 +95,8 @@ export const routes = defineRoutes([
   },
   { path: \`/t\`, name: String('x'), component: other, children: extra, ['meta']: 1, ...extra },
   { component: Local, meta: {}, 'path': '/quoted' },
+  { path: '/spread', ...extra },
+  { name: 'pathless' },
   ...extra,
   ,
   makeRoute(),
@@ -194,6 +196,12 @@ describe('output', () => {
     const empty = testCtx(app({ module: EMPTY }), false);
     expect(await main(['routes'], empty.ctx)).toBe(0);
     expect(empty.out.join('')).toBe('API\n  No routes.\nUI\n  No routes.\n');
+    const api = testCtx(app({ module: EMPTY }), false);
+    expect(await main(['routes', '--kind', 'api'], api.ctx)).toBe(0);
+    expect(api.out.join('')).toBe('API\n  No routes.\n');
+    const ui = testCtx(app({ module: EMPTY }), false);
+    expect(await main(['routes', '--kind', 'ui'], ui.ctx)).toBe(0);
+    expect(ui.out.join('')).toBe('UI\n  No routes.\n');
   });
 
   it('answers --help as JSON and as text', async () => {

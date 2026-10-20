@@ -23,19 +23,21 @@ exports[`output > prints an API and a UI table for people 1`] = `
     interceptors: Timing
     filters: Fallback
 UI
-  /                 home   → ui/src/pages/HomePage.vibe
-  /admin/           -      → ui/shared/Layout.vibe
-  /admin/           admin  → ui/src/pages/Admin.vibe
-  /admin/users      -      → -
-  /admin/users/:id  user   → -
-  /absolute         -      → /
-  /admin/old        -      → -
-  /admin/member     -      → -
-  /admin/computed   -      → -
-  \`/t\`              -      → -
-  /quoted           -      → -
-  ...extra          -      → -
-  makeRoute()       -      → -
+  /                 home      → ui/src/pages/HomePage.vibe
+  /admin/           -         → ui/shared/Layout.vibe
+  /admin/           admin     → ui/src/pages/Admin.vibe
+  /admin/users      -         → -
+  /admin/users/:id  user      → -
+  /absolute         -         → /
+  /admin/old        -         → -
+  /admin/member     -         → -
+  /admin/computed   -         → -
+  \`/t\`              -         → -
+  /quoted           -         → -
+  /spread           -         → -
+                    pathless  → -
+  ...extra          -         → -
+  makeRoute()       -         → -
 "
 `;
 
@@ -101,6 +103,19 @@ exports[`ui routes > joins nested paths in source order and lists the dynamic fi
       "component",
     ],
     "path": "/quoted",
+  },
+  {
+    "dynamic": [
+      "path",
+    ],
+    "path": "/spread",
+  },
+  {
+    "dynamic": [
+      "path",
+    ],
+    "name": "pathless",
+    "path": "",
   },
   {
     "dynamic": [

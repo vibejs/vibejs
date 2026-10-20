@@ -70,7 +70,7 @@ export const components: CommandDef<ComponentsResult> = {
       });
     }
     const next = [
-      ...(list.length ? [] : ['vibejs components']),
+      ...(name !== undefined && !list.length ? ['vibejs components'] : []),
       ...(list.some((c) => c.diagnostics.length) ? ['vibejs check --json'] : []),
     ];
     return { ...base, next: next.length ? next : undefined, components: list };

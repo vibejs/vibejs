@@ -99,7 +99,7 @@ function walk(
       if (value === undefined) dynamic.push(key);
       return value;
     };
-    let path = '';
+    let path: string | undefined;
     let name, component, redirect, children: ArrayExpression | undefined;
     for (const p of element.properties) {
       if (p.type !== 'Property') continue;
@@ -112,7 +112,10 @@ function walk(
       else if (key === 'children' && value.type === 'ArrayExpression') children = value;
       else if (key === 'children') dynamic.push(key);
     }
-    path = joinPath(parent, path);
+    // A spread can set `path`, and a record without one has none to read.
+    const spread = element.properties.some((p) => p.type !== 'Property');
+    if ((path === undefined || spread) && !dynamic.includes('path')) dynamic.push('path');
+    path = joinPath(parent, path ?? '');
     const route: UiRoute = { path, name, component, redirect, dynamic };
     // Without the absent fields, so a route reads the same as JSON and in a snapshot.
     for (const field of ['name', 'component', 'redirect'] as const)

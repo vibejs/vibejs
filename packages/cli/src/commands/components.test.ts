@@ -101,6 +101,15 @@ describe('the components command', () => {
     expect(r.next).toEqual(next);
   });
 
+  it('gives no next step when a project has no components', async () => {
+    const root = copyApp();
+    roots.push(root);
+    installCompiler(root);
+    const r = await run(root);
+    expect(r).toMatchObject({ ok: true, components: [] });
+    expect(r.next).toBeUndefined();
+  });
+
   it('reports VIBE8005 when the project has no compiler', async () => {
     const root = copyApp();
     roots.push(root);
