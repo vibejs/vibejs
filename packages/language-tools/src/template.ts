@@ -2,7 +2,6 @@ import {
   capitalize,
   camelize,
   ElementTypes,
-  isSimpleHandler,
   NodeTypes,
   type AttributeNode,
   type DirectiveNode,
@@ -17,6 +16,7 @@ import {
   assignable,
   expression,
   readsEvent,
+  simpleHandler,
   type Mode,
   type Names,
 } from './expression.ts';
@@ -647,7 +647,7 @@ function bound(dir: DirectiveNode, p: Props): void {
 function handler(dir: DirectiveNode, p: Props, isLoose = false): void {
   const { w, locals } = p;
   const exp = dir.exp!;
-  if (dir.name !== 'on' || isSimpleHandler(exp.content)) return value(dir, w, locals);
+  if (dir.name !== 'on' || simpleHandler(exp.content)) return value(dir, w, locals);
   const event = readsEvent(w.source, range(exp));
   w.b.add(event ? `($event${isLoose ? ': unknown' : ''}) => { ` : '() => { ');
   value(dir, w, new Set([...locals, '$event']));

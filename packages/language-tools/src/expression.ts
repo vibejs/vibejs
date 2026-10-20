@@ -1,4 +1,9 @@
-import { forEachIdentifier, identifiersOf, isAllowedGlobal } from '@vibejs-org/compiler';
+import {
+  forEachIdentifier,
+  identifiersOf,
+  isAllowedGlobal,
+  isSimpleHandler,
+} from '@vibejs-org/compiler';
 import { Preset, type CodeBuilder } from './builder.ts';
 
 /** The names a template reads from outside, and the ones it used. */
@@ -65,6 +70,18 @@ export function pathRef(text: string): Ref | undefined {
     return [root, start, start + root.length, { local: false, writeRoot }];
   }
   return undefined;
+}
+
+/**
+ * A call of a member path without nested parentheses, or an assignment to one: what it parses to,
+ * if anything, is a call, an assignment or a sequence, never a simple handler.
+ */
+const CALL_OR_ASSIGNMENT = new RegExp(`^\\s*${ID}(?:\\.${ID})*\\s*(?:\\([^()]*\\)\\s*$|=[^=>])`);
+
+/** `isSimpleHandler(text)`, without parsing the common forms: a member path, a call, an assignment. */
+export function simpleHandler(text: string): boolean {
+  if (CALL_OR_ASSIGNMENT.test(text)) return false;
+  return pathRef(text)?.[3].writeRoot === false || isSimpleHandler(text);
 }
 
 /** `forEachIdentifier(text, offset, cb)`, parsing each text at most once per file. */
