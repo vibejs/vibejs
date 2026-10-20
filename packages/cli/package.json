@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@vibejs-org/errors": "workspace:*",
+    "oxc-parser": "catalog:",
     "srvx": "catalog:",
     "std-env": "catalog:"
   },

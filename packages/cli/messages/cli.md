@@ -54,6 +54,16 @@ The first word after `vibejs` must be a command, and every option must belong to
 - Check the spelling: a code is `VIBE` followed by four digits.
 - Update the vibe.js packages in this project if the code comes from a newer version.
 
+## VIBE8010: Overwrite needs consent
+
+> Overwriting {count} file(s) needs the user's consent: set `VIBEJS_USER_CONSENT` to their words.
+
+In agent mode, `vibejs generate --force` overwrites files only when `VIBEJS_USER_CONSENT` holds the user's own words agreeing to it, and the JSON output echoes them in `consent`. Nothing is written until then. This is a speed bump that keeps an agent from replacing a person's edits unasked, not a security boundary.
+
+### Fix
+
+- Ask the user, then re-run with `VIBEJS_USER_CONSENT='<their words>'`.
+
 ## VIBE8201: Project layout incomplete
 
 > `{path}` is missing; `vibejs {command}` expects `ui/index.html`, `server/src/app.module.ts` and `server/src/main.ts`.
@@ -147,6 +157,36 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 ### Fix
 
 - Fix the reported error and run `vibejs build` again.
+
+## VIBE8401: Generated files differ
+
+> {count} file(s) differ from what `vibejs generate {kind} {name}` writes: {paths}.
+
+`vibejs generate` never overwrites a file that differs from what it would write, so edits to generated code are never lost. A file equal to the generated one is skipped, which makes a second run of the same command a no-op. Nothing is written while any file differs.
+
+### Fix
+
+- Run with `--dry-run --json` to compare, then rename or `--force`.
+
+## VIBE8402: Register by hand
+
+> Register `{what}` in `{path}` by hand: {instruction}.
+
+`vibejs generate` registers new code in the files of the template: a module in the `imports` of `@Module` on `AppModule` in `server/src/app.module.ts`, a contract in the `contracts` object of `ui/src/api.ts`, and a page in the `defineRoutes([...])` array of `ui/src/routes.ts`. When such a file is missing or has another shape, it writes the other files and reports the exact code to add instead. The command still succeeds.
+
+### Fix
+
+- Apply the instruction, then run `vibejs check`.
+
+## VIBE8403: Invalid generator name
+
+> `{name}` is not a valid {kind} name; expected {expected}.
+
+`vibejs generate` takes names verbatim and derives file, class and route names from them. A resource is a camelCase identifier, usually plural (`users`); a component or a page is a PascalCase identifier (`UserCard`, `Users`). JavaScript reserved words and the names the generated code uses itself (such as `app`, `client` or `setup` for a resource, `Page` for a page) are not valid. A resource also needs a valid singular: `--singular <word>` gives it when the derived one is empty or taken; other kinds ignore `--singular`. `next` holds the command with a corrected name.
+
+### Fix
+
+- Use the name from `next`.
 
 ## VIBE8501: App module failed to load
 

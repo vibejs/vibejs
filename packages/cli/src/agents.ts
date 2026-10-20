@@ -39,6 +39,7 @@ export function renderBlock(exec: string, index: string): string {
     `- \`${exec} dev\` serves the UI and the API on one port; it reuses a running dev server.`,
     `- \`${exec} errors --json\` lists the errors of the running dev server.`,
     `- Done = \`${exec} check --json\` exits 0 (types, lint, format, tests, coverage per file).`,
+    `- \`${exec} g resource|component|page <name>\` adds code with its tests; \`--dry-run --json\` previews it.`,
     `- \`${exec} agents sync\` refreshes this block.`,
     '',
     'Rules:',

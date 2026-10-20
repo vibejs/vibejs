@@ -128,12 +128,14 @@ export function errorText(r: JsonEnvelope): string {
 /** Usage, project and tool errors: nothing could be checked. */
 const USAGE: readonly string[] = [
   'VIBE8001',
+  'VIBE8010',
   'VIBE8003',
   'VIBE8004',
   'VIBE8005',
   'VIBE8201',
   'VIBE8204',
   'VIBE8301',
+  'VIBE8403',
   'VIBE8503',
 ];
 

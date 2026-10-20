@@ -123,6 +123,7 @@ async function run(
   const ctx: Ctx = {
     version: '1.2.3',
     agent: { active: true },
+    consent: undefined,
     docsDir: '',
     cwd: join(root, 'src'),
     now: () => 0,
@@ -666,6 +667,7 @@ it('times each step and the whole run with ctx.now', async () => {
   const ctx: Ctx = {
     version: '1.2.3',
     agent: { active: true },
+    consent: undefined,
     docsDir: '',
     cwd: root,
     now: () => (t += 10),

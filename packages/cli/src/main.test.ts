@@ -56,6 +56,7 @@ async function run(argv: string[], agent = false, cwd = join(root, 'app')) {
   const ctx: Ctx = {
     version: '1.2.3',
     agent: { active: agent },
+    consent: undefined,
     docsDir: join(root, 'docs'),
     cwd,
     now: () => 0,
@@ -97,7 +98,7 @@ it('answers a missing input in agent mode with VIBE8003, missing[].example and e
 
 describe('unknown commands and options', () => {
   it.each([
-    [['g'], 'g', 'g', 'vibejs --help'],
+    [['generate', 'module', 'x'], 'generate', 'module', 'vibejs generate --help'],
     [['create'], 'create', 'create', 'npm create vibejs@latest'],
     [['toString'], 'toString', 'toString', 'vibejs --help'],
     [['explain', '--bogus', 'VIBE8003'], 'explain', '--bogus', 'vibejs explain --help'],
@@ -155,6 +156,8 @@ describe('command matrix', () => {
     ['--version', 0],
     ['explain --version', 0],
     ['g', 2],
+    ['generate', 2],
+    ['g resource my-thing', 2],
     ['check --only types', 0],
     ['dev', 2],
     ['build', 2],

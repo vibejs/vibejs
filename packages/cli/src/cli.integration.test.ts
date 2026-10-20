@@ -55,6 +55,37 @@ it('answers explain without a code with one VIBE8003 object and exit 2', () => {
   });
 });
 
+it('answers g and generate without input with the same VIBE8003 object listing the kinds', () => {
+  const g = vibejs('g');
+  expect(g.status).toBe(2);
+  expect(g.stderr).toBe('');
+  expect(single(g.stdout)).toMatchObject({
+    ok: false,
+    command: 'generate',
+    error: {
+      code: 'VIBE8003',
+      missing: [{ name: 'kind', values: ['resource', 'component', 'page'] }],
+    },
+  });
+  expect(vibejs('generate')).toEqual(g);
+  const help = single(vibejs('g', '--help', '--json').stdout);
+  expect(help).toMatchObject({
+    commands: [
+      {
+        name: 'generate',
+        aliases: ['g'],
+        positionals: [
+          { name: 'kind', required: true, values: ['resource', 'component', 'page'] },
+          { name: 'name', required: true },
+        ],
+      },
+    ],
+  });
+  expect(vibejs('generate', '--help', '--json').stdout).toBe(
+    vibejs('g', '--help', '--json').stdout,
+  );
+});
+
 it('explains a code offline from the bundled catalog', () => {
   const { status, stdout, stderr } = vibejs('explain', 'VIBE8003');
   expect(status).toBe(0);
@@ -144,10 +175,11 @@ describe('agent files', () => {
 
   it('names only commands that the built bin describes', () => {
     const names = new Set([...block.matchAll(/\bvibejs ([a-z]+)\b/g)].map((m) => m[1]));
-    expect([...names].toSorted()).toEqual(['agents', 'check', 'dev', 'errors', 'explain']);
+    expect([...names].toSorted()).toEqual(['agents', 'check', 'dev', 'errors', 'explain', 'g']);
     for (const name of names) {
       const { status, stdout } = vibejs(name, '--help', '--json');
-      expect(single(stdout)).toMatchObject({ ok: true, commands: [{ name }] });
+      const command = COMMANDS.find((c) => c.name === name || c.aliases?.includes(name))!;
+      expect(single(stdout)).toMatchObject({ ok: true, commands: [{ name: command.name }] });
       expect(status).toBe(0);
     }
   });
