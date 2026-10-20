@@ -9,4 +9,4 @@ const MESSAGES = {
   VIBE9091: ["The call to \"{path}\" is missing the path param \"{param}\".","Pass `params.{param}` in the call input.","Check that the route path \"{path}\" is the one you meant to call."],
 } as const;
 
-export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);
+export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => (process.env.NODE_ENV !== 'production' ? MESSAGES : undefined));
