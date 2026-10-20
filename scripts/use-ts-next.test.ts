@@ -95,17 +95,34 @@ describe('nextVersion', () => {
   });
 });
 
-async function runScript(...args: string[]): Promise<string> {
+const pkg = `{
+  "devDependencies": {
+    "typescript": "7.1.0-dev.20261015.1"
+  },
+  "overrides": {
+    "typescript": "$typescript"
+  }
+}
+`;
+
+/** Runs the script and returns the new pnpm-workspace.yaml after checking the template write. */
+async function runScript(version: string, ...args: string[]): Promise<string> {
   const writeFileSync = vi.fn<(file: string, text: string) => void>();
-  vi.doMock('node:fs', () => ({ readFileSync: () => yaml, writeFileSync }));
+  const readFileSync = (file: string) => (file.endsWith('package.json') ? pkg : yaml);
+  vi.doMock('node:fs', () => ({ readFileSync, writeFileSync }));
   vi.spyOn(console, 'log').mockImplementation(() => {});
   process.argv = ['node', fileURLToPath(new URL('use-ts-next.ts', import.meta.url)), ...args];
   vi.resetModules();
   await import('./use-ts-next.ts');
-  expect(writeFileSync).toHaveBeenCalledOnce();
-  const [file, text] = writeFileSync.mock.calls[0];
-  expect(file).toBe(fileURLToPath(new URL('../pnpm-workspace.yaml', import.meta.url)));
-  return text;
+  const root = new URL('../', import.meta.url);
+  expect(writeFileSync.mock.calls).toEqual([
+    [fileURLToPath(new URL('pnpm-workspace.yaml', root)), expect.any(String)],
+    [
+      fileURLToPath(new URL('packages/create-vibejs/templates/fullstack/package.json', root)),
+      pkg.replace('7.1.0-dev.20261015.1', version),
+    ],
+  ]);
+  return writeFileSync.mock.calls[0][1];
 }
 
 describe('as a script', () => {
@@ -118,7 +135,7 @@ describe('as a script', () => {
   });
 
   it('pins the given version', async () => {
-    expect(await runScript('7.1.0-dev.20261018.1')).toBe(
+    expect(await runScript('7.1.0-dev.20261018.1', '7.1.0-dev.20261018.1')).toBe(
       setTypescript(yaml, '7.1.0-dev.20261018.1'),
     );
   });
@@ -127,6 +144,8 @@ describe('as a script', () => {
     vi.useFakeTimers({ now, toFake: ['Date'] });
     vi.stubGlobal('fetch', async () => Response.json({ time }));
     // minimumReleaseAge: 1440 (one day) admits 20261019.1; the repository's 4320 would not.
-    expect(await runScript()).toBe(setTypescript(yaml, '7.1.0-dev.20261019.1'));
+    expect(await runScript('7.1.0-dev.20261019.1')).toBe(
+      setTypescript(yaml, '7.1.0-dev.20261019.1'),
+    );
   });
 });

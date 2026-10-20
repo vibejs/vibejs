@@ -1,5 +1,6 @@
 // Usage: node scripts/use-ts-next.ts [version]
-// Pins both `catalog.typescript` and `catalogs.ts-next.typescript` in pnpm-workspace.yaml to an
+// Pins both `catalog.typescript` and `catalogs.ts-next.typescript` in pnpm-workspace.yaml, and the
+// fullstack template's typescript devDependency (kept equal to the ts-next pin), to an
 // exact version, or to the newest 7.1 nightly at least minimumReleaseAge old when no version is given.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -65,9 +66,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const arg = process.argv.at(2);
   const version = arg ?? (await nextVersion(releaseAge(yaml)));
   writeFileSync(file, setTypescript(yaml, version));
+  const template = fileURLToPath(
+    new URL('../packages/create-vibejs/templates/fullstack/package.json', import.meta.url),
+  );
+  const pkg = readFileSync(template, 'utf8');
+  writeFileSync(template, pkg.replace(/"typescript": "\d[^"]*"/, `"typescript": "${version}"`));
   console.log(
     arg === undefined
-      ? `typescript ${version} (newest 7.1 nightly at least minimumReleaseAge old) in catalog and catalogs.ts-next`
-      : `typescript ${version} in catalog and catalogs.ts-next`,
+      ? `typescript ${version} (newest 7.1 nightly at least minimumReleaseAge old) in the catalogs and the template`
+      : `typescript ${version} in the catalogs and the template`,
   );
 }
