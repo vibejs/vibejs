@@ -25,7 +25,7 @@ const app = await Test.createTestingModule({
   logger: new JsonLogger({ level: 'silent' }),
 }).compile();
 const api = createClient({ users }, { baseUrl: '/api', fetch: app.fetch });
-expect(await api.get({ params: { id: 'missing' } })).toMatchObject({
+expect(await api.users.get({ params: { id: 'missing' } })).toMatchObject({
   ok: false,
   error: { code: 'USER_NOT_FOUND', status: 404 },
 });
