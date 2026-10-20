@@ -110,10 +110,14 @@ export const key = (name: string): string => (IDENTIFIER.test(name) ? name : quo
 export const CTX_TYPES = '__VibeProps & __VibeModels, __VibeEmits, __VibeSlots';
 
 const line = (w: Walk, s = '') => w.b.add(`\n${'  '.repeat(w.depth)}${s}`);
-const directive = (el: ElementNode, name: string) =>
-  el.props.find((p): p is DirectiveNode => p.type === NodeTypes.DIRECTIVE && p.name === name);
-const findAttr = (el: ElementNode, name: string) =>
-  el.props.find((p): p is AttributeNode => p.type === NodeTypes.ATTRIBUTE && p.name === name);
+function directive(el: ElementNode, name: string): DirectiveNode | undefined {
+  for (const p of el.props) if (p.type === NodeTypes.DIRECTIVE && p.name === name) return p;
+  return undefined;
+}
+function findAttr(el: ElementNode, name: string): AttributeNode | undefined {
+  for (const p of el.props) if (p.type === NodeTypes.ATTRIBUTE && p.name === name) return p;
+  return undefined;
+}
 /** A non-empty expression. */
 const filled = (exp: SimpleExpressionNode | undefined) =>
   exp && /\S/.test(exp.content) ? exp : undefined;
