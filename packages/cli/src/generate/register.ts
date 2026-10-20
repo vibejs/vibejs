@@ -36,8 +36,10 @@ function nameOf(
   return undefined;
 }
 
-/** What identifies an element: its name, or the `path` of an object element. */
+/** What identifies an element: its name, `X` of `X.forRoot()`, or the `path` of an object. */
 function keyOf(node: Item | null): string | undefined {
+  if (node?.type === 'CallExpression' && node.callee.type === 'MemberExpression')
+    return nameOf(node.callee.object);
   if (node?.type !== 'ObjectExpression') return nameOf(node);
   const path = node.properties.find((p) => nameOf(p) === 'path');
   return path?.type === 'Property' ? nameOf(path.value) : undefined;
@@ -68,11 +70,12 @@ function append(text: string, literal: Literal, element: string, multiline: bool
   if (!last) return `${open}\n${base}  ${element},\n${base}${close}`;
   const end = last.end - literal.start;
   if (!source.includes('\n')) return `${source.slice(0, end)}, ${element}${source.slice(end)}`;
-  const comma = /^\s*,/.exec(source.slice(end));
-  const indent = indentAt(text, last.start);
-  return comma
-    ? `${source.slice(0, end + comma[0].length)}\n${indent}${element},${source.slice(end + comma[0].length)}`
-    : `${source.slice(0, end)},\n${indent}${element}${source.slice(end)}`;
+  const comma = /^\s*,/.exec(source.slice(end))?.[0];
+  // After the line of the last element, so a trailing comment stays on that element.
+  const eol = source.indexOf('\n', end + (comma?.length ?? 0));
+  const at = eol === -1 ? end + (comma?.length ?? 0) : eol;
+  const line = `\n${indentAt(text, last.start)}${element}${comma ? ',' : ''}`;
+  return `${source.slice(0, end)}${comma ? '' : ','}${source.slice(end, at)}${line}${source.slice(at)}`;
 }
 
 /**
@@ -88,15 +91,18 @@ export function register(
   if (!literal) return { manual: target.instruction };
   if (itemsOf(literal).some((item) => keyOf(item) === target.key)) return { registered: true };
   const updated = append(text, literal, target.element, target.multiline === true);
-  let out = text.slice(0, literal.start) + updated + text.slice(literal.end);
-  if (target.import) {
-    const at = program.body.findLast((s) => s.type === 'ImportDeclaration')?.end;
-    out =
-      at === undefined
-        ? `${target.import}\n${out}`
-        : `${out.slice(0, at)}\n${target.import}${out.slice(at)}`;
+  const edits: [start: number, end: number, text: string][] = [
+    [literal.start, literal.end, updated],
+  ];
+  const imports = program.body.filter((s) => s.type === 'ImportDeclaration');
+  const bound = imports.some((s) => s.specifiers.some((x) => x.local.name === target.element));
+  if (target.import && !bound) {
+    const at = imports.at(-1)?.end;
+    edits.push(at === undefined ? [0, 0, `${target.import}\n`] : [at, at, `\n${target.import}`]);
   }
-  return { text: out };
+  // From the end, so each edit keeps the offsets of the ones before it valid.
+  edits.sort((a, b) => b[0] - a[0]);
+  return { text: edits.reduce((out, [s, e, add]) => out.slice(0, s) + add + out.slice(e), text) };
 }
 
 const callee = (node: Expression | null | undefined, name: string) =>

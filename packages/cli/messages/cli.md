@@ -182,7 +182,7 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 
 > `{name}` is not a valid {kind} name; expected {expected}.
 
-`vibejs generate` takes names verbatim and derives file, class and route names from them. A resource is a camelCase identifier, usually plural (`users`); a component or a page is a PascalCase identifier (`UserCard`, `Users`). JavaScript reserved words are not valid names. `next` holds the command with a corrected name.
+`vibejs generate` takes names verbatim and derives file, class and route names from them. A resource is a camelCase identifier, usually plural (`users`); a component or a page is a PascalCase identifier (`UserCard`, `Users`). JavaScript reserved words and the names the generated code uses itself (such as `app`, `client` or `setup` for a resource, `Page` for a page) are not valid. A resource also needs a valid singular: `--singular <word>` gives it when the derived one is empty or taken; other kinds ignore `--singular`. `next` holds the command with a corrected name.
 
 ### Fix
 

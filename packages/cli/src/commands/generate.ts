@@ -90,7 +90,7 @@ export const generate: CommandDef<GenerateResult> = {
     } catch (error) {
       if (!isVibeError(error)) throw error;
       const fixed = [`vibejs generate ${k} ${fixName(k, name)}`];
-      if (singular) fixed[0] += ` --singular ${fixName(k, singular)}`;
+      if (singular && k === 'resource') fixed[0] += ` --singular ${fixName(k, singular)}`;
       return failed(error, fixed);
     }
     let ops = plan(k, n, (path) => readOrUndefined(join(root, path)));

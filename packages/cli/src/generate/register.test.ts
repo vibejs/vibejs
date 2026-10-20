@@ -91,9 +91,38 @@ describe('the AppModule imports', () => {
     });
   });
 
-  it('skips a registered module', () => {
+  it('skips a registered module, also as UsersModule.forRoot()', () => {
     const text = '@Module({ imports: [UsersModule] })\nexport class AppModule {}\n';
     expect(register(text, moduleTarget)).toEqual({ registered: true });
+    const forRoot = `${moduleTarget.import}\n@Module({ imports: [UsersModule.forRoot()] })\n`;
+    expect(register(`${forRoot}export class AppModule {}\n`, moduleTarget)).toEqual({
+      registered: true,
+    });
+  });
+
+  it('adds only the element when the module is imported already', () => {
+    const text = `${moduleTarget.import}\n@Module({ imports: [] })\nexport class AppModule {}\n`;
+    expect(register(text, moduleTarget)).toEqual({
+      text: `${moduleTarget.import}\n@Module({ imports: [UsersModule] })\nexport class AppModule {}\n`,
+    });
+  });
+
+  it('adds the import after an import that follows the literal', () => {
+    const text = lines(
+      "import { Module } from '@vibejs-org/server';",
+      '@Module({ imports: [HealthModule] })',
+      'export class AppModule {}',
+      "import { HealthModule } from './health/health.module.ts';",
+    );
+    expect(register(text, moduleTarget)).toEqual({
+      text: lines(
+        "import { Module } from '@vibejs-org/server';",
+        '@Module({ imports: [HealthModule, UsersModule] })',
+        'export class AppModule {}',
+        "import { HealthModule } from './health/health.module.ts';",
+        "import { UsersModule } from './users/users.module.ts';",
+      ),
+    });
   });
 
   it.each([
@@ -175,6 +204,22 @@ describe('the routes array', () => {
     });
     expect(register('const routes = defineRoutes([\n]);\n', routeTarget)).toEqual({
       text: `const routes = defineRoutes([\n  ${route},\n]);\n`,
+    });
+  });
+
+  it('keeps a trailing comment on the last element', () => {
+    for (const comma of [',', '']) {
+      const text = `const routes = defineRoutes([\n  { path: '/', component: H }${comma} // home\n]);\n`;
+      expect(register(text, routeTarget)).toEqual({
+        text: `const routes = defineRoutes([\n  { path: '/', component: H }, // home\n  ${route}${comma}\n]);\n`,
+      });
+    }
+  });
+
+  it('appends after a last element that shares the line of the closing bracket', () => {
+    const text = "const routes = defineRoutes([\n  { path: '/', component: H }]);\n";
+    expect(register(text, routeTarget)).toEqual({
+      text: `const routes = defineRoutes([\n  { path: '/', component: H },\n  ${route}]);\n`,
     });
   });
 

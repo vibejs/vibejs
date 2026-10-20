@@ -149,6 +149,7 @@ it('rejects an invalid name with VIBE8403, exit 2 and a corrected command', asyn
     ['resource', 'delete', undefined, 'vibejs generate resource users'],
     ['component', 'userCard', undefined, 'vibejs generate component UserCard'],
     ['resource', 'people', 'Person', 'vibejs generate resource people --singular person'],
+    ['component', 'userCard', 'x', 'vibejs generate component UserCard'],
   ] as const) {
     const r = await run([kind, name], singular ? { singular } : {});
     expect(r).toMatchObject({ ok: false, error: { code: 'VIBE8403' }, next: [next] });

@@ -38,8 +38,34 @@ const PATTERN: Record<GeneratorKind, [RegExp, string, string]> = {
   page: [/^[A-Z][A-Za-z0-9]*$/, 'a PascalCase identifier such as `Users`', 'Users'],
 };
 
+/** One rule: `categories` → `category`, `boxes` → `box`, `houses` → `house`, `glass` stays. */
+const singularOf = (name: string) =>
+  name.replace(/(?:ies|(?<=[xz]|ch|sh|ss)es|(?<!s)s)$/, (end) => (end === 'ies' ? 'y' : ''));
+
+/** Reserved words and names the generated code uses itself, so a generated file would not compile. */
+const TAKEN: Record<GeneratorKind, Set<string>> = {
+  resource: new Set([
+    ...RESERVED,
+    ...`app arguments client contracts createClient ctx defineContract del eval expect get inject it
+    patch post setup v`.split(/\s+/),
+  ]),
+  component: RESERVED,
+  page: new Set([...RESERVED, 'Page']),
+};
+/** Singulars whose PascalCase form the controller imports already. */
+const TAKEN_SINGULAR = new Set(['controller', 'ctx', 'handle']);
+
+/** The `expected` text of VIBE8403 when `word` is not a valid `kind` name. */
+function invalid(kind: GeneratorKind, word: string, taken = TAKEN[kind]): string | undefined {
+  const [pattern, expected, example] = PATTERN[kind];
+  if (!pattern.test(word)) return expected;
+  if (taken.has(word))
+    return `a name that is not a reserved word or used by the generated code, such as \`${example}\``;
+  return undefined;
+}
+
 const valid = (kind: GeneratorKind, name: string) =>
-  PATTERN[kind][0].test(name) && !RESERVED.has(name);
+  !invalid(kind, name) && (kind !== 'resource' || !invalid(kind, singularOf(name), TAKEN_SINGULAR));
 
 /** A valid name close to `name`: `my-thing` → `myThing`, `userCard` → `UserCard`. */
 export function fixName(kind: GeneratorKind, name: string): string {
@@ -52,18 +78,19 @@ export function fixName(kind: GeneratorKind, name: string): string {
   return valid(kind, fixed) ? fixed : PATTERN[kind][2];
 }
 
-/** One rule: `categories` → `category`, `boxes` → `box`, `users` → `user`, `glass` stays. */
-const singularOf = (name: string) =>
-  name.replace(/(?:ies|(?<=[sxz]|ch|sh)es|(?<!s)s)$/, (end) => (end === 'ies' ? 'y' : ''));
-
-/** The names of a `kind` called `name`; throws VIBE8403 for an invalid name. */
+/** The names of a `kind` called `name`; throws VIBE8403 for an invalid name. `singular` is for resources only. */
 export function names(kind: GeneratorKind, name: string, singular?: string): Names {
-  for (const value of singular === undefined ? [name] : [name, singular]) {
-    if (!valid(kind, value)) {
-      throw vibeError('VIBE8403', { name: value, kind, expected: PATTERN[kind][1] });
-    }
+  const fail = (value: string, expected: string) =>
+    vibeError('VIBE8403', { name: value, kind, expected });
+  const expected = invalid(kind, name);
+  if (expected) throw fail(name, expected);
+  if (kind === 'resource') {
+    const one = singular ?? singularOf(name);
+    const wrong = invalid(kind, one, TAKEN_SINGULAR);
+    if (wrong && singular !== undefined) throw fail(singular, wrong);
+    if (wrong) throw fail(name, 'a name with a valid singular, or `--singular <word>`');
+    return { name, singular: one };
   }
-  if (kind === 'resource') return { name, singular: singular ?? singularOf(name) };
   const full = kind === 'page' && !name.endsWith('Page') ? `${name}Page` : name;
   return { name: full, singular: full };
 }

@@ -23,7 +23,9 @@ describe('names', () => {
     ['wishes', undefined, 'wishes', 'wish'],
     ['blogPosts', undefined, 'blogPosts', 'blogPost'],
     ['people', 'person', 'people', 'person'],
-    ['buses', undefined, 'buses', 'bus'],
+    ['houses', undefined, 'houses', 'house'],
+    ['cases', undefined, 'cases', 'case'],
+    ['classes', undefined, 'classes', 'class'],
     ['glass', undefined, 'glass', 'glass'],
     ['news', 'news', 'news', 'news'],
   ])('resource %s (--singular %s) → %s/%s', (name, singular, plural, one) => {
@@ -46,6 +48,15 @@ describe('names', () => {
     ['component', 'user-card', 'UserCard'],
     ['page', '2fa', 'Fa'],
     ['page', '', 'Users'],
+    ['page', 'Page', 'Users'],
+    ['resource', 's', 'users'],
+    ['resource', 'app', 'users'],
+    ['resource', 'contracts', 'users'],
+    ['resource', 'client', 'users'],
+    ['resource', 'setup', 'users'],
+    ['resource', 'arguments', 'users'],
+    ['resource', 'eval', 'users'],
+    ['resource', 'controllers', 'users'],
   ] as const)('rejects %s %j with VIBE8403 and suggests %s', (kind, name, fixed) => {
     let error: unknown;
     try {
@@ -58,8 +69,11 @@ describe('names', () => {
     expect(fixName(kind, name)).toBe(fixed);
   });
 
-  it('checks the --singular word too', () => {
+  it('checks the --singular word of a resource and ignores it for other kinds', () => {
     expect(() => names('resource', 'people', 'Person')).toThrow('`Person` is not a valid');
+    expect(() => names('resource', 'handles', 'handle')).toThrow('`handle` is not a valid');
+    expect(() => names('resource', 's')).toThrow('expected a name with a valid singular');
+    expect(names('component', 'UserCard', 'x')).toEqual({ name: 'UserCard', singular: 'UserCard' });
   });
 });
 
