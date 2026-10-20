@@ -90,6 +90,36 @@ describe('corpus', () => {
     ]);
   });
 
+  it('reports unused and misplaced @vibe-expect-error as VIBE6010, still checking types', () => {
+    const lines = diagnostics.filter((d) => d.startsWith('cases/_fail_expect-error-unused/'));
+    expect(lines.map((d) => C6.exec(d)?.slice(1, 6))).toEqual([
+      ['cases/_fail_expect-error-unused/App.vibe', '7', '3', 'error', 'VIBE6010'],
+      ['cases/_fail_expect-error-unused/App.vibe', '11', '5', 'error', 'VIBE6010'],
+      ['cases/_fail_expect-error-unused/App.vibe', '13', '15', 'error', 'TS2339'],
+    ]);
+  });
+
+  it('reports an unused import under noUnusedLocals, and none in generated code', () => {
+    expect(diagnostics.filter((d) => /^cases\/(?:_fail_)?no-unused\//.test(d))).toEqual([
+      "cases/_fail_no-unused/App.vibe(2,10): error TS6133: 'computed' is declared but its value is never read.",
+    ]);
+  });
+
+  it('reports the errors that @vibe-expect-error suppresses once the comments are removed', () => {
+    const app = join(root, 'cases/expect-error/App.vibe');
+    const source = readFileSync(app, 'utf8');
+    writeFileSync(app, source.replaceAll('<!-- @vibe-expect-error -->', ''));
+    const removed = tsc(root, 'cases/expect-error');
+    writeFileSync(app, source);
+    expect(removed.diagnostics).toMatchInlineSnapshot(`
+      [
+        "cases/expect-error/App.vibe(8,21): error TS2322: Type 'string' is not assignable to type 'number'.",
+        "cases/expect-error/App.vibe(10,36): error TS2551: Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?",
+        "cases/expect-error/App.vibe(13,14): error TS2339: Property 'toUpperCase' does not exist on type 'number'.",
+      ]
+    `);
+  }, 60_000);
+
   it('reports every error at its .vibe or .ts position', async () => {
     await expect(`${diagnostics.toSorted().join('\n')}\n`).toMatchFileSnapshot(
       './__snapshots__/typecheck.corpus.txt',

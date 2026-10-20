@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import Child from './Child.vibe'
+</script>
+
+<template>
+  <!--   @vibe-expect-error   -->
+  <!-- another comment -->
+  <Child :count="'x'">
+    <template #item="{ row }">{{ row.missing }}</template>
+  </Child>
+</template>

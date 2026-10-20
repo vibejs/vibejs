@@ -1,0 +1,11 @@
+<script setup lang="ts">
+const value = 1 as number | string
+</script>
+
+<template>
+  <!-- @vibe-expect-error -->
+  <p v-if="value.length">a</p>
+  <!-- @vibe-expect-error -->
+  <p v-else-if="value.toFixed()">b</p>
+  <p v-else>{{ value }}</p>
+</template>

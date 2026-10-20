@@ -1,0 +1,11 @@
+<script setup lang="ts">
+const label = 'a'
+</script>
+
+<template>
+  <p>
+    <!-- @vibe-expect-error -->
+    {{ label.toFixed() }}
+    {{ label }}
+  </p>
+</template>

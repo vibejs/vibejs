@@ -1,0 +1,15 @@
+<script setup lang="ts">
+const { rows } = defineProps<{ rows: string[] }>()
+const emit = defineEmits<{ pick: [row: string] }>()
+const selected = defineModel<string>()
+</script>
+
+<template>
+  <slot name="header" :count="rows.length" />
+  <ul>
+    <li v-for="(row, index) in rows" :key="index" @click="emit('pick', row)">
+      <slot name="item" :row="row" :active="row === selected" />
+    </li>
+  </ul>
+  <slot />
+</template>

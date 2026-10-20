@@ -1,0 +1,8 @@
+#0 Verbatim EXPR o[24,43) "\nconst label = 'a'\n" → v[0,19) "\nconst label = 'a'\n"
+#1 Atom LINK o[31,36) "label" → v[110,115) "label"
+#2 Atom BOUND o[68,69) "p" → v[173,174) "p"
+#3 Verbatim BOUND o[110,115) "label" → v[187,192) "label"
+#4 Verbatim EXPR o[115,125) ".toFixed()" → v[192,202) ".toFixed()"
+#5 Verbatim BOUND o[136,141) "label" → v[210,215) "label"
+#6 Atom ANCHOR o[0,0) "" → v[314,422) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
+@vibe-expect-error o[75,102) → v[181,204) "\n    (label.toFixed());"

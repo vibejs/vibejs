@@ -15,6 +15,60 @@ export interface Names {
   writes: boolean;
 }
 
+type Ref = [name: string, start: number, end: number, info: { local: boolean; writeRoot: boolean }];
+/**
+ * The identifier references of each text walked while one file is generated: a handler or a
+ * `v-model` value is walked up to three times, and a file repeats paths such as `item.id`.
+ */
+const walkedTexts = new Map<string, Ref[]>();
+
+/** Starts a file: the cache holds only the texts of one file. */
+export function resetWalks(): void {
+  walkedTexts.clear();
+}
+
+const ID = '[A-Za-z_$][\\w$]*';
+/**
+ * A member path (`a.b`): plain, as an assignment target `(a.b) = 0` and as an array pattern
+ * `[a.b] = []`. Its root is its only reference, a write root when wrapped.
+ */
+const PATHS: [RegExp, boolean][] = [
+  [new RegExp(`^\\s*(${ID})(?:\\.${ID})*\\s*$`), false],
+  [new RegExp(`^\\(\\s*(${ID})(?:\\.${ID})*\\s*\\) = 0$`), true],
+  [new RegExp(`^\\[\\s*(${ID})(?:\\.${ID})*\\s*\\] = \\[\\]$`), true],
+];
+/** The reserved words of strict code: a path starting with one is left to the parser. */
+const RESERVED = new Set(
+  'await break case catch class const continue debugger default delete do else enum export extends false finally for function if implements import in instanceof interface let new null package private protected public return static super switch this throw true try typeof var void while with yield'.split(
+    ' ',
+  ),
+);
+
+/** The reference of a member path, without parsing it: most template expressions are one. */
+export function pathRef(text: string): Ref | undefined {
+  for (const [re, writeRoot] of PATHS) {
+    const root = re.exec(text)?.[1];
+    if (root === undefined) continue;
+    if (RESERVED.has(root)) return undefined;
+    // Only whitespace, `(` or `[` precede the root.
+    const start = text.indexOf(root);
+    return [root, start, start + root.length, { local: false, writeRoot }];
+  }
+  return undefined;
+}
+
+/** `forEachIdentifier(text, offset, cb)`, parsing each text at most once per file. */
+function eachIdentifier(text: string, offset: number, cb: (...ref: Ref) => void): void {
+  let refs = walkedTexts.get(text);
+  if (!refs) {
+    const ref = pathRef(text);
+    const list: Ref[] = ref ? [ref] : [];
+    if (!ref) forEachIdentifier(text, 0, (...r) => list.push(r));
+    walkedTexts.set(text, (refs = list));
+  }
+  for (const [name, start, end, info] of refs) cb(name, start + offset, end + offset, info);
+}
+
 /** How `expression` walks and maps its range. */
 export interface Mode {
   /** The range is a v-for alias: only names read by its default values are bound. */
@@ -49,7 +103,7 @@ export function expression(
     : target
       ? ([`(${text}) = 0`, start - 1] as const)
       : ([text, start] as const);
-  forEachIdentifier(...walked, (name, from, to, { local, writeRoot }) => {
+  eachIdentifier(...walked, (name, from, to, { local, writeRoot }) => {
     if (local || locals.has(name) || (pattern && writeRoot)) return;
     const setup = names.setup.has(name);
     if (!setup && !names.ctx.has(name)) {
@@ -74,7 +128,7 @@ export function expression(
 /** Whether the expression at [start, end) is an assignment target: a name or a member path. */
 export function assignable(source: string, [start, end]: [number, number]): boolean {
   let found = false;
-  forEachIdentifier(`(${source.slice(start, end)}) = 0`, 0, (_, __, ___, { writeRoot }) => {
+  eachIdentifier(`(${source.slice(start, end)}) = 0`, 0, (_, __, ___, { writeRoot }) => {
     found ||= writeRoot;
   });
   return found;
@@ -83,7 +137,7 @@ export function assignable(source: string, [start, end]: [number, number]): bool
 /** Whether the inline handler at [start, end) reads `$event`. */
 export function readsEvent(source: string, [start, end]: [number, number]): boolean {
   let found = false;
-  forEachIdentifier(source.slice(start, end), start, (name, _, __, { local }) => {
+  eachIdentifier(source.slice(start, end), start, (name, _, __, { local }) => {
     found ||= name === '$event' && !local;
   });
   return found;
@@ -93,7 +147,7 @@ export function readsEvent(source: string, [start, end]: [number, number]): bool
 export function aliasNames(source: string, [start, end]: [number, number]): string[] {
   const names: string[] = [];
   // As an assignment target, every name the pattern declares is a write root.
-  forEachIdentifier(`[${source.slice(start, end)}] = []`, start - 1, (name, _, __, info) => {
+  eachIdentifier(`[${source.slice(start, end)}] = []`, start - 1, (name, _, __, info) => {
     if (info.writeRoot) names.push(name);
   });
   return names;

@@ -1,6 +1,7 @@
+import { forEachIdentifier } from '@vibejs-org/compiler';
 import { expect, it } from 'vitest';
 import { CodeBuilder, Preset, SpanKind } from './builder.ts';
-import { aliasNames, expression, type Names } from './expression.ts';
+import { aliasNames, expression, pathRef, type Names } from './expression.ts';
 
 const names = (): Names => ({
   setup: new Map([['count', [0, 5]]]),
@@ -53,3 +54,25 @@ it('lists the names a v-for alias declares', () => {
   expect(aliasNames(source, [4, 27])).toEqual(['a', 'c', 'e']);
   expect(aliasNames(source, [1, 2])).toEqual(['x']);
 });
+
+it.each([
+  'a',
+  ' $event ',
+  'item.id',
+  'a.b.c',
+  '(a.b) = 0',
+  '( x ) = 0',
+  '[row] = []',
+  '[a.b] = []',
+])('reads the member path %j without the parser, as the parser does', (text) => {
+  const refs: unknown[] = [];
+  forEachIdentifier(text, 0, (...ref) => refs.push(ref));
+  expect([pathRef(text)]).toEqual(refs);
+});
+
+it.each(['this.a', 'true', 'private', 'a.b()', 'a[0]', 'a .b', '(a) = 1', 'a.0'])(
+  'leaves %j to the parser',
+  (text) => {
+    expect(pathRef(text)).toBeUndefined();
+  },
+);

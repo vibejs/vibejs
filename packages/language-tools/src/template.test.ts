@@ -1,7 +1,8 @@
-import { parse } from '@vibejs-org/compiler';
+import { NodeTypes, parse, type ElementNode } from '@vibejs-org/compiler';
 import { expect, it } from 'vitest';
 import { CodeBuilder } from './builder.ts';
-import { children } from './template.ts';
+import { generate } from './generate.ts';
+import { children, expectErrors } from './template.ts';
 
 function emit(
   template: string,
@@ -35,6 +36,8 @@ function emit(
     forwarded: new Set<number>(),
     refs,
     loops: 0,
+    targets: new Map(),
+    expecting: false,
   };
   children(descriptor.template!.ast.children, w, locals);
   return b.text
@@ -248,4 +251,41 @@ it('camelizes a kebab model name on a component', () => {
   expect(emit('<C v-model:first-name="m" />', ['C', 'm'])).toEqual([
     "var __vibe_c0 = __vibe.component(C)({ firstName: m, 'onUpdate:firstName': ($event = undefined as never) => { __vibe_w.m = $event } });",
   ]);
+});
+
+it('finds every @vibe-expect-error comment and its target', () => {
+  const template = [
+    '<!-- @vibe-expect-error --> <!-- c --><p />',
+    '<div><!--@vibe-expect-error-->{{ a }}</div>',
+    '<!-- @vibe-expect-error -->text',
+    '<!-- @vibe-expect-error: reason --><p />',
+    '<!-- @vibe-expect-error -->',
+  ].join('');
+  const source = `<template>${template}</template>`;
+  const nodes = parse(source, { filename: 'A.vibe' }).descriptor.template!.ast.children;
+  const [list, targets] = expectErrors(nodes);
+  const comments = [...source.matchAll(/<!--\s*@vibe-expect-error\s*-->/g)];
+  expect(list).toEqual(comments.map((m) => ({ start: m.index, length: m[0].length })));
+  const [p, div] = nodes.filter((n): n is ElementNode => n.type === NodeTypes.ELEMENT);
+  expect(targets).toEqual(
+    new Map([
+      [p, list[0]],
+      [div.children[1], list[1]],
+    ]),
+  );
+});
+
+it('covers all code of the target; a directive inside it stays unplaced', () => {
+  const file = generate(
+    'A.vibe',
+    '<template><!-- @vibe-expect-error --><ul><!-- @vibe-expect-error --><li /></ul></template>',
+  );
+  const [outer, inner] = file.directives;
+  const covered = file.text.slice(outer.virtualStart, outer.virtualEnd);
+  expect(covered.split('\n').map((line) => line.trim())).toEqual([
+    '',
+    '__vibe.el(__vibe.tags.ul)({ });',
+    '__vibe.el(__vibe.tags.li)({ });',
+  ]);
+  expect([inner.virtualStart, inner.virtualEnd]).toEqual([file.text.length, file.text.length]);
 });

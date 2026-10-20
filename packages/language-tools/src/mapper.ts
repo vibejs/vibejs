@@ -2,7 +2,13 @@ import type { VibeError } from '@vibejs-org/errors';
 import { ErrorCodes, ResponseError, type MessageConnection } from 'vscode-jsonrpc/node';
 import { vibeError } from './errors.gen.ts';
 import { generate } from './generate.ts';
-import { closeProject, initialize, openProject, transform } from './protocol.ts';
+import {
+  closeProject,
+  initialize,
+  openProject,
+  transform,
+  type TransformResult,
+} from './protocol.ts';
 
 /** The catalog text of an error on one line, without its `[VIBE####] ` prefix. */
 const text = (error: VibeError) =>
@@ -33,12 +39,27 @@ export function listen(conn: MessageConnection): void {
   conn.onRequest(transform, ({ fileName, content }) => {
     try {
       const file = generate(fileName, content);
-      return {
+      const result: TransformResult = {
         text: file.text,
         extension: '.ts',
         mappings: file.spans,
         diagnostics: file.diagnostics.map(({ message, ...d }) => ({ ...d, messageText: message })),
       };
+      if (file.directives.length > 0) {
+        result.diagnosticDirectives = {
+          directives: file.directives.map((d) => [
+            d.start,
+            d.length,
+            d.virtualStart,
+            d.virtualEnd,
+            1,
+          ]),
+          unusedExpectDirectiveDiagnostics: [
+            { code: 6010, messageText: text(vibeError('VIBE6010')) },
+          ],
+        };
+      }
+      return result;
     } catch (error) {
       const reason = String(error);
       const messageText = text(vibeError('VIBE6090', { reason }));

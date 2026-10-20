@@ -1,0 +1,13 @@
+<script setup lang="ts">
+const count = 1
+</script>
+
+<template>
+  <div>
+    <!-- @vibe-expect-error -->
+    <ul :title="count">
+      <!-- @vibe-expect-error -->
+      <li v-for="n in count" :key="n">{{ n.length }}</li>
+    </ul>
+  </div>
+</template>

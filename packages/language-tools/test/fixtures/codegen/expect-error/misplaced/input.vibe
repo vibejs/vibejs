@@ -1,0 +1,18 @@
+<script setup lang="ts">
+// @vibe-expect-error is not a directive in the script.
+const label = 'a'
+</script>
+
+<template>
+  <p>
+    <!-- @vibe-expect-error -->
+    text
+  </p>
+  <!-- @vibe-expect-error: with a reason -->
+  <p>{{ label }}</p>
+  <template>
+    <!-- @vibe-expect-error -->
+    <p :title="1" />
+  </template>
+  <!-- @vibe-expect-error -->
+</template>

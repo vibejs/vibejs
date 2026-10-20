@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import Child from './Child.vibe'
+const count = 1
+</script>
+
+<template>
+  <!-- @vibe-expect-error -->
+  <Child title="a" :count="'x'" />
+  <!-- @vibe-expect-error -->
+  <Child title="b" @select="$event.toFixed()" />
+  <p>
+    <!-- @vibe-expect-error -->
+    {{ count.toUpperCase() }}
+  </p>
+</template>

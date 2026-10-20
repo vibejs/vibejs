@@ -50,6 +50,44 @@ export interface Walk {
   refs: Map<string, string>;
   /** The number of `v-for` loops around the current element. */
   loops: number;
+  /** The targets of `@vibe-expect-error` comments: node -> its directive, ranges in `b`. */
+  targets: Map<TemplateChildNode, Expected>;
+  /** Whether a directive's target is being walked: a directive inside it stays unplaced. */
+  expecting: boolean;
+}
+
+/** A `<!-- @vibe-expect-error -->`; the virtual range is set when its target is walked. */
+export interface Expected {
+  start: number;
+  length: number;
+  virtual?: [number, number];
+}
+
+const EXPECT = '@vibe-expect-error';
+
+/**
+ * Every `<!-- @vibe-expect-error -->` in document order, and its target: the next sibling element
+ * or interpolation, skipping whitespace and comments. A directive before text or last has none.
+ */
+export function expectErrors(
+  nodes: TemplateChildNode[],
+): [Expected[], Map<TemplateChildNode, Expected>] {
+  const list: Expected[] = [];
+  const targets = new Map<TemplateChildNode, Expected>();
+  const scan = (siblings: TemplateChildNode[]) =>
+    siblings.forEach((node, i) => {
+      if (node.type === NodeTypes.ELEMENT) scan(node.children);
+      if (node.type !== NodeTypes.COMMENT || node.content.trim() !== EXPECT) return;
+      const [start, end] = range(node);
+      const d: Expected = { start, length: end - start };
+      list.push(d);
+      const next = siblings.slice(i + 1).find((n) => n.type !== NodeTypes.COMMENT && content(n));
+      if (next?.type === NodeTypes.ELEMENT || next?.type === NodeTypes.INTERPOLATION) {
+        targets.set(next, d);
+      }
+    });
+  scan(nodes);
+  return [list, targets];
 }
 
 type Locals = ReadonlySet<string>;
@@ -121,30 +159,39 @@ export function children(
   // Whether the last emitted statement is an `if` that a `v-else(-if)` continues.
   let chain = false;
   for (const node of nodes) {
+    // A directive covers all code of its target; one inside another's target stays unplaced.
+    const expected = w.expecting ? undefined : w.targets.get(node);
+    const start = w.b.text.length;
+    w.expecting ||= expected !== undefined;
     // Whitespace and comments keep a chain; other text and interpolations end it.
     if (node.type === NodeTypes.TEXT) chain &&= !node.content.trim();
     if (node.type === NodeTypes.INTERPOLATION) {
       chain = false;
       interpolation(node, w, locals);
     }
-    if (node.type !== NodeTypes.ELEMENT) continue;
-    const cond = directive(node, 'if') ?? directive(node, 'else-if');
-    const otherwise = directive(node, 'else');
-    const exp = filled(cond?.exp);
-    if (cond || otherwise) {
-      line(w, chain && (cond?.name === 'else-if' || otherwise) ? 'else ' : '');
-      if (exp) {
-        w.b.add('if (');
-        expression(w.b, w.names, w.source, range(exp), locals);
-        w.b.add(') {');
-      } else w.b.add('{');
-      chain = exp !== undefined;
-      // An untyped branch keeps its condition, so the rest of the chain still narrows.
-      block(w, () => visit(node));
-      line(w, '}');
-    } else {
-      chain = false;
-      visit(node);
+    if (node.type === NodeTypes.ELEMENT) {
+      const cond = directive(node, 'if') ?? directive(node, 'else-if');
+      const otherwise = directive(node, 'else');
+      const exp = filled(cond?.exp);
+      if (cond || otherwise) {
+        line(w, chain && (cond?.name === 'else-if' || otherwise) ? 'else ' : '');
+        if (exp) {
+          w.b.add('if (');
+          expression(w.b, w.names, w.source, range(exp), locals);
+          w.b.add(') {');
+        } else w.b.add('{');
+        chain = exp !== undefined;
+        // An untyped branch keeps its condition, so the rest of the chain still narrows.
+        block(w, () => visit(node));
+        line(w, '}');
+      } else {
+        chain = false;
+        visit(node);
+      }
+    }
+    if (expected) {
+      expected.virtual = [start, w.b.text.length];
+      w.expecting = false;
     }
   }
 }

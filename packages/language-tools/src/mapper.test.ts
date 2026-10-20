@@ -95,6 +95,33 @@ it('transforms a file to .ts with mappings and forwarded diagnostics', async () 
     mappings: file.spans,
     diagnostics: [{ code: 1102, messageText: file.diagnostics[0].message, start: 22, length: 6 }],
   });
+  expect(result).not.toHaveProperty('diagnosticDirectives');
+});
+
+it('adds the @vibe-expect-error directives with the VIBE6010 text, only when there are any', async () => {
+  const content =
+    '<template><!-- @vibe-expect-error --><p :id="1" /><a id="b" id="c" /></template>\n';
+  const file = generate('/p/A.vibe', content);
+  const result = await client().sendRequest('transform', {
+    fileName: '/p/A.vibe',
+    content,
+    projectHandle: 'p:0',
+  });
+  const [d] = file.directives;
+  expect(result).toMatchObject({
+    diagnosticDirectives: {
+      directives: [[10, 27, d.virtualStart, d.virtualEnd, 1]],
+      unusedExpectDirectiveDiagnostics: [
+        {
+          code: 6010,
+          messageText: expect.stringMatching(
+            /^This `<!-- @vibe-expect-error -->` suppresses no type error\. .*VIBE6010$/,
+          ),
+        },
+      ],
+    },
+    diagnostics: [{ code: 1102, messageText: file.diagnostics[0].message, start: 60, length: 6 }],
+  });
 });
 
 it('falls back to an empty module with VIBE6090 when generate throws', async () => {
