@@ -187,6 +187,8 @@ describe('skills and .mcp.json', () => {
     // A CLI dist with the repo's skills.
     const dist = join(root, 'dist');
     cpSync(SKILLS, join(dist, 'skills'), { recursive: true });
+    // A stray file next to the skill directories is ignored.
+    writeFileSync(join(dist, 'skills/.DS_Store'), '');
     cpSync(join(FIXTURES, 'docs'), join(dist, 'docs'), { recursive: true });
     root = join(root, 'app');
     mkdirSync(root);
@@ -271,6 +273,7 @@ describe('skills and .mcp.json', () => {
     ['not a JSON object', '[]'],
     ['not a JSON object', 'null'],
     ['a JSON object whose `mcpServers` is not an object', '{ "mcpServers": "vibejs" }'],
+    ['a JSON object whose `mcpServers` is not an object', '{ "mcpServers": null }'],
   ])('throws VIBE8602 for .mcp.json %s and writes nothing (%s)', (problem, text) => {
     writeFileSync(join(root, '.mcp.json'), text);
     let error: unknown;

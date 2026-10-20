@@ -14,7 +14,7 @@ function write(path: string, content: string): void {
   mkdirSync(dirname(join(root, path)), { recursive: true });
   writeFileSync(join(root, path), content);
 }
-// The search rows match only this page, so new catalog entries never change their snapshots.
+// Plain `docs quokka` matches only this page; queries that catalog entries can also match assert the row is present, not first.
 write('docs/guide/quokka.md', '# Quokka guide\n\nA quokka page.\n');
 write('docs/index.txt', '[vibe.js docs index]|guide:{quokka.md}\n');
 write('skills/vibejs-quokka/SKILL.md', 'A quokka skill.\n');
@@ -230,9 +230,9 @@ describe('--help --json', () => {
 });
 
 it('reads --json after -- as a docs query, not as the flag', async () => {
-  const result = await run(['docs', '--', '--json', 'quokka', 'guide']);
+  const result = await run(['docs', '--', '--json', 'quokka']);
   expect(result.code).toBe(0);
-  expect(result.stdout).toMatch(/^guide\/quokka {2}Quokka guide\n/);
+  expect(result.stdout).toMatch(/^guide\/quokka {2}Quokka guide$/m);
 });
 
 it('prints the version with --version --json, without a skew check', async () => {

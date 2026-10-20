@@ -86,7 +86,9 @@ export function projectAgentFiles(root: string, cliDist: string): AgentFiles {
   const index = readFileSync(join(cliDist, 'docs/index.txt'), 'utf8').trim();
   const dir = join(cliDist, 'skills');
   const skills = Object.fromEntries(
-    readdirSync(dir)
+    readdirSync(dir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map(({ name }) => name)
       .toSorted()
       .map((name) => [name, readFileSync(join(dir, name, 'SKILL.md'), 'utf8')]),
   );
@@ -129,7 +131,7 @@ function withMcp(text: string | undefined, entry: unknown): string {
     throw vibeError('VIBE8602', { problem: 'not valid JSON' });
   }
   if (!isObject(json)) throw vibeError('VIBE8602', { problem: 'not a JSON object' });
-  const servers = json.mcpServers ?? {};
+  const servers = 'mcpServers' in json ? json.mcpServers : {};
   if (!isObject(servers)) {
     throw vibeError('VIBE8602', { problem: 'a JSON object whose `mcpServers` is not an object' });
   }
