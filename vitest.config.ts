@@ -75,6 +75,8 @@ export default defineConfig({
         test: {
           name: 'integration',
           environment: 'node',
+          // The tests spawn builds, servers and browsers in parallel, so one can wait for the CPU.
+          testTimeout: 60_000,
           include: [
             'packages/*/src/**/*.integration.test.ts',
             'packages/create-vibejs/*.integration.test.ts',
