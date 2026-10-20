@@ -12,7 +12,7 @@ description: Pass values to every descendant of a component or to the whole app 
 An `InjectionKey<T>` is a symbol that carries the type of its value, so `provide()` checks the value and `inject()` returns `T`. Export the key from a `.ts` module that both sides import:
 
 ```ts
-import type { InjectionKey, Ref } from '@vibejs-org/ui';
+import { inject, type InjectionKey, type Ref } from '@vibejs-org/ui';
 
 export interface Theme {
   mode: Ref<'light' | 'dark'>;
@@ -20,6 +20,9 @@ export interface Theme {
 }
 
 export const ThemeKey: InjectionKey<Theme> = Symbol('theme');
+
+/** The nearest provided theme; `undefined` without a provider. */
+export const useTheme = (): Theme | undefined => inject(ThemeKey);
 ```
 
 The provider creates the value in its setup:
@@ -44,14 +47,13 @@ provide(ThemeKey, {
 </template>
 ```
 
-Any descendant injects it:
+Any descendant injects it, here through the `useTheme()` composable of `theme.ts`:
 
 ```vibe
 <script setup lang="ts">
-import { inject } from '@vibejs-org/ui';
-import { ThemeKey } from './theme.ts';
+import { useTheme } from './theme.ts';
 
-const theme = inject(ThemeKey);
+const theme = useTheme();
 </script>
 
 <template>

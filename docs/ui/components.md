@@ -83,7 +83,7 @@ A component renders content from its parent where it places `<slot>`. Named slot
 <script setup lang="ts">
 defineSlots<{
   default?: (props: { item: string; index: number }) => unknown;
-  header?: () => unknown;
+  header?: (props: {}) => unknown;
 }>();
 
 const { items } = defineProps<{ items: string[] }>();
@@ -132,12 +132,12 @@ The children of `<slot>` render when the parent passes no content for that slot.
 
 ```vibe
 <script setup lang="ts">
-const value = defineModel<string>({ required: true });
+const text = defineModel<string>({ required: true });
 const open = defineModel<boolean>('open', { default: () => false });
 </script>
 
 <template>
-  <input v-model="value" />
+  <input v-model="text" />
   <button type="button" @click="open = !open">{{ open ? 'Hide' : 'Show' }}</button>
 </template>
 ```
