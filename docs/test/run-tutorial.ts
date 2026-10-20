@@ -39,10 +39,15 @@ const WINDOWS = process.platform === 'win32';
 /** A response's status and JSON body. */
 const answer = async (res: Response) => [res.status, await res.json()];
 
-/** Stops a process and the processes it started. */
+/** Stops a process and the processes it started; a group that already ended is fine. */
 function stop(child: ChildProcess) {
   if (WINDOWS) spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F']);
-  else process.kill(-child.pid!, 'SIGTERM');
+  else
+    try {
+      process.kill(-child.pid!, 'SIGTERM');
+    } catch (error) {
+      if (!(error instanceof Error && 'code' in error && error.code === 'ESRCH')) throw error;
+    }
 }
 
 /** Runs one tutorial step at a time, in order; a failed step throws naming its tutorial.md line. */
@@ -101,11 +106,14 @@ export function tutorialRunner(
     });
     let stdout = '';
     child.stdout.setEncoding('utf8').on('data', (s: string) => (stdout += s));
-    child.stderr.resume();
+    let stderr = '';
+    child.stderr.setEncoding('utf8').on('data', (s: string) => (stderr += s));
     const exited = new Promise((resolve) => child.on('exit', resolve));
     try {
       const url = await new Promise<string>((resolve, reject) => {
-        void exited.then((code) => reject(new Error(`exited: ${String(code)}\n${stdout}`)));
+        void exited.then((code) =>
+          reject(new Error(`exited: ${String(code)}\n${stdout}\n${stderr}`)),
+        );
         child.stdout.on('data', () => {
           const found = /"url":"(http:\/\/[^"]+)"/.exec(stdout)?.[1];
           if (found) resolve(found.replace('[::]', '127.0.0.1'));

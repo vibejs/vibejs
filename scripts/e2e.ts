@@ -127,17 +127,23 @@ async function mcp(app: string, name: string): Promise<Line> {
   const send = (message: object) =>
     child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', ...message })}\n`);
   const clientInfo = { name: 'e2e', version: '1.0.0' };
-  send({
-    id: 1,
-    method: 'initialize',
-    params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo },
-  });
-  await until('the MCP server', () => answered(1), 60_000);
-  send({ method: 'notifications/initialized' });
-  send({ id: 2, method: 'tools/call', params: { name, arguments: {} } });
-  await until(name, () => answered(2), 60_000);
-  child.stdin.end();
-  await once(child, 'exit');
+  const exited = once(child, 'exit');
+  try {
+    send({
+      id: 1,
+      method: 'initialize',
+      params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo },
+    });
+    await until('the MCP server', () => answered(1), 60_000);
+    send({ method: 'notifications/initialized' });
+    send({ id: 2, method: 'tools/call', params: { name, arguments: {} } });
+    await until(name, () => answered(2), 60_000);
+  } finally {
+    // Also on a timeout: a running server keeps e2e from exiting.
+    child.stdin.end();
+    child.kill();
+    await exited;
+  }
   const answer = json(stdout).find((line) => line.id === 2)!;
   return JSON.parse(answer.result!.content[0].text);
 }
@@ -218,11 +224,21 @@ async function devLoop({ cwd: app, url, output }: StepOutput) {
   same(await (await fetch(users)).json(), [{ id: '1', name: 'Grace' }]);
 }
 
+/** The extra checks, by the tutorial command they follow; each must run at least once. */
+const HOOKS = [
+  'pnpm vibejs check',
+  'pnpm vibejs g component UserCard',
+  'pnpm vibejs build',
+  'pnpm dev',
+];
+const ran = new Set<string>();
+
 /** Extra checks around the tutorial's own steps. */
 async function onStep(s: TutorialStep, out: StepOutput) {
-  if (s.kind === 'write') return;
+  if (s.kind === 'write' || !HOOKS.includes(s.command)) return;
   const vibejs = (...args: string[]) => must(run('pnpm', ['vibejs', ...args], out.cwd, AGENT));
-  if (s.kind === 'run' && s.command === 'pnpm vibejs check' && s.exit === 0) {
+  if (s.command === 'pnpm vibejs check') {
+    if (s.kind !== 'run' || s.exit !== 0) return;
     clean(out.output());
     vibejs('agents', 'sync', '--check');
   } else if (s.command === 'pnpm vibejs g component UserCard') {
@@ -230,9 +246,10 @@ async function onStep(s: TutorialStep, out: StepOutput) {
     same([...new Set(ops.map((o: { op: string }) => o.op))], ['skip']);
   } else if (s.command === 'pnpm vibejs build') {
     audit(out.cwd, 'tutorial');
-  } else if (s.command === 'pnpm dev') {
+  } else {
     await devLoop(out);
   }
+  ran.add(s.command);
 }
 
 /** examples/todo: check, build, then add a todo in each browser on `vibejs dev`. */
@@ -250,11 +267,14 @@ async function todo() {
   });
   let stdout = '';
   dev.stdout!.setEncoding('utf8').on('data', (s: string) => (stdout += s));
-  dev.stderr!.resume();
+  let stderr = '';
+  dev.stderr!.setEncoding('utf8').on('data', (s: string) => (stderr += s));
+  const exited = once(dev, 'exit');
   try {
-    const { url } = await until('todo dev ready', () =>
-      json(stdout).find((e) => e.event === 'ready'),
-    );
+    const { url } = await until('todo dev ready', () => {
+      if (dev.exitCode !== null) throw new Error(`exit ${dev.exitCode}\n${stdout}\n${stderr}`);
+      return json(stdout).find((e) => e.event === 'ready');
+    });
     for (const type of [chromium, firefox, webkit]) {
       step(`examples/todo in ${type.name()}`);
       // Rendered from the API: a todo created through it is listed.
@@ -276,7 +296,7 @@ async function todo() {
     }
   } finally {
     dev.kill();
-    await once(dev, 'exit');
+    await exited;
   }
 }
 
@@ -291,6 +311,9 @@ try {
   // Imported after the build: the docs helpers load @vibejs-org/errors from dist.
   const { runTutorial } = await import('../docs/test/run-tutorial.ts');
   await runTutorial(md, { dir: temp('vibejs-e2e-'), tarballs }, onStep);
+  // A reworded tutorial command must fail here, not silently skip its extra check.
+  const missed = HOOKS.filter((command) => !ran.has(command));
+  ok(!missed.length, `no tutorial step for the extra checks of: ${missed.join(', ')}`);
 
   step('npm app');
   const app = join(temp('vibejs-e2e-npm-'), 'app');
