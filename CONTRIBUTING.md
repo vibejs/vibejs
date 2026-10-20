@@ -13,19 +13,19 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 
 ## Commands
 
-| Command                                 | What it does                                                                              |
-| --------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `pnpm check`                            | The local gate: `pnpm errors --check`, `oxfmt --check`, `pnpm lint`, `pnpm test:coverage` |
-| `pnpm lint`                             | `tsc -b`, type-aware oxlint, `scripts/lint-repo.ts` and knip                              |
-| `pnpm typecheck`                        | `tsc -b` with TypeScript 7.0.2, including the `*.test-d.ts` files                         |
-| `pnpm test`                             | Vitest, node and dom projects (watch mode; add `--run` for one run)                       |
-| `pnpm test:coverage`                    | Vitest node, dom and browser projects with the 100% per-file gate                         |
-| `pnpm test:integration`                 | `pnpm build`, then the integration project against `dist`                                 |
-| `pnpm build`                            | tsdown, publint and attw for every package                                                |
-| `pnpm fmt`                              | Formats the repo with oxfmt                                                               |
-| `pnpm errors`                           | Regenerates the error files from `packages/*/messages/*.md`                               |
-| `pnpm run docs`                         | `pnpm build`, then the docs site: error pages, CLI reference, snippet check, `llms.txt`   |
-| `node scripts/use-ts-next.ts [version]` | Pins the TypeScript catalogs to a 7.1 nightly (the `ts-next` CI job)                      |
+| Command                                 | What it does                                                                                                                      |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                            | The local gate: `pnpm errors --check`, `oxfmt --check`, `pnpm lint`, `pnpm test:coverage`                                         |
+| `pnpm lint`                             | `tsc -b`, type-aware oxlint, `scripts/lint-repo.ts` and knip                                                                      |
+| `pnpm typecheck`                        | `tsc -b` with TypeScript 7.0.2, including the `*.test-d.ts` files                                                                 |
+| `pnpm test`                             | Vitest, node and dom projects (watch mode; add `--run` for one run)                                                               |
+| `pnpm test:coverage`                    | Vitest node, dom and browser projects with the 100% per-file gate                                                                 |
+| `pnpm test:integration`                 | `pnpm build`, then the integration project against `dist`                                                                         |
+| `pnpm build`                            | tsdown, publint and attw for every package                                                                                        |
+| `pnpm fmt`                              | Formats the repo with oxfmt                                                                                                       |
+| `pnpm errors`                           | Regenerates the error files from `packages/*/messages/*.md`                                                                       |
+| `pnpm run docs`                         | `pnpm build`, then the docs site: error pages, CLI reference, snippet check, `llms.txt`                                           |
+| `node scripts/use-ts-next.ts [version]` | Pins the TypeScript catalogs and the template to the newest 7.1 nightly at least `minimumReleaseAge` old, or to the given version |
 
 ## Tests and coverage
 

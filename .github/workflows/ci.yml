@@ -105,8 +105,10 @@ jobs:
           install: false
       - run: node scripts/use-ts-next.ts
       - run: pnpm install --no-frozen-lockfile
-        env:
-          pnpm_config_minimum_release_age: 0
+      # As in `integration`: the npm install test needs the npm of a supported Node.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm typecheck
       - run: pnpm test --run
