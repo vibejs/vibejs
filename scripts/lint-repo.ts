@@ -193,7 +193,12 @@ export function main(root: string): number {
       }
     }
     const forkedCompiler = /^packages\/compiler\/src\/.*(?<!\.test(-d)?)\.ts$/.test(file);
-    if (forkedCompiler && headers.length && !text.includes('Edits to re-apply on an upgrade:')) {
+    const leadingComments = text.replace(/\n(?![ \t]*\/\/)[\s\S]*/, '');
+    if (
+      forkedCompiler &&
+      headers.length &&
+      !leadingComments.includes('Edits to re-apply on an upgrade:')
+    ) {
       at(headers[0].start, 'upstream', 'list the "Edits to re-apply on an upgrade:" in the header');
     }
 

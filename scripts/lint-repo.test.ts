@@ -438,11 +438,13 @@ describe('rule 7: Upstream headers', () => {
       lint({
         'packages/compiler/src/a.ts': `${header}export {};`,
         'packages/compiler/src/b.ts': `${header}// Edits to re-apply on an upgrade:\n// - none.\nexport {};`,
+        'packages/compiler/src/c.ts': `${header}export {};\n// Edits to re-apply on an upgrade:\n`,
         'packages/compiler/src/a.test.ts': header,
         'packages/compiler/src/a.test-d.ts': header,
       }),
     ).toEqual([
       'packages/compiler/src/a.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
+      'packages/compiler/src/c.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
     ]);
   });
 });

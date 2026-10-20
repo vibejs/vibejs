@@ -61,7 +61,7 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 
 ## Upgrading forked code
 
-`packages/compiler` and `packages/ui` contain files derived from other projects. Each one starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header and lists its `Edits to re-apply on an upgrade:`; `scripts/lint-repo.ts` requires that list in every forked compiler source. To move a fork to a new upstream release:
+`packages/compiler` and `packages/ui` contain files derived from other projects. Each one starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header. Each forked compiler source also lists its `Edits to re-apply on an upgrade:` in that header, and `scripts/lint-repo.ts` requires the list there; the forked UI sources do not carry the list yet. To move a fork to a new upstream release:
 
 1. For each file listed in the package's `THIRD-PARTY-NOTICES.md`, diff the upstream path between the pinned commit and the new release tag.
 2. Apply the upstream changes, then re-apply every edit listed in the file's header. Update the list when an edit changes or is no longer needed.
