@@ -17,8 +17,6 @@
     "packages/ui/src/**/*.integration.test.ts",
     "packages/*/src/**/*.vibe.test.ts",
     "packages/ui/test/vibe.d.ts",
-    "packages/compiler/src/hmr.integration.test.ts",
-    "packages/compiler/src/template-roundtrip.test.ts",
     "packages/contract/src/**/*.integration.test.ts",
     "packages/contract/test/fixtures/ui-bundle"
   ],

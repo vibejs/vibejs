@@ -1,6 +1,7 @@
 // oxlint-disable typescript/no-empty-object-type, typescript/no-unsafe-type-assertion -- C4 casts each ComponentDef to its signature
 // RouterView and RouterLink, written as the compiler emits components (CONTRACTS C3, C4).
 import type { Component, Handle, Slot } from '../component.ts';
+import type { IntrinsicElementAttributes, ReservedProps } from '../dom-types.ts';
 import { vibeError } from '../errors.gen.ts';
 import type { ComponentDef } from '../internal.ts';
 import { computed } from '../reactivity/computed.ts';
@@ -65,7 +66,7 @@ const t0 = template('<a></a>');
 
 /**
  * A link inside the app, as `<a :href :class :aria-current @click="navigate"><slot/></a>` would
- * render it, built on `useLink()`.
+ * render it, built on `useLink()`. Other attributes (`class`, `target`) fall through to the `<a>`.
  */
 export const RouterLink = {
   name: 'RouterLink',
@@ -95,5 +96,9 @@ export const RouterLink = {
     return a;
   },
 } satisfies ComponentDef as ComponentDef as Component<
-  (props: RouterLinkProps) => Handle<{ default?: Slot<{}> }>
+  (
+    props: RouterLinkProps &
+      Omit<IntrinsicElementAttributes['a'], keyof RouterLinkProps> &
+      ReservedProps,
+  ) => Handle<{ default?: Slot<{}> }>
 >;

@@ -200,6 +200,13 @@ export const RouterLinkSuite: AbiSuite = defineAbiSuite('RouterLink', (load) => 
     expect(a(3).classes()).toEqual([]);
   });
 
+  test('passes fallthrough attributes to the link', async () => {
+    const { a, go } = await mountLinks([{ to: '/users/1', class: 'nav', target: '_blank' }]);
+    await go('/users/1');
+    expect(a(0).classes()).toEqual(['router-link-active', 'router-link-exact-active', 'nav']);
+    expect(a(0).attributes('target')).toBe('_blank');
+  });
+
   test('renders the default slot inside the link', async () => {
     const { a } = await mountLinks([{ to: '/' }, { to: '/users/1' }]);
     expect([a(0).element.textContent, a(1).element.textContent]).toEqual(['0', '1']);
