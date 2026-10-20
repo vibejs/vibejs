@@ -65,7 +65,11 @@ const isNode = (value: unknown): value is Node =>
 export const isIdentifier = (node: Node): node is Identifier => node.type === 'Identifier';
 
 /** The nodes under `node[key]`, which holds a node, an array of nodes (with holes) or nothing. */
-export const children = (node: Node, key: string): Node[] => [node[key]].flat().filter(isNode);
+export const children = (node: Node, key: string): Node[] => {
+  const value = node[key];
+  if (Array.isArray(value)) return value.filter(isNode);
+  return isNode(value) ? [value] : [];
+};
 
 /** The identifiers under `node[key]`. */
 const ids = (node: Node, key: string): Identifier[] => children(node, key).filter(isIdentifier);
