@@ -32,13 +32,14 @@ function match(id: string): { file: string; index?: number } | undefined {
   if (!path.endsWith('.vibe')) return undefined;
   const file = normalizePath(path);
   const params = new URLSearchParams(query);
-  // Asset-style imports (`?raw`, `?url`, ...) belong to Vite.
+  if (params.has('vibe'))
+    return params.get('type') === 'style' && params.has('index')
+      ? { file, index: Number(params.get('index')) }
+      : undefined;
+  // Asset-style imports (`?raw`, `?url`, ...) of the file itself belong to Vite.
   if (['raw', 'url', 'worker', 'sharedworker', 'inline'].some((k) => params.has(k)))
     return undefined;
-  if (!params.has('vibe')) return { file };
-  if (params.get('type') === 'style' && params.has('index'))
-    return { file, index: Number(params.get('index')) };
-  return undefined;
+  return { file };
 }
 
 const sameBlock = (a: SFCBlock | null, b: SFCBlock | null): boolean =>
@@ -216,7 +217,10 @@ export function vibe(): Plugin {
         if (!m) return true;
         const { index } = m;
         if (index === undefined) return main;
-        return prev.styles[index]?.content !== descriptor.styles[index]?.content;
+        // `scoped` changes the module's output but not its URL.
+        const a = prev.styles.at(index);
+        const b = descriptor.styles.at(index);
+        return a?.content !== b?.content || a?.scoped !== b?.scoped;
       });
     },
   };
