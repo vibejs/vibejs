@@ -48,11 +48,13 @@ const requestInput = (methods: readonly string[]) =>
     headers: z.record(z.string(), z.string()).optional(),
   });
 
+// Positionals follow `--`, so a value that starts with `-` is never read as an option.
 const requestArgv: Tool['argv'] = ({ method, path, body, headers = {} }) => [
-  String(method),
-  String(path),
   ...(body === undefined ? [] : [`--data=${JSON.stringify(body)}`]),
   ...Object.entries(Object(headers)).map(([name, value]) => `--header=${name}: ${String(value)}`),
+  '--',
+  String(method),
+  String(path),
 ];
 
 /** One tool per row, in C9 order; `argv` maps the tool input to the command line. */
@@ -85,7 +87,13 @@ export const TOOLS: readonly Tool[] = [
     check,
     'check',
     'Call it after every change; it reports diagnostics with docs links and fixes.',
-    z.object({ only: z.array(z.enum(['types', 'lint', 'format', 'test'])).optional(), max: limit }),
+    z.object({
+      only: z
+        .array(z.enum(['types', 'lint', 'format', 'test']))
+        .min(1)
+        .optional(),
+      max: limit,
+    }),
   ),
   tool(
     request,
@@ -99,7 +107,7 @@ export const TOOLS: readonly Tool[] = [
     'explain',
     'Call it with a VIBE code from any result, a docs path, or words to search the docs.',
     z.object({ query: z.string().describe('A VIBE code, a docs path or search words.') }),
-    ({ query }) => [String(query)],
+    ({ query }) => ['--', String(query)],
   ),
 ];
 
@@ -112,7 +120,7 @@ export function buildServer(ctx: Ctx, options: McpOptions): McpServer {
     const inputSchema: z.ZodObject =
       options.readOnly && name === 'request' ? requestInput(SAFE_METHODS) : input;
     server.registerTool(name, { description, inputSchema }, async (args) => {
-      const [result] = await dispatch([command, ...argv(args), '--json'], agentCtx);
+      const [result] = await dispatch([command, '--json', ...argv(args)], agentCtx);
       return { content: [{ type: 'text', text: JSON.stringify(result) }], isError: !result.ok };
     });
   }

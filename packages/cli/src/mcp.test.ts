@@ -107,12 +107,12 @@ async function call(client: Client, name: string, args: Record<string, unknown>)
   return { result, isError: r.isError };
 }
 
-/** What `vibejs <cmd> ...argv --json` prints in agent mode for the tool and input. */
+/** What `vibejs <cmd> --json ...argv` prints in agent mode for the tool and input. */
 async function cli(name: string, args: Record<string, unknown>): Promise<JsonEnvelope> {
   const t = fixtureCtx();
   t.ctx.agent = { active: true };
   const { command, argv } = TOOLS.find((tool) => tool.name === name)!;
-  await main([command, ...argv(args), '--json'], t.ctx);
+  await main([command, '--json', ...argv(args)], t.ctx);
   return JSON.parse(t.out.join(''));
 }
 
@@ -149,10 +149,13 @@ describe('mirror: each tool answers like its --json command', () => {
     ],
     ['request', { method: 'GET', path: 'api' }, false],
     ['request', { method: 'GET', path: '/api/items', body: null }, false],
+    ['request', { method: 'GET', path: '-h' }, false],
     ['explain', { query: 'VIBE8502' }, true],
     ['explain', { query: 'VIBE0000' }, false],
     ['explain', { query: 'server/di' }, true],
     ['explain', { query: 'quokka modules' }, true],
+    ['explain', { query: '--read-only' }, true],
+    ['explain', { query: '--version' }, true],
   ];
 
   it.for(cases)('%s %j', async ([name, args, ok]) => {
@@ -176,6 +179,23 @@ describe('mirror: each tool answers like its --json command', () => {
     expect(await code('explain', { query: 'VIBE0000' })).toBe('VIBE8008');
     expect(await code('request', { method: 'GET', path: 'api' })).toBe('VIBE8503');
     expect(await code('get_logs', { since: 'yesterday' })).toBe('VIBE8004');
+    // A value that starts with `-` stays a value.
+    expect(await code('request', { method: 'GET', path: '-h' })).toBe('VIBE8503');
+  });
+
+  it('reads an explain query that starts with - as a query, not an option', async () => {
+    const client = await connect(fixtureCtx().ctx);
+    for (const query of ['--version', '-h', '--read-only']) {
+      const { result } = await call(client, 'explain', { query });
+      expect(result).toMatchObject({ ok: true, command: 'docs', mode: 'search' });
+    }
+  });
+
+  it('rejects an empty check.only list before the command runs', async () => {
+    const client = await connect(fixtureCtx().ctx);
+    const r = await client.callTool({ name: 'check', arguments: { only: [] } });
+    expect(r.isError).toBe(true);
+    expect(JSON.stringify(r.content)).not.toContain('VIBE8004');
   });
 
   it('answers explain with the catalog entry, the page or the search hits', async () => {
