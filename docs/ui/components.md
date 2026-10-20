@@ -79,7 +79,7 @@ The parent listens with `@remove="handler"`. The handler receives the payload, n
 
 A component renders content from its parent where it places `<slot>`. Named slots take a `name`, and attributes on `<slot>` are passed to the parent as slot props. `defineSlots<Slots>()` declares the slots and their props.
 
-```vibe
+```vibe [ItemList.vibe]
 <script setup lang="ts">
 defineSlots<{
   default?: (props: { item: string; index: number }) => unknown;
@@ -172,7 +172,7 @@ console.log(Object.keys(attrs));
 
 A template ref on a component holds the values the component passes to `defineExpose()`, with refs unwrapped. Nothing else of the component is reachable: not its props, not its other bindings and not its elements.
 
-```vibe
+```vibe [SearchField.vibe]
 <script setup lang="ts">
 import { ref, useTemplateRef } from '@vibejs-org/ui';
 

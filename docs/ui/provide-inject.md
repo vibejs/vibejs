@@ -11,7 +11,7 @@ description: Pass values to every descendant of a component or to the whole app 
 
 An `InjectionKey<T>` is a symbol that carries the type of its value, so `provide()` checks the value and `inject()` returns `T`. Export the key from a `.ts` module that both sides import:
 
-```ts
+```ts [theme.ts]
 import { inject, type InjectionKey, type Ref } from '@vibejs-org/ui';
 
 export interface Theme {

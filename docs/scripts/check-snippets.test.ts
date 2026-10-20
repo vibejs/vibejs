@@ -45,38 +45,59 @@ describe('extractSnippets', () => {
     );
   });
 
-  it('skips [file]-titled fences on the tutorial and throws on them elsewhere', () => {
+  it('names fences titled with a bare file name and skips titled ones on the tutorial', () => {
     const md =
-      '```sh [a.sh]\nls\n```\n```ts [a.ts]\na;\n```\n```vibe {1} [A.vibe]\n<template />\n```';
+      '```sh [a.sh]\nls\n```\n```ts [theme.ts]\na;\n```\n```vibe {1} [ItemList.vibe]\n<template />\n```';
     expect(extractSnippets(md, 'guides/tutorial.md')).toEqual([]);
-    expect(() => extractSnippets(md, 'guide.md')).toThrow(
-      'guide.md:4: a [file]-titled ts fence is checked only in guides/tutorial.md',
-    );
+    expect(extractSnippets(md, 'guide.md')).toEqual([
+      { file: 'guide.md', mdLine: 4, ext: 'ts', code: 'a;', name: 'theme.ts' },
+      { file: 'guide.md', mdLine: 7, ext: 'vibe', code: '<template />', name: 'ItemList.vibe' },
+    ]);
+  });
+
+  it.each([
+    [
+      'a path',
+      '```vibe [ui/src/App.vibe]\n<template />\n```',
+      'guide.md:1: a [file]-titled vibe fence is checked only in guides/tutorial.md',
+    ],
+    [
+      'another extension',
+      '```ts [a.vibe]\na;\n```',
+      'guide.md:1: a [file]-titled ts fence is checked only in guides/tutorial.md',
+    ],
+    [
+      'a duplicate name',
+      '```ts [a.ts]\na;\n```\n```ts [a.ts]\nb;\n```',
+      'guide.md:4: duplicate snippet file a.ts',
+    ],
+  ])('throws on a title with %s outside the tutorial', (_, md, message) => {
+    expect(() => extractSnippets(md, 'guide.md')).toThrow(message);
   });
 });
 
 describe('mapDiagnostics', () => {
-  const snippets: Snippet[] = [
-    { file: 'a.md', mdLine: 10, ext: 'ts', code: '' },
-    { file: 'guides/b.md', mdLine: 3, ext: 'ts', code: '' },
-    { file: 'ui/c.md', mdLine: 20, ext: 'vibe', code: '' },
-  ];
+  const snippets = new Map<string, Snippet>([
+    ['0/1.ts', { file: 'a.md', mdLine: 10, ext: 'ts', code: '' }],
+    ['3/theme.ts', { file: 'guides/b.md', mdLine: 3, ext: 'ts', code: '', name: 'theme.ts' }],
+    ['0/1.vibe', { file: 'ui/c.md', mdLine: 20, ext: 'vibe', code: '' }],
+  ]);
 
   it('maps snippet positions to page.md:line:col and passes other lines through', () => {
     const output = [
-      ".snippets/1.ts(2,7): error TS2322: Type 'string' is not assignable to type 'number'.",
-      "C:\\docs\\.snippets\\0.ts(1,1): error TS2304: Cannot find name 'x'.",
+      ".snippets/3/theme.ts(2,7): error TS2322: Type 'string' is not assignable to type 'number'.",
+      "/docs/.snippets/0/1.ts(1,1): error TS2304: Cannot find name 'x'.",
       '  Continuation line.',
       '',
-      ".snippets/7.ts(1,1): error TS2304: Cannot find name 'y'.",
-      ".snippets/2.vibe(9,26): error TS2322: Type 'number' is not assignable to type 'string'.",
+      ".snippets/0/7.ts(1,1): error TS2304: Cannot find name 'y'.",
+      "C:\\docs\\.snippets\\0\\1.vibe(9,26): error TS2322: Type 'number' is not assignable to type 'string'.",
       "tsconfig.json(3,3): error TS5023: Unknown compiler option 'x'.",
     ].join('\n');
     expect(mapDiagnostics(output, snippets)).toEqual([
       "guides/b.md:5:7 TS2322 Type 'string' is not assignable to type 'number'.",
       "a.md:11:1 TS2304 Cannot find name 'x'.",
       '  Continuation line.',
-      ".snippets/7.ts(1,1): error TS2304: Cannot find name 'y'.",
+      ".snippets/0/7.ts(1,1): error TS2304: Cannot find name 'y'.",
       "ui/c.md:29:26 TS2322 Type 'number' is not assignable to type 'string'.",
       "tsconfig.json(3,3): error TS5023: Unknown compiler option 'x'.",
     ]);
@@ -116,15 +137,18 @@ describe('main', () => {
   it('writes the snippets of every page but error pages, and the tsconfig', () => {
     expect(main(docs, fakeTsc('', 0))).toBe(0);
     const dir = join(docs, '.snippets');
-    expect(readdirSync(dir).toSorted()).toEqual([
-      '0.ts',
-      '1.ts',
+    expect(readdirSync(dir, { recursive: true, encoding: 'utf8' }).toSorted()).toEqual([
+      '1',
+      join('1', '0.ts'),
+      join('1', '1.ts'),
       'package.json',
       'tsconfig.json',
       'vibe.d.ts',
     ]);
-    expect(readFileSync(join(dir, 'vibe.d.ts'), 'utf8')).toContain("declare module '*.vibe'");
-    expect(readFileSync(join(dir, '1.ts'), 'utf8')).toContain('// ---cut---\n');
+    const types = readFileSync(join(dir, 'vibe.d.ts'), 'utf8');
+    expect(types).toContain("declare module '*.vibe'");
+    expect(types).not.toContain("declare module '*.ts'");
+    expect(readFileSync(join(dir, '1', '1.ts'), 'utf8')).toContain('// ---cut---\n');
     const tsconfig = JSON.parse(readFileSync(join(dir, 'tsconfig.json'), 'utf8'));
     expect(tsconfig).toMatchObject({
       extends: fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url)),
@@ -135,25 +159,28 @@ describe('main', () => {
         experimentalDecorators: true,
       },
       contentMappers: [{ package: '@vibejs-org/language-tools', extensions: ['.vibe'] }],
-      include: ['*.ts', '*.vibe'],
+      include: ['**/*.ts', '**/*.vibe'],
     });
     expect(out).toEqual(['check-snippets: 2 snippets type-check']);
   });
 
   it('writes vibe fences as .vibe files and runs tsc with the content mapper', () => {
-    writeFileSync(join(docs, 'ui.md'), '```vibe\n<template />\n```\n');
+    writeFileSync(
+      join(docs, 'ui.md'),
+      '```vibe\n<template />\n```\n```ts [theme.ts]\nexport {};\n```\n',
+    );
     const tsc = join(tmp, 'tsc-args.js');
     writeFileSync(tsc, 'process.stdout.write(process.argv.slice(2).join(" "));\n');
     expect(main(docs, tsc)).toBe(0);
     const dir = join(docs, '.snippets');
-    const vibe = readdirSync(dir).filter((file) => file.endsWith('.vibe'));
-    expect(vibe.map((file) => readFileSync(join(dir, file), 'utf8'))).toEqual(['<template />\n']);
+    expect(readdirSync(join(dir, '4')).toSorted()).toEqual(['0.vibe', 'theme.ts']);
+    expect(readFileSync(join(dir, '4', '0.vibe'), 'utf8')).toBe('<template />\n');
     expect(errors).toEqual([`-p ${dir} --pretty false --runExternalCode`]);
-    expect(out).toEqual(['check-snippets: 3 snippets type-check']);
+    expect(out).toEqual(['check-snippets: 4 snippets type-check']);
   });
 
   it('prints mapped diagnostics and exits 1', () => {
-    const tsc = fakeTsc(".snippets/1.ts(3,14): error TS2322: Type 'x'.\n", 2);
+    const tsc = fakeTsc(".snippets/1/1.ts(3,14): error TS2322: Type 'x'.\n", 2);
     expect(main(docs, tsc)).toBe(1);
     expect(errors).toEqual(["guides/start.md:24:14 TS2322 Type 'x'."]);
   });
