@@ -84,6 +84,29 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:integration
 
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, args: '' }
+          - { os: macos-latest, args: --no-browser }
+          - { os: windows-latest, args: --no-browser }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+      # The npm app needs the npm of a supported Node; the runner's default npm 10 cannot
+      # resolve the template's `$typescript` override.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - if: matrix.args == ''
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm e2e ${{ matrix.args }}
+
   docs:
     runs-on: ubuntu-latest
     steps:

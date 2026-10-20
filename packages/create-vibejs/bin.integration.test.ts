@@ -12,8 +12,8 @@ import {
   cleanup,
   env,
   INSTALL,
+  installNpm,
   installPnpm,
-  must,
   pack,
   run,
   scaffold as create,
@@ -226,18 +226,7 @@ describe('npm', () => {
     'installs with npm, passes check and keeps the agent files current',
     () => {
       const app = scaffold('npm');
-      const file = join(app, 'package.json');
-      const pkg = JSON.parse(readFileSync(file, 'utf8'));
-      // npm accepts an override of a direct dependency only with the same spec. The keys stay
-      // sorted, as the app's formatter wants them.
-      const specs = Object.entries(tarballs).map(([name, tarball]) => [name, `file:${tarball}`]);
-      for (const [name, spec] of specs) {
-        for (const deps of [pkg.dependencies, pkg.devDependencies])
-          if (deps[name]) deps[name] = spec;
-      }
-      pkg.overrides = { ...Object.fromEntries(specs), ...pkg.overrides };
-      writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
-      must(run('npm', ['install', '--no-audit', '--no-fund'], app));
+      installNpm(app, tarballs);
       const check = vibejs(app, 'check', '--json');
       expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, diagnostics: [] });
       expect(check.status).toBe(0);

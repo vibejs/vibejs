@@ -15,6 +15,7 @@
     "pack-check": "node scripts/pack-check.ts",
     "check": "pnpm errors --check && oxfmt --check --disable-nested-config && pnpm lint && pnpm test:coverage",
     "errors": "node scripts/errors.ts",
+    "e2e": "node scripts/e2e.ts",
     "docs": "pnpm build && pnpm --dir docs build",
     "version-packages": "changeset version && pnpm errors && pnpm install --lockfile-only"
   },
