@@ -30,14 +30,17 @@ export default {
       // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.
       ignoreDependencies: ['@vibejs-org/ui'],
     },
-    // The app entries (CONTRACTS C7); the Vitest config and tests come from the knip plugin.
+    // The app entries (CONTRACTS C7) and the tests. The Vitest config imports the built vibe()
+    // plugin, so knip reads it as a plain entry instead of loading it before the build.
     'examples/*': {
       entry: [
         'server/src/app.module.ts',
         'server/src/main.ts',
         'ui/src/main.ts',
         'ui/vite.config.ts',
+        'vitest.config.ts',
       ],
+      vitest: { config: [], entry: ['**/*.test.ts'] },
       // Run by `vibejs check`.
       ignoreDependencies: ['oxfmt', 'oxlint'],
     },

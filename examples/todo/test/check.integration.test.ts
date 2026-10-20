@@ -21,6 +21,14 @@ it('passes vibejs check with no diagnostics and 100% coverage per file', () => {
   });
   expect(result.steps.tests.passed).toBeGreaterThan(0);
   expect(r.status).toBe(0);
+  // The .vibe files are measured, not dropped from the report.
+  const report = JSON.parse(
+    readFileSync(join(root, '.vibejs/check/coverage/coverage-final.json'), 'utf8'),
+  );
+  for (const file of ['App.vibe', 'pages/TodoPage.vibe', 'pages/TodosPage.vibe']) {
+    // A missing entry throws here.
+    expect(Object.keys(report[join(root, 'ui/src', file)].statementMap)).not.toHaveLength(0);
+  }
 }, 300_000);
 
 it('reports a type error seeded in the App.vibe template at its line and column', () => {
