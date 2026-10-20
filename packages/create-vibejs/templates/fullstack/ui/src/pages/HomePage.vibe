@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from '@vibejs-org/ui';
+import { computed, inject, useAsync } from '@vibejs-org/ui';
 import { API } from '../api.ts';
 
 const api = inject(API)!;
-const status = ref('checking');
-
-onMounted(async () => {
-  const r = await api.health.get();
-  status.value = r.ok ? r.data.status : r.error.code;
-});
+// Loads on mount and is aborted when the page unmounts; failures are values, never thrown.
+const { data } = useAsync((signal) => api.health.get(undefined, { signal }));
+const status = computed(() =>
+  data.value?.ok ? data.value.data.status : (data.value?.error.code ?? 'checking'),
+);
 </script>
 
 <template>

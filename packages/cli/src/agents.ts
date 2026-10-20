@@ -45,6 +45,8 @@ export function renderBlock(exec: string, index: string): string {
     'Rules:',
     '',
     '- `.vibe` files use `<script setup lang="ts">` only; template refs use `useTemplateRef` only.',
+    '- UI: import `RouterLink`/`RouterView` explicitly; guards return `false` or a location, never call `next()`; load data with `useAsync` and narrow `data.value?.ok`.',
+    '- UI tests: `mount()` from `@vibejs-org/ui/testing` with `plugins: [router]` and `createMemoryHistory()`.',
     '- Services are injected into fields: `private readonly users = inject(UsersService)`. No constructor injection, no parameter decorators.',
     '- A handler takes one `ctx: Ctx<typeof contract.route>` and returns the route response type.',
     "- Contracts come first: routes live in `contracts/src/*.contract.ts` and declare `errors: { CODE: status }`; handlers raise them with `ctx.fail('CODE')`.",
