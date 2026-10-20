@@ -1,5 +1,5 @@
 import type { VibeError } from '@vibejs-org/errors';
-import { parseSync, rawTransferSupported, visitorKeys } from 'oxc-parser';
+import { parseSync, rawTransferSupported, visitorKeys, type ParserOptions } from 'oxc-parser';
 import { toDiagnostic, type Diagnostic, type LineIndex } from '../diagnostics.ts';
 import { children, FUNCTIONS, type Node } from './walk.ts';
 
@@ -41,7 +41,7 @@ const isAwait = (node: Node) => node.type === 'AwaitExpression' || node.kind ===
  * The first node under `node`, outside nested functions, that is valid only in a module:
  * `await`, an `import` or an `export`.
  */
-function moduleOnly(node: Node): Node | undefined {
+export function moduleOnly(node: Node): Node | undefined {
   if (isAwait(node) || node.type === 'ImportDeclaration' || /^(TS)?Export/.test(node.type)) {
     return node;
   }
@@ -63,13 +63,12 @@ export const RAW_TRANSFER: { experimentalRawTransfer: boolean } = {
   experimentalRawTransfer: rawTransferSupported(),
 };
 
+/** The options of every template expression parse. */
+export const PARSE_OPTIONS: ParserOptions = { lang: 'ts', preserveParens: false, ...RAW_TRANSFER };
+
 /** Parses `text`, whose content of `length` starts at `prefix`. */
 function parseProgram(text: string, prefix: number, length: number): { root: Node } | Failure {
-  const { program, errors, module } = parseSync('e.ts', text, {
-    lang: 'ts',
-    preserveParens: false,
-    ...RAW_TRANSFER,
-  });
+  const { program, errors, module } = parseSync('e.ts', text, PARSE_OPTIONS);
   const clamp = (offset: number) => Math.min(Math.max(offset - prefix, 0), length);
   if (errors.length === 0) {
     const root: Node = { ...program };

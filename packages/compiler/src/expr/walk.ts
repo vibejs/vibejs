@@ -64,11 +64,16 @@ const isNode = (value: unknown): value is Node =>
 
 export const isIdentifier = (node: Node): node is Identifier => node.type === 'Identifier';
 
-/** The nodes under `node[key]`, which holds a node, an array of nodes (with holes) or nothing. */
-export const children = (node: Node, key: string): Node[] => {
+const NONE: readonly Node[] = [];
+
+/**
+ * The nodes under `node[key]`, which holds a node, an array of nodes (with `null` holes) or
+ * nothing. An array without holes is returned as it is: callers only read the result.
+ */
+export const children = (node: Node, key: string): readonly Node[] => {
   const value = node[key];
-  if (Array.isArray(value)) return value.filter(isNode);
-  return isNode(value) ? [value] : [];
+  if (Array.isArray(value)) return value.every(isNode) ? value : value.filter(isNode);
+  return isNode(value) ? [value] : NONE;
 };
 
 /** The identifiers under `node[key]`. */
@@ -90,23 +95,31 @@ const declaratorIds = (declaration: Node): Identifier[] =>
   children(declaration, 'declarations').flatMap((d) => children(d, 'id').flatMap(patternIds));
 
 /** The names a statement list declares in its own block: `let`, `const`, functions and classes. */
-function blockIds(statements: Node[]): Identifier[] {
+function blockIds(statements: readonly Node[]): Identifier[] {
   return statements.flatMap((s) => {
     if (s.type === 'VariableDeclaration' && s.kind !== 'var') return declaratorIds(s);
     return s.type === 'FunctionDeclaration' || s.type === 'ClassDeclaration' ? ids(s, 'id') : [];
   });
 }
 
-/** The `var` names declared anywhere under `node`, without entering nested functions. */
-function varIds(node: Node): Identifier[] {
-  if (FUNCTIONS.has(node.type)) return [];
-  const own = node.type === 'VariableDeclaration' && node.kind === 'var' ? declaratorIds(node) : [];
+/**
+ * The `var` names declared anywhere under `node`, without entering nested functions, into `out`.
+ * The recursive walks over every node use index loops: a `for…of` there allocates an iterator
+ * result per step until V8 optimizes the function, which a recursive walk rarely reaches.
+ */
+function varIds(node: Node, out: Identifier[] = []): Identifier[] {
+  if (FUNCTIONS.has(node.type)) return out;
+  if (node.type === 'VariableDeclaration' && node.kind === 'var') out.push(...declaratorIds(node));
   const keys = visitorKeys[node.type];
-  return [...own, ...keys.flatMap((key) => children(node, key).flatMap(varIds))];
+  for (let k = 0; k < keys.length; k++) {
+    const list = children(node, keys[k]);
+    for (let i = 0; i < list.length; i++) varIds(list[i], out);
+  }
+  return out;
 }
 
 /** The statements of a scope-creating statement list. */
-function statementsOf(node: Node): Node[] {
+function statementsOf(node: Node): readonly Node[] {
   return node.type === 'SwitchStatement'
     ? children(node, 'cases').flatMap((c) => children(c, 'consequent'))
     : children(node, 'body');
@@ -142,10 +155,12 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
 
   /** Visits the nodes under `node[key]`. */
   const at = (node: Node, key: string, mode: Mode = 'read', shorthand = false) => {
-    for (const child of children(node, key)) visit(child, mode, shorthand);
+    const list = children(node, key);
+    for (let i = 0; i < list.length; i++) visit(list[i], mode, shorthand);
   };
   const visitKeys = (node: Node, mode: Mode) => {
-    for (const key of visitorKeys[node.type]) if (!TYPE_KEYS.has(key)) at(node, key, mode);
+    const keys = visitorKeys[node.type];
+    for (let i = 0; i < keys.length; i++) if (!TYPE_KEYS.has(keys[i])) at(node, keys[i], mode);
   };
 
   function visit(node: Node, mode: Mode = 'read', shorthand = false): void {
@@ -240,7 +255,7 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
         const own = type === 'FunctionExpression' ? ids(node, 'id') : [];
         const body = children(node, 'body');
         const arrow = type === 'ArrowFunctionExpression';
-        enter([...own, ...params.flatMap(patternIds), ...body.flatMap(varIds)], () => {
+        enter([...own, ...params.flatMap(patternIds), ...body.flatMap((b) => varIds(b))], () => {
           if (!arrow) functions++;
           at(node, 'params', 'decl');
           at(node, 'body');

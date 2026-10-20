@@ -1,7 +1,14 @@
-import { forEachIdentifier } from '@vibejs-org/compiler';
+import { forEachIdentifier, isSimpleHandler } from '@vibejs-org/compiler';
 import { expect, it } from 'vitest';
 import { CodeBuilder, Preset, SpanKind } from './builder.ts';
-import { aliasNames, expression, pathRef, type Names } from './expression.ts';
+import {
+  aliasNames,
+  expression,
+  pathRef,
+  primeWalks,
+  simpleHandler,
+  type Names,
+} from './expression.ts';
 
 const names = (): Names => ({
   setup: new Map([['count', [0, 5]]]),
@@ -97,3 +104,63 @@ it.each(['this.a', 'true', 'private', 'a.b()', 'a[0]', 'a .b', '(a) = 1', 'a.0']
     expect(pathRef(text)).toBeUndefined();
   },
 );
+
+it.each([
+  'count + limit',
+  'count.value',
+  '{ count, other }',
+  'count++; limit = 1',
+  'items.map((x) => x + other)',
+  'count +',
+])('emits %j the same from the primed cache and on demand', (source) => {
+  const forms = [source, `(${source}) = 0`, `[${source}] = []`];
+  const modes = [{}, { target: true }, { pattern: true }];
+  const all = () =>
+    modes.map((mode) => {
+      const b = new CodeBuilder(source);
+      expression(b, names(), source, [0, source.length], new Set(), mode);
+      return [b.text, b.spans];
+    });
+  primeWalks([]);
+  const onDemand = all();
+  primeWalks(forms);
+  expect(all()).toStrictEqual(onDemand);
+});
+
+it.each([
+  'a',
+  'a.b',
+  ' a.b ',
+  'this.a',
+  'true',
+  'a()',
+  'a.b(c, d)',
+  'toggle(row)',
+  "emit('x')",
+  'a(b) + c',
+  'a(b).c',
+  'a(b)()',
+  'a(b // c)',
+  "a(')",
+  'async (x)',
+  'async (x) => x',
+  'a = b',
+  'a.b = true',
+  'a = b => c',
+  'a => b',
+  'a == b',
+  'a =',
+  'a = 1, b',
+  'typeof(a)',
+  'new(a)',
+  'import(a)',
+  'function(a)',
+  '(a) = 0',
+  'a++; b()',
+  '() => a',
+  'function () {}',
+  "a['b']",
+  'a?.b',
+])('decides %j as isSimpleHandler does', (text) => {
+  expect(simpleHandler(text)).toBe(isSimpleHandler(text));
+});

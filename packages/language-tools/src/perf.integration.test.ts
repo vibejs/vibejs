@@ -26,13 +26,14 @@ function time(body: () => void): number {
   return (end.user - user + end.system - system) / 1000;
 }
 
-// Known failure: over the 5 ms p95 budget; tracked for the I2 single-pass expression parsing optimization.
-it.fails('generates Large.vibe with a p95 under 5 ms', () => {
+it('generates Large.vibe with a p95 under 5 ms', () => {
   expect(LARGE.split('\n')).toHaveLength(301);
-  for (let i = 0; i < 20; i++) generate('Large.vibe', LARGE);
-  const runs = Array.from({ length: 200 }, () => time(() => generate('Large.vibe', LARGE)));
-  const p95 = runs.toSorted((a, b) => a - b)[Math.ceil(200 * 0.95) - 1];
-  print(`generate() p95 on Large.vibe: ${p95.toFixed(2)} ms CPU`);
+  for (let i = 0; i < 100; i++) generate('Large.vibe', LARGE);
+  const runs = Array.from({ length: 500 }, () => time(() => generate('Large.vibe', LARGE)));
+  const sorted = runs.toSorted((a, b) => a - b);
+  const p95 = sorted[Math.ceil(500 * 0.95) - 1];
+  const median = sorted[250];
+  print(`generate() on Large.vibe: p95 ${p95.toFixed(2)} ms, median ${median.toFixed(2)} ms CPU`);
   expect(p95).toBeLessThan(5);
 });
 

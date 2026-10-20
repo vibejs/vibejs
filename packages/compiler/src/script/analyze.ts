@@ -249,36 +249,43 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
   // Everything else that reads the whole tree: misplaced macros, `await`, template refs.
   const byValue = new Map<Node, string>();
   const wrapped = new Set<Node>();
-  /** `fns` is the number of functions around `n`. */
-  const scan = (n: Node, fns: number): void => {
-    const callee = n.type === 'CallExpression' ? first(n, 'callee')! : undefined;
-    const name = str(callee);
+  /** A call by the name of its callee. */
+  const scanCall = (n: Node, callee: Node, name: string) => {
     const args = children(n, 'arguments');
     if (name === 'withDefaults') {
-      at(vibeError('VIBE3006'), range(callee!));
+      at(vibeError('VIBE3006'), range(callee));
       // A macro inside is reported by VIBE3006 alone.
       for (const arg of args) wrapped.add(arg);
     }
-    if (isCall(n, MACROS) && !placed.has(n) && !wrapped.has(n)) {
-      at(vibeError('VIBE3004', { macro: name! }), range(callee!));
+    if (MACROS.has(name) && !placed.has(n) && !wrapped.has(n)) {
+      at(vibeError('VIBE3004', { macro: name }), range(callee));
     }
     const refKey = literal(args[0]);
     if (name === 'useTemplateRef' && refKey !== undefined) {
       a.templateRefs.push({
         key: refKey,
         keyLoc: range(args[0]),
-        typeArgInsertAt: first(n, 'typeArguments') ? null : callee!.end,
+        typeArgInsertAt: first(n, 'typeArguments') ? null : callee.end,
       });
     }
-    if (imported.has(name ?? '') && args[0]?.type === 'Identifier') byValue.set(args[0], name!);
+    if (imported.has(name) && args[0]?.type === 'Identifier') byValue.set(args[0], name);
+  };
+  /** `fns` is the number of functions around `n`. */
+  const scan = (n: Node, fns: number): void => {
+    const callee = n.type === 'CallExpression' ? first(n, 'callee')! : undefined;
+    const name = str(callee);
+    if (name !== undefined) scanCall(n, callee!, name);
     const awaited = n.type === 'AwaitExpression' || n.await === true || n.kind === 'await using';
     if (awaited && fns === 0) {
       const start = d.source.indexOf('await', n.start);
       at(vibeError('VIBE3002'), [start, start + 'await'.length]);
     }
     const inner = FUNCTIONS.has(n.type) ? fns + 1 : fns;
-    for (const key of visitorKeys[n.type]) {
-      for (const child of children(n, key)) scan(child, inner);
+    // Index loops, as in `varIds` (expr/walk.ts): a `for…of` here allocates per step.
+    const keys = visitorKeys[n.type];
+    for (let k = 0; k < keys.length; k++) {
+      const list = children(n, keys[k]);
+      for (let i = 0; i < list.length; i++) scan(list[i], inner);
     }
   };
   for (const statement of body) scan(statement, 0);
@@ -454,7 +461,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
     });
   }
 
-  function options(callee: Node, args: Node[]): void {
+  function options(callee: Node, args: readonly Node[]): void {
     const [arg] = args;
     const valid =
       args.length === 1 &&

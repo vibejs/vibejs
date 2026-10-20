@@ -1,8 +1,8 @@
 import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@vibejs-org/compiler';
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
-import { resetWalks, UNKNOWN, type Names } from './expression.ts';
+import { primeWalks, UNKNOWN, type Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
-import { children, CTX_TYPES, expectErrors, key, type Walk } from './template.ts';
+import { children, CTX_TYPES, expectErrors, key, walkedTexts, type Walk } from './template.ts';
 
 /** A forwarded compiler diagnostic; `code` is the numeric part of VIBE####. */
 export interface LanguageDiagnostic {
@@ -39,7 +39,6 @@ const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
  * on user input; `text` is not changed (CRLF passes through).
  */
 export function generate(fileName: string, text: string): GeneratedFile {
-  resetWalks();
   const { descriptor, diagnostics } = parse(text, { filename: fileName });
   const analysis = analyzeScript(descriptor);
   const b = new CodeBuilder(text);
@@ -60,6 +59,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
   };
   const nodes = descriptor.template?.ast.children ?? [];
   const [expected, targets] = expectErrors(nodes);
+  primeWalks(walkedTexts(nodes, text));
   const w: Walk = {
     b: new CodeBuilder(text),
     names,

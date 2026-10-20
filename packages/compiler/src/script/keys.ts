@@ -32,7 +32,7 @@ function literals(node: Node): string[] | undefined {
 }
 
 /** The members of an interface or a type literal. */
-const members = (node: Node): Node[] =>
+const members = (node: Node): readonly Node[] =>
   node.type === 'TSInterfaceDeclaration'
     ? children(first(node, 'body')!, 'body')
     : children(node, 'members');
