@@ -11,4 +11,4 @@
 #10 Verbatim EXPR o[287,292) ".trim" → v[589,594) ".trim"
 #11 Verbatim BOUND o[299,304) "count" → v[602,607) "count"
 #12 Verbatim BOUND o[311,321) "modelValue" → v[615,625) "modelValue"
-#13 Atom ANCHOR o[0,0) "" → v[1145,1253) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
+#13 Atom ANCHOR o[0,0) "" → v[1166,1274) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
