@@ -132,7 +132,9 @@ describe('rewriteExpr', () => {
     'this',
     'this.x',
     '() => this',
-    ...'$el $refs $parent $root $options $data $nextTick $watch $forceUpdate'.split(' '),
+    ...'$el $refs $parent $root $options $data $nextTick $watch $forceUpdate $route $router'.split(
+      ' ',
+    ),
   ])('reports %s as VIBE2008', (exp) => {
     const { code, diagnostics } = rewrite(`{{ ${exp} }}`);
     expect(code).toBe(exp);

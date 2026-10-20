@@ -1,0 +1,28 @@
+<script setup lang="ts">
+import { useLink, type RouteLocationRaw } from '@vibejs-org/ui/router';
+
+const props = defineProps<{
+  to: RouteLocationRaw;
+  replace?: boolean;
+  activeClass?: string;
+  exactActiveClass?: string;
+  ariaCurrentValue?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false';
+}>();
+const { href, isActive, isExactActive, navigate } = useLink({
+  to: () => props.to,
+  replace: () => props.replace,
+});
+</script>
+
+<template>
+  <a
+    :href="href"
+    :class="{
+      [activeClass ?? 'router-link-active']: isActive,
+      [exactActiveClass ?? 'router-link-exact-active']: isExactActive,
+    }"
+    :aria-current="isExactActive ? (ariaCurrentValue ?? 'page') : null"
+    @click="navigate"
+    ><slot
+  /></a>
+</template>

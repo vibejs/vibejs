@@ -27,6 +27,7 @@ cases/_fail_prop-type/App.vibe(6,21): error TS2322: Type 'string' is not assigna
 cases/_fail_props-import-wrong-prop/main.ts(4,19): error TS2322: Type 'string' is not assignable to type 'number'.
 cases/_fail_ref-key/App.vibe(3,30): error TS2339: Property 'inptu' does not exist on type '__VibeRefs'.
 cases/_fail_ref-use/App.vibe(5,16): error TS2339: Property 'play' does not exist on type 'HTMLInputElement'.
+cases/_fail_router-link-name/App.vibe(6,22): error TS2820: Type '"usr"' is not assignable to type '"home" | "user" | undefined'. Did you mean '"user"'?
 cases/_fail_self-prop/Tree.vibe(9,66): error TS2322: Type 'string' is not assignable to type 'Node'.
 cases/_fail_slot-no-slots/App.vibe(6,4): error TS2339: Property 'default' does not exist on type '__VibeSlots'.
 cases/_fail_slot-outlet-declared/Panel.vibe(6,14): error TS2344: Type '"footer"' does not satisfy the constraint '"header"'.

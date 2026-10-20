@@ -10,19 +10,19 @@ import {
   template,
   type ComponentDef,
 } from '@vibejs-org/ui/internal';
-import { RouterLink, RouterView } from '@vibejs-org/ui/router';
+import { RouterView } from '@vibejs-org/ui/router';
 
 const t0 = template('<section><!----></section>');
 
 /**
- * A page: a `<section>` with the class `name` and its props in `data-props`, and a nested
- * RouterView with `nested`. `setup` runs in the page's setup, once per instance.
+ * A page: a `<section>` with the class `name` and its props in `data-props`, and the view
+ * component `nested` inside it. `setup` runs in the page's setup, once per instance.
  */
 export function page(
   name: string,
-  options: { props?: string[]; nested?: boolean; setup?: () => void } = {},
+  options: { props?: string[]; nested?: ComponentDef; setup?: () => void } = {},
 ): Component {
-  const { props = [], nested = false, setup } = options;
+  const { props = [], nested, setup } = options;
   return {
     name,
     __propKeys: props,
@@ -33,7 +33,7 @@ export function page(
       const el = t0() as Element;
       el.className = name;
       renderEffect(() => setAttr(el, 'data-props', JSON.stringify(props.map((k) => $props[k]))));
-      if (nested) insert(createComponent(RouterView), el, child(el));
+      if (nested) insert(createComponent(nested), el, child(el));
       return el;
     },
   } satisfies ComponentDef;
@@ -41,8 +41,8 @@ export function page(
 
 const t1 = template('<nav></nav>');
 
-/** A `<nav>` with one RouterLink per props object (getters of each value); the link text is its index. */
-export function links(...list: Record<string, unknown>[]): Component {
+/** A `<nav>` with one `link` per props object (getters of each value); the link text is its index. */
+export function links(link: ComponentDef, ...list: Record<string, unknown>[]): Component {
   return {
     name: 'Links',
     render() {
@@ -50,7 +50,7 @@ export function links(...list: Record<string, unknown>[]): Component {
       list.forEach((props, i) => {
         const raw = Object.fromEntries(Object.entries(props).map(([k, v]) => [k, () => v]));
         insert(
-          createComponent(RouterLink, raw, { default: () => document.createTextNode(String(i)) }),
+          createComponent(link, raw, { default: () => document.createTextNode(String(i)) }),
           nav,
         );
       });
