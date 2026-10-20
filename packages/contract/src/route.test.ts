@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { del, get, isRouteSpec, patch, post, put, raw } from './route.ts';
 
 const nonEmpty = expect.arrayContaining([expect.any(String)]);
@@ -62,6 +62,25 @@ describe('get', () => {
       expect.objectContaining({ code: 'VIBE9004', args: { path: '/search' }, fixes: nonEmpty }),
     );
     expect(post('/search', { body }).def.body).toBe(body);
+  });
+
+  describe('with NODE_ENV=production', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it('throws VIBE9004 without the catalog text', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      const body = { '~standard': { version: 1, vendor: 'test', validate: () => ({ value: 1 }) } };
+      // @ts-expect-error a GET route takes no body
+      expect(() => get('/search', { body })).toThrow(
+        expect.objectContaining({
+          code: 'VIBE9004',
+          message: '[VIBE9004] https://vibejs.org/v0/errors/VIBE9004?path=%2Fsearch',
+          fixes: [],
+        }),
+      );
+    });
   });
 });
 

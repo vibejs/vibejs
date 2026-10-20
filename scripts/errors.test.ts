@@ -137,6 +137,12 @@ describe('errorsGen', () => {
     expect(errorsGen('ui', entries)).toBe(golden('() => (__DEV__ ? MESSAGES : undefined)'));
   });
 
+  it('loads the table only outside NODE_ENV=production for packages/contract', () => {
+    expect(errorsGen('contract', entries)).toBe(
+      golden("() => (process.env.NODE_ENV !== 'production' ? MESSAGES : undefined)"),
+    );
+  });
+
   it('always loads the table elsewhere and drops retired entries', () => {
     expect(errorsGen('server', entries)).toBe(golden('() => MESSAGES'));
   });
