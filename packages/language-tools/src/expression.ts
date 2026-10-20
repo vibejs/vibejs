@@ -1,4 +1,4 @@
-import { forEachIdentifier, isAllowedGlobal } from '@vibejs-org/compiler';
+import { forEachIdentifier, identifiersOf, isAllowedGlobal } from '@vibejs-org/compiler';
 import { Preset, type CodeBuilder } from './builder.ts';
 
 /** The names a template reads from outside, and the ones it used. */
@@ -22,9 +22,19 @@ type Ref = [name: string, start: number, end: number, info: { local: boolean; wr
  */
 const walkedTexts = new Map<string, Ref[]>();
 
-/** Starts a file: the cache holds only the texts of one file. */
-export function resetWalks(): void {
+/**
+ * Starts a file: the cache holds only the texts of one file, filled here with the references of
+ * `texts`, which are parsed together.
+ */
+export function primeWalks(texts: readonly string[]): void {
   walkedTexts.clear();
+  const parsed: string[] = [];
+  for (const text of new Set(texts)) {
+    const ref = pathRef(text);
+    if (ref) walkedTexts.set(text, [ref]);
+    else parsed.push(text);
+  }
+  identifiersOf(parsed).forEach((refs, i) => walkedTexts.set(parsed[i], refs));
 }
 
 const ID = '[A-Za-z_$][\\w$]*';

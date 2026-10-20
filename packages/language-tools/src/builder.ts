@@ -99,10 +99,13 @@ export class CodeBuilder {
     return this.#span(s, oStart, oEnd, SpanKind.Alias, features);
   }
 
-  /** Appends another builder over the same original text. */
+  /** Appends another builder over the same original text; its spans move here. */
   append(other: CodeBuilder): this {
     const shift = this.text.length;
-    for (const [v, ...rest] of other.spans) this.spans.push([v + shift, ...rest]);
+    for (const span of other.spans) {
+      span[0] += shift;
+      this.spans.push(span);
+    }
     this.text += other.text;
     return this;
   }

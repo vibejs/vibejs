@@ -136,6 +136,40 @@ const slotTemplate = (node: TemplateChildNode) =>
   node.tagType === ElementTypes.TEMPLATE &&
   directive(node, 'slot') !== undefined;
 
+/** The directives whose value is walked as it is; `v-model` also as a target. */
+const PLAIN = new Set(['if', 'else-if', 'show', 'bind', 'on', 'html', 'text', 'model']);
+
+/**
+ * The texts that `children` walks, as it wraps them: plain, `(x) = 0` targets and `[x] = []`
+ * aliases. They are parsed together before the walk.
+ */
+export function walkedTexts(nodes: TemplateChildNode[], source: string): string[] {
+  const texts: string[] = [];
+  const text = (exp: { loc: SimpleExpressionNode['loc'] }) => source.slice(...range(exp));
+  const alias = (exp: SimpleExpressionNode | undefined) => {
+    if (exp) texts.push(`[${text(exp)}] = []`);
+  };
+  const visit = (node: TemplateChildNode) => {
+    if (node.type === NodeTypes.INTERPOLATION && filled(node.content)) {
+      texts.push(text(node.content));
+    }
+    if (node.type !== NodeTypes.ELEMENT) return;
+    for (const prop of node.props) {
+      if (prop.type !== NodeTypes.DIRECTIVE || !filled(prop.exp)) continue;
+      if (prop.name === 'for' && prop.forParseResult) {
+        const loop = prop.forParseResult;
+        [loop.value, loop.key, loop.index].forEach(alias);
+        texts.push(text(loop.source));
+      } else if (prop.name === 'slot') alias(prop.exp);
+      else if (PLAIN.has(prop.name)) texts.push(text(prop.exp!));
+      if (prop.name === 'model') texts.push(`(${text(prop.exp!)}) = 0`);
+    }
+    node.children.forEach(visit);
+  };
+  nodes.forEach(visit);
+  return texts;
+}
+
 /**
  * Emits the template children as statements, with `v-if` chains as `if`/`else` statements. `owner`
  * is the handle of the component whose slot templates these are.
