@@ -27,7 +27,7 @@ The macros below declare the interface of a component. They are available in `<s
 
 `defineProps<Props>()` declares the props. Destructuring the result gives each prop a local name, and a default after `=` applies when the parent passes `undefined` or nothing.
 
-```vibe
+```vibe [TodoItem.vibe]
 <script setup lang="ts">
 import { computed } from '@vibejs-org/ui';
 

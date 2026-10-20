@@ -50,7 +50,7 @@ const TUTORIAL = 'guides/tutorial.md';
 /**
  * The `ts` and `vibe` fences: the info string's leading language name, as VitePress reads it, is
  * `ts` or `vibe`. A fence titled with a bare file name of its language gets that `name`; a
- * duplicate name throws. The tutorial's titled fences are skipped, and another title throws, since
+ * duplicate name, or one of the `<index>.<ext>` form of an untitled fence, throws. The tutorial's titled fences are skipped, and another title throws, since
  * nothing would check it.
  */
 export function extractSnippets(md: string, file: string): Snippet[] {
@@ -69,6 +69,9 @@ export function extractSnippets(md: string, file: string): Snippet[] {
         throw new Error(
           `${file}:${mdLine}: a [file]-titled ${ext} fence is checked only in ${TUTORIAL}`,
         );
+      // Untitled fences are written as `<index>.<ext>`.
+      if (/^\d+\./.test(name))
+        throw new Error(`${file}:${mdLine}: snippet file ${name} is reserved for untitled fences`);
       if (names.has(name)) throw new Error(`${file}:${mdLine}: duplicate snippet file ${name}`);
       names.add(name);
     }

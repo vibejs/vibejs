@@ -71,6 +71,11 @@ describe('extractSnippets', () => {
       '```ts [a.ts]\na;\n```\n```ts [a.ts]\nb;\n```',
       'guide.md:4: duplicate snippet file a.ts',
     ],
+    [
+      'the name of an untitled fence',
+      '```ts\na;\n```\n```ts [0.ts]\nb;\n```',
+      'guide.md:4: snippet file 0.ts is reserved for untitled fences',
+    ],
   ])('throws on a title with %s outside the tutorial', (_, md, message) => {
     expect(() => extractSnippets(md, 'guide.md')).toThrow(message);
   });
