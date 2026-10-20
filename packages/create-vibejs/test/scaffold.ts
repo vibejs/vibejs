@@ -1,7 +1,14 @@
 // Packs every package and scaffolds apps from the tarballs with the real bin, as a user would
 // after a release: the integration tests of create-vibejs and the docs tutorial share these.
 import { spawnSync } from 'node:child_process';
-import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -47,9 +54,12 @@ export function must(r: RunResult): string {
 }
 
 const dirs: string[] = [];
-/** A new temp directory, removed by `cleanup()`. */
+/**
+ * A new temp directory, removed by `cleanup()`. Its real path: on Windows the temp directory can
+ * be an 8.3 short path, which Vitest resolves to the long one.
+ */
 export function temp(prefix: string): string {
-  const dir = mkdtempSync(join(tmpdir(), prefix));
+  const dir = realpathSync.native(mkdtempSync(join(tmpdir(), prefix)));
   dirs.push(dir);
   return dir;
 }
