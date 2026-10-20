@@ -1,5 +1,5 @@
 import type { VibeError } from '@vibejs-org/errors';
-import { parseSync, visitorKeys } from 'oxc-parser';
+import { parseSync, rawTransferSupported, visitorKeys } from 'oxc-parser';
 import { toDiagnostic, type Diagnostic, type LineIndex } from '../diagnostics.ts';
 import { children, FUNCTIONS, type Node } from './walk.ts';
 
@@ -55,11 +55,20 @@ function moduleOnly(node: Node): Node | undefined {
   return undefined;
 }
 
+/**
+ * Where supported, oxc-parser hands its AST over through shared memory: parsing takes about half
+ * the time of the JSON transfer. The option is experimental and not in its types.
+ */
+export const RAW_TRANSFER: { experimentalRawTransfer: boolean } = {
+  experimentalRawTransfer: rawTransferSupported(),
+};
+
 /** Parses `text`, whose content of `length` starts at `prefix`. */
 function parseProgram(text: string, prefix: number, length: number): { root: Node } | Failure {
   const { program, errors, module } = parseSync('e.ts', text, {
     lang: 'ts',
     preserveParens: false,
+    ...RAW_TRANSFER,
   });
   const clamp = (offset: number) => Math.min(Math.max(offset - prefix, 0), length);
   if (errors.length === 0) {
