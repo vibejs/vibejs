@@ -102,12 +102,14 @@ function blockIds(statements: readonly Node[]): Identifier[] {
   });
 }
 
-/** The `var` names declared anywhere under `node`, without entering nested functions. */
-function varIds(node: Node): Identifier[] {
-  if (FUNCTIONS.has(node.type)) return [];
-  const own = node.type === 'VariableDeclaration' && node.kind === 'var' ? declaratorIds(node) : [];
-  const keys = visitorKeys[node.type];
-  return [...own, ...keys.flatMap((key) => children(node, key).flatMap(varIds))];
+/** The `var` names declared anywhere under `node`, without entering nested functions, into `out`. */
+function varIds(node: Node, out: Identifier[] = []): Identifier[] {
+  if (FUNCTIONS.has(node.type)) return out;
+  if (node.type === 'VariableDeclaration' && node.kind === 'var') out.push(...declaratorIds(node));
+  for (const key of visitorKeys[node.type]) {
+    for (const child of children(node, key)) varIds(child, out);
+  }
+  return out;
 }
 
 /** The statements of a scope-creating statement list. */
@@ -245,7 +247,7 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
         const own = type === 'FunctionExpression' ? ids(node, 'id') : [];
         const body = children(node, 'body');
         const arrow = type === 'ArrowFunctionExpression';
-        enter([...own, ...params.flatMap(patternIds), ...body.flatMap(varIds)], () => {
+        enter([...own, ...params.flatMap(patternIds), ...body.flatMap((b) => varIds(b))], () => {
           if (!arrow) functions++;
           at(node, 'params', 'decl');
           at(node, 'body');
