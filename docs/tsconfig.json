@@ -8,8 +8,10 @@
   },
   "include": ["scripts", "scripts/fixtures/*.json", ".vitepress/config.ts"],
   "references": [
+    { "path": "../packages/compiler" },
     { "path": "../packages/contract" },
     { "path": "../packages/errors" },
-    { "path": "../packages/server" }
+    { "path": "../packages/server" },
+    { "path": "../packages/ui" }
   ]
 }

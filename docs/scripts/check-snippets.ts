@@ -22,6 +22,13 @@ const TSC = createRequire(import.meta.url)
   .resolve('typescript/package.json')
   .replace(/package\.json$/, 'bin/tsc');
 const BASE = fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url));
+/** Types a `.vibe` import in a snippet as a component without a typed signature. */
+const VIBE_MODULE = `declare module '*.vibe' {
+  import type { Component, Handle } from '@vibejs-org/ui';
+  const component: Component<(props: any) => Handle<any, any, any>>;
+  export default component;
+}
+`;
 const DIAGNOSTIC = /^(?:.*[\\/])?(\d+)\.ts\((\d+),(\d+)\): error (TS\d+): (.*)$/;
 
 /** The `ts` fences: the info string's leading language name, as VitePress reads it, is `ts`. */
@@ -83,6 +90,7 @@ export function main(docsDir: string, tsc = TSC): number {
   };
   writeFileSync(join(dir, 'tsconfig.json'), `${JSON.stringify(tsconfig, null, 2)}\n`);
   writeFileSync(join(dir, 'package.json'), '{ "type": "module" }\n');
+  writeFileSync(join(dir, 'vibe.d.ts'), VIBE_MODULE);
   const { status, stdout, stderr } = spawnSync(
     process.execPath,
     [tsc, '-p', dir, '--pretty', 'false'],

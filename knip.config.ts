@@ -35,7 +35,13 @@ export default {
     docs: {
       entry: ['scripts/*.ts'],
       // Imported only by the ts snippets of the pages, which check-snippets type-checks.
-      ignoreDependencies: ['@vibejs-org/contract', '@vibejs-org/server', 'valibot'],
+      ignoreDependencies: [
+        '@vibejs-org/compiler',
+        '@vibejs-org/contract',
+        '@vibejs-org/server',
+        '@vibejs-org/ui',
+        'valibot',
+      ],
     },
   },
   ignore: ['packages/create-vibejs/templates/**', '**/test/fixtures/**'],
