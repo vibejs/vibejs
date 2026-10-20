@@ -2,9 +2,11 @@ import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterAll, expect, it, vi } from 'vitest';
+import type { ComponentsResult } from './commands/components.ts';
 import type { DiResult } from './commands/di.ts';
 import { loadAppModule, withServerRunner } from './dev/app-module.ts';
 import type { RequestResult } from './commands/request.ts';
+import type { RoutesResult } from './commands/routes.ts';
 
 const BIN = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
 const TODO = fileURLToPath(new URL('../../../examples/todo', import.meta.url));
@@ -17,7 +19,10 @@ afterAll(() => {
 });
 
 /** Runs the built bin in examples/todo; stdout must be one JSON document without colors. */
-function vibejs(...args: string[]): { status: number | null; result: DiResult & RequestResult } {
+function vibejs(...args: string[]): {
+  status: number | null;
+  result: DiResult & RequestResult & RoutesResult & ComponentsResult;
+} {
   const { status, stdout } = spawnSync(process.execPath, [BIN, ...args], {
     cwd: TODO,
     encoding: 'utf8',
@@ -39,6 +44,29 @@ it('di --json describes the todo modules', async () => {
   });
   expect(result.modules).toEqual(expected);
 }, 30_000);
+
+// The same committed inspect() snapshot pins the API routes; ui/src/routes.ts pins the UI routes.
+it('routes --json lists the todo API routes', async () => {
+  const { status, result } = vibejs('routes', '--json');
+  expect(status).toBe(0);
+  expect(result.ok).toBe(true);
+  const expected = await withServerRunner(TODO, async (runner) => {
+    const { server, AppModule, appOptions } = await loadAppModule(runner, TODO);
+    return server.inspect(AppModule, appOptions).routes;
+  });
+  expect(result.api).toEqual(expected);
+  expect(result.ui).toEqual([
+    { name: 'todos', path: '/', component: 'ui/src/pages/TodosPage.vibe' },
+    { name: 'todo', path: '/todos/:id', component: 'ui/src/pages/TodoPage.vibe' },
+  ]);
+}, 30_000);
+
+it('components --json lists the todo components', () => {
+  const { status, result } = vibejs('components', '--json');
+  expect(status).toBe(0);
+  expect(result.ok).toBe(true);
+  expect(result.components).toMatchSnapshot();
+});
 
 it('request runs in process without a dev server', () => {
   const { status, result } = vibejs('request', 'GET', '/api/todos');

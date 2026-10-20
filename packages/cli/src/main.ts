@@ -4,6 +4,7 @@ import type { CommandDef, OptionDef } from './command.ts';
 import { agents } from './commands/agents.ts';
 import { build } from './commands/build.ts';
 import { check } from './commands/check.ts';
+import { components } from './commands/components.ts';
 import { dev } from './commands/dev.ts';
 import { di } from './commands/di.ts';
 import { docs } from './commands/docs.ts';
@@ -13,6 +14,7 @@ import { generate } from './commands/generate.ts';
 import { logs } from './commands/logs.ts';
 import { mcp } from './commands/mcp.ts';
 import { request } from './commands/request.ts';
+import { routes } from './commands/routes.ts';
 import type { Ctx } from './ctx.ts';
 import { vibeError } from './errors.gen.ts';
 import {
@@ -35,7 +37,9 @@ export const COMMANDS: readonly CommandDef[] = [
   errors,
   logs,
   agents,
+  routes,
   di,
+  components,
   request,
   generate,
   mcp,

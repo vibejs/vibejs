@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { Client } from '@modelcontextprotocol/client';
 import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { copyApp, testCtx } from '../test/app.ts';
+import { copyApp, installCompiler, testCtx } from '../test/app.ts';
 import type { LogsResult } from './commands/logs.ts';
 import type { RequestResult } from './commands/request.ts';
 import type { Ctx } from './ctx.ts';
@@ -51,6 +51,13 @@ export class AppModule {}
 export const appOptions = { basePath: '/api' };
 `;
 
+const ITEM = `<script setup lang="ts">
+const { label } = defineProps<{ label: string }>();
+</script>
+
+<template><li>{{ label }}</li></template>
+`;
+
 const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
 const LOG: LogEntry[] = [
   { t: ago(5000), level: 'error', source: 'vite', msg: 'Bad', code: 'VIBE3005', file: 'a.vibe' },
@@ -67,6 +74,8 @@ let root: string;
 beforeAll(() => {
   root = copyApp();
   writeFileSync(join(root, 'server/src/app.module.ts'), ITEMS);
+  installCompiler(root);
+  writeFileSync(join(root, 'ui/src/Item.vibe'), ITEM);
   mkdirSync(join(root, '.vibejs'));
   writeFileSync(join(root, '.vibejs/dev.log'), LOG.map((e) => `${JSON.stringify(e)}\n`).join(''));
   mkdirSync(join(root, 'docs/server'), { recursive: true });
@@ -123,7 +132,9 @@ it('lists the tools in C9 order, each with its input schema', async () => {
   expect(tools.map((t) => t.name)).toEqual([
     'get_errors',
     'get_logs',
+    'get_routes',
     'get_di_graph',
+    'get_component_tree',
     'check',
     'request',
     'explain',
@@ -138,8 +149,12 @@ describe('mirror: each tool answers like its --json command', () => {
     ['get_logs', { level: 'error', source: 'server' }, true],
     ['get_logs', { grep: '-warning 5', since: '1h', limit: 3 }, true],
     ['get_logs', { since: 'yesterday' }, false],
+    ['get_routes', {}, true],
+    ['get_routes', { kind: 'ui' }, true],
     ['get_di_graph', {}, true],
     ['get_di_graph', { module: 'Nope', token: 'X' }, true],
+    ['get_component_tree', {}, true],
+    ['get_component_tree', { name: 'Nope' }, true],
     ['check', { only: ['types', 'lint'], max: 5 }, false],
     ['request', { method: 'GET', path: '/api/items' }, true],
     [

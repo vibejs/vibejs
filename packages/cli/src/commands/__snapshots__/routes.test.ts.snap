@@ -1,0 +1,133 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`output > answers --help as JSON and as text 1`] = `
+"vibejs 1.2.3
+
+vibejs routes [--kind api|ui]
+  List the API routes and the UI routes, without starting a server or running UI code.
+  $ vibejs routes
+  $ vibejs routes --kind api
+  --kind  Only the api or the ui routes.
+
+Global options:
+  --json  Print one JSON object (on by default in agent mode).
+  -h, --help  Describe the commands and their options.
+  --version  Print the vibejs version.
+"
+`;
+
+exports[`output > prints an API and a UI table for people 1`] = `
+"API
+  GET  /api/health  → HealthController.get
+    guards: Allow
+    interceptors: Timing
+    filters: Fallback
+UI
+  /                 home      → ui/src/pages/HomePage.vibe
+  /admin/           -         → ui/shared/Layout.vibe
+  /admin/           admin     → ui/src/pages/Admin.vibe
+  /admin/users      -         → -
+  /admin/users/:id  user      → -
+  /absolute         -         → /
+  /admin/old        -         → -
+  /admin/member     -         → -
+  /admin/computed   -         → -
+  \`/t\`              -         → -
+  /quoted           -         → -
+  /spread           -         → -
+                    pathless  → -
+  ...extra          -         → -
+  makeRoute()       -         → -
+"
+`;
+
+exports[`ui routes > joins nested paths in source order and lists the dynamic fields 1`] = `
+[
+  {
+    "component": "ui/src/pages/HomePage.vibe",
+    "name": "home",
+    "path": "/",
+  },
+  {
+    "component": "ui/shared/Layout.vibe",
+    "path": "/admin/",
+  },
+  {
+    "component": "ui/src/pages/Admin.vibe",
+    "name": "admin",
+    "path": "/admin/",
+  },
+  {
+    "path": "/admin/users",
+  },
+  {
+    "dynamic": [
+      "component",
+    ],
+    "name": "user",
+    "path": "/admin/users/:id",
+  },
+  {
+    "path": "/absolute",
+    "redirect": "/",
+  },
+  {
+    "dynamic": [
+      "redirect",
+    ],
+    "path": "/admin/old",
+  },
+  {
+    "dynamic": [
+      "component",
+    ],
+    "path": "/admin/member",
+  },
+  {
+    "dynamic": [
+      "component",
+    ],
+    "path": "/admin/computed",
+  },
+  {
+    "dynamic": [
+      "path",
+      "name",
+      "component",
+      "children",
+    ],
+    "path": "\`/t\`",
+  },
+  {
+    "dynamic": [
+      "component",
+    ],
+    "path": "/quoted",
+  },
+  {
+    "dynamic": [
+      "path",
+    ],
+    "path": "/spread",
+  },
+  {
+    "dynamic": [
+      "path",
+    ],
+    "name": "pathless",
+    "path": "",
+  },
+  {
+    "dynamic": [
+      "path",
+    ],
+    "path": "...extra",
+  },
+  {
+    "dynamic": [
+      "path",
+    ],
+    "path": "makeRoute()",
+  },
+]
+`;

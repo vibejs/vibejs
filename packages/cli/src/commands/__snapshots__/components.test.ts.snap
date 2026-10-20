@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`output > answers --help as JSON and as text 1`] = `
+"vibejs 1.2.3
+
+vibejs components [--name NAME]
+  List the .vibe components with their props, models and types, without running them.
+  $ vibejs components
+  $ vibejs components --name TodoList
+  --name  Only the component NAME.
+
+Global options:
+  --json  Print one JSON object (on by default in agent mode).
+  -h, --help  Describe the commands and their options.
+  --version  Print the vibejs version.
+"
+`;
+
+exports[`output > prints one block per component for people 1`] = `
+"Broken (ui/src/Broken.vibe)
+Plain (ui/src/Plain.vibe)
+Card (ui/src/components/Card.vibe)
+  props: title, count, open, openModifiers, modelValue, modelValueModifiers
+  models: open, modelValue
+  emits: { save: [id: number] }
+  slots: { default(props: { heading: string }): unknown }
+HomePage (ui/src/pages/HomePage.vibe)
+"
+`;
+
+exports[`the components command > lists every component in path order without running it 1`] = `
+[
+  {
+    "diagnostics": [
+      "VIBE1124",
+    ],
+    "file": "ui/src/Broken.vibe",
+    "models": [],
+    "name": "Broken",
+    "props": [],
+    "types": {},
+  },
+  {
+    "diagnostics": [],
+    "file": "ui/src/Plain.vibe",
+    "models": [],
+    "name": "Plain",
+    "props": [],
+    "types": {},
+  },
+  {
+    "diagnostics": [],
+    "file": "ui/src/components/Card.vibe",
+    "models": [
+      "open",
+      "modelValue",
+    ],
+    "name": "Card",
+    "props": [
+      "title",
+      "count",
+      "open",
+      "openModifiers",
+      "modelValue",
+      "modelValueModifiers",
+    ],
+    "types": {
+      "emits": "{ save: [id: number] }",
+      "props": "{ title: string; count?: number }",
+      "slots": "{ default(props: { heading: string }): unknown }",
+    },
+  },
+  {
+    "diagnostics": [],
+    "file": "ui/src/pages/HomePage.vibe",
+    "models": [],
+    "name": "HomePage",
+    "props": [],
+    "types": {},
+  },
+]
+`;

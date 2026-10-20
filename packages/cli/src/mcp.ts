@@ -2,11 +2,13 @@ import { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import type { CommandDef } from './command.ts';
 import { check } from './commands/check.ts';
+import { components } from './commands/components.ts';
 import { di } from './commands/di.ts';
 import { docs } from './commands/docs.ts';
 import { errors } from './commands/errors.ts';
 import { logs } from './commands/logs.ts';
 import { request } from './commands/request.ts';
+import { routes } from './commands/routes.ts';
 import type { Ctx } from './ctx.ts';
 import { dispatch } from './main.ts';
 
@@ -78,10 +80,22 @@ export const TOOLS: readonly Tool[] = [
     }),
   ),
   tool(
+    routes,
+    'get_routes',
+    'Call it to find the handler of an endpoint or the page of a UI path.',
+    z.object({ kind: z.enum(['api', 'ui']).optional() }),
+  ),
+  tool(
     di,
     'get_di_graph',
     'Call it before adding or wiring a provider, a module or an injection.',
     z.object({ module: z.string().optional(), token: z.string().optional() }),
+  ),
+  tool(
+    components,
+    'get_component_tree',
+    'Call it before using or changing a component, to see its props, models and types.',
+    z.object({ name: z.string().optional() }),
   ),
   tool(
     check,

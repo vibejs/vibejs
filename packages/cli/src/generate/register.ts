@@ -27,7 +27,7 @@ export interface Target {
 }
 
 /** The name of an identifier, a property key or a string literal. */
-function nameOf(
+export function nameOf(
   node: Expression | Item | Key | BindingPattern | null | undefined,
 ): string | undefined {
   if (node?.type === 'Identifier') return node.name;

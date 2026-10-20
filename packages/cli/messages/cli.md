@@ -39,6 +39,8 @@ The first word after `vibejs` must be a command, and every option must belong to
 
 `vibejs check` runs the type checker, linter, formatter and test runner installed in the project, never global copies, so every result matches what the project's own scripts report. It needs TypeScript 7.1 or newer, which runs the content mapper for `.vibe` files.
 
+`vibejs components` reads `.vibe` files with the project's own `@vibejs-org/compiler`, so it needs that package installed.
+
 ### Fix
 
 - Run `{install}` in the project root.
@@ -192,7 +194,7 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 
 > Could not load `server/src/app.module.ts`: {reason}.
 
-`vibejs di` and `vibejs request` (when no dev server runs) load `server/src/app.module.ts` and the project's `@vibejs-org/server` in process. Importing the module, or creating the application for a request, threw an error that has no VIBE code of its own; an error with a code is reported as itself.
+`vibejs di`, `vibejs routes` and `vibejs request` (when no dev server runs) load `server/src/app.module.ts` and the project's `@vibejs-org/server` in process. Importing the module, or creating the application for a request, threw an error that has no VIBE code of its own; an error with a code is reported as itself.
 
 ### Fix
 
@@ -217,6 +219,16 @@ A `vibejs dev` server is running for this project, so `vibejs request` sends the
 ### Fix
 
 - Pass `--data` as JSON or `@file`, and `-H` as `Name: value`.
+
+## VIBE8504: Routes file not statically readable
+
+> `ui/src/routes.ts` cannot be read statically: {reason}.
+
+`vibejs routes` lists the UI routes without running any UI code: it parses `ui/src/routes.ts` and reads the array literal passed to `defineRoutes([...])` in a top-level declaration. The file has a syntax error, or it has no such array, for example when the routes are built by a function call or imported from another file.
+
+### Fix
+
+- Keep `export const routes = defineRoutes([...])` with an array literal; see the router docs.
 
 ## VIBE8601: Malformed agent rules markers
 

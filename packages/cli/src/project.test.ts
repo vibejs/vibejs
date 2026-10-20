@@ -2,7 +2,14 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { findRoot, installCommand, packageManager, resolveTool } from './project.ts';
+import {
+  findRoot,
+  installCommand,
+  packageManager,
+  projectCompiler,
+  resolveTool,
+  vibeFiles,
+} from './project.ts';
 
 let tmp: string;
 beforeEach(() => {
@@ -80,5 +87,32 @@ describe('resolveTool', () => {
     write('node_modules/@vitest/coverage-v8/package.json', { version: '5.0.0' });
     expect(resolveTool(tmp, '@vitest/coverage-v8', '')).toEqual({ bin: '', version: '5.0.0' });
     expect(resolveTool(tmp, 'missing', 'missing')).toBeUndefined();
+  });
+});
+
+describe('vibeFiles', () => {
+  it('lists the .vibe files under a directory, root-relative and sorted', () => {
+    for (const file of ['ui/src/b/B.vibe', 'ui/src/A.vibe', 'ui/Top.vibe', 'server/S.vibe'])
+      write(file, '');
+    for (const skipped of ['node_modules/x/X.vibe', 'ui/dist/D.vibe', 'ui/.cache/C.vibe'])
+      write(skipped, '');
+    write('ui/src/Dir.vibe/inner.ts', '');
+    const all = ['server/S.vibe', 'ui/Top.vibe', 'ui/src/A.vibe', 'ui/src/b/B.vibe'];
+    expect(vibeFiles(tmp)).toEqual(all.map((f) => join(f)));
+    expect(vibeFiles(tmp, 'ui/src')).toEqual(
+      ['ui/src/A.vibe', 'ui/src/b/B.vibe'].map((f) => join(f)),
+    );
+    expect(vibeFiles(tmp, 'missing')).toEqual([]);
+  });
+});
+
+describe('projectCompiler', () => {
+  it('reports VIBE8005 with the install command when the project has none', async () => {
+    write('pnpm-lock.yaml', '');
+    const e = await projectCompiler(tmp);
+    expect(e).toMatchObject({ code: 'VIBE8005' });
+    expect(e).toHaveProperty('fixes', [
+      'Run `pnpm add -D @vibejs-org/compiler` in the project root.',
+    ]);
   });
 });

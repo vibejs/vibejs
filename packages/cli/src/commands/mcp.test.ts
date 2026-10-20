@@ -46,13 +46,22 @@ it('does not load the MCP SDK for other commands', async () => {
 
 it('serves the tools until stdin closes', async () => {
   const { done, client } = await start();
-  expect((await client.listTools()).tools).toHaveLength(6);
+  expect((await client.listTools()).tools).toHaveLength(8);
   await client.close();
   expect(await done).toEqual({
     ok: true,
     command: 'mcp',
     version: '1.2.3',
-    tools: ['get_errors', 'get_logs', 'get_di_graph', 'check', 'request', 'explain'],
+    tools: [
+      'get_errors',
+      'get_logs',
+      'get_routes',
+      'get_di_graph',
+      'get_component_tree',
+      'check',
+      'request',
+      'explain',
+    ],
   });
   expect(sdk.loaded).toBe(true);
 });
