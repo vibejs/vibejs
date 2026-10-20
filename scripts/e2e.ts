@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { gzipSync } from 'node:zlib';
 import { chromium, firefox, webkit, type Browser } from 'playwright';
-import { runTutorial, type StepOutput } from '../docs/test/run-tutorial.ts';
+import type { StepOutput } from '../docs/test/run-tutorial.ts';
 import type { TutorialStep } from '../docs/scripts/tutorial.ts';
 import {
   cleanup,
@@ -288,6 +288,8 @@ try {
 
   step('tutorial with pnpm');
   const md = readFileSync(join(ROOT, 'docs/guides/tutorial.md'), 'utf8');
+  // Imported after the build: the docs helpers load @vibejs-org/errors from dist.
+  const { runTutorial } = await import('../docs/test/run-tutorial.ts');
   await runTutorial(md, { dir: temp('vibejs-e2e-'), tarballs }, onStep);
 
   step('npm app');
