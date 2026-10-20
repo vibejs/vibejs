@@ -2,7 +2,7 @@ import type { VibeError } from '@vibejs-org/errors';
 import { parseSync, visitorKeys } from 'oxc-parser';
 import { LineIndex, type Diagnostic } from '../diagnostics.ts';
 import { vibeError } from '../errors.gen.ts';
-import { RAW_TRANSFER, report, type ExprContext } from '../expr/parse.ts';
+import { report, type ExprContext } from '../expr/parse.ts';
 import type { ExprScope } from '../expr/rewrite.ts';
 import {
   children,
@@ -135,7 +135,6 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
     lang: 'ts',
     sourceType: 'module',
     preserveParens: false,
-    ...RAW_TRANSFER,
   });
   if (errors.length > 0) {
     const end = base + block.content.length;
