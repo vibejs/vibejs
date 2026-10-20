@@ -65,7 +65,6 @@ These come from the TypeScript language server and are tracked upstream.
 
 - **Rename from the script does not update the template** ([#63879](https://github.com/microsoft/TypeScript/issues/63879)). Renaming a `<script setup>` binding edits the script only; the template keeps the old name, and the next type check reports it. Use find references first, or search and replace in the file. Renaming a tag, a prop key or an event name in the template is refused.
 - **Auto-import completions** ([#64119](https://github.com/microsoft/TypeScript/issues/64119)). Completion in a `.vibe` file does not offer exports that the file does not import yet. Write the `import` yourself, or complete the name in a `.ts` file and copy the import.
-- **Go to definition on a module specifier** ([#64828](https://github.com/microsoft/TypeScript/issues/64828)). On `'./components/Child.vibe'` in an import, it can find nothing when the path has several segments. Go to definition on the imported name instead.
 - **Formatting** ([#64579](https://github.com/microsoft/TypeScript/issues/64579)). The language server does not format `.vibe` files. Format them with the app's formatter: `vibejs check` reports formatting problems.
 
 ## Troubleshooting

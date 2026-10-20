@@ -36,6 +36,7 @@
   "devDependencies": {
     "@vibejs-org/errors": "workspace:*",
     "@vscode/vsce": "catalog:",
+    "ovsx": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:ts-next",
     "vscode-tmgrammar-test": "catalog:"

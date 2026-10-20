@@ -69,6 +69,12 @@ exports[`language features > definition: a component in .ts: its .vibe file > lo
 ]
 `;
 
+exports[`language features > definition: a nested .vibe module specifier: its file (#64828 passes on this pin) > locations 1`] = `
+[
+  "cases/lsp/components/Deep.vibe:1:1-1:1",
+]
+`;
+
 exports[`language features > definition: a self tag: the component itself > locations 1`] = `
 [
   "cases/self/Loop.vibe:1:1-1:1",
@@ -114,7 +120,7 @@ exports[`language features > references: a component import: its tags and the .t
   "cases/lsp/Parent.vibe:13:4-13:9",
   "cases/lsp/Parent.vibe:3:8-3:13",
   "cases/lsp/main.ts:1:8-1:13",
-  "cases/lsp/main.ts:4:28-4:33",
+  "cases/lsp/main.ts:5:28-5:33",
 ]
 `;
 

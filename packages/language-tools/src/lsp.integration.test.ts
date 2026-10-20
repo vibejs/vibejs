@@ -153,6 +153,12 @@ describe('language features', () => {
     ['a self tag: the component itself', 'cases/self/Loop.vibe', '<Loop', 1],
     ['a component in .ts: its .vibe file', MAIN, 'Child,', 0],
     ['a .vibe module specifier: its file (#64828 passes on this pin)', MAIN, "'./Child.vibe'", 3],
+    [
+      'a nested .vibe module specifier: its file (#64828 passes on this pin)',
+      MAIN,
+      "'./components/Deep.vibe'",
+      8,
+    ],
   ];
   for (const c of definitions) {
     it(`definition: ${c[0]}`, async () => {
@@ -225,23 +231,33 @@ describe('language features', () => {
     }
   });
 
-  it.fails('completion: auto-imports an unimported export (known-upstream #64119)', async () => {
-    const file = 'cases/lsp/Parent.vibe';
+  /** Completes `shou` after `anchor` in `file`; returns the auto-import of `shout` from util.ts. */
+  const autoImport = async (file: string, anchor: string) => {
     const uri = await lsp.open(join(root, file));
     const source = read(file);
-    const seeded = source.replace("const rows = ['a', 'b']", '$&\nconst check = expectTyp');
+    const seeded = source.replace(anchor, '$&\nconst loud = shou');
     await lsp.change(uri, seeded);
     try {
       const { items } = await lsp.request<{ items: CompletionItem[] }>('textDocument/completion', {
         textDocument: { uri },
-        position: at(seeded, 'expectTyp', 'expectTyp'.length),
+        position: at(seeded, 'loud = shou', 'loud = shou'.length),
       });
-      expect(items.find((item) => item.label === 'expectType')?.data?.autoImport).toMatchObject({
-        moduleSpecifier: '../../expect.ts',
-      });
+      return items.find((item) => item.label === 'shout')?.data?.autoImport;
     } finally {
       await lsp.change(uri, source);
     }
+  };
+
+  it('completion: auto-imports an unimported export in a .ts file', async () => {
+    expect(await autoImport(MAIN, "import Parent from './Parent.vibe';")).toMatchObject({
+      moduleSpecifier: './util',
+    });
+  });
+
+  it.fails('completion: auto-imports an unimported export (known-upstream #64119)', async () => {
+    expect(await autoImport(PARENT, "const rows = ['a', 'b']")).toMatchObject({
+      moduleSpecifier: './util',
+    });
   });
 });
 
@@ -258,15 +274,9 @@ describe('diagnostics', () => {
   });
   afterAll(() => lsp.close());
 
-  const opened = new Set<string>();
   const pull = async (file: string) => {
-    const uri = uriOf(file);
-    if (!opened.has(file)) {
-      opened.add(file);
-      await lsp.open(join(root, file));
-    }
     const report = await lsp.request<{ items: Diagnostic[] }>('textDocument/diagnostic', {
-      textDocument: { uri },
+      textDocument: { uri: await lsp.open(join(root, file)) },
     });
     return report.items;
   };

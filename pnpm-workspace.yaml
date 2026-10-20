@@ -46,6 +46,7 @@ catalog:
   '@scalar/openapi-parser': 0.29.14
   '@types/vscode': 1.125.0
   '@vscode/vsce': 4.0.0
+  ovsx: 1.3.0
   vscode-tmgrammar-test: 0.1.3
   std-env: ^4.3.0
   reactive-framework-test-suite: 0.1.0

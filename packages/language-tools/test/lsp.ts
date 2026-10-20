@@ -13,7 +13,7 @@ import { childEnv, TSC } from './corpus.ts';
 export interface Lsp {
   /** The server process. */
   server: ChildProcess;
-  /** didOpen with languageId 'vibejs' for .vibe, returns the uri. */
+  /** didOpen with languageId 'vibejs' for .vibe, once per file; returns the uri. */
   open(file: string, text?: string): Promise<string>;
   /** A full-text didChange. */
   change(uri: string, text: string): Promise<void>;
@@ -67,6 +67,7 @@ export async function startLsp(
     server,
     async open(file, text = readFileSync(file, 'utf8')) {
       const uri = pathToFileURL(file).href;
+      if (versions.has(uri)) return uri;
       versions.set(uri, 1);
       const languageId = LANGUAGE[file.slice(file.lastIndexOf('.') + 1)];
       await connection.sendNotification('textDocument/didOpen', {
