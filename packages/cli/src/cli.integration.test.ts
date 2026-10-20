@@ -139,6 +139,22 @@ describe('bundled docs', () => {
     expect(named.toSorted()).toEqual(files.filter((file) => file.endsWith('.md')).toSorted());
   });
 
+  it('holds the guides with the code they include from the examples', () => {
+    for (const guide of ['getting-started', 'tutorial', 'ai-agents', 'extending']) {
+      expect(files).toContain(`guides/${guide}.md`);
+    }
+    const flags = readFileSync(
+      fileURLToPath(new URL('../../../examples/todo-flags/ui/flags.ts', import.meta.url)),
+      'utf8',
+    );
+    const region = /\/\/ #region composable\n([\s\S]*?)\/\/ #endregion composable/.exec(flags)![1];
+    expect(readFileSync(join(DOCS, 'guides/extending.md'), 'utf8')).toContain(region);
+    const pages = files.filter((file) => file.endsWith('.md'));
+    expect(pages.filter((file) => /^<<< /m.test(readFileSync(join(DOCS, file), 'utf8')))).toEqual(
+      [],
+    );
+  });
+
   it('answers a catalog title with its error page exactly once', () => {
     const { status, stdout } = vibejs('docs', '--json', 'Missing required input');
     expect(status).toBe(0);

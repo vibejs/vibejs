@@ -16,28 +16,9 @@ description: Load data with useAsync, keep it in sync with the route, abort stal
 - `loading`: a ref that is `true` while a run is in progress.
 - `refresh()`: runs `fn` again; the promise resolves once that run is over and never rejects.
 
-```vibe
-<script setup lang="ts">
-import { inject, useAsync } from '@vibejs-org/ui';
-import { useRoute } from '@vibejs-org/ui/router';
-import { API } from '../api.ts';
+The todo page of the example app loads one todo by the id in the URL:
 
-const api = inject(API)!;
-const route = useRoute('todo');
-const { data, loading, refresh } = useAsync((signal) =>
-  api.todos.one({ params: { id: route.params.id } }, { signal }),
-);
-</script>
-
-<template>
-  <p v-if="loading">Loading…</p>
-  <article v-else-if="data?.ok">
-    <h1>{{ data.data.title }}</h1>
-    <button type="button" @click="refresh()">Reload</button>
-  </article>
-  <p v-else-if="data" role="alert">{{ data.error.code }}</p>
-</template>
-```
+<<< @/../examples/todo/ui/src/pages/TodoPage.vibe
 
 `API` is the injection key under which the app provides its client.
 

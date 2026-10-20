@@ -57,3 +57,42 @@ it(
     expect(errors).toEqual([]);
   },
 );
+
+const VIBE = `---
+title: Vibe
+---
+
+# Vibe
+
+\`\`\`vibe
+<script setup lang="ts">
+const busy: boolean = false;
+const label: string = 'Save';
+</script>
+
+<template>
+  <button :disabled="label">{{ label }}</button>
+</template>
+\`\`\`
+`;
+
+it('maps a template type error in a vibe fence to page.md:line:col', { timeout: 60_000 }, () => {
+  writeFileSync(join(docs, 'vibe.md'), VIBE);
+  expect(main(docs)).toBe(1);
+  expect(errors).toEqual([
+    "vibe.md:14:12 TS2322 Type 'string' is not assignable to type 'Booleanish | undefined'.",
+  ]);
+});
+
+it('maps a script error in a vibe fence the same way', { timeout: 60_000 }, () => {
+  const fixed = VIBE.replace(':disabled="label"', ':disabled="busy"');
+  writeFileSync(join(docs, 'vibe.md'), fixed.replace("= 'Save'", '= 1'));
+  expect(main(docs)).toBe(1);
+  expect(errors).toEqual(["vibe.md:10:7 TS2322 Type 'number' is not assignable to type 'string'."]);
+});
+
+it('passes the fixed vibe fence', { timeout: 60_000 }, () => {
+  writeFileSync(join(docs, 'vibe.md'), VIBE.replace(':disabled="label"', ':disabled="busy"'));
+  expect(main(docs)).toBe(0);
+  expect(errors).toEqual([]);
+});

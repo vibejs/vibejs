@@ -48,12 +48,15 @@ export default {
     'examples/todo-flags': {},
     docs: {
       entry: ['scripts/*.ts'],
-      // Imported only by the ts snippets of the pages, which check-snippets type-checks.
+      // Imported only by the snippets of the pages, which check-snippets type-checks with the
+      // .vibe content mapper; the tutorial test imports the scaffold helpers of create-vibejs.
       ignoreDependencies: [
         '@vibejs-org/compiler',
         '@vibejs-org/contract',
+        '@vibejs-org/language-tools',
         '@vibejs-org/server',
         '@vibejs-org/ui',
+        'create-vibejs',
         'valibot',
       ],
     },

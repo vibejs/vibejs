@@ -8,12 +8,16 @@ import { extractSnippets, main, mapDiagnostics, type Snippet } from './check-sni
 const FIXTURE = fileURLToPath(new URL('fixtures/docs', import.meta.url));
 
 describe('extractSnippets', () => {
-  it.each<[string, string, Pick<Snippet, 'mdLine' | 'code'>[]]>([
+  it.each<[string, string, (Pick<Snippet, 'mdLine' | 'code'> & Partial<Snippet>)[]]>([
     ['a ts fence', '# T\n\n```ts\nconst a = 1;\n```\n', [{ mdLine: 3, code: 'const a = 1;' }]],
     ['meta after ts', '```ts {2}\na;\nb;\n```', [{ mdLine: 1, code: 'a;\nb;' }]],
     ['highlighted lines without a space', '```ts{2}\na;\n```', [{ mdLine: 1, code: 'a;' }]],
     ['line numbers', '```ts:line-numbers {1}\na;\n```', [{ mdLine: 1, code: 'a;' }]],
-    ['a title', '```ts [a.ts]\na;\n```', [{ mdLine: 1, code: 'a;' }]],
+    [
+      'a file title (a file of an app, ignored)',
+      '```ts [a.ts]\na;\n```\n```vibe {1} [A.vibe]\n<template />\n```',
+      [],
+    ],
     ['a tilde fence', '~~~ts\na;\n~~~', [{ mdLine: 1, code: 'a;' }]],
     [
       'a longer closing fence, not a shorter or other marker or an info string',
@@ -23,8 +27,16 @@ describe('extractSnippets', () => {
     ['an indented fence', '- item\n\n   ```ts\n   a;\n   ```\n', [{ mdLine: 3, code: '   a;' }]],
     ['an unclosed fence', '```ts\na;\n', [{ mdLine: 1, code: 'a;\n' }]],
     [
-      'vibe, sh, bare and ts-prefixed fences (ignored)',
-      '```vibe\n<template />\n```\n```sh\nls\n```\n```\nx\n```\n```tsx\nx\n```',
+      'vibe fences, backtick and tilde, with meta',
+      '```vibe\n<template />\n```\n~~~vibe {2}\n<script setup lang="ts"></script>\n<template />\n~~~',
+      [
+        { mdLine: 1, ext: 'vibe', code: '<template />' },
+        { mdLine: 4, ext: 'vibe', code: '<script setup lang="ts"></script>\n<template />' },
+      ],
+    ],
+    [
+      'sh, bare, ts- and vibe-prefixed fences (ignored)',
+      '```sh\nls\n```\n```\nx\n```\n```tsx\nx\n```\n```vibes\nx\n```',
       [],
     ],
     [
@@ -34,15 +46,16 @@ describe('extractSnippets', () => {
     ],
   ])('handles %s', (_, md, expected) => {
     expect(extractSnippets(md, 'guide.md')).toEqual(
-      expected.map((snippet) => ({ file: 'guide.md', ...snippet })),
+      expected.map((snippet) => ({ file: 'guide.md', ext: 'ts', ...snippet })),
     );
   });
 });
 
 describe('mapDiagnostics', () => {
   const snippets: Snippet[] = [
-    { file: 'a.md', mdLine: 10, code: '' },
-    { file: 'guides/b.md', mdLine: 3, code: '' },
+    { file: 'a.md', mdLine: 10, ext: 'ts', code: '' },
+    { file: 'guides/b.md', mdLine: 3, ext: 'ts', code: '' },
+    { file: 'ui/c.md', mdLine: 20, ext: 'vibe', code: '' },
   ];
 
   it('maps snippet positions to page.md:line:col and passes other lines through', () => {
@@ -52,6 +65,7 @@ describe('mapDiagnostics', () => {
       '  Continuation line.',
       '',
       ".snippets/7.ts(1,1): error TS2304: Cannot find name 'y'.",
+      ".snippets/2.vibe(9,26): error TS2322: Type 'number' is not assignable to type 'string'.",
       "tsconfig.json(3,3): error TS5023: Unknown compiler option 'x'.",
     ].join('\n');
     expect(mapDiagnostics(output, snippets)).toEqual([
@@ -59,6 +73,7 @@ describe('mapDiagnostics', () => {
       "a.md:11:1 TS2304 Cannot find name 'x'.",
       '  Continuation line.',
       ".snippets/7.ts(1,1): error TS2304: Cannot find name 'y'.",
+      "ui/c.md:29:26 TS2322 Type 'number' is not assignable to type 'string'.",
       "tsconfig.json(3,3): error TS5023: Unknown compiler option 'x'.",
     ]);
   });
@@ -115,9 +130,22 @@ describe('main', () => {
         customConditions: [],
         experimentalDecorators: true,
       },
-      include: ['*.ts'],
+      contentMappers: [{ package: '@vibejs-org/language-tools', extensions: ['.vibe'] }],
+      include: ['*.ts', '*.vibe'],
     });
-    expect(out).toEqual(['check-snippets: 2 ts snippets type-check']);
+    expect(out).toEqual(['check-snippets: 2 snippets type-check']);
+  });
+
+  it('writes vibe fences as .vibe files and runs tsc with the content mapper', () => {
+    writeFileSync(join(docs, 'ui.md'), '```vibe\n<template />\n```\n');
+    const tsc = join(tmp, 'tsc-args.js');
+    writeFileSync(tsc, 'process.stdout.write(process.argv.slice(2).join(" "));\n');
+    expect(main(docs, tsc)).toBe(0);
+    const dir = join(docs, '.snippets');
+    const vibe = readdirSync(dir).filter((file) => file.endsWith('.vibe'));
+    expect(vibe.map((file) => readFileSync(join(dir, file), 'utf8'))).toEqual(['<template />\n']);
+    expect(errors).toEqual([`-p ${dir} --pretty false --runExternalCode`]);
+    expect(out).toEqual(['check-snippets: 3 snippets type-check']);
   });
 
   it('prints mapped diagnostics and exits 1', () => {
@@ -131,7 +159,7 @@ describe('main', () => {
     cpSync(join(FIXTURE, 'server'), join(empty, 'server'), { recursive: true });
     expect(main(empty, join(tmp, 'missing.js'))).toBe(0);
     expect(readdirSync(join(empty, '.snippets'))).toEqual([]);
-    expect(out).toEqual(['check-snippets: no ts snippets']);
+    expect(out).toEqual(['check-snippets: no snippets']);
   });
 });
 
