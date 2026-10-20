@@ -69,7 +69,8 @@ it('writes only JSON-RPC frames to stdout and exits 0 when stdin closes', async 
   });
   await answered(1);
   send({ method: 'notifications/initialized' });
-  // In process: the todo backend runs inside the MCP server.
+  // In process, or through the dev server that introspect.integration.test.ts may run in
+  // examples/todo at the same time; that file asserts each mode.
   send({
     id: 2,
     method: 'tools/call',
@@ -94,7 +95,7 @@ it('writes only JSON-RPC frames to stdout and exits 0 when stdin closes', async 
     ['2.0', 2],
     ['2.0', 3],
   ]);
-  expect(parse(lines[1].result)).toMatchObject({ ok: true, mode: 'in-process' });
+  expect(parse(lines[1].result)).toMatchObject({ ok: true, response: { status: 200 } });
 }, 60_000);
 
 it('answers mcp --help --json', () => {
