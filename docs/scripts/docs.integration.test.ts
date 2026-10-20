@@ -1,9 +1,12 @@
-import { globSync } from 'node:fs';
-import { sep } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { globSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, it } from 'vitest';
-import { loadSource } from './docs.ts';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { DISAMBIGUATION, loadSource, main, SITE } from './docs.ts';
 
+const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const DOCS = fileURLToPath(new URL('..', import.meta.url));
 const BUNDLE = fileURLToPath(new URL('../../packages/cli/dist/docs', import.meta.url));
 
@@ -17,4 +20,66 @@ it('bundles every source page and the CLI reference into the built CLI, and noth
   const reference = bundled.filter((file) => file.startsWith('cli/'));
   expect(reference).toContain('cli/index.md');
   expect(bundled.toSorted()).toEqual([...source, ...reference].toSorted());
+});
+
+it('keeps the bundled docs index to one line of at most 8192 bytes', () => {
+  const index = readFileSync(join(BUNDLE, 'index.txt'), 'utf8');
+  expect(index).not.toContain('\n');
+  expect(Buffer.byteLength(index)).toBeLessThanOrEqual(8192);
+});
+
+/** The site URL of a page, as llms.txt links it. */
+const url = (path: string) => SITE + path.replace(/(^|\/)index$/, '$1');
+const count = (text: string, part: string) => text.split(part).length - 1;
+
+// The first steps of the docs build, on the real tree; their output is gitignored.
+describe('the docs build', () => {
+  let out: string;
+  beforeAll(() => {
+    rmSync(join(DOCS, 'errors'), { recursive: true, force: true });
+    execFileSync(process.execPath, ['scripts/errors.ts', '--docs', 'docs/errors'], { cwd: ROOT });
+    main(['cli', join(DOCS, 'cli')]);
+    out = mkdtempSync(join(tmpdir(), 'vibejs-llms-'));
+    main(['llms', out]);
+  });
+  afterAll(() => rmSync(out, { recursive: true, force: true }));
+
+  it('writes a non-empty page for every catalog code, retired included, and no other', () => {
+    // Every `## VIBE####: Title` heading of the catalogs, as scripts/errors.ts parses them.
+    const codes = globSync('packages/*/messages/*.md', { cwd: ROOT }).flatMap((file) =>
+      Array.from(
+        readFileSync(join(ROOT, file), 'utf8').matchAll(/^## (VIBE\d{4}): /gm),
+        (m) => m[1],
+      ),
+    );
+    const pages = globSync('VIBE*.md', { cwd: join(DOCS, 'errors') });
+    expect(pages.map((file) => basename(file, '.md')).toSorted()).toEqual(codes.toSorted());
+    const empty = pages.filter(
+      (page) =>
+        !readFileSync(join(DOCS, 'errors', page), 'utf8')
+          .split(/^# .*$/m)[1]
+          .trim(),
+    );
+    expect(empty).toEqual([]);
+  });
+
+  it('links every non-error page once from llms.txt, and no error code page', () => {
+    const text = readFileSync(join(out, 'llms.txt'), 'utf8');
+    expect(text.startsWith(`# vibe.js\n\n> ${DISAMBIGUATION}\n`)).toBe(true);
+    const pages = loadSource(DOCS);
+    expect(pages.map((page) => page.path)).toContain('cli/index');
+    const notOnce = pages.filter((page) => count(text, `](${url(page.path)})`) !== 1);
+    expect(notOnce.map((page) => page.path)).toEqual([]);
+    expect(text).not.toContain(`](${SITE}errors/VIBE`);
+  });
+
+  it('holds every page and every error page once in llms-full.txt', () => {
+    const lines = readFileSync(join(out, 'llms-full.txt'), 'utf8').split('\n');
+    const pages = loadSource(DOCS, { errors: true });
+    expect(pages.filter((page) => page.path.startsWith('errors/VIBE')).length).toBeGreaterThan(0);
+    const notOnce = pages.filter(
+      (page) => lines.filter((line) => line === `Source: ${url(page.path)}`).length !== 1,
+    );
+    expect(notOnce.map((page) => page.path)).toEqual([]);
+  });
 });

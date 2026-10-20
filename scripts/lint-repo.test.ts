@@ -71,6 +71,9 @@ const BASE: Record<string, string> = {
   'packages/server/src/service.ts': 'function Tag(_: unknown) {}\n@Tag\nexport class Service {}\n',
 };
 
+/** A notices section that credits `files` to `repo` at commit `sha`. */
+const credit = (repo: string, sha: string, ...files: string[]): string =>
+  `## ${repo}\n\n- Commit \`${sha}\`\n${files.map((file) => `- \`${file}\`\n`).join('')}`;
 const entry = (file: string, reason: string): string => JSON.stringify([{ file, reason }]);
 /** Builds hint text, so that no line of this file turns coverage off. */
 const off = (kind: string): string => `v8 ignore ${kind}`;
@@ -179,7 +182,7 @@ describe('rule 1: coverage hints', () => {
     const header =
       '// Upstream: vuejs/core@0123abc packages/compiler-core/src/tokenizer.ts (MIT)\n// Edits to re-apply on an upgrade: none.\n';
     put({
-      'packages/compiler/THIRD-PARTY-NOTICES.md': '## vuejs/core (MIT)\n',
+      'packages/compiler/THIRD-PARTY-NOTICES.md': credit('vuejs/core', '0123abc', file),
       'coverage-ignores.json': entry(file, 'upstream-defensive: unreachable state'),
     });
     expect(
@@ -432,7 +435,14 @@ describe('rule 7: Upstream headers', () => {
   });
 
   it('requires upgrade notes in a forked compiler source, not in its tests or other packages', () => {
-    put({ 'packages/compiler/THIRD-PARTY-NOTICES.md': '## vuejs/core (MIT)\n' });
+    const files = ['a.ts', 'b.ts', 'c.ts', 'a.test.ts', 'a.test-d.ts'];
+    put({
+      'packages/compiler/THIRD-PARTY-NOTICES.md': credit(
+        'vuejs/core',
+        'abcdef0',
+        ...files.map((name) => `packages/compiler/src/${name}`),
+      ),
+    });
     const header = '// Upstream: vuejs/core@abcdef0 packages/compiler-sfc/src/a.ts (MIT)\n';
     expect(
       lint({
@@ -446,6 +456,61 @@ describe('rule 7: Upstream headers', () => {
       'packages/compiler/src/a.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
       'packages/compiler/src/c.ts:1:1 upstream list the "Edits to re-apply on an upgrade:" in the header',
     ]);
+  });
+});
+
+describe('rule 7: notices', () => {
+  const file = 'packages/ui/src/a.ts';
+  const header = '// Upstream: vuejs/core@abcdef0123 packages/reactivity/src/ref.ts (MIT)\n';
+  const notices = 'packages/ui/THIRD-PARTY-NOTICES.md';
+
+  it('passes a header whose commit, by full SHA or prefix, and file are under its project', () => {
+    put({ [file]: header, 'packages/ui/src/b.ts': header.replace('abcdef0123', 'abcdef0') });
+    expect(
+      lint({ [notices]: credit('vuejs/core', 'abcdef0123', file, 'packages/ui/src/b.ts') }),
+    ).toEqual([]);
+    expect(
+      lint({ [notices]: credit('vuejs/core', 'abcdef01', file, 'packages/ui/src/b.ts') }),
+    ).toEqual([]);
+  });
+
+  it('rejects a header whose commit or file is missing from its project section', () => {
+    put({ [file]: header });
+    expect(
+      lint({
+        [notices]: `## vuejs/core\n\n${credit('vuejs/router', 'abcdef0123', file)}`,
+      }),
+    ).toEqual([
+      `${file}:1:1 upstream ${notices} does not name ${file} under vuejs/core`,
+      `${file}:1:1 upstream ${notices} names no commit abcdef0123 under vuejs/core`,
+    ]);
+    expect(lint({ [notices]: credit('vuejs/core', '1234567', file) })).toEqual([
+      `${file}:1:1 upstream ${notices} names no commit abcdef0123 under vuejs/core`,
+    ]);
+  });
+
+  it('rejects a workspace path that a notices file names but that does not exist', () => {
+    expect(
+      lint({
+        'THIRD-PARTY-NOTICES.md': 'See `packages/ui/src/gone.ts` and packages/ui/LICENSE.\n',
+        [notices]: '- `packages/ui/src/dev.ts` from `packages/runtime-dom/src/x.ts`\n',
+      }),
+    ).toEqual(['THIRD-PARTY-NOTICES.md:1:6 upstream packages/ui/src/gone.ts does not exist']);
+  });
+
+  it('rejects a third-party alwaysBundle entry that the package notices do not name', () => {
+    const config = 'packages/ui/tsdown.config.ts';
+    put({
+      [config]:
+        "export default { deps: { alwaysBundle: ['@vibejs-org/errors', 'tiny', 'dep'] } };\n",
+      [notices]: '## tiny\n',
+    });
+    expect(lint()).toEqual([`${config}:1:26 upstream dep is bundled but not named in ${notices}`]);
+    expect(lint({ 'packages/ui/THIRD-PARTY-NOTICES.md': '' })).toContain(
+      `${config}:1:26 upstream tiny is bundled but not named in ${notices}`,
+    );
+    put({ [config]: 'export default { deps: {} };\n' });
+    expect(lint()).toEqual([]);
   });
 });
 
@@ -570,7 +635,7 @@ describe('rule 11: email addresses', () => {
     const header = '// Upstream: fb55/htmlparser2@abcdef0 src/Tokenizer.ts (MIT)\n';
     expect(
       lint({
-        'THIRD-PARTY-NOTICES.md': `fb55/htmlparser2\n${notice}`,
+        'THIRD-PARTY-NOTICES.md': `${credit('fb55/htmlparser2', 'abcdef0', 'src/a.ts')}${notice}`,
         'src/a.ts': header + notice,
         'src/b.ts': notice,
         'NOTICE.md': `x ${address('jane', 'corp.io')}`,
@@ -748,6 +813,7 @@ describe('as a script', () => {
     process.exitCode = undefined;
   });
 
+  // It walks every committed file, which outlasts the 5 s default on a loaded machine.
   it('lints the real repo and exits 0', async () => {
     errors = [];
     process.argv = ['node', fileURLToPath(new URL('lint-repo.ts', import.meta.url))];
@@ -755,5 +821,5 @@ describe('as a script', () => {
     await import('./lint-repo.ts');
     expect(errors).toEqual([]);
     expect(process.exitCode).toBe(0);
-  });
+  }, 30_000);
 });

@@ -34,12 +34,19 @@ const WINDOWS = process.platform === 'win32';
 const { values } = parseArgs({ options: { 'no-browser': { type: 'boolean', default: false } } });
 const browsers = !values['no-browser'];
 
-/** The longest plain part of each ui catalog message: ui messages are dev only (CONTRACTS C2). */
-const MESSAGES = globSync('packages/ui/messages/*.md', { cwd: ROOT }).flatMap((file) =>
-  parseMessages('ui', file, readFileSync(join(ROOT, file), 'utf8')).entries.map(({ message }) =>
-    message.split(/\{\w+\}|["'`\\]/).reduce((a, b) => (b.length > a.length ? b : a)),
-  ),
+/**
+ * The longest plain part of each catalog message, of every package: a prod bundle carries codes
+ * only (CONTRACTS C2). Parts under 12 characters are dropped, so that common words cannot match.
+ */
+const MESSAGES = globSync('packages/*/messages/*.md', { cwd: ROOT }).flatMap((file) =>
+  parseMessages(file.split('/')[1], file, readFileSync(join(ROOT, file), 'utf8'))
+    .entries.map(({ message }) =>
+      message.split(/\{\w+\}|["'`\\]/).reduce((a, b) => (b.length > a.length ? b : a)),
+    )
+    .filter((text) => text.length >= 12),
 );
+/** gzip bytes, level 9, sum over ui/dist/**\/*.js; measured + 10% (C10). */
+const BUDGETS = { template: 23_300, todo: 24_300 };
 
 let current = '';
 function step(name: string) {
@@ -89,18 +96,21 @@ function clean(stdout: string) {
   ok(result.ok && result.steps?.coverage.filesBelow100 === 0, `check: ${stdout}`);
 }
 
-/** Prints the size of each built UI file and fails on any dev-only catalog message in it. */
-function audit(app: string, label: string) {
+/** Prints the size of each built UI file, fails on any catalog message in it and on its budget. */
+function audit(app: string, label: string, budget: number) {
   const files = globSync('ui/dist/**/*.js', { cwd: app }).toSorted();
   ok(files.length, `${label}: no ui/dist/**/*.js`);
+  let total = 0;
   for (const file of files) {
     const code = readFileSync(join(app, file));
-    console.log(
-      `  ${label} ${file}: ${code.length} B, ${gzipSync(code, { level: 9 }).length} B gzip`,
-    );
+    const gzip = gzipSync(code, { level: 9 }).length;
+    total += gzip;
+    console.log(`  ${label} ${file}: ${code.length} B, ${gzip} B gzip`);
     const leaked = MESSAGES.filter((text) => code.includes(text));
     ok(!leaked.length, `${label} ${file} contains catalog messages:\n${leaked.join('\n')}`);
   }
+  console.log(`  ${label} total: ${total} B gzip, budget ${budget} B`);
+  ok(total <= budget, `${label} ui is ${total} B gzip, over the ${budget} B budget`);
 }
 
 /** Replaces `from`, which must be there, with `to` in a file. */
@@ -245,7 +255,7 @@ async function onStep(s: TutorialStep, out: StepOutput) {
     const [{ ops = [] }] = json(vibejs('g', 'resource', 'users'));
     same([...new Set(ops.map((o: { op: string }) => o.op))], ['skip']);
   } else if (s.command === 'pnpm vibejs build') {
-    audit(out.cwd, 'tutorial');
+    audit(out.cwd, 'tutorial', BUDGETS.template);
   } else {
     await devLoop(out);
   }
@@ -259,7 +269,7 @@ async function todo() {
   const vibejs = (...args: string[]) => must(run(process.execPath, [bin, ...args], app));
   clean(vibejs('check', '--json'));
   vibejs('build', '--json');
-  audit(app, 'examples/todo');
+  audit(app, 'examples/todo', BUDGETS.todo);
 
   const dev: ChildProcess = spawn(process.execPath, [bin, 'dev', '--json'], {
     cwd: app,
