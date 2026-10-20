@@ -79,6 +79,7 @@ export default defineConfig({
             'packages/*/src/**/*.integration.test.ts',
             'packages/create-vibejs/*.integration.test.ts',
             'docs/scripts/**/*.integration.test.ts',
+            'examples/*/test/**/*.integration.test.ts',
             '**/*.vibe.test.ts',
           ],
         },

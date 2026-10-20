@@ -1,0 +1,25 @@
+{
+  "name": "todo-flags",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./contract": "./contract/flags.contract.ts",
+    "./server": "./server/flags.module.ts",
+    "./ui": "./ui/flags.ts"
+  },
+  "scripts": {
+    "test": "tsc -b && vitest run --coverage"
+  },
+  "dependencies": {
+    "@vibejs-org/contract": "workspace:*",
+    "@vibejs-org/server": "workspace:*",
+    "@vibejs-org/ui": "workspace:*",
+    "valibot": "catalog:"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "typescript": "catalog:ts-next",
+    "vitest": "catalog:"
+  }
+}

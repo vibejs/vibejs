@@ -30,8 +30,19 @@ export default {
       // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.
       ignoreDependencies: ['@vibejs-org/ui'],
     },
-    // The app entry (CONTRACTS C7); the Vitest config and tests come from the knip plugin.
-    'examples/*': { entry: ['server/src/app.module.ts', 'server/src/main.ts'] },
+    // The app entries (CONTRACTS C7); the Vitest config and tests come from the knip plugin.
+    'examples/*': {
+      entry: [
+        'server/src/app.module.ts',
+        'server/src/main.ts',
+        'ui/src/main.ts',
+        'ui/vite.config.ts',
+      ],
+      // Run by `vibejs check`.
+      ignoreDependencies: ['oxfmt', 'oxlint'],
+    },
+    // A local package: its exports are the entries.
+    'examples/todo-flags': {},
     docs: {
       entry: ['scripts/*.ts'],
       // Imported only by the ts snippets of the pages, which check-snippets type-checks.

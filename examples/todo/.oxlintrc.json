@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+  "categories": { "correctness": "error" },
+  "overrides": [
+    {
+      "files": ["ui/**"],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@vibejs-org/server",
+                "message": "UI code runs in the browser; share contracts instead."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["@vibejs-org/server/*", "todo-flags/server", "node:*"],
+                "message": "UI code runs in the browser; share contracts instead."
+              },
+              {
+                "regex": "^(?:\\.\\./)+server(?:/|$)",
+                "message": "UI code runs in the browser; share contracts instead."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

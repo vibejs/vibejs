@@ -11,6 +11,11 @@ export class TodosController {
     return this.todos.list();
   }
 
+  @Handle(todos.get)
+  get(ctx: Ctx<typeof todos.get>): TodoItem {
+    return this.todos.get(ctx.params.id) ?? ctx.fail('TODO_NOT_FOUND', `No todo ${ctx.params.id}`);
+  }
+
   @Handle(todos.create)
   create(ctx: Ctx<typeof todos.create>): TodoItem {
     return this.todos.create(ctx.body.title);

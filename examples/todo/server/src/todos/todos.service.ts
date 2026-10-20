@@ -10,6 +10,10 @@ export class TodosService {
     return [...this.#todos.values()];
   }
 
+  get(id: string): TodoItem | undefined {
+    return this.#todos.get(id);
+  }
+
   create(title: string): TodoItem {
     const todo = { id: crypto.randomUUID(), title, done: false };
     this.#todos.set(todo.id, todo);

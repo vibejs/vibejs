@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
-  "compilerOptions": { "lib": ["es2024", "dom"], "rootDir": "." },
+  "compilerOptions": { "lib": ["es2024", "dom"] },
   "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }],
-  "include": ["src", "test"],
+  "include": ["src"],
   "references": [{ "path": "../contracts" }]
 }

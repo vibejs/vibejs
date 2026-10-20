@@ -24,9 +24,19 @@ exports[`describes the routes and modules without constructing anything 1`] = `
     {
       "exports": [],
       "global": false,
+      "imports": [],
+      "path": "AppModule > FlagsModule",
+      "providers": [
+        "FLAGS_OPTIONS",
+      ],
+    },
+    {
+      "exports": [],
+      "global": false,
       "imports": [
         "TodosModule",
         "HealthModule",
+        "FlagsModule",
       ],
       "path": "AppModule",
       "providers": [],
@@ -40,6 +50,14 @@ exports[`describes the routes and modules without constructing anything 1`] = `
       "interceptors": [],
       "method": "GET",
       "path": "/api/todos",
+    },
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "TodosController.get",
+      "interceptors": [],
+      "method": "GET",
+      "path": "/api/todos/:id",
     },
     {
       "filters": [],
@@ -72,6 +90,14 @@ exports[`describes the routes and modules without constructing anything 1`] = `
       "interceptors": [],
       "method": "GET",
       "path": "/api/health",
+    },
+    {
+      "filters": [],
+      "guards": [],
+      "handler": "FlagsController.list",
+      "interceptors": [],
+      "method": "GET",
+      "path": "/api/flags",
     },
   ],
 }

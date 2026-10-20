@@ -1,0 +1,53 @@
+<script setup lang="ts">
+import { inject, ref, useAsync } from '@vibejs-org/ui';
+import { RouterLink } from '@vibejs-org/ui/router';
+import { useFlag } from 'todo-flags/ui';
+import { API } from '../api.ts';
+
+const api = inject(API)!;
+const canRemoveDone = useFlag('removeDone');
+const { data: list, refresh } = useAsync((signal) => api.todos.list(undefined, { signal }));
+const title = ref('');
+// The code of the last failed create.
+const error = ref<string>();
+
+async function add() {
+  const r = await api.todos.create({ body: { title: title.value } });
+  error.value = r.ok ? undefined : r.error.code;
+  if (r.ok) title.value = '';
+  await refresh();
+}
+
+async function toggle(id: string) {
+  await api.todos.toggle({ params: { id } });
+  await refresh();
+}
+
+async function removeDone(todos: readonly { id: string; done: boolean }[]) {
+  const done = todos.filter((todo) => todo.done);
+  await Promise.all(done.map((todo) => api.todos.remove({ params: { id: todo.id } })));
+  await refresh();
+}
+</script>
+
+<template>
+  <section>
+    <h1>Todos</h1>
+    <form @submit.prevent="add">
+      <input v-model="title" placeholder="What next?" />
+      <button>Add</button>
+    </form>
+    <p v-if="error" class="error">{{ error }}</p>
+    <div v-if="list?.ok">
+      <ul>
+        <li v-for="todo in list.data" :key="todo.id">
+          <input type="checkbox" :checked="todo.done" @change="toggle(todo.id)" />
+          <RouterLink :to="{ name: 'todo', params: { id: todo.id } }">{{ todo.title }}</RouterLink>
+        </li>
+      </ul>
+      <button v-if="canRemoveDone" class="remove-done" @click="removeDone(list.data)">
+        Remove done
+      </button>
+    </div>
+  </section>
+</template>

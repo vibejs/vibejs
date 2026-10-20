@@ -1,23 +1,32 @@
-import { transformWithOxc } from 'vite';
+import { vibe } from '@vibejs-org/compiler/vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [
-    {
-      // Compiles .vibe files for the test run; replaced by vibe() from @vibejs-org/compiler/vite.
-      name: 'todo:vibe',
-      async transform(code, id) {
-        if (!id.endsWith('.vibe')) return null;
-        // Imported here, not at the top: knip loads this config before compiler dist exists.
-        const { compile, formatDiagnostic } = await import('@vibejs-org/compiler');
-        // ponytail: one fixed id, as TodoList.vibe has no scoped style.
-        const r = compile(code, { filename: id, id: '00000000', dev: false });
-        if (r.diagnostics.length) {
-          this.error(r.diagnostics.map((d) => formatDiagnostic(d, code)).join('\n'));
-        }
-        return transformWithOxc(r.code, `${id}.ts`, { lang: 'ts' });
+  test: {
+    projects: [
+      {
+        plugins: [vibe()],
+        test: {
+          name: 'ui',
+          environment: 'jsdom',
+          include: ['ui/src/**/*.test.ts', 'test/*.test.ts'],
+          // Run from the repo's integration project, after the build.
+          exclude: ['**/*.integration.test.ts'],
+        },
       },
+      {
+        test: {
+          name: 'server',
+          environment: 'node',
+          include: ['server/src/**/*.test.ts', 'contracts/src/**/*.test.ts'],
+        },
+      },
+    ],
+    coverage: {
+      provider: 'v8',
+      include: ['ui/src/**/*.{ts,vibe}', 'server/src/**/*.ts', 'contracts/src/**/*.ts'],
+      exclude: ['**/*.test.ts', 'ui/src/main.ts', 'server/src/main.ts'],
+      thresholds: { 100: true, perFile: true },
     },
-  ],
-  test: { environment: 'node' },
+  },
 });
