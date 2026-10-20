@@ -10,7 +10,8 @@ const release = (waiters: (() => void)[]): void => waiters.forEach((resolve) => 
  * when a reactive value that it read before its first `await` changes, and the current run is
  * aborted when the owner scope stops. An aborted run never touches `data`, `error` or `loading`.
  * `error` holds what `fn` throws; with the typed client, HTTP and network failures are values in
- * `data`. `refresh()` runs `fn` again and resolves, never rejects, once that run is over.
+ * `data`. `refresh()` runs `fn` again and resolves, never rejects, once that run is over; called
+ * from `fn` before its first `await`, it joins the run that is starting.
  *
  * @example
  * const todo = useAsync((signal) => api.todos.one({ params: { id: route.params.id } }, { signal }));
@@ -30,6 +31,8 @@ export function useAsync<T>(fn: (signal: AbortSignal) => Promise<T>): {
   const runs = shallowRef(0);
   // The `refresh()` calls that wait for the next run.
   let pending: (() => void)[] = [];
+  // The waiters of the run whose synchronous part is executing, if any.
+  let starting: (() => void)[] | undefined;
 
   watchEffect(() => {
     void runs.value;
@@ -49,11 +52,13 @@ export function useAsync<T>(fn: (signal: AbortSignal) => Promise<T>): {
       }
       release(waiters);
     };
+    starting = waiters;
     // The executor runs now, so `fn` is tracked and a synchronous throw becomes a rejection.
     new Promise<T>((resolve) => resolve(fn(controller.signal))).then(
       (value) => settle(() => (data.value = value)),
       (reason: unknown) => settle(() => (error.value = reason)),
     );
+    starting = undefined;
   });
   onScopeDispose(() => release(pending));
 
@@ -63,8 +68,10 @@ export function useAsync<T>(fn: (signal: AbortSignal) => Promise<T>): {
     loading,
     refresh() {
       if (!scope.active) return Promise.resolve();
-      runs.value++;
-      return new Promise((resolve) => pending.push(resolve));
+      // A watcher does not trigger itself, so a call from inside the run joins it.
+      const waiters = starting ?? pending;
+      if (!starting) runs.value++;
+      return new Promise((resolve) => waiters.push(resolve));
     },
   };
 }

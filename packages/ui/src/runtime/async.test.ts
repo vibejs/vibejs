@@ -180,6 +180,24 @@ describe('useAsync', () => {
     expect(runs).toHaveLength(3);
   });
 
+  it('refresh() called from fn before its first await joins that run and resolves', async () => {
+    let calls = 0;
+    let inner: Promise<void> | undefined;
+    const { result } = mountComposable(() =>
+      useAsync(async () => {
+        calls++;
+        if (calls === 2) inner = result.refresh();
+        await Promise.resolve();
+        return calls;
+      }),
+    );
+    await flushPromises();
+    await result.refresh();
+    await inner;
+    expect(calls).toBe(2);
+    expect(result.data.value).toBe(2);
+  });
+
   it('throws VIBE7301 with no owner scope', () => {
     let error: unknown;
     try {

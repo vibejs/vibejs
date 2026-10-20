@@ -20,5 +20,7 @@ else if (value) expectTypeOf(value.error.code).toEqualTypeOf<string>();
 // The refs are read-only.
 // @ts-expect-error data is read-only
 todo.data.value = undefined;
+// @ts-expect-error error is read-only
+todo.error.value = undefined;
 // @ts-expect-error loading is read-only
 todo.loading.value = false;
