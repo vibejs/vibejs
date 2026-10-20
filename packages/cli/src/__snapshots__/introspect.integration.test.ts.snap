@@ -1,12 +1,28 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`components --json lists TodoList 1`] = `
+exports[`components --json lists the todo components 1`] = `
 [
   {
     "diagnostics": [],
-    "file": "ui/src/TodoList.vibe",
+    "file": "ui/src/App.vibe",
     "models": [],
-    "name": "TodoList",
+    "name": "App",
+    "props": [],
+    "types": {},
+  },
+  {
+    "diagnostics": [],
+    "file": "ui/src/pages/TodoPage.vibe",
+    "models": [],
+    "name": "TodoPage",
+    "props": [],
+    "types": {},
+  },
+  {
+    "diagnostics": [],
+    "file": "ui/src/pages/TodosPage.vibe",
+    "models": [],
+    "name": "TodosPage",
     "props": [],
     "types": {},
   },

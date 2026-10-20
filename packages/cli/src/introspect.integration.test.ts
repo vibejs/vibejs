@@ -47,7 +47,7 @@ it('di --json describes the todo modules', async () => {
   expect(result.modules).toEqual(expected);
 }, 30_000);
 
-// The same committed inspect() snapshot pins the routes; todo has no ui/src/routes.ts.
+// The same committed inspect() snapshot pins the API routes; ui/src/routes.ts pins the UI routes.
 it('routes --json lists the todo API routes', async () => {
   const { status, result } = vibejs('routes', '--json');
   expect(status).toBe(0);
@@ -57,10 +57,13 @@ it('routes --json lists the todo API routes', async () => {
     return server.inspect(AppModule, appOptions).routes;
   });
   expect(result.api).toEqual(expected);
-  expect(result.ui).toEqual([]);
+  expect(result.ui).toEqual([
+    { name: 'todos', path: '/', component: 'ui/src/pages/TodosPage.vibe' },
+    { name: 'todo', path: '/todos/:id', component: 'ui/src/pages/TodoPage.vibe' },
+  ]);
 }, 30_000);
 
-it('components --json lists TodoList', () => {
+it('components --json lists the todo components', () => {
   const { status, result } = vibejs('components', '--json');
   expect(status).toBe(0);
   expect(result.ok).toBe(true);
