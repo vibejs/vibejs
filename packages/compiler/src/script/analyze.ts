@@ -281,8 +281,11 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
       at(vibeError('VIBE3002'), [start, start + 'await'.length]);
     }
     const inner = FUNCTIONS.has(n.type) ? fns + 1 : fns;
-    for (const key of visitorKeys[n.type]) {
-      for (const child of children(n, key)) scan(child, inner);
+    // Index loops, as in `varIds` (expr/walk.ts): a `for…of` here allocates per step.
+    const keys = visitorKeys[n.type];
+    for (let k = 0; k < keys.length; k++) {
+      const list = children(n, keys[k]);
+      for (let i = 0; i < list.length; i++) scan(list[i], inner);
     }
   };
   for (const statement of body) scan(statement, 0);

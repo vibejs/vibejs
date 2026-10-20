@@ -101,11 +101,27 @@ export function identifiersOf(texts: readonly string[]): Ref[][] {
       const node = whole ? children(statement, 'expression')[0] : undefined;
       placed.set(slot, node && node.start > starts[slot] ? node : undefined);
     }
+    const nodes: Node[] = [];
+    const owners: number[] = [];
     batch.forEach((i, k) => {
       const node = placed.get(k);
-      if (node) refs[i] = references(node, starts[k] + 1);
-      else alone.add(i);
+      if (node) {
+        nodes.push(node);
+        owners.push(k);
+      } else alone.add(i);
     });
+    // One walk over the placed expressions as a sequence, which binds nothing: each reference
+    // belongs to the last slot that starts before it.
+    let n = 0;
+    const sequence = { type: 'SequenceExpression', start: 0, end: code.length, expressions: nodes };
+    walk(sequence, {
+      ref: (id, info) => {
+        while (starts[owners[n + 1]] <= id.start) n++;
+        const shift = starts[owners[n]] + 1;
+        refs[batch[owners[n]]].push([id.name, id.start - shift, id.end - shift, info]);
+      },
+    });
+    for (const k of owners) refs[batch[k]] = refs[batch[k]].toSorted((a, b) => a[1] - b[1]);
     break;
   }
   for (const i of alone) forEachIdentifier(texts[i], 0, (...ref) => refs[i].push(ref));

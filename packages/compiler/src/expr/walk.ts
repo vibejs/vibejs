@@ -102,12 +102,18 @@ function blockIds(statements: readonly Node[]): Identifier[] {
   });
 }
 
-/** The `var` names declared anywhere under `node`, without entering nested functions, into `out`. */
+/**
+ * The `var` names declared anywhere under `node`, without entering nested functions, into `out`.
+ * The recursive walks over every node use index loops: a `for…of` there allocates an iterator
+ * result per step until V8 optimizes the function, which a recursive walk rarely reaches.
+ */
 function varIds(node: Node, out: Identifier[] = []): Identifier[] {
   if (FUNCTIONS.has(node.type)) return out;
   if (node.type === 'VariableDeclaration' && node.kind === 'var') out.push(...declaratorIds(node));
-  for (const key of visitorKeys[node.type]) {
-    for (const child of children(node, key)) varIds(child, out);
+  const keys = visitorKeys[node.type];
+  for (let k = 0; k < keys.length; k++) {
+    const list = children(node, keys[k]);
+    for (let i = 0; i < list.length; i++) varIds(list[i], out);
   }
   return out;
 }
@@ -149,10 +155,12 @@ export function walk(root: Node, handlers: WalkHandlers, bound: Iterable<string>
 
   /** Visits the nodes under `node[key]`. */
   const at = (node: Node, key: string, mode: Mode = 'read', shorthand = false) => {
-    for (const child of children(node, key)) visit(child, mode, shorthand);
+    const list = children(node, key);
+    for (let i = 0; i < list.length; i++) visit(list[i], mode, shorthand);
   };
   const visitKeys = (node: Node, mode: Mode) => {
-    for (const key of visitorKeys[node.type]) if (!TYPE_KEYS.has(key)) at(node, key, mode);
+    const keys = visitorKeys[node.type];
+    for (let i = 0; i < keys.length; i++) if (!TYPE_KEYS.has(keys[i])) at(node, keys[i], mode);
   };
 
   function visit(node: Node, mode: Mode = 'read', shorthand = false): void {
