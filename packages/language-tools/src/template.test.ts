@@ -18,7 +18,7 @@ function emit(
     ctx: new Map(),
     usedSetup: new Set<string>(),
     usedCtx: new Set<string>(),
-    unknown: new Map(),
+    unknown: false,
     writes: false,
   };
   const w = {
@@ -40,7 +40,9 @@ function emit(
     expecting: false,
   };
   children(descriptor.template!.ast.children, w, locals);
+  // Most names here are unknown; expression.test.ts covers how they are read.
   return b.text
+    .replaceAll('__vibe_unknown.', '')
     .trim()
     .split('\n')
     .map((line) => line.trim());

@@ -81,7 +81,7 @@ export function expectErrors(
       const [start, end] = range(node);
       const d: Expected = { start, length: end - start };
       list.push(d);
-      const next = siblings.slice(i + 1).find((n) => n.type !== NodeTypes.COMMENT && content(n));
+      const next = siblings.slice(i + 1).find(content);
       if (next?.type === NodeTypes.ELEMENT || next?.type === NodeTypes.INTERPOLATION) {
         targets.set(next, d);
       }

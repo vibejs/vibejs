@@ -1,0 +1,4 @@
+<template>
+  <!-- @vibe-expect-error -->
+  <p :title="name" @click="name = 1">{{ { name } }}</p>
+</template>

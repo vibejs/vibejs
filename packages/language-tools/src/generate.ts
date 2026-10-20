@@ -1,6 +1,6 @@
 import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@vibejs-org/compiler';
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
-import { resetWalks, type Names } from './expression.ts';
+import { resetWalks, UNKNOWN, type Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
 import { children, CTX_TYPES, expectErrors, key, type Walk } from './template.ts';
 
@@ -55,7 +55,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
     ctx,
     usedSetup: new Set(),
     usedCtx: new Set(),
-    unknown: new Map(),
+    unknown: false,
     writes: false,
   };
   const nodes = descriptor.template?.ast.children ?? [];
@@ -85,13 +85,13 @@ export function generate(fileName: string, text: string): GeneratedFile {
 
   const used = [...names.usedSetup];
   b.add(`const __vibe_setup = { ${used.join(', ')} };\n{`);
-  /** `const { a, b } = from;` with spans to the declarations (LINK) or to the first use (NONE). */
-  const destructure = (list: [string, [number, number] | null, number][], from: string) => {
+  /** `const { a, b } = from;` with LINK spans to the declarations. */
+  const destructure = (list: [string, [number, number] | null][], from: string) => {
     if (list.length === 0) return;
     b.add('\n  const { ');
-    list.forEach(([name, at, features], i) => {
+    list.forEach(([name, at], i) => {
       if (i > 0) b.add(', ');
-      if (at) b.atom(name, ...at, features);
+      if (at) b.atom(name, ...at, Preset.LINK);
       else b.add(name);
     });
     b.add(` } = ${from};`);
@@ -105,11 +105,7 @@ export function generate(fileName: string, text: string): GeneratedFile {
     [...names.usedCtx].map((name) => link(name, ctx)),
     '__vibe_ctx',
   );
-  // Other names fail at their first use instead of resolving from lib.dom, as they do at runtime.
-  destructure(
-    [...names.unknown].map(([name, at]) => [name, at, Preset.NONE]),
-    '{}',
-  );
+  if (names.unknown) b.add(`\n  const ${UNKNOWN} = {};`);
   if (names.writes) {
     const lets = used.filter((name) => analysis.bindings.get(name)!.kind === 'let');
     const letNames = lets.map((name) => `'${name}'`).join(' | ') || 'never';
@@ -150,8 +146,6 @@ export function generate(fileName: string, text: string): GeneratedFile {
     b.add(`import { ${[...macros].join(', ')} } from '@vibejs-org/ui/tooling';\n`);
 
   // A directive without a walked target gets an empty range at the end: tsc reports it unused.
-  // ponytail: an error emitted outside the target's statements (an unknown name, reported at its
-  // destructuring above) is not covered; move such checks into the statements if users need it.
   const end = b.text.length;
   const directives = expected.map(({ start, length, virtual }) => {
     const [virtualStart, virtualEnd] = virtual?.map((v) => v + shift) ?? [end, end];
@@ -165,9 +159,9 @@ export function generate(fileName: string, text: string): GeneratedFile {
   };
 }
 
-/** A destructured name with a LINK span to its declaration. */
+/** A destructured name and its declaration. */
 const link = (name: string, decls: ReadonlyMap<string, [number, number] | null>) =>
-  [name, decls.get(name)!, Preset.LINK] as [string, [number, number] | null, number];
+  [name, decls.get(name)!] as [string, [number, number] | null];
 
 /** An object type literal. */
 const members = (list: string[]) => (list.length > 0 ? `{ ${list.join('; ')} }` : '{}');

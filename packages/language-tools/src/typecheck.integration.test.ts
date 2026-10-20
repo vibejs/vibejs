@@ -116,6 +116,8 @@ describe('corpus', () => {
         "cases/expect-error/App.vibe(8,21): error TS2322: Type 'string' is not assignable to type 'number'.",
         "cases/expect-error/App.vibe(10,36): error TS2551: Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?",
         "cases/expect-error/App.vibe(13,14): error TS2339: Property 'toUpperCase' does not exist on type 'number'.",
+        "cases/expect-error/App.vibe(16,14): error TS2339: Property 'name' does not exist on type '{}'.",
+        "cases/expect-error/App.vibe(16,25): error TS2339: Property 'name' does not exist on type '{}'.",
       ]
     `);
   }, 60_000);

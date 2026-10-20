@@ -8,7 +8,7 @@ const names = (): Names => ({
   ctx: new Map([['limit', [6, 11]]]),
   usedSetup: new Set(),
   usedCtx: new Set(),
-  unknown: new Map(),
+  unknown: false,
   writes: false,
 });
 
@@ -20,16 +20,37 @@ function emit(source: string, locals: string[] = []) {
 }
 
 it('keeps reads verbatim with BOUND spans on setup and ctx names', () => {
-  const { text, spans, n } = emit('count + limit + Math.PI + other');
-  expect(text).toBe('count + limit + Math.PI + other');
+  const { text, spans, n } = emit('count + limit + Math.PI');
+  expect(text).toBe('count + limit + Math.PI');
   expect(spans.map(([, , o, l, , f]) => [o, l, f])).toEqual([
     [0, 5, Preset.BOUND],
     [5, 3, Preset.EXPR],
     [8, 5, Preset.BOUND],
-    [13, 18, Preset.EXPR],
+    [13, 10, Preset.EXPR],
   ]);
   expect([...n.usedSetup, ...n.usedCtx]).toEqual(['count', 'limit']);
   expect(n.writes).toBe(false);
+  expect(n.unknown).toBe(false);
+});
+
+it('reads an unknown name from __vibe_unknown at each use, so the error lands there', () => {
+  const { text, spans, n } = emit('other + other');
+  expect(text).toBe('__vibe_unknown.other + __vibe_unknown.other');
+  expect(spans.slice(0, 2)).toEqual([
+    [0, 15, 0, 0, SpanKind.Atom, Preset.NONE],
+    [15, 5, 0, 5, SpanKind.Verbatim, Preset.EXPR],
+  ]);
+  expect(n.unknown).toBe(true);
+});
+
+it.each([
+  ['{ count, other }', '{ count, other: __vibe_unknown.other }'],
+  ['f({ other })', '__vibe_unknown.f({ other: __vibe_unknown.other })'],
+  ['if (count) { other }', 'if (count) { __vibe_unknown.other }'],
+  ['count; { other }', 'count; { __vibe_unknown.other }'],
+  ['[count, other]', '[count, __vibe_unknown.other]'],
+])('expands a shorthand property with an unknown name only: %s', (source, expected) => {
+  expect(emit(source).text).toBe(expected);
 });
 
 it('writes setup bindings through __vibe_w and props through __vibe_ctx', () => {

@@ -12,4 +12,6 @@ const count = 1
     <!-- @vibe-expect-error -->
     {{ count.toUpperCase() }}
   </p>
+  <!-- @vibe-expect-error -->
+  <p :title="name">{{ { name } }}</p>
 </template>
