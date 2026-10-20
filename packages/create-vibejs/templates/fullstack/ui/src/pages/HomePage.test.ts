@@ -9,7 +9,7 @@ import { routes } from '../routes.ts';
 async function render(response: Response) {
   const router = createRouter({ history: createMemoryHistory(), routes });
   const api = createApi(async () => response);
-  const wrapper = mount(App, { plugins: [router, (app) => void app.provide(API, api)] });
+  const wrapper = mount(App, { plugins: [router], provide: { [API]: api } });
   await router.isReady();
   await flushPromises();
   return wrapper;

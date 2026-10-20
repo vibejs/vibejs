@@ -13,7 +13,7 @@ it('shows the todo of the route, after loading', async () => {
     return Response.json({ id: 'a', title: 'Write', done: false });
   });
   await router.push('/todos/a');
-  const wrapper = mount(App, { plugins: [router, (app) => void app.provide(API, api)] });
+  const wrapper = mount(App, { plugins: [router], provide: { [API]: api } });
   expect(wrapper.find('section h1').exists()).toBe(false);
   expect(wrapper.find('.error').exists()).toBe(false);
   await flushPromises();

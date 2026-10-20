@@ -63,7 +63,7 @@ import { routes } from '../routes.ts';
 it('lists the users from the API at /users', async () => {
   const router = createRouter({ history: createMemoryHistory(), routes });
   const api = createApi(async () => Response.json([{ id: '1', name: 'Ada' }]));
-  const wrapper = mount(App, { plugins: [router, (app) => void app.provide(API, api)] });
+  const wrapper = mount(App, { plugins: [router], provide: { [API]: api } });
   await router.push('/users');
   await flushPromises();
   expect(wrapper.get('h1').text()).toBe('Users');

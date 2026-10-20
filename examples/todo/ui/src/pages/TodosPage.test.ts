@@ -15,7 +15,7 @@ const problem = (status: number, code: string) =>
 async function render(answer: (method: string) => Response) {
   const router = createRouter({ history: createMemoryHistory(), routes });
   const api = createApi(async (request) => answer(request.method));
-  const wrapper = mount(TodosPage, { plugins: [router, (app) => void app.provide(API, api)] });
+  const wrapper = mount(TodosPage, { plugins: [router], provide: { [API]: api } });
   await router.isReady();
   await flushPromises();
   return wrapper;

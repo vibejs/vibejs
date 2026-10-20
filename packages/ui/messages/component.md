@@ -42,7 +42,7 @@ A component renders synchronously when it is created, so its `<script setup>` ca
 
 ### Fix
 
-- Load async data in a watcher or an `onMounted()` hook, and render a loading state until it arrives.
+- Load async data with `useAsync()` in setup, and render a loading state until `loading` is false.
 - Move the `await` into a function that the component calls instead of awaiting in setup.
 
 ## VIBE5205: Setup-only API called outside setup

@@ -4,9 +4,9 @@ import { isFunction } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { currentApp, currentInstance, setupInstance } from './instance.ts';
 
-/** A typed key of `provide()` and `inject()`. */
-// oxlint-disable-next-line typescript/no-empty-object-type, typescript/no-wrapper-object-types, eslint/no-unused-vars -- a symbol branded by `T`, the type of the provided value
-export interface InjectionKey<T> extends Symbol {}
+declare const injectionType: unique symbol;
+/** A typed key of `provide()` and `inject()`: a symbol branded by `T`, the type of the provided value. */
+export type InjectionKey<T> = symbol & { readonly [injectionType]?: T };
 
 /** Makes `value` available to `inject(key)` in the descendants of the component whose setup is running. */
 export function provide<T, K = InjectionKey<T> | string | number>(

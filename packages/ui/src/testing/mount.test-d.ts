@@ -1,6 +1,7 @@
 // The mount() types: props required with required props, typed events and slot props.
 import { expectTypeOf } from 'vitest';
 import { Anonymous, Greeting } from '../../test/testing/components.ts';
+import type { InjectionKey } from '../runtime/inject.ts';
 import { mount, mountComposable } from './mount.ts';
 
 // Props are required exactly when the component has a required prop.
@@ -45,3 +46,8 @@ mount(Greeting, { props: { name: 'Ada' }, slots: { default: () => 1 } });
 expectTypeOf(mountComposable(() => 1).result).toBeNumber();
 // @ts-expect-error -- mountComposable takes only provide and plugins
 mountComposable(() => 1, { attachTo: 'body' });
+
+// An InjectionKey is a computed key of `provide`, with no cast.
+declare const api: InjectionKey<{ list(): string[] }>;
+mount(Anonymous, { provide: { [api]: { list: () => [] } } });
+mountComposable(() => 1, { provide: { [api]: { list: () => [] } } });
