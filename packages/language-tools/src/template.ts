@@ -116,7 +116,7 @@ const findAttr = (el: ElementNode, name: string) =>
   el.props.find((p): p is AttributeNode => p.type === NodeTypes.ATTRIBUTE && p.name === name);
 /** A non-empty expression. */
 const filled = (exp: SimpleExpressionNode | undefined) =>
-  exp && exp.content.trim() ? exp : undefined;
+  exp && /\S/.test(exp.content) ? exp : undefined;
 /** The range of a directive's name as written: `v-model`, `:` or `@`. */
 const nameRange = (dir: DirectiveNode): [number, number] => {
   const start = dir.loc.start.offset;
