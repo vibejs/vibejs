@@ -1,0 +1,15 @@
+<script setup lang="ts">
+const emit = defineEmits<{ hit: [name: string] }>();
+const hit = (name: string) => emit('hit', name);
+</script>
+
+<template>
+  <div @click="hit('outer')">
+    <button class="stop" @click.stop="hit('stop')"></button>
+    <div class="self" @click.self="hit('self')"><span></span></div>
+    <button class="once" @click.once="hit('once')"></button>
+    <div @click.capture="hit('capture')"><span class="inner" @click="hit('inner')"></span></div>
+    <input @keydown.enter="hit('enter')" />
+    <button class="exact" @click.ctrl.exact="hit('exact')"></button>
+  </div>
+</template>

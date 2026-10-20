@@ -3,5 +3,10 @@
   "compilerOptions": { "lib": ["es2024"], "types": ["node"], "rootDir": "." },
   "references": [{ "path": "../errors" }, { "path": "../ui" }],
   "include": ["src", "test", "package.json"],
-  "exclude": ["test/fixtures"]
+  "exclude": [
+    "test/fixtures",
+    "src/**/*.vibe.test.ts",
+    "src/hmr.integration.test.ts",
+    "src/template-roundtrip.test.ts"
+  ]
 }

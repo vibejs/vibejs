@@ -1,0 +1,14 @@
+<script setup lang="ts">
+defineProps<{ rows: { id: number; name: string }[] }>();
+</script>
+
+<template>
+  <table>
+    <tbody>
+      <tr v-for="row in rows" :key="row.id">
+        <td>{{ row.id }}</td>
+        <td>{{ row.name }}</td>
+      </tr>
+    </tbody>
+  </table>
+</template>

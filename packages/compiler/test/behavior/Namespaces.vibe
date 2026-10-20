@@ -1,0 +1,10 @@
+<script setup lang="ts">
+defineProps<{ size: number }>();
+</script>
+
+<template>
+  <div>
+    <svg><circle :r="size" /></svg>
+    <math><mspace :width="`${size}px`" /></math>
+  </div>
+</template>

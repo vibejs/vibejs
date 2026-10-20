@@ -54,6 +54,24 @@ export default defineConfig({
         },
       },
       {
+        // The built vibe() compiles `.vibe` imports. Loaded lazily: knip, `pnpm check` and the other
+        // projects load this config before the compiler's dist exists.
+        plugins: [
+          import('@vibejs-org/compiler/vite').then(
+            ({ vibe }) => vibe(),
+            (error: unknown) => {
+              // Node's ESM loader reports ERR_MODULE_NOT_FOUND; knip loads this config through jiti (CJS).
+              if (
+                error instanceof Error &&
+                'code' in error &&
+                (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'MODULE_NOT_FOUND')
+              ) {
+                return null;
+              }
+              throw error;
+            },
+          ),
+        ],
         test: {
           name: 'integration',
           environment: 'node',

@@ -1,0 +1,7 @@
+<script setup lang="ts">
+defineProps<{ user: { id: number } }>();
+</script>
+
+<template>
+  <div><input :key="user.id" /></div>
+</template>
