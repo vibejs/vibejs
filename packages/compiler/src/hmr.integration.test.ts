@@ -22,19 +22,21 @@ it('a dev server keeps state on template and style edits and resets it on a scri
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   cpSync(fixture, root, { recursive: true });
   const app = join(root, 'src/App.vibe');
-  const edit = (from: string, to: string) => {
-    const source = readFileSync(app, 'utf8');
-    expect(source).toContain(from);
-    writeFileSync(app, source.replace(from, to));
-  };
-
+  // No file watcher: its change events for one file are at most one per 50 ms, and an edit inside
+  // that window is dropped. Each edit reports its change, as the watcher would.
   const server = await createServer({
     root,
     configFile: false,
     logLevel: 'silent',
     plugins: [vibe()],
-    server: { port: 0 },
+    server: { port: 0, watch: null },
   });
+  const edit = (from: string, to: string) => {
+    const source = readFileSync(app, 'utf8');
+    expect(source).toContain(from);
+    writeFileSync(app, source.replace(from, to));
+    server.watcher.emit('change', app);
+  };
   onTestFinished(() => server.close());
   await server.listen();
   const browser = await chromium.launch();

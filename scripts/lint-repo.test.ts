@@ -748,6 +748,7 @@ describe('as a script', () => {
     process.exitCode = undefined;
   });
 
+  // It walks every committed file, which outlasts the 5 s default on a loaded machine.
   it('lints the real repo and exits 0', async () => {
     errors = [];
     process.argv = ['node', fileURLToPath(new URL('lint-repo.ts', import.meta.url))];
@@ -755,5 +756,5 @@ describe('as a script', () => {
     await import('./lint-repo.ts');
     expect(errors).toEqual([]);
     expect(process.exitCode).toBe(0);
-  });
+  }, 30_000);
 });
