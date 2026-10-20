@@ -11,6 +11,7 @@
     { "path": "packages/cli" },
     { "path": "packages/create-vibejs" },
     { "path": "docs" },
-    { "path": "tsconfig.tools.json" }
+    { "path": "tsconfig.tools.json" },
+    { "path": "tsconfig.dom-tests.json" }
   ]
 }

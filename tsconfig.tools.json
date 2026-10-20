@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["es2024", "dom"],
+    "lib": ["es2024"],
     "types": ["node"],
     "isolatedDeclarations": false,
     "rootDir": ".",
@@ -15,17 +15,12 @@
     "packages/ui/vitest.setup.ts",
     "packages/ui/src/globals.d.ts",
     "packages/ui/src/**/*.integration.test.ts",
-    "packages/*/src/**/*.vibe.test.ts",
-    "packages/ui/test/vibe.d.ts",
-    "packages/compiler/src/hmr.integration.test.ts",
-    "packages/compiler/src/template-roundtrip.test.ts",
     "packages/contract/src/**/*.integration.test.ts",
     "packages/contract/test/fixtures/ui-bundle"
   ],
   "references": [
     { "path": "packages/errors" },
     { "path": "packages/ui" },
-    { "path": "packages/compiler" },
     { "path": "packages/contract" }
   ]
 }

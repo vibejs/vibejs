@@ -59,7 +59,16 @@ export default defineConfig({
         plugins: [
           import('@vibejs-org/compiler/vite').then(
             ({ vibe }) => vibe(),
-            () => null,
+            (error: unknown) => {
+              if (
+                error instanceof Error &&
+                'code' in error &&
+                error.code === 'ERR_MODULE_NOT_FOUND'
+              ) {
+                return null;
+              }
+              throw error;
+            },
           ),
         ],
         test: {
