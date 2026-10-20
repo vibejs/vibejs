@@ -1,0 +1,11 @@
+<script setup lang="ts">
+defineProps<{ n: number }>();
+</script>
+
+<template>
+  <div>
+    <p v-if="n === 1">one</p>
+    <p v-else-if="n === 2">two</p>
+    <span v-else>other</span>
+  </div>
+</template>

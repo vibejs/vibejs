@@ -4,6 +4,7 @@
   "include": ["src", "test/abi", "test/router", "test/testing", "test/codes.ts"],
   "exclude": [
     "${configDir}/src/**/*.integration.test.ts",
+    "${configDir}/src/**/*.vibe.test.ts",
     "${configDir}/src/virtual",
     "${configDir}/src/tooling.test-d.ts"
   ],

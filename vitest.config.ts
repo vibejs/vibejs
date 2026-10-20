@@ -54,6 +54,14 @@ export default defineConfig({
         },
       },
       {
+        // The built vibe() compiles `.vibe` imports. Loaded lazily: knip, `pnpm check` and the other
+        // projects load this config before the compiler's dist exists.
+        plugins: [
+          import('@vibejs-org/compiler/vite').then(
+            ({ vibe }) => vibe(),
+            () => null,
+          ),
+        ],
         test: {
           name: 'integration',
           environment: 'node',

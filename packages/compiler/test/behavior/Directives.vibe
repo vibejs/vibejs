@@ -1,0 +1,11 @@
+<script setup lang="ts">
+defineProps<{ html: string; text: string; shown: boolean }>();
+</script>
+
+<template>
+  <div>
+    <p class="html" v-html="html"></p>
+    <p class="text" v-text="text"></p>
+    <p class="show" v-show="shown">shown</p>
+  </div>
+</template>
