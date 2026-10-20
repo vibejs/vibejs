@@ -3,7 +3,6 @@
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
-import v8 from 'node:v8';
 import { fileURLToPath } from 'node:url';
 import {
   createMessageConnection,
@@ -35,14 +34,6 @@ it('generates Large.vibe with a p95 under 5 ms', () => {
   const p95 = sorted[Math.ceil(500 * 0.95) - 1];
   const median = sorted[250];
   print(`generate() on Large.vibe: p95 ${p95.toFixed(2)} ms, median ${median.toFixed(2)} ms CPU`);
-  print(`DIAG distinct: ${[...new Set(sorted.map((x) => x.toFixed(3)))].slice(0, 60).join(' ')}`);
-  print(
-    `DIAG tail: ${sorted
-      .slice(440)
-      .map((x) => x.toFixed(2))
-      .join(' ')}`,
-  );
-  print(`DIAG node ${process.version} heap ${JSON.stringify(v8.getHeapStatistics())}`);
   expect(p95).toBeLessThan(5);
 });
 
