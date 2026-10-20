@@ -149,6 +149,10 @@ describe('pnpm', () => {
       const ops: { op: string }[] = JSON.parse(again.stdout).ops;
       expect(new Set(ops.map((o) => o.op))).toEqual(new Set(['skip']));
       expect(again.status).toBe(0);
+      // The installed server package loads once for the app and for the CLI.
+      const di = vibejs(app, 'di', '--json');
+      expect(JSON.parse(di.stdout)).toMatchObject({ ok: true });
+      expect(di.stdout).toContain('UsersModule');
     },
     INSTALL,
   );
