@@ -755,8 +755,8 @@ describe('rule 13: workflows', () => {
       `      - uses: 'docker://alpine:3'`,
       `      - uses: changesets/action@${SHA}`,
       '        with:',
-      '          github-token: ${{ steps.app-token.outputs.token }}',
-      '          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}',
+      '          github-token: ${{ github.token }}',
+      "          pr-title: 'chore: release'",
       '          publish-script: pnpm changeset publish',
       '        env:',
       '          NPM_CONFIG_PROVENANCE: true',
@@ -783,7 +783,7 @@ describe('rule 13: workflows', () => {
     ]);
     expect(lint({ [RELEASE]: 'on: push\n' })).toEqual([
       `${RELEASE}:1:1 workflow missing \`NPM_CONFIG_PROVENANCE: true\``,
-      `${RELEASE}:1:1 workflow missing \`github-token: \${{ steps.app-token.outputs.token }}\``,
+      `${RELEASE}:1:1 workflow missing \`github-token: \${{ github.token }}\``,
       `${RELEASE}:1:1 workflow missing \`id-token: write\``,
       `${RELEASE}:1:1 workflow missing \`publish-script: pnpm changeset publish\``,
       `${RELEASE}:1:1 workflow triggers [push]; use only workflow_dispatch`,
