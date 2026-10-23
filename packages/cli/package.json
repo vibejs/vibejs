@@ -1,6 +1,6 @@
 {
   "name": "@usevibejs/cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The vibejs command line: dev server, checks, generators, JSON output and an MCP server for coding agents.",
   "keywords": [
     "ai-agents",

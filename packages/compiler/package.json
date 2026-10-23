@@ -1,6 +1,6 @@
 {
   "name": "@usevibejs/compiler",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Compiler and Vite plugin for vibe.js .vibe single-file components.",
   "keywords": [
     "compiler",

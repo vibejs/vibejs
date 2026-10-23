@@ -337,7 +337,8 @@ describe('nodeCtx', () => {
   it('describes the process and the package', () => {
     const p = proc(true);
     const ctx = nodeCtx(p);
-    expect(ctx).toMatchObject({ cwd, env: { A: '1' }, isTTY: true, version: '0.0.0' });
+    const { version } = JSON.parse(readFileSync(new URL('package.json', import.meta.url), 'utf8'));
+    expect(ctx).toMatchObject({ cwd, env: { A: '1' }, isTTY: true, version });
     expect(nodeCtx(proc()).isTTY).toBe(false);
     expect(readdirSync(ctx.templateDir)).toContain('package.json');
     expect(ctx.agentsDir).toBe(fileURLToPath(new URL('agents', import.meta.url)));
