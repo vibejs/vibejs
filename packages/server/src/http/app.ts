@@ -1,5 +1,5 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
-import type { HttpMethod } from '@vibejs-org/contract';
+import type { HttpMethod } from '@usevibejs/contract';
 import {
   get,
   instantiate,

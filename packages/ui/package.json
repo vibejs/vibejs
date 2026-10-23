@@ -1,5 +1,5 @@
 {
-  "name": "@vibejs-org/ui",
+  "name": "@usevibejs/ui",
   "version": "0.0.0",
   "description": "Fine-grained reactive runtime, router and test utilities for vibe.js .vibe single-file components.",
   "keywords": [
@@ -63,7 +63,7 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@vibejs-org/errors": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
     "csstype": "catalog:"
   },
   "devDependencies": {

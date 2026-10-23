@@ -21,7 +21,7 @@ const MODULES = fileURLToPath(new URL('../node_modules/', import.meta.url));
  * links sit in a real `node_modules`, so Vite's caches stay inside the copy.
  */
 export function copyApp(
-  links: string[] = ['vite', '@vibejs-org/server', '@vibejs-org/contract'],
+  links: string[] = ['vite', '@usevibejs/server', '@usevibejs/contract'],
 ): string {
   const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'vibejs-app-')));
   cpSync(new URL('fixtures/app', import.meta.url), root, { recursive: true });
@@ -86,7 +86,7 @@ export async function sourceVite(original: () => Promise<Vite>): Promise<Vite> {
   const vite = await original();
   const source = {
     ssr: {
-      noExternal: [/^@vibejs-org\//],
+      noExternal: [/^@usevibejs\//],
       resolve: { conditions: ['vibejs-source', ...vite.defaultServerConditions] },
     },
   };
@@ -105,7 +105,7 @@ export const compilerSrc: string = fileURLToPath(
 );
 
 /**
- * Installs @vibejs-org/compiler in `root` as a link to a package that re-exports the workspace
+ * Installs @usevibejs/compiler in `root` as a link to a package that re-exports the workspace
  * compiler's source. The link target is outside node_modules, so Vitest transforms the TypeScript
  * it loads.
  */
@@ -119,6 +119,6 @@ export function installCompiler(root: string): void {
     join(root, 'compiler/index.js'),
     `export * from ${JSON.stringify(compilerSrc.replaceAll('\\', '/'))};\n`,
   );
-  mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
-  symlinkSync(join(root, 'compiler'), join(root, 'node_modules/@vibejs-org/compiler'), 'junction');
+  mkdirSync(join(root, 'node_modules/@usevibejs'), { recursive: true });
+  symlinkSync(join(root, 'compiler'), join(root, 'node_modules/@usevibejs/compiler'), 'junction');
 }

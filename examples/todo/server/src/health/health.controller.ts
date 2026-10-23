@@ -1,4 +1,4 @@
-import { Controller, Handle } from '@vibejs-org/server';
+import { Controller, Handle } from '@usevibejs/server';
 import { health } from '../../../contracts/src/health.contract.ts';
 
 @Controller(health)

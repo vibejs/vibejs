@@ -1,5 +1,5 @@
-import { child as _child, createComponent as _createComponent, createDynamicComponent as _createDynamicComponent, createSlot as _createSlot, insert as _insert, next as _next, template as _template } from '@vibejs-org/ui/internal'
-import { ref, shallowRef } from '@vibejs-org/ui'
+import { child as _child, createComponent as _createComponent, createDynamicComponent as _createDynamicComponent, createSlot as _createSlot, insert as _insert, next as _next, template as _template } from '@usevibejs/ui/internal'
+import { ref, shallowRef } from '@usevibejs/ui'
 import Field from './Field.vibe'
 import Panel from './Panel.vibe'
 function _setup(__props: any, __ctx: any) {

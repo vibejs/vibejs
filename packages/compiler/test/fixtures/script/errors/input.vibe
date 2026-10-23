@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps as props, watch } from '@vibejs-org/ui';
+import { defineProps as props, watch } from '@usevibejs/ui';
 import type { Imported } from './types';
 
 export const version = 1;

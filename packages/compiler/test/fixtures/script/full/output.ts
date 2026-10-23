@@ -1,5 +1,5 @@
-import { child as _child, createFor as _createFor, insert as _insert, on as _on, renderEffect as _renderEffect, setRef as _setRef, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt, useModel as _useModel } from '@vibejs-org/ui/internal'
-import { computed, ref, useTemplateRef } from '@vibejs-org/ui';
+import { child as _child, createFor as _createFor, insert as _insert, on as _on, renderEffect as _renderEffect, setRef as _setRef, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt, useModel as _useModel } from '@usevibejs/ui/internal'
+import { computed, ref, useTemplateRef } from '@usevibejs/ui';
 import type { Item } from './types';
 import Child from './Child.vibe';
 export interface Props {

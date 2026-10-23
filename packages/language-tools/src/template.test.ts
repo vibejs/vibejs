@@ -1,4 +1,4 @@
-import { NodeTypes, parse, type ElementNode } from '@vibejs-org/compiler';
+import { NodeTypes, parse, type ElementNode } from '@usevibejs/compiler';
 import { expect, it } from 'vitest';
 import { CodeBuilder } from './builder.ts';
 import { generate } from './generate.ts';

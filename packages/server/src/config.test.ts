@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import * as v from 'valibot';
 import { describe, expect, it, vi } from 'vitest';
 import { caught } from '../test/log.ts';

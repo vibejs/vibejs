@@ -1,5 +1,5 @@
-import { nextTick } from '@vibejs-org/ui';
-import { hmr, type ComponentDef } from '@vibejs-org/ui/internal';
+import { nextTick } from '@usevibejs/ui';
+import { hmr, type ComponentDef } from '@usevibejs/ui/internal';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import { mountForTest } from './mount.ts';
 import { defineAbiSuite, type AbiSuite } from './suite.ts';

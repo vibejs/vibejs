@@ -5,7 +5,7 @@ import type { InternalAnalysis } from './analyze.ts';
 export interface ScriptOutput {
   /** Over the whole `.vibe` source; the text outside the script is removed. */
   s: MagicString;
-  /** Runtime helpers the script uses, imported from `@vibejs-org/ui/internal` with a `_` prefix. */
+  /** Runtime helpers the script uses, imported from `@usevibejs/ui/internal` with a `_` prefix. */
   abiImports: Set<string>;
   /** camelCase keys as written. */
   propKeys: string[];

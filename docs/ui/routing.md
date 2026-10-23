@@ -5,15 +5,15 @@ description: Declare typed routes, render them with RouterView and RouterLink, r
 
 # Routing
 
-The router maps the URL to a chain of route records and renders their components. It comes from `@vibejs-org/ui/router`, and its types follow your routes: route names, params and links are checked by TypeScript, in scripts and in templates.
+The router maps the URL to a chain of route records and renders their components. It comes from `@usevibejs/ui/router`, and its types follow your routes: route names, params and links are checked by TypeScript, in scripts and in templates.
 
 ## Routes
 
 Routes live in one file, `ui/src/routes.ts`. `defineRoutes()` returns the array unchanged and keeps its literal names and paths, which type the router.
 
 ```ts
-import { defineRoutes } from '@vibejs-org/ui/router';
-import type { Component } from '@vibejs-org/ui';
+import { defineRoutes } from '@usevibejs/ui/router';
+import type { Component } from '@usevibejs/ui';
 declare const HomePage: Component;
 declare const UsersLayout: Component;
 declare const UserList: Component;
@@ -43,8 +43,8 @@ A record takes `path`, `name`, `component`, `props`, `children`, `redirect`, `me
 `createRouter()` takes the history, the routes and an optional `scrollBehavior`. `app.use(router)` installs it and starts the first navigation.
 
 ```ts
-import { createApp, type Component } from '@vibejs-org/ui';
-import { createRouter, createWebHistory, defineRoutes } from '@vibejs-org/ui/router';
+import { createApp, type Component } from '@usevibejs/ui';
+import { createRouter, createWebHistory, defineRoutes } from '@usevibejs/ui/router';
 declare const App: Component;
 declare const Page: Component;
 // Snippets share one program: these routes type the router in every docs snippet.
@@ -57,7 +57,7 @@ const routes = defineRoutes([
 // ---cut---
 const router = createRouter({ history: createWebHistory(), routes });
 
-declare module '@vibejs-org/ui/router' {
+declare module '@usevibejs/ui/router' {
   interface Register {
     router: typeof router;
   }
@@ -77,7 +77,7 @@ The `Register` declaration types every router API with your routes: `useRoute()`
 
 ```vibe
 <script setup lang="ts">
-import { RouterLink, RouterView } from '@vibejs-org/ui/router';
+import { RouterLink, RouterView } from '@usevibejs/ui/router';
 </script>
 
 <template>
@@ -102,7 +102,7 @@ When a link needs other markup, build it with `useLink()`. It returns `href`, `i
 
 ```vibe
 <script setup lang="ts">
-import { useLink, type RouteLocationRaw } from '@vibejs-org/ui/router';
+import { useLink, type RouteLocationRaw } from '@usevibejs/ui/router';
 
 const props = defineProps<{ to: RouteLocationRaw; label: string }>();
 const { href, isActive, navigate } = useLink({ to: () => props.to });
@@ -121,8 +121,8 @@ const { href, isActive, navigate } = useLink({ to: () => props.to });
 
 ```vibe
 <script setup lang="ts">
-import { computed } from '@vibejs-org/ui';
-import { useRoute, useRouter } from '@vibejs-org/ui/router';
+import { computed } from '@usevibejs/ui';
+import { useRoute, useRouter } from '@usevibejs/ui/router';
 
 const route = useRoute('user');
 const router = useRouter();
@@ -147,7 +147,7 @@ With `props: true` on a record, the page receives the params as props. Type them
 
 ```vibe
 <script setup lang="ts">
-import type { RouteParams } from '@vibejs-org/ui/router';
+import type { RouteParams } from '@usevibejs/ui/router';
 
 const { id } = defineProps<RouteParams<'user'>>();
 </script>
@@ -178,7 +178,7 @@ Paths match case-insensitively, a trailing slash is optional, and the most speci
 `router.push(to)` and `router.replace(to)` take the same locations as `RouterLink`. They resolve once the navigation is over: with `undefined` when it succeeded, or with a navigation failure when a guard cancelled it, a newer navigation replaced it, or the target is the current route. They reject only when a guard, a redirect or a lazy loader throws, after the error reached `router.onError()`.
 
 ```ts
-import { isNavigationFailure, NavigationFailureType, type Router } from '@vibejs-org/ui/router';
+import { isNavigationFailure, NavigationFailureType, type Router } from '@usevibejs/ui/router';
 declare const router: Router;
 // ---cut---
 const failure = await router.push({ path: '/users', query: { page: '2' } });
@@ -200,7 +200,7 @@ A guard receives `to` and `from` and decides with its return value:
 A guard may be async. It never takes a third parameter ([VIBE7107](/errors/VIBE7107)).
 
 ```ts
-import type { Router } from '@vibejs-org/ui/router';
+import type { Router } from '@usevibejs/ui/router';
 declare const router: Router;
 declare function isSignedIn(): boolean;
 // ---cut---
@@ -225,8 +225,8 @@ A page guards its own route with `onBeforeRouteLeave` and `onBeforeRouteUpdate` 
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
-import { onBeforeRouteLeave } from '@vibejs-org/ui/router';
+import { ref } from '@usevibejs/ui';
+import { onBeforeRouteLeave } from '@usevibejs/ui/router';
 
 const draft = ref('');
 onBeforeRouteLeave(() => draft.value === '' || window.confirm('Discard the draft?'));
@@ -246,8 +246,8 @@ A `component` that is a function is loaded on the first navigation to its route,
 After a deploy, an open tab can ask for a chunk that no longer exists. The navigation then fails with [VIBE7109](/errors/VIBE7109); load the target as a full page to get the new version:
 
 ```ts
-import { isVibeError } from '@vibejs-org/ui';
-import type { Router } from '@vibejs-org/ui/router';
+import { isVibeError } from '@usevibejs/ui';
+import type { Router } from '@usevibejs/ui/router';
 declare const router: Router;
 // ---cut---
 router.onError((error, to) => {
@@ -260,7 +260,7 @@ router.onError((error, to) => {
 With the web history, the router restores the scroll position on back and forward, scrolls to the element of a hash, keeps the position when only the query changes, and scrolls to the top otherwise. `scrollBehavior` replaces this: it returns a position, `{ el }` for an element, `false` to leave the scroll as it is, or nothing for the top.
 
 ```ts
-import { createRouter, createWebHistory, type RouteRecordRaw } from '@vibejs-org/ui/router';
+import { createRouter, createWebHistory, type RouteRecordRaw } from '@usevibejs/ui/router';
 declare const routes: RouteRecordRaw[];
 // ---cut---
 const router = createRouter({
@@ -281,7 +281,7 @@ An element scrolls into view with its `scroll-margin-top`, which leaves room for
 A screen reader does not notice that the page changed. Announce the new page in a live region after each navigation, and give each page a `document.title`:
 
 ```ts
-import type { Router } from '@vibejs-org/ui/router';
+import type { Router } from '@usevibejs/ui/router';
 declare const router: Router;
 // ---cut---
 const status = document.createElement('p');

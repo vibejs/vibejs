@@ -13,7 +13,7 @@ const BASE = ['package.json', 'README.md', 'LICENSE', 'dist/index.js', 'dist/ind
 const errors = (files: string[], extra: Partial<PackedManifest> = {}, text = ''): string[] =>
   checkPackage(
     join(packages, 'errors'),
-    { name: '@vibejs-org/errors', files: ['dist'], exports: { '.': './dist/index.js' }, ...extra },
+    { name: '@usevibejs/errors', files: ['dist'], exports: { '.': './dist/index.js' }, ...extra },
     files,
     () => text,
   );
@@ -21,7 +21,7 @@ const errors = (files: string[], extra: Partial<PackedManifest> = {}, text = '')
 const ui = (files: string[]): string[] =>
   checkPackage(
     join(packages, 'ui'),
-    { name: '@vibejs-org/ui', files: ['dist', 'THIRD-PARTY-NOTICES.md'] },
+    { name: '@usevibejs/ui', files: ['dist', 'THIRD-PARTY-NOTICES.md'] },
     files,
     () => '',
   );
@@ -119,15 +119,15 @@ describe('checkPackage', () => {
 
   it('rejects unresolved specs and internal ranges', () => {
     const manifest = {
-      dependencies: { '@vibejs-org/contract': 'workspace:*', srvx: '^1.0.0' },
+      dependencies: { '@usevibejs/contract': 'workspace:*', srvx: '^1.0.0' },
       devDependencies: { vite: 'catalog:', 'create-vibejs': '0.1.0-next.1' },
-      peerDependencies: { '@vibejs-org/ui': '^0.1.0' },
-      optionalDependencies: { '@vibejs-org/server': '0.1.0' },
+      peerDependencies: { '@usevibejs/ui': '^0.1.0' },
+      optionalDependencies: { '@usevibejs/server': '0.1.0' },
     };
     expect(errors(BASE, manifest)).toEqual([
-      'dependencies.@vibejs-org/contract is "workspace:*"; pack with pnpm',
+      'dependencies.@usevibejs/contract is "workspace:*"; pack with pnpm',
       'devDependencies.vite is "catalog:"; pack with pnpm',
-      'peerDependencies.@vibejs-org/ui is "^0.1.0"; internal packages use exact versions',
+      'peerDependencies.@usevibejs/ui is "^0.1.0"; internal packages use exact versions',
     ]);
   });
 

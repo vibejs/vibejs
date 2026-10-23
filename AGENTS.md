@@ -1,6 +1,6 @@
 # AGENTS.md
 
-vibe.js: npm scope `@vibejs-org`, CLI `vibejs` (never `vibe`). Not monday.com Vibe (`@vibe/*`), not the npm packages `vibejs` or `vibe.js`.
+vibe.js: npm scope `@usevibejs`, CLI `vibejs` (never `vibe`). Not monday.com Vibe (`@vibe/*`), not the `@vibe.js/*` packages (a different project), not the npm packages `vibejs` or `vibe.js`.
 
 ## Before work
 
@@ -14,7 +14,7 @@ vibe.js: npm scope `@vibejs-org`, CLI `vibejs` (never `vibe`). Not monday.com Vi
 
 - English only: code, comments, strings, docs, error messages, commit messages and PR titles.
 - Tests: `*.test.ts` next to the code in `src`; `*.browser.test.ts` runs in Chromium; `*.integration.test.ts` and `*.vibe.test.ts` run after the build; `*.test-d.ts` is checked by `tsc -b`. Helpers and fixtures go in `packages/<pkg>/test/`.
-- Imports: relative imports end in `.ts`; other packages are imported by name (`@vibejs-org/errors`), never by their `src`. No default exports (config files excepted).
+- Imports: relative imports end in `.ts`; other packages are imported by name (`@usevibejs/errors`), never by their `src`. No default exports (config files excepted).
 - Errors: add the entry to `packages/<pkg>/messages/*.md`, run `pnpm errors`, throw `vibeError('VIBE####', args)`, assert the code in a test.
 - Coverage is 100% per file. The only ignore hint is `/* v8 ignore next|if|else|start|stop -- @preserve <reason> */`, and it needs a `{ file, reason }` entry in `coverage-ignores.json`. Forked upstream code uses `upstream-defensive:` reasons.
 - `__DEV__` is read only inside function bodies and only in `packages/ui/src`. Tests toggle it with `vi.stubGlobal('__DEV__', false)`.

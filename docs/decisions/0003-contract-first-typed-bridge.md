@@ -11,7 +11,7 @@ The UI and the server are written in the same repository and the same language, 
 
 - An API is declared once as a contract: `defineContract(prefix, routes)`, with routes built by `get`, `post`, `put`, `patch` and `del`. Each route names its path and, optionally, `params`, `query`, `headers`, `body` and `response` schemas, a success status, and its error codes with their HTTP status (`errors: { USER_NOT_FOUND: 404 }`).
 - Schemas are [Standard Schema](https://standardschema.dev) validators, so any compliant library can be used. The project template uses valibot.
-- `@vibejs-org/contract` is isomorphic: it imports nothing from `node:*` or from the server, and `*.contract.ts` files import only the contract package and a schema library.
+- `@usevibejs/contract` is isomorphic: it imports nothing from `node:*` or from the server, and `*.contract.ts` files import only the contract package and a schema library.
 - The server implements a contract with `@Controller(contract)` and `@Handle(route)`. Inputs are validated before the handler runs; the handler returns the response type and raises declared errors with `ctx.fail('CODE', detail?)`.
 - The UI calls a contract through `createClient(contracts, { baseUrl })`. A call returns an `ApiResult` that is narrowed on `.ok`; it never throws for HTTP or network failures.
 - Error responses are RFC 9457 `application/problem+json` with a required `code`.

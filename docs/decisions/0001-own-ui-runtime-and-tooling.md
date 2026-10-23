@@ -12,8 +12,8 @@ vibe.js needs a UI layer whose templates are fully type-checked, whose compiled 
 - Components are `.vibe` single-file components: `<script setup lang="ts">`, a `<template>` with directives and an optional `<style scoped>`. Templates are type-checked in the editor and in CI.
 - The reactive core is fine-grained (signals with automatic dependency tracking, computed values, effects grouped into effect scopes, and a scheduler that runs parent updates before child updates).
 - The DOM runtime has no virtual DOM. The compiler turns each template into a cloned static DOM fragment plus one effect per dynamic binding. Lists are keyed, and each block owns an effect scope that is disposed with it.
-- vibe.js owns the compiler (`@vibejs-org/compiler`), its Vite plugin with hot module replacement, and the language tools (`@vibejs-org/language-tools`, a TypeScript content mapper, see [0004](0004-typescript-7-toolchain.md)).
-- The compiler and runtime meet at a versioned ABI (`@vibejs-org/ui/internal`); the compiler and language tools share one parser and script analysis.
+- vibe.js owns the compiler (`@usevibejs/compiler`), its Vite plugin with hot module replacement, and the language tools (`@usevibejs/language-tools`, a TypeScript content mapper, see [0004](0004-typescript-7-toolchain.md)).
+- The compiler and runtime meet at a versioned ABI (`@usevibejs/ui/internal`); the compiler and language tools share one parser and script analysis.
 - For well-specified sub-problems with mature MIT-licensed implementations (HTML tokenizing, the template parser and AST, scoped CSS rewriting, the signal propagation algorithm), the code is forked with an `// Upstream:` header and credited in `THIRD-PARTY-NOTICES.md`.
 - v0.1 renders on the client only.
 

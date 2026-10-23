@@ -25,7 +25,7 @@ description: The vue-router and Vue Test Utils idioms you know, their vibe.js fo
 | `<RouterLink custom v-slot="{ href, navigate }">`                                | `useLink({ to })` in your own link component                                                                      | `custom` is not a prop, a template type error; see [useLink](../ui/routing.md#routerview-and-routerlink)  |
 | `<RouterLink to="https://example.com">`                                          | A plain `<a href>`                                                                                                | [VIBE7114](/errors/VIBE7114)                                                                              |
 | `<router-link>` and `<router-view>`                                              | `<RouterLink>` and `<RouterView>`                                                                                 | [VIBE2002](/errors/VIBE2002) once the component is imported                                               |
-| `RouterLink` used without an import (global registration)                        | `import { RouterLink, RouterView } from '@vibejs-org/ui/router'`                                                  | [VIBE2001](/errors/VIBE2001)                                                                              |
+| `RouterLink` used without an import (global registration)                        | `import { RouterLink, RouterView } from '@usevibejs/ui/router'`                                                   | [VIBE2001](/errors/VIBE2001)                                                                              |
 | `$route` and `$router` in a template                                             | `const route = useRoute()` and `const router = useRouter()` in `<script setup lang="ts">`                         | [VIBE2008](/errors/VIBE2008)                                                                              |
 | `beforeRouteEnter`, `beforeRouteLeave` and `beforeRouteUpdate` component options | `beforeEnter` on the record or `router.beforeEach()`; `onBeforeRouteLeave()` and `onBeforeRouteUpdate()` in setup | [VIBE1004](/errors/VIBE1004) for an options `<script>`, [VIBE3331](/errors/VIBE3331) in `defineOptions()` |
 | Typed routes from a generated file or a `RouteNamedMap`                          | `defineRoutes([...])` and `interface Register { router: typeof router }`                                          | A wrong name or param is a type error; see [Typed routes](../ui/routing.md#creating-the-router)           |
@@ -62,7 +62,7 @@ router.beforeEach((to, from, next) => {
 returns its decision:
 
 ```ts
-import type { Router } from '@vibejs-org/ui/router';
+import type { Router } from '@usevibejs/ui/router';
 declare const router: Router;
 declare function isSignedIn(): boolean;
 // ---cut---
@@ -83,11 +83,11 @@ expect(wrapper.findComponent(UserCard).props('id')).toBe(1);
 drives the real tree and reads the DOM:
 
 ```ts
-import type { RouteRecordRaw } from '@vibejs-org/ui/router';
+import type { RouteRecordRaw } from '@usevibejs/ui/router';
 declare const routes: RouteRecordRaw[];
 // ---cut---
-import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { expect, vi } from 'vitest';
 import App from './App.vibe';
 

@@ -21,7 +21,7 @@ server/src/todos/todos.service.ts
 `server/src/app.module.ts` exports the root module and the application options. The dev server, the tools and the tests import this file, so it has no side effects:
 
 ```ts
-import { Module, type AppOptions } from '@vibejs-org/server';
+import { Module, type AppOptions } from '@usevibejs/server';
 // ---cut---
 @Module({ imports: [] })
 export class AppModule {}
@@ -32,7 +32,7 @@ export const appOptions: AppOptions = { basePath: '/api' };
 `server/src/main.ts` is the production entry. It creates the application, closes it on `SIGTERM` and `SIGINT`, and listens:
 
 ```ts
-import { Module, VibeFactory, type AppOptions } from '@vibejs-org/server';
+import { Module, VibeFactory, type AppOptions } from '@usevibejs/server';
 declare const process: { env: Record<string, string | undefined> };
 @Module({})
 class AppModule {}
@@ -62,7 +62,7 @@ The created `App`:
 `inspect(root, options)` returns the same description without creating the application: no provider, controller, enhancer or hook runs, so tools and tests can read the graph safely.
 
 ```ts
-import { inspect, Module } from '@vibejs-org/server';
+import { inspect, Module } from '@usevibejs/server';
 @Module({})
 class AppModule {}
 // ---cut---

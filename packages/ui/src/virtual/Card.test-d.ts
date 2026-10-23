@@ -1,4 +1,4 @@
-import { ref } from '@vibejs-org/ui'
+import { ref } from '@usevibejs/ui'
 defineSlots<__VibeSlots>()
 const { title, items } = defineProps<__VibeProps>()
 const expanded = ref(false)
@@ -19,5 +19,5 @@ const __vibe_setup = { title, items, expanded, toggle }
 }
 type __VibeEmits = {}; type __VibeExposed = typeof __vibe_exposed; type __VibeRefs = {}; type __VibeModels = {}
 export const Card = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
-import * as __vibe from '@vibejs-org/ui/tooling'
-import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@vibejs-org/ui/tooling'
+import * as __vibe from '@usevibejs/ui/tooling'
+import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@usevibejs/ui/tooling'

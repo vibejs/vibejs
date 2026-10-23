@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from '@vibejs-org/ui'
+import { ref, useTemplateRef } from '@usevibejs/ui'
 import List from './List.vibe'
 const rows = ref(['a', 'b'])
 const picked = ref('')

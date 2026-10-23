@@ -4,15 +4,15 @@ import {
   forEachIdentifier,
   identifiersOf,
   parse,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { describe, expect, it, vi } from 'vitest';
 import { CODEGEN, codegen, compiler } from '../test/fixtures.ts';
 import { formatSpans } from './dump.ts';
 import { UNKNOWN } from './expression.ts';
 import { generate } from './generate.ts';
 
-vi.mock('@vibejs-org/compiler', async (original) => {
-  const real = await original<typeof import('@vibejs-org/compiler')>();
+vi.mock('@usevibejs/compiler', async (original) => {
+  const real = await original<typeof import('@usevibejs/compiler')>();
   return {
     ...real,
     forEachIdentifier: vi.fn<typeof real.forEachIdentifier>(real.forEachIdentifier),

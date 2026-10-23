@@ -20,7 +20,7 @@ const rows: [string, string, string][] = [
     '1:60-1:72',
   ],
   ['VIBE3007', S('const _createIf = 1'), '1:52-1:61'],
-  ['VIBE3008', S("import { defineProps } from '@vibejs-org/ui/tooling'"), '1:55-1:66'],
+  ['VIBE3008', S("import { defineProps } from '@usevibejs/ui/tooling'"), '1:55-1:66'],
   ['VIBE3009', S('defineProps<{ a: string }>()\nconst a = 1'), '2:7-2:8'],
   ['VIBE3010', S("import fs = require('fs')"), '1:46-1:55'],
   ['VIBE3101', S("defineProps<{ a: string }>(['a'])"), '1:73-1:78'],
@@ -32,7 +32,7 @@ const rows: [string, string, string][] = [
   [
     'VIBE3107',
     S(
-      "import { watch } from '@vibejs-org/ui'\nconst { a } = defineProps<{ a: number }>()\nwatch(a, () => {})",
+      "import { watch } from '@usevibejs/ui'\nconst { a } = defineProps<{ a: number }>()\nwatch(a, () => {})",
     ),
     '3:7-3:8',
   ],

@@ -1,4 +1,4 @@
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import { ErrorCodes, ResponseError, type MessageConnection } from 'vscode-jsonrpc/node';
 import { vibeError } from './errors.gen.ts';
 import { generate } from './generate.ts';

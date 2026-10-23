@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from '@vibejs-org/ui';
+import { ref, useTemplateRef } from '@usevibejs/ui';
 import Counter from './Counter.vibe';
 
 const items = ref([1, 2, 3]);

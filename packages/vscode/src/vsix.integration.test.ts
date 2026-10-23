@@ -23,11 +23,11 @@ function zipEntries(zip: Buffer): string[] {
 describe('bundle', () => {
   const bundle = readFileSync(join(dir, pkg.main), 'utf8');
 
-  it('requires only vscode and bundles @vibejs-org/errors', () => {
+  it('requires only vscode and bundles @usevibejs/errors', () => {
     expect([...bundle.matchAll(/\brequire\(\s*["']([^"']+)["']\s*\)/g)].map((m) => m[1])).toEqual([
       'vscode',
     ]);
-    expect(bundle).not.toMatch(/\bimport\s*\(|from\s*["']|["']typescript["']|@vibejs-org\//);
+    expect(bundle).not.toMatch(/\bimport\s*\(|from\s*["']|["']typescript["']|@usevibejs\//);
   });
 
   it('contains the VIBE6101 and VIBE6102 messages', () => {

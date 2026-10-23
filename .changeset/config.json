@@ -2,7 +2,7 @@
   "baseBranch": "main",
   "access": "public",
   "format": "oxfmt",
-  "fixed": [["@vibejs-org/*", "create-vibejs"]],
+  "fixed": [["@usevibejs/*", "create-vibejs"]],
   "updateInternalDependencies": "patch",
   "privatePackages": { "version": false, "tag": false }
 }

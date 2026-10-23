@@ -3,7 +3,7 @@ import type {
   CompileOptions,
   CompileResult,
   resolveComponentTag,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { expectTypeOf } from 'vitest';
 import type {
   analyzeScript,

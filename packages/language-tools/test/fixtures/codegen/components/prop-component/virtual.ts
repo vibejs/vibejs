@@ -1,5 +1,5 @@
 
-import type { Component } from '@vibejs-org/ui'
+import type { Component } from '@usevibejs/ui'
 defineProps<__VibeProps>()
 
 type __VibeProps = { Inner: Component };
@@ -15,5 +15,5 @@ type __VibeExposed = {};
 type __VibeRefs = {};
 type __VibeModels = {};
 export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();
-import * as __vibe from '@vibejs-org/ui/tooling';
-import { defineProps } from '@vibejs-org/ui/tooling';
+import * as __vibe from '@usevibejs/ui/tooling';
+import { defineProps } from '@usevibejs/ui/tooling';

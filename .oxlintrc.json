@@ -36,7 +36,7 @@
         ],
         "patterns": [
           {
-            "regex": "^(?:@vibejs-org/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
+            "regex": "^(?:@usevibejs/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
             "message": "Import another package by its name, not its src."
           }
         ]
@@ -80,7 +80,7 @@
             ],
             "patterns": [
               {
-                "regex": "^(?:@vibejs-org/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
+                "regex": "^(?:@usevibejs/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
                 "message": "Import another package by its name, not its src."
               },
               {
@@ -110,7 +110,7 @@
             ],
             "patterns": [
               {
-                "regex": "^(?:@vibejs-org/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
+                "regex": "^(?:@usevibejs/[^/]+|(?:\\.\\./)+[^./][^/]*)/src(?:/|$)",
                 "message": "Import another package by its name, not its src."
               }
             ]
@@ -148,13 +148,13 @@
                 "message": "vibe.js uses no decorator metadata; inject with inject(Token)."
               },
               {
-                "name": "@vibejs-org/server",
+                "name": "@usevibejs/server",
                 "message": "ui code must not import the server; share contracts instead."
               }
             ],
             "patterns": [
               {
-                "group": ["@vibejs-org/server/*", "todo-flags/server", "node:*"],
+                "group": ["@usevibejs/server/*", "todo-flags/server", "node:*"],
                 "message": "ui code must not import the server or Node modules; share contracts instead."
               },
               {
@@ -181,8 +181,8 @@
             ],
             "patterns": [
               {
-                "group": ["*", "!./*", "!@vibejs-org/contract", "!valibot"],
-                "message": "contracts import only ./*, @vibejs-org/contract and valibot."
+                "group": ["*", "!./*", "!@usevibejs/contract", "!valibot"],
+                "message": "contracts import only ./*, @usevibejs/contract and valibot."
               }
             ]
           }

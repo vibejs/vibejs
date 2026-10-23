@@ -24,7 +24,7 @@ it('pins the third-party tools to the repo catalog and TypeScript to the ts-next
   const pins = catalog();
   expect(pins.typescript).toMatch(/^7\.1\.0-dev\./);
   for (const [name, spec] of Object.entries({ ...dependencies, ...devDependencies })) {
-    const expected = name.startsWith('@vibejs-org/') ? '0.0.0-template' : pins[name];
+    const expected = name.startsWith('@usevibejs/') ? '0.0.0-template' : pins[name];
     expect([name, spec]).toEqual([name, expected]);
   }
   // npm reads a prerelease TypeScript as outside the optional `>=5` peer range of valibot.
@@ -34,7 +34,7 @@ it('pins the third-party tools to the repo catalog and TypeScript to the ts-next
 
 it('excludes only the vibe.js packages from the release age gate', () => {
   expect(template('pnpm-workspace.yaml')).toBe(
-    "minimumReleaseAgeExclude:\n  - '@vibejs-org/*'\n  - create-vibejs\n",
+    "minimumReleaseAgeExclude:\n  - '@usevibejs/*'\n  - create-vibejs\n",
   );
 });
 
@@ -47,7 +47,7 @@ it('has the CONTRACTS C6 ui tsconfig and a decorator-enabled server tsconfig', (
       verbatimModuleSyntax: true,
       noEmit: true,
     },
-    contentMappers: [{ package: '@vibejs-org/language-tools', extensions: ['.vibe'] }],
+    contentMappers: [{ package: '@usevibejs/language-tools', extensions: ['.vibe'] }],
     include: ['src'],
     references: [{ path: '../contracts' }],
   });
@@ -69,6 +69,6 @@ it('forbids server imports in ui code and enables no type-aware rules', () => {
   expect(lint.options).toBeUndefined();
   const ui = lint.overrides.find((o: { files: string[] }) => o.files.includes('ui/**'));
   const [, { paths, patterns }] = ui.rules['eslint/no-restricted-imports'];
-  expect(paths.map((p: { name: string }) => p.name)).toEqual(['@vibejs-org/server']);
-  expect(patterns[0].group).toContain('@vibejs-org/server/*');
+  expect(paths.map((p: { name: string }) => p.name)).toEqual(['@usevibejs/server']);
+  expect(patterns[0].group).toContain('@usevibejs/server/*');
 });

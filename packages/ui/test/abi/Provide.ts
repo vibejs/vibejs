@@ -1,5 +1,5 @@
 // The compiled twin of Provide.vibe, written as the compiler emits it (types added).
-import { provide, ref } from '@vibejs-org/ui';
+import { provide, ref } from '@usevibejs/ui';
 import {
   child,
   createComponent,
@@ -8,7 +8,7 @@ import {
   on,
   template,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { Consumer } from './Consumer.ts';
 import { ThemeKey } from './keys.ts';
 

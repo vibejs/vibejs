@@ -10,7 +10,7 @@ description: Modules, providers, field injection with inject(), tokens, exports,
 A module is a class with `@Module()`. It lists what it provides, which controllers it registers, which modules it imports and which of its providers other modules may use:
 
 ```ts
-import { Module } from '@vibejs-org/server';
+import { Module } from '@usevibejs/server';
 class TodosController {}
 // ---cut---
 class TodosService {
@@ -35,7 +35,7 @@ A module can export an imported module, which passes that module's exports on to
 Dependencies are fields initialized with `inject(Token)`:
 
 ```ts
-import { inject } from '@vibejs-org/server';
+import { inject } from '@usevibejs/server';
 class Db {
   query(sql: string): string[] {
     return [sql];
@@ -61,7 +61,7 @@ class TodosService {
 A provider is a class, or an object that names a token in `provide` and says how to create its value:
 
 ```ts
-import { token, type Provider } from '@vibejs-org/server';
+import { token, type Provider } from '@usevibejs/server';
 class TodosService {}
 class MemoryTodosService extends TodosService {}
 // ---cut---
@@ -82,7 +82,7 @@ export const providers: Provider[] = [
 A factory receives the tokens listed in `inject` as parameters, and may be async:
 
 ```ts
-import { token, type Provider } from '@vibejs-org/server';
+import { token, type Provider } from '@usevibejs/server';
 declare function connect(url: string): Promise<{ close(): Promise<void> }>;
 // ---cut---
 const DatabaseUrl = token<string>('DatabaseUrl');
@@ -108,7 +108,7 @@ A provider, controller, enhancer or module class can implement these hooks:
 | `onApplicationShutdown(signal?)` | After every `onModuleDestroy`.                                         |
 
 ```ts
-import { inject, token, type OnModuleDestroy, type OnModuleInit } from '@vibejs-org/server';
+import { inject, token, type OnModuleDestroy, type OnModuleInit } from '@usevibejs/server';
 const Database = token<{ connect(): Promise<void>; close(): Promise<void> }>('Database');
 // ---cut---
 class Migrations implements OnModuleInit, OnModuleDestroy {

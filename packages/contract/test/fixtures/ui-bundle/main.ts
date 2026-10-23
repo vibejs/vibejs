@@ -1,4 +1,4 @@
-import { createClient, defineContract, get } from '@vibejs-org/contract';
+import { createClient, defineContract, get } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 const users = defineContract('/users', {

@@ -1,6 +1,6 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
-import { defineContract, del, get, post, raw } from '@vibejs-org/contract';
-import { isVibeError } from '@vibejs-org/errors';
+import { defineContract, del, get, post, raw } from '@usevibejs/contract';
+import { isVibeError } from '@usevibejs/errors';
 import * as v from 'valibot';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { inject } from '../di/injector.ts';

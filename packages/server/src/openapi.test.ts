@@ -1,6 +1,6 @@
 import { validate } from '@scalar/openapi-parser';
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import { defineContract, del, get, post, put, raw } from '@vibejs-org/contract';
+import { defineContract, del, get, post, put, raw } from '@usevibejs/contract';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import * as arktype from '../test/openapi/arktype.ts';

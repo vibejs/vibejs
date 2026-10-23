@@ -1,5 +1,5 @@
 // The compiled twin of Card.vibe, written as the compiler emits it (types added).
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 import {
   child,
   createSlot,
@@ -8,7 +8,7 @@ import {
   on,
   template,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 const t0 = template(
   '<article><header><!----></header><button type="button">More</button><!----><footer><!----></footer></article>',

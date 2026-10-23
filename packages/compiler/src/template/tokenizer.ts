@@ -39,7 +39,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
  */
 
-import type { VibeError } from '@vibejs-org/errors'
+import type { VibeError } from '@usevibejs/errors'
 import { DecodingMode, EntityDecoder, htmlDecodeTree } from 'entities/decode'
 import { LineIndex, type Position } from '../diagnostics.ts'
 import { vibeError } from '../errors.gen.ts'

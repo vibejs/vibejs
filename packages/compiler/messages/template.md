@@ -90,7 +90,7 @@ A template has no component instance: `this` and instance properties such as `$r
 ### Fix
 
 - Reach an element or a child component with `useTemplateRef('name')` in `<script setup lang="ts">` and a matching `ref="name"`.
-- Import `nextTick` or `watch` from `@vibejs-org/ui` and call it in `<script setup lang="ts">`.
+- Import `nextTick` or `watch` from `@usevibejs/ui` and call it in `<script setup lang="ts">`.
 - Write `$attrs`, `$slots`, `$emit` or a binding of `<script setup lang="ts">` instead of `this`.
 - Read the route with `const route = useRoute()` and the router with `useRouter()` in `<script setup lang="ts">`.
 

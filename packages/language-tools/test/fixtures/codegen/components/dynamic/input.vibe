@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef } from '@vibejs-org/ui'
+import { shallowRef } from '@usevibejs/ui'
 import Comp from './Comp.vibe'
 const current = shallowRef(Comp)
 </script>

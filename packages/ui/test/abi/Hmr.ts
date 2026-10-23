@@ -1,5 +1,5 @@
 // The compiled twin of Hmr.vibe, written as the compiler emits it (types added).
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 import {
   child,
   createComponent,
@@ -12,7 +12,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { Badge } from './Badge.ts';
 
 const t0 = template(

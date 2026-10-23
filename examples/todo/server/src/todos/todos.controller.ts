@@ -1,4 +1,4 @@
-import { Controller, Handle, inject, type Ctx } from '@vibejs-org/server';
+import { Controller, Handle, inject, type Ctx } from '@usevibejs/server';
 import { todos } from '../../../contracts/src/todos.contract.ts';
 import { TodosService, type TodoItem } from './todos.service.ts';
 

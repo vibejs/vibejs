@@ -1,5 +1,5 @@
-import type { ValidationIssue } from '@vibejs-org/contract';
-import { isVibeError } from '@vibejs-org/errors';
+import type { ValidationIssue } from '@usevibejs/contract';
+import { isVibeError } from '@usevibejs/errors';
 import { vibeError } from '../errors.gen.ts';
 import type { Logger } from '../logger.ts';
 

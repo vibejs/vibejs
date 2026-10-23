@@ -1,4 +1,4 @@
-import { defineContract, get, post } from '@vibejs-org/contract';
+import { defineContract, get, post } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 export const Project = v.object({ id: v.string(), name: v.string() });

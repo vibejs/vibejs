@@ -15,13 +15,13 @@ export const childEnv: NodeJS.ProcessEnv = Object.fromEntries(
   Object.entries(process.env).filter(([k]) => !k.startsWith('VITEST')),
 );
 
-/** Copies test/fixtures/typecheck to a temp dir with @vibejs-org/{language-tools,ui} linked (junction on Windows). */
+/** Copies test/fixtures/typecheck to a temp dir with @usevibejs/{language-tools,ui} linked (junction on Windows). */
 export function copyCorpus(): { root: string; dispose: () => void } {
   const root = mkdtempSync(join(tmpdir(), 'vibejs-typecheck-'));
   cpSync(FIXTURES, root, { recursive: true });
-  mkdirSync(join(root, 'node_modules/@vibejs-org'), { recursive: true });
+  mkdirSync(join(root, 'node_modules/@usevibejs'), { recursive: true });
   for (const name of ['language-tools', 'ui']) {
-    symlinkSync(join(PACKAGES, name), join(root, 'node_modules/@vibejs-org', name), 'junction');
+    symlinkSync(join(PACKAGES, name), join(root, 'node_modules/@usevibejs', name), 'junction');
   }
   return { root, dispose: () => rmSync(root, { recursive: true, force: true }) };
 }

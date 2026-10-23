@@ -126,7 +126,7 @@ describe('bundled docs', () => {
     expect(Buffer.byteLength(index)).toBeLessThanOrEqual(8192);
     expect(index).not.toContain('\n');
     expect(
-      index.startsWith('[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|'),
+      index.startsWith('[vibe.js docs index]|root: ./node_modules/@usevibejs/cli/dist/docs|'),
     ).toBe(true);
     const named = index
       .split('|')

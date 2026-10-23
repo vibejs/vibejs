@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { computed } from '../reactivity/computed.ts';
 import { effectScope } from '../reactivity/effectScope.ts';

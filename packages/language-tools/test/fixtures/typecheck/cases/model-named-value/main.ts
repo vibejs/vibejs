@@ -1,4 +1,4 @@
-import type { ComponentProps } from '@vibejs-org/ui';
+import type { ComponentProps } from '@usevibejs/ui';
 import { expectType } from '../../expect.ts';
 import Child from './Child.vibe';
 

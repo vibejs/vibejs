@@ -1,4 +1,4 @@
-import { nextTick } from '@vibejs-org/ui';
+import { nextTick } from '@usevibejs/ui';
 import { expect, test, vi } from 'vitest';
 import { mountForTest } from './mount.ts';
 import { defineAbiSuite, type AbiSuite } from './suite.ts';

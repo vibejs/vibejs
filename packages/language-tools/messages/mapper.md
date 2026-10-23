@@ -2,13 +2,13 @@
 
 ## VIBE6001: Unknown content mapper option
 
-> The `@vibejs-org/language-tools` content mapper takes no options, but the `contentMappers` entry sets `{option}`.
+> The `@usevibejs/language-tools` content mapper takes no options, but the `contentMappers` entry sets `{option}`.
 
 The content mapper has no settings: every `.vibe` file is type-checked the same strict way. An `options` object in the `contentMappers` entry of `tsconfig.json` is not read.
 
 ### Fix
 
-- Remove `{option}` from the `options` of the `@vibejs-org/language-tools` entry in `contentMappers`.
+- Remove `{option}` from the `options` of the `@usevibejs/language-tools` entry in `contentMappers`.
 
 ## VIBE6002: UTF-16 positions not offered
 
@@ -18,7 +18,7 @@ The content mapper reports every position as a UTF-16 offset, the unit of JavaSc
 
 ### Fix
 
-- Update `typescript` to the version that `@vibejs-org/language-tools` supports.
+- Update `typescript` to the version that `@usevibejs/language-tools` supports.
 
 ## VIBE6010: Unused @vibe-expect-error directive
 

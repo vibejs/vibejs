@@ -32,9 +32,9 @@ expect(await api.users.get({ params: { id: 'missing' } })).toMatchObject({
 await app.close();
 ```
 
-`Test` comes from `@vibejs-org/server/testing`, `createClient` from `@vibejs-org/contract`.
+`Test` comes from `@usevibejs/server/testing`, `createClient` from `@usevibejs/contract`.
 
-UI code: mount the component with `mount()` from `@vibejs-org/ui/testing`, pass the router with `plugins: [router]` and `createMemoryHistory()`, and give the API client a fake `fetch` that returns each response the component handles. Await `flushPromises()` before reading the DOM.
+UI code: mount the component with `mount()` from `@usevibejs/ui/testing`, pass the router with `plugins: [router]` and `createMemoryHistory()`, and give the API client a fake `fetch` that returns each response the component handles. Await `flushPromises()` before reading the DOM.
 
 ## 3. Repeat until clean
 

@@ -1,13 +1,13 @@
-# Third-party notices for @vibejs-org/ui
+# Third-party notices for @usevibejs/ui
 
-`@vibejs-org/ui` is MIT licensed. Code derived from other open-source projects is credited here with the upstream project, its license and its copyright notice. Each derived file starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header.
+`@usevibejs/ui` is MIT licensed. Code derived from other open-source projects is credited here with the upstream project, its license and its copyright notice. Each derived file starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header.
 
 ## stackblitz/alien-signals
 
 - Repository: https://github.com/stackblitz/alien-signals
 - Version: 3.2.1, commit `8734d386d925025d0e99419bd9161c17b112c5ee`
 - License: MIT
-- Used in (shipped in the `@vibejs-org/ui` dist):
+- Used in (shipped in the `@usevibejs/ui` dist):
   - `packages/ui/src/reactivity/system.ts`
 - Used in (tests, not shipped):
   - `packages/ui/src/reactivity/conformance.test.ts`
@@ -42,7 +42,7 @@ SOFTWARE.
 - Repository: https://github.com/vuejs/core
 - Version: v3.5.44, commit `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`
 - License: MIT
-- Used in (shipped in the `@vibejs-org/ui` dist):
+- Used in (shipped in the `@usevibejs/ui` dist):
   - `packages/ui/src/dom-types.ts` (the DOM attribute and event types from `packages/runtime-dom/src/jsx.ts`, shipped in the dist types)
   - `packages/ui/src/reactivity/arrayInstrumentations.ts`
   - `packages/ui/src/reactivity/baseHandlers.ts`
@@ -123,7 +123,7 @@ THE SOFTWARE.
 - Repository: https://github.com/vuejs/router
 - Version: v4.6.4, commit `47b95baae1ebdeb564bd1adf8168c9e9d6d09d0a`
 - License: MIT
-- Used in (shipped in the `@vibejs-org/ui` dist):
+- Used in (shipped in the `@usevibejs/ui` dist):
   - `packages/ui/src/router/path.ts`
 - Used in (tests, not shipped):
   - `packages/ui/src/router/matcher.test.ts`

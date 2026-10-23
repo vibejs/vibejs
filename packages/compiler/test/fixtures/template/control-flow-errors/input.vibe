@@ -12,7 +12,7 @@
   <template v-for="i in items" :key="i.id"><p :key="i.id"></p></template>
 </template>
 <script setup lang="ts">
-import { ref, useTemplateRef } from '@vibejs-org/ui'
+import { ref, useTemplateRef } from '@usevibejs/ui'
 import Item from './Item.vibe'
 const { label } = defineProps<{ label: string }>()
 const text = ref('')

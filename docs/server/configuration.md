@@ -10,7 +10,7 @@ description: Typed environment config, logging, CORS, cookies, request limits, s
 `defineConfig(schema)` returns a class whose constructor validates the environment variables named by the schema keys. Provide it like any class and inject it where it is needed:
 
 ```ts
-import { defineConfig, inject, Module } from '@vibejs-org/server';
+import { defineConfig, inject, Module } from '@usevibejs/server';
 import * as v from 'valibot';
 // ---cut---
 export class AppConfig extends defineConfig({
@@ -37,7 +37,7 @@ The config is validated once, when the application is created. Every failing key
 The application logger is provided as `Logger` in every module. Inject it to log with the same sink as the framework:
 
 ```ts
-import { inject, Logger } from '@vibejs-org/server';
+import { inject, Logger } from '@usevibejs/server';
 // ---cut---
 class Mailer {
   private readonly log = inject(Logger);
@@ -51,7 +51,7 @@ class Mailer {
 The default logger is `JsonLogger`, which writes one JSON line per entry: `{ time, level, msg, ...fields }`. Pass another one in `AppOptions.logger`:
 
 ```ts
-import { JsonLogger, type AppOptions } from '@vibejs-org/server';
+import { JsonLogger, type AppOptions } from '@usevibejs/server';
 // ---cut---
 export const appOptions: AppOptions = {
   basePath: '/api',
@@ -66,7 +66,7 @@ Levels are `debug`, `info` (default), `warn`, `error` and `silent`. Each request
 `cors(options)` is a middleware. It answers preflight requests and adds the CORS headers to the responses for allowed origins:
 
 ```ts
-import { cors, type AppOptions } from '@vibejs-org/server';
+import { cors, type AppOptions } from '@usevibejs/server';
 // ---cut---
 export const appOptions: AppOptions = {
   basePath: '/api',
@@ -81,8 +81,8 @@ export const appOptions: AppOptions = {
 `ctx.cookies` reads the request cookies and sets response cookies. New cookies are `HttpOnly`, `Secure`, `SameSite=Lax` and `Path=/` unless the options say otherwise:
 
 ```ts
-import { defineContract, post } from '@vibejs-org/contract';
-import { Controller, Handle, type Ctx } from '@vibejs-org/server';
+import { defineContract, post } from '@usevibejs/contract';
+import { Controller, Handle, type Ctx } from '@usevibejs/server';
 const session = defineContract('/session', { start: post('/'), end: post('/end') });
 // ---cut---
 @Controller(session)

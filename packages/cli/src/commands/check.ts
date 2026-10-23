@@ -1,6 +1,6 @@
 import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { DOCS_BASE, type VibeError } from '@vibejs-org/errors';
+import { DOCS_BASE, type VibeError } from '@usevibejs/errors';
 import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
 import {
   parseCompiler,
@@ -45,8 +45,8 @@ const TOOLS: Record<StepName, [pkg: string, bin: string][]> = {
 
 /** The types step also needs these when the project has `.vibe` files: the mapper and the compile step. */
 const VIBE_TOOLS: [pkg: string, bin: string][] = [
-  ['@vibejs-org/language-tools', ''],
-  ['@vibejs-org/compiler', ''],
+  ['@usevibejs/language-tools', ''],
+  ['@usevibejs/compiler', ''],
 ];
 
 const OUT = '.vibejs/check';
@@ -258,7 +258,7 @@ export const check: CommandDef<CheckResult> = {
     if (vibe.length) {
       // The project's compiler, the one the gate found and the mapper uses, not one next to the CLI.
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the gate above found it
-      const { compile } = (await projectCompiler(root)) as typeof import('@vibejs-org/compiler');
+      const { compile } = (await projectCompiler(root)) as typeof import('@usevibejs/compiler');
       for (const file of vibe) {
         const filename = join(root, file);
         const source = readFileSync(filename, 'utf8');

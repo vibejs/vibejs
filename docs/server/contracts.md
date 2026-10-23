@@ -8,7 +8,7 @@ description: Declare an API once with defineContract, serve it from a controller
 A contract declares the routes of one resource: method, path, inputs, response and errors. The server serves it, the UI calls it, and both are type-checked against the same declaration, with no code generation.
 
 ```ts
-import { defineContract, del, get, patch, post } from '@vibejs-org/contract';
+import { defineContract, del, get, patch, post } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 export const Todo = v.object({ id: v.string(), title: v.string(), done: v.boolean() });
@@ -25,7 +25,7 @@ export const todos = defineContract('/todos', {
 });
 ```
 
-Contract files (`*.contract.ts`) import only `@vibejs-org/contract` and a schema library, so the UI can import them without pulling in server code.
+Contract files (`*.contract.ts`) import only `@usevibejs/contract` and a schema library, so the UI can import them without pulling in server code.
 
 ## Routes
 
@@ -47,7 +47,7 @@ Paths are `/` or segments such as `/users/:id/posts`; params start with `:` ([VI
 `raw(contentType?)` declares a response that is sent as is, such as a file. The handler returns a `Response` or a body such as a string or a stream, and the client receives the `Response`:
 
 ```ts
-import { defineContract, get, raw } from '@vibejs-org/contract';
+import { defineContract, get, raw } from '@usevibejs/contract';
 // ---cut---
 export const reports = defineContract('/reports', {
   csv: get('/:year', { response: raw('text/csv') }),
@@ -85,7 +85,7 @@ Schemas run on the server. It validates the request parts before the handler run
 `createClient(contracts, options)` returns one function per route. A call never throws for HTTP or network failures; it resolves to an `ApiResult` that you narrow on `ok`, then on `error.code`:
 
 ```ts
-import { createClient, defineContract, get } from '@vibejs-org/contract';
+import { createClient, defineContract, get } from '@usevibejs/contract';
 import * as v from 'valibot';
 const todos = defineContract('/todos', {
   one: get('/:id', { response: v.object({ title: v.string() }), errors: { TODO_NOT_FOUND: 404 } }),
@@ -111,12 +111,12 @@ if (result.ok) {
 
 ## OpenAPI
 
-`generateOpenApi(contracts, options)` from `@vibejs-org/server/openapi` returns an OpenAPI 3.1 document for the same record of contracts the client takes. Serve it with a middleware. A middleware sees the full request path, base path included, so the recipe below answers `/api/openapi.json` under the base path `/api`:
+`generateOpenApi(contracts, options)` from `@usevibejs/server/openapi` returns an OpenAPI 3.1 document for the same record of contracts the client takes. Serve it with a middleware. A middleware sees the full request path, base path included, so the recipe below answers `/api/openapi.json` under the base path `/api`:
 
 ```ts
-import { defineContract, get } from '@vibejs-org/contract';
-import type { Middleware } from '@vibejs-org/server';
-import { generateOpenApi } from '@vibejs-org/server/openapi';
+import { defineContract, get } from '@usevibejs/contract';
+import type { Middleware } from '@usevibejs/server';
+import { generateOpenApi } from '@usevibejs/server/openapi';
 const todos = defineContract('/todos', { list: get('/') });
 // ---cut---
 const doc = generateOpenApi(

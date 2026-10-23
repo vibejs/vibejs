@@ -1,4 +1,4 @@
-import type { ComponentProps, HTMLAttributes, ReservedProps } from '@vibejs-org/ui';
+import type { ComponentProps, HTMLAttributes, ReservedProps } from '@usevibejs/ui';
 import { expectType } from '../../expect.ts';
 import Comp from './Comp.vibe';
 

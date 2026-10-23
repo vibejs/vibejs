@@ -1,4 +1,4 @@
-import { defineContract, del, get, patch, post } from '@vibejs-org/contract';
+import { defineContract, del, get, patch, post } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 export const Todo = v.object({ id: v.string(), title: v.string(), done: v.boolean() });

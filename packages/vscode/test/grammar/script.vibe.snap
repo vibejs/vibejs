@@ -10,7 +10,7 @@
 #                    ^^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html
 #                      ^ source.vibejs meta.tag-stuff meta.attribute.lang.html string.quoted.double.html punctuation.definition.string.end.html
 #                       ^ source.vibejs meta.tag-stuff punctuation.definition.tag.end.html.vibejs
->import { ref } from '@vibejs-org/ui'
+>import { ref } from '@usevibejs/ui'
 #^^^^^^ source.vibejs source.ts meta.import.ts keyword.control.import.ts
 #      ^ source.vibejs source.ts meta.import.ts
 #       ^ source.vibejs source.ts meta.import.ts meta.block.ts punctuation.definition.block.ts
@@ -22,8 +22,8 @@
 #               ^^^^ source.vibejs source.ts meta.import.ts keyword.control.from.ts
 #                   ^ source.vibejs source.ts meta.import.ts
 #                    ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.begin.ts
-#                     ^^^^^^^^^^^^^^ source.vibejs source.ts meta.import.ts string.quoted.single.ts
-#                                   ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.end.ts
+#                     ^^^^^^^^^^^^^ source.vibejs source.ts meta.import.ts string.quoted.single.ts
+#                                  ^ source.vibejs source.ts meta.import.ts string.quoted.single.ts punctuation.definition.string.end.ts
 >import Item from './Item.vibe'
 #^^^^^^ source.vibejs source.ts meta.import.ts keyword.control.import.ts
 #      ^ source.vibejs source.ts meta.import.ts

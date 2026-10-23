@@ -1,4 +1,4 @@
-import { on as _on, template as _template } from '@vibejs-org/ui/internal'
+import { on as _on, template as _template } from '@usevibejs/ui/internal'
 function _setup(__props: any, __ctx: any) {
 
 interface Events {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from '@vibejs-org/ui'
+import { useTemplateRef } from '@usevibejs/ui'
 import type { Node } from './types.ts'
 const { node } = defineProps<{ node: Node }>()
 const first = useTemplateRef('first')

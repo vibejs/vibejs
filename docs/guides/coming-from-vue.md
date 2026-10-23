@@ -8,7 +8,7 @@ description: What carries over from Vue 3 to vibe.js, the Vue idioms that change
 Most of what you know from Vue 3 with `<script setup>` carries over:
 
 - **Single-file components:** a `.vibe` file has `<script setup lang="ts">`, `<template>` and `<style scoped>` blocks, and the template uses the same directives: `v-if`, `v-for`, `v-show`, `v-model`, `v-bind`, `v-on`, `v-slot`, `v-html` and `v-text`, with the same shorthands and modifiers.
-- **Reactivity:** `ref`, `shallowRef`, `reactive`, `readonly`, `computed`, `watch`, `watchEffect`, `effectScope`, `nextTick`, `toRef`, `toRefs` and `toValue` have the same signatures, types and semantics. They are imported from `@vibejs-org/ui`.
+- **Reactivity:** `ref`, `shallowRef`, `reactive`, `readonly`, `computed`, `watch`, `watchEffect`, `effectScope`, `nextTick`, `toRef`, `toRefs` and `toValue` have the same signatures, types and semantics. They are imported from `@usevibejs/ui`.
 - **Components:** `defineProps`, `defineEmits`, `defineSlots`, `defineModel`, `defineExpose` and `defineOptions` are macros, the lifecycle hooks have the same names, and `provide`/`inject` with an `InjectionKey`, `useTemplateRef`, `useAttrs`, `useSlots` and `useId` work as in Vue.
 - **The app:** `createApp(App).mount('#app')`, `app.use()`, `app.provide()`, `app.config.errorHandler` and `app.config.warnHandler`.
 
@@ -66,7 +66,7 @@ The template compiles to code that creates DOM nodes directly and updates only t
 
 ## Not in vibe.js
 
-Importing one of these from `@vibejs-org/ui` fails to type-check with TS2305 (module has no exported member).
+Importing one of these from `@usevibejs/ui` fails to type-check with TS2305 (module has no exported member).
 
 - `h()`, render functions and JSX: write a template; choose a component at runtime with `<component :is>`.
 - `defineAsyncComponent`: the router loads a route component from `() => import('./Page.vibe')` itself.

@@ -2,7 +2,7 @@ import { existsSync, globSync, readFileSync, realpathSync, statSync } from 'node
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import { vibeError } from './errors.gen.ts';
 
 interface Manifest {
@@ -29,11 +29,11 @@ function* upwards(dir: string): Generator<string> {
   }
 }
 
-/** The nearest directory at or above `cwd` whose package.json depends on @vibejs-org/cli. */
+/** The nearest directory at or above `cwd` whose package.json depends on @usevibejs/cli. */
 export function findRoot(cwd: string): string | undefined {
   for (const dir of upwards(cwd)) {
     const pkg = readManifest(dir);
-    if (pkg && '@vibejs-org/cli' in { ...pkg.dependencies, ...pkg.devDependencies }) return dir;
+    if (pkg && '@usevibejs/cli' in { ...pkg.dependencies, ...pkg.devDependencies }) return dir;
   }
   return undefined;
 }
@@ -118,16 +118,16 @@ export function vibeFiles(root: string, dir = '.'): string[] {
     .toSorted();
 }
 
-/** The project's own `@vibejs-org/compiler` (resolved from `root`), never one next to the CLI. Missing → VIBE8005. */
+/** The project's own `@usevibejs/compiler` (resolved from `root`), never one next to the CLI. Missing → VIBE8005. */
 export async function projectCompiler(
   root: string,
-): Promise<typeof import('@vibejs-org/compiler') | VibeError> {
+): Promise<typeof import('@usevibejs/compiler') | VibeError> {
   // Found in the project's node_modules like the tools of `check`, never through NODE_PATH.
-  if (!resolveTool(root, '@vibejs-org/compiler', '')) {
-    const install = installCommand(packageManager(root), ['@vibejs-org/compiler']);
+  if (!resolveTool(root, '@usevibejs/compiler', '')) {
+    const install = installCommand(packageManager(root), ['@usevibejs/compiler']);
     const minimum = 'the required version';
-    return vibeError('VIBE8005', { tool: '@vibejs-org/compiler', minimum, install });
+    return vibeError('VIBE8005', { tool: '@usevibejs/compiler', minimum, install });
   }
-  const entry = createRequire(join(root, 'package.json')).resolve('@vibejs-org/compiler');
+  const entry = createRequire(join(root, 'package.json')).resolve('@usevibejs/compiler');
   return import(pathToFileURL(entry).href);
 }

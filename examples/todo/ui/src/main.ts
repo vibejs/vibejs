@@ -1,5 +1,5 @@
-import { createApp } from '@vibejs-org/ui';
-import { createRouter, createWebHistory } from '@vibejs-org/ui/router';
+import { createApp } from '@usevibejs/ui';
+import { createRouter, createWebHistory } from '@usevibejs/ui/router';
 import { flagsPlugin } from 'todo-flags/ui';
 import App from './App.vibe';
 import { API, createApi } from './api.ts';

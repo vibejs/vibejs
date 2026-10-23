@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { vibe } from '@vibejs-org/compiler/vite';
+import { vibe } from '@usevibejs/compiler/vite';
 import { build } from 'vite';
 import { expect, it, vi } from 'vitest';
 

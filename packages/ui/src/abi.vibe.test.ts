@@ -2,7 +2,7 @@
 // Runs each shared ABI suite on its `.vibe` twin, compiled by the built vibe().
 import { globSync } from 'node:fs';
 import { basename } from 'node:path';
-import type { ComponentDef } from '@vibejs-org/ui/internal';
+import type { ComponentDef } from '@usevibejs/ui/internal';
 import { expect, test } from 'vitest';
 import type { AbiSuite } from '../test/abi/suite.ts';
 import Card from '../test/abi/Card.vibe';

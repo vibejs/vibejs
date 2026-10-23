@@ -1,5 +1,5 @@
-import { child as _child, createFor as _createFor, insert as _insert, on as _on, renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@vibejs-org/ui/internal'
-import { ref } from '@vibejs-org/ui'
+import { child as _child, createFor as _createFor, insert as _insert, on as _on, renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@usevibejs/ui/internal'
+import { ref } from '@usevibejs/ui'
 function _setup(__props: any, __ctx: any) {
 
 

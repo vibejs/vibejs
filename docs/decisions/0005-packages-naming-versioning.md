@@ -1,6 +1,6 @@
 # 0005. Package layout, naming and versioning
 
-- Status: Accepted
+- Status: Accepted; the npm scope is superseded by [0008](0008-npm-scope-usevibejs.md)
 - Date: 2026-10-18
 
 ## Context

@@ -337,10 +337,10 @@ importers:
       '@types/vscode':
         specifier: 'catalog:'
         version: 1.125.0
-      '@vibejs-org/compiler':
+      '@usevibejs/compiler':
         specifier: workspace:*
         version: link:packages/compiler
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:packages/ui
       '@vitest/browser-playwright':
@@ -391,22 +391,22 @@ importers:
 
   docs:
     devDependencies:
-      '@vibejs-org/compiler':
+      '@usevibejs/compiler':
         specifier: workspace:*
         version: link:../packages/compiler
-      '@vibejs-org/contract':
+      '@usevibejs/contract':
         specifier: workspace:*
         version: link:../packages/contract
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../packages/errors
-      '@vibejs-org/language-tools':
+      '@usevibejs/language-tools':
         specifier: workspace:*
         version: link:../packages/language-tools
-      '@vibejs-org/server':
+      '@usevibejs/server':
         specifier: workspace:*
         version: link:../packages/server
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:../packages/ui
       create-vibejs:
@@ -427,13 +427,13 @@ importers:
 
   examples/todo:
     dependencies:
-      '@vibejs-org/contract':
+      '@usevibejs/contract':
         specifier: workspace:*
         version: link:../../packages/contract
-      '@vibejs-org/server':
+      '@usevibejs/server':
         specifier: workspace:*
         version: link:../../packages/server
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       todo-flags:
@@ -446,13 +446,13 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
-      '@vibejs-org/cli':
+      '@usevibejs/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@vibejs-org/compiler':
+      '@usevibejs/compiler':
         specifier: workspace:*
         version: link:../../packages/compiler
-      '@vibejs-org/language-tools':
+      '@usevibejs/language-tools':
         specifier: workspace:*
         version: link:../../packages/language-tools
       '@vitest/coverage-v8':
@@ -485,13 +485,13 @@ importers:
 
   examples/todo-flags:
     dependencies:
-      '@vibejs-org/contract':
+      '@usevibejs/contract':
         specifier: workspace:*
         version: link:../../packages/contract
-      '@vibejs-org/server':
+      '@usevibejs/server':
         specifier: workspace:*
         version: link:../../packages/server
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       valibot:
@@ -516,7 +516,7 @@ importers:
       '@modelcontextprotocol/server':
         specifier: 'catalog:'
         version: 2.3.1
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
       oxc-parser:
@@ -535,19 +535,19 @@ importers:
       '@modelcontextprotocol/client':
         specifier: 'catalog:'
         version: 2.3.1
-      '@vibejs-org/compiler':
+      '@usevibejs/compiler':
         specifier: workspace:*
         version: link:../compiler
-      '@vibejs-org/contract':
+      '@usevibejs/contract':
         specifier: workspace:*
         version: link:../contract
-      '@vibejs-org/language-tools':
+      '@usevibejs/language-tools':
         specifier: workspace:*
         version: link:../language-tools
-      '@vibejs-org/server':
+      '@usevibejs/server':
         specifier: workspace:*
         version: link:../server
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:../ui
       '@vitest/coverage-v8':
@@ -577,7 +577,7 @@ importers:
       '@jridgewell/gen-mapping':
         specifier: 'catalog:'
         version: 0.3.13
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
       entities:
@@ -599,7 +599,7 @@ importers:
       '@jridgewell/trace-mapping':
         specifier: 'catalog:'
         version: 0.3.31
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:../ui
       tsdown:
@@ -614,7 +614,7 @@ importers:
       '@standard-schema/spec':
         specifier: 'catalog:'
         version: 1.1.0
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
     devDependencies:
@@ -636,10 +636,10 @@ importers:
 
   packages/create-vibejs:
     devDependencies:
-      '@vibejs-org/cli':
+      '@usevibejs/cli':
         specifier: workspace:*
         version: link:../cli
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
 
@@ -651,17 +651,17 @@ importers:
 
   packages/language-tools:
     dependencies:
-      '@vibejs-org/compiler':
+      '@usevibejs/compiler':
         specifier: workspace:*
         version: link:../compiler
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
       vscode-jsonrpc:
         specifier: 'catalog:'
         version: 9.0.3
     devDependencies:
-      '@vibejs-org/ui':
+      '@usevibejs/ui':
         specifier: workspace:*
         version: link:../ui
       oxc-parser:
@@ -679,10 +679,10 @@ importers:
       '@standard-schema/spec':
         specifier: 'catalog:'
         version: 1.1.0
-      '@vibejs-org/contract':
+      '@usevibejs/contract':
         specifier: workspace:*
         version: link:../contract
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
       srvx:
@@ -710,7 +710,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
       csstype:
@@ -729,7 +729,7 @@ importers:
 
   packages/vscode:
     devDependencies:
-      '@vibejs-org/errors':
+      '@usevibejs/errors':
         specifier: workspace:*
         version: link:../errors
       '@vscode/vsce':

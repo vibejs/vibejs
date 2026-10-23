@@ -1,6 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { dirname } from 'node:path';
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { projectAgentFiles, syncAgentFiles } from '../agents.ts';
 import type { CommandDef } from '../command.ts';
 import { SSR_OPTIONS } from '../dev/app-module.ts';

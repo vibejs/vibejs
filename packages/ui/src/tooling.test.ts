@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { expect, it, vi } from 'vitest';
 
 async function importTooling(): Promise<unknown> {
@@ -14,7 +14,7 @@ it('throws VIBE5900 when the module runs', async () => {
   expect(isVibeError(error, 'VIBE5900')).toBe(true);
   expect(error).toHaveProperty(
     'message',
-    expect.stringMatching(/^\[VIBE5900\] @vibejs-org\/ui\/tooling only declares types/),
+    expect.stringMatching(/^\[VIBE5900\] @usevibejs\/ui\/tooling only declares types/),
   );
 });
 

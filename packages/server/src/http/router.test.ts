@@ -1,5 +1,5 @@
-import { isVibeError } from '@vibejs-org/errors';
-import { defineContract, get, type HttpMethod, type Route } from '@vibejs-org/contract';
+import { isVibeError } from '@usevibejs/errors';
+import { defineContract, get, type HttpMethod, type Route } from '@usevibejs/contract';
 import { describe, expect, it } from 'vitest';
 import { token } from '../di/token.ts';
 import type { RouteBinding } from '../module/graph.ts';

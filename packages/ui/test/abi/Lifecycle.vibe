@@ -8,7 +8,7 @@ import {
   onUnmounted,
   onUpdated,
   ref,
-} from '@vibejs-org/ui';
+} from '@usevibejs/ui';
 import Leaf from './Leaf.vibe';
 
 const { log } = defineProps<{ log: string[] }>();

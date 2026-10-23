@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from '@vibejs-org/ui'
+import { useTemplateRef } from '@usevibejs/ui'
 import Comp from './Comp.vibe'
 const input = useTemplateRef('input')
 const typed = useTemplateRef<HTMLElement>('input')

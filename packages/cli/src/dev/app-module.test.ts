@@ -1,5 +1,5 @@
 import { rmSync } from 'node:fs';
-import { isVibeError, VibeError } from '@vibejs-org/errors';
+import { isVibeError, VibeError } from '@usevibejs/errors';
 import type { ModuleRunner } from 'vite/module-runner';
 import { afterEach, expect, it, vi } from 'vitest';
 import { copyApp, edit } from '../../test/app.ts';

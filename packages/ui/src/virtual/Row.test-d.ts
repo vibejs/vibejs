@@ -11,5 +11,5 @@ const __vibe_setup = { id, label, count, emit }
 }
 type __VibeSlots = {}; type __VibeExposed = {}; type __VibeRefs = {}; type __VibeModels = {}
 export const Row = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
-import * as __vibe from '@vibejs-org/ui/tooling'
-import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@vibejs-org/ui/tooling'
+import * as __vibe from '@usevibejs/ui/tooling'
+import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@usevibejs/ui/tooling'

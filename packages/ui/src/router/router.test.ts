@@ -67,7 +67,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/users/:id', name: 'user', component },
 ];
 
-describe('@vibejs-org/ui/router', () => {
+describe('@usevibejs/ui/router', () => {
   it('exports the router, its histories, components and composables', () => {
     const names = Object.keys(entry);
     names.sort();

@@ -29,7 +29,7 @@ The macros below declare the interface of a component. They are available in `<s
 
 ```vibe [TodoItem.vibe]
 <script setup lang="ts">
-import { computed } from '@vibejs-org/ui';
+import { computed } from '@usevibejs/ui';
 
 const { title, done = false, tags = [] } = defineProps<{
   title: string;
@@ -150,7 +150,7 @@ Attributes and listeners that a parent passes but the component does not declare
 
 ```vibe
 <script setup lang="ts">
-import { useAttrs } from '@vibejs-org/ui';
+import { useAttrs } from '@usevibejs/ui';
 
 defineOptions({ inheritAttrs: false });
 const { label } = defineProps<{ label: string }>();
@@ -174,7 +174,7 @@ A template ref on a component holds the values the component passes to `defineEx
 
 ```vibe [SearchField.vibe]
 <script setup lang="ts">
-import { ref, useTemplateRef } from '@vibejs-org/ui';
+import { ref, useTemplateRef } from '@usevibejs/ui';
 
 const field = useTemplateRef<HTMLInputElement>('field');
 const text = ref('');
@@ -192,7 +192,7 @@ defineExpose({
 
 ```vibe
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from '@vibejs-org/ui';
+import { onMounted, useTemplateRef } from '@usevibejs/ui';
 import SearchField from './SearchField.vibe';
 
 const search = useTemplateRef('search');

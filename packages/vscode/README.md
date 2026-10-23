@@ -3,7 +3,7 @@
 Language support for vibe.js `.vibe` single-file components.
 
 - Syntax highlighting for templates, `<script>` (TypeScript) and `<style>` (CSS, SCSS and Less), and editing rules for comments, brackets and indentation. These work in every workspace, Restricted Mode included.
-- Type checking, hover, go to definition and diagnostics in `.vibe` files, through the TypeScript 7 extension and the project's `@vibejs-org/language-tools`.
+- Type checking, hover, go to definition and diagnostics in `.vibe` files, through the TypeScript 7 extension and the project's `@usevibejs/language-tools`.
 
 ## Requirements
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // create-vibejs [dir] [--pm pnpm|npm|yarn|bun] [--no-install]: writes a new full-stack vibe.js
-// project from templates/fullstack and the agent files of @vibejs-org/cli, then installs it.
+// project from templates/fullstack and the agent files of @usevibejs/cli, then installs it.
 // Zero dependencies: the Node standard library only.
 import { spawn } from 'node:child_process';
 import {
@@ -43,8 +43,8 @@ const DEFAULT_DIR = 'vibejs-app';
 const MANAGERS = ['pnpm', 'npm', 'yarn', 'bun'];
 
 /**
- * How a project runs its local CLI: the `execPrefix` table of @vibejs-org/cli. `.mcp.json` runs
- * `<exec> mcp`, as `mcpServer` of @vibejs-org/cli writes it.
+ * How a project runs its local CLI: the `execPrefix` table of @usevibejs/cli. `.mcp.json` runs
+ * `<exec> mcp`, as `mcpServer` of @usevibejs/cli writes it.
  * @type {Record<PackageManager, string>}
  */
 export const EXEC = {

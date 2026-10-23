@@ -1,7 +1,7 @@
-import * as errors from '@vibejs-org/errors';
+import * as errors from '@usevibejs/errors';
 import { expect, it } from 'vitest';
 
-it('resolves @vibejs-org/errors to its built dist', () => {
+it('resolves @usevibejs/errors to its built dist', () => {
   expect(errors.isVibeError).toBeTypeOf('function');
-  expect(import.meta.resolve('@vibejs-org/errors')).toMatch(/\/packages\/errors\/dist\/index\.js$/);
+  expect(import.meta.resolve('@usevibejs/errors')).toMatch(/\/packages\/errors\/dist\/index\.js$/);
 });

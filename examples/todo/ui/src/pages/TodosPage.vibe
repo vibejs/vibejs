@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject, ref, useAsync } from '@vibejs-org/ui';
-import { RouterLink } from '@vibejs-org/ui/router';
+import { inject, ref, useAsync } from '@usevibejs/ui';
+import { RouterLink } from '@usevibejs/ui/router';
 import { useFlag } from 'todo-flags/ui';
 import { API } from '../api.ts';
 

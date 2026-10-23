@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from '@vibejs-org/ui';
+import { computed, ref, useTemplateRef } from '@usevibejs/ui';
 import type { Item } from './types';
 import Child from './Child.vibe';
 

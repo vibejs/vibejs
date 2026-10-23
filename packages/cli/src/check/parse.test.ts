@@ -12,11 +12,11 @@
 // copy of test/fixtures/clean whose src/Hello.vibe repeats an attribute (`:id="id" :id="id"`) and
 // whose src/bad.ts holds a TS2322. tsc-synthetic.txt holds lines the real mapper never prints
 // (a position in synthesized code, an unresolved mapper), verbatim from the content-mapper spike
-// with the mapper name rewritten to @vibejs-org/language-tools@0.0.0.
+// with the mapper name rewritten to @usevibejs/language-tools@0.0.0.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { ExecResult } from '../ctx.ts';
-import type { Diagnostic } from '@vibejs-org/compiler';
+import type { Diagnostic } from '@usevibejs/compiler';
 import {
   parseCompiler,
   parseCoverage,
@@ -53,10 +53,10 @@ describe('parseTsc', () => {
     expect(vibe).toHaveLength(2);
     expect(synthetic).toHaveLength(2);
     expect(synthetic[0].message).toBe(
-      "Type 'string' is not assignable to type 'number'.\n  This location is in virtual code produced by the content mapper '@vibejs-org/language-tools@0.0.0' and has no corresponding location in the original file.",
+      "Type 'string' is not assignable to type 'number'.\n  This location is in virtual code produced by the content mapper '@usevibejs/language-tools@0.0.0' and has no corresponding location in the original file.",
     );
     expect(synthetic[1].message).toBe(
-      "The content mapper package '@vibejs-org/language-tools' could not be resolved.",
+      "The content mapper package '@usevibejs/language-tools' could not be resolved.",
     );
   });
 

@@ -19,7 +19,7 @@ const marker: Plugin = {
 export default defineConfig({
   resolve: { conditions: ['vibejs-source', ...defaultClientConditions] },
   ssr: {
-    noExternal: [/^@vibejs-org\//],
+    noExternal: [/^@usevibejs\//],
     resolve: { conditions: ['vibejs-source', ...defaultServerConditions] },
   },
   plugins: [marker],

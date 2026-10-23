@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import type { CommandDef } from '../command.ts';
 import { envelopeError, type JsonEnvelope } from '../output.ts';
 import { fullstackRoot, projectCompiler, vibeFiles } from '../project.ts';

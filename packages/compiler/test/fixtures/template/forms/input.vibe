@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from '@vibejs-org/ui'
+import { ref, useTemplateRef } from '@usevibejs/ui'
 const form = ref({ name: '', agree: false, size: 1, kind: 'a' })
 const field = useTemplateRef('field')
 const tags = ref(['x'])

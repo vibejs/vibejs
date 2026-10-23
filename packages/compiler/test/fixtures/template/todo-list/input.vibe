@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from '@vibejs-org/ui'
+import { ref, computed } from '@usevibejs/ui'
 import TodoItem from './TodoItem.vibe'
 import type { Todo } from './types'
 const { title = 'Todos', todos } = defineProps<{ title?: string; todos: Todo[] }>()

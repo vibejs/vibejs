@@ -8,8 +8,8 @@ description: Serve a contract with @Controller and @Handle, read the typed ctx, 
 A controller serves one contract. Each route of the contract has exactly one handler method, marked with `@Handle(route)`:
 
 ```ts
-import { defineContract, del, get, post } from '@vibejs-org/contract';
-import { Controller, Handle, inject, type Ctx } from '@vibejs-org/server';
+import { defineContract, del, get, post } from '@usevibejs/contract';
+import { Controller, Handle, inject, type Ctx } from '@usevibejs/server';
 import * as v from 'valibot';
 const Todo = v.object({ id: v.string(), title: v.string(), done: v.boolean() });
 type Todo = v.InferOutput<typeof Todo>;
@@ -81,7 +81,7 @@ A handler may be async. It returns the route's response type: the schema's input
 Every error response is `application/problem+json`: `{ type, title, status, code, detail?, errors?, requestId }`.
 
 ```ts
-import { HttpError } from '@vibejs-org/server';
+import { HttpError } from '@usevibejs/server';
 // ---cut---
 export function requireUser(id: string | undefined): string {
   if (!id) throw new HttpError(401, 'UNAUTHORIZED', 'Sign in first');
@@ -116,8 +116,8 @@ Check, in this order:
 3. A route without a `response` returns `void`.
 
 ```ts
-import { defineContract, get } from '@vibejs-org/contract';
-import { Controller, Handle, type Ctx } from '@vibejs-org/server';
+import { defineContract, get } from '@usevibejs/contract';
+import { Controller, Handle, type Ctx } from '@usevibejs/server';
 import * as v from 'valibot';
 const users = defineContract('/users', {
   one: get('/:id', { response: v.object({ id: v.string() }) }),

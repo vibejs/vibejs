@@ -1,6 +1,6 @@
-import { isVibeError } from '@vibejs-org/errors';
-import { nextTick, onMounted, onUnmounted } from '@vibejs-org/ui';
-import { renderEffect, type ComponentDef } from '@vibejs-org/ui/internal';
+import { isVibeError } from '@usevibejs/errors';
+import { nextTick, onMounted, onUnmounted } from '@usevibejs/ui';
+import { renderEffect, type ComponentDef } from '@usevibejs/ui/internal';
 import { expect, test } from 'vitest';
 import { mountForTest } from './mount.ts';
 import { defineAbiSuite, type AbiSuite } from './suite.ts';

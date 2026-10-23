@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { vibeError } from '../errors.gen.ts';
 import { tokenName, type Token } from './token.ts';
 

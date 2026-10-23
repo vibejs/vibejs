@@ -52,7 +52,7 @@ beforeEach(() => {
   install('oxfmt', '0.73.0', 'bin/oxfmt');
   install('vitest', '5.0.5', 'vitest.mjs');
   install('@vitest/coverage-v8', '5.0.5');
-  install('@vibejs-org/language-tools', '0.0.0');
+  install('@usevibejs/language-tools', '0.0.0');
   installCompiler(root);
 });
 
@@ -314,9 +314,9 @@ const uninstall = (pkg: string) => rmSync(join(root, 'node_modules', pkg), { rec
 
 describe('.vibe files', () => {
   it.each([
-    [['@vibejs-org/language-tools']],
-    [['@vibejs-org/compiler']],
-    [['@vibejs-org/language-tools', '@vibejs-org/compiler']],
+    [['@usevibejs/language-tools']],
+    [['@usevibejs/compiler']],
+    [['@usevibejs/language-tools', '@usevibejs/compiler']],
   ])('need %j: VIBE8005 with one install command, exit 2, nothing run', async (pkgs) => {
     vibeSeeds();
     pkgs.forEach(uninstall);
@@ -332,14 +332,14 @@ describe('.vibe files', () => {
 
   it('are not needed without .vibe files outside node_modules, dist and dot directories', async () => {
     for (const dir of ['node_modules/x', 'dist', '.cache']) write(`${dir}/A.vibe`, '<template>');
-    uninstall('@vibejs-org/language-tools');
-    uninstall('@vibejs-org/compiler');
+    uninstall('@usevibejs/language-tools');
+    uninstall('@usevibejs/compiler');
     expect((await run({}, CLEAN)).r.ok).toBe(true);
   });
 
   it('are not needed by --only lint', async () => {
     vibeSeeds();
-    uninstall('@vibejs-org/language-tools');
+    uninstall('@usevibejs/language-tools');
     expect((await run({ only: 'lint' }, CLEAN)).r.ok).toBe(true);
   });
 
@@ -400,8 +400,8 @@ describe('.vibe files', () => {
 
   it('skips a directory named *.vibe', async () => {
     mkdirSync(join(root, 'src/assets.vibe'), { recursive: true });
-    uninstall('@vibejs-org/language-tools');
-    uninstall('@vibejs-org/compiler');
+    uninstall('@usevibejs/language-tools');
+    uninstall('@usevibejs/compiler');
     expect((await run({ only: 'types' }, CLEAN)).r.ok).toBe(true);
   });
 

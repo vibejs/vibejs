@@ -220,10 +220,10 @@ describe('props destructure', () => {
     });
 
     it.each([
-      `import { watch } from '@vibejs-org/ui'\nconst { foo } = defineProps<{ foo: any }>()\nwatch(foo, () => {})`,
-      `import { watch as w } from '@vibejs-org/ui'\nconst { foo } = defineProps<{ foo: any }>()\nw(foo, () => {})`,
-      `import { toRef } from '@vibejs-org/ui'\nconst { foo } = defineProps<{ foo: any }>()\ntoRef(foo)`,
-      `import { toRef as r } from '@vibejs-org/ui'\nconst { foo } = defineProps<{ foo: any }>()\nr(foo)`,
+      `import { watch } from '@usevibejs/ui'\nconst { foo } = defineProps<{ foo: any }>()\nwatch(foo, () => {})`,
+      `import { watch as w } from '@usevibejs/ui'\nconst { foo } = defineProps<{ foo: any }>()\nw(foo, () => {})`,
+      `import { toRef } from '@usevibejs/ui'\nconst { foo } = defineProps<{ foo: any }>()\ntoRef(foo)`,
+      `import { toRef as r } from '@usevibejs/ui'\nconst { foo } = defineProps<{ foo: any }>()\nr(foo)`,
     ])('should error when passing destructured prop into certain methods: %s', (code) => {
       const [d] = analyzeCode(code, ['VIBE3107']).diagnostics;
       expect(d.message).toMatch('`foo` is a destructured prop passed directly to');
@@ -232,7 +232,7 @@ describe('props destructure', () => {
     it('should not throw an error if the variable is not a props', () => {
       expect(
         codesOf(
-          `import { watch } from '@vibejs-org/ui'\nconst { userId } = defineProps<{ userId: number }>()\nconst { error: e, info } = useRequest();\nwatch(e, () => {});\nwatch(info, () => {});\nwatch(() => userId, () => {});`,
+          `import { watch } from '@usevibejs/ui'\nconst { userId } = defineProps<{ userId: number }>()\nconst { error: e, info } = useRequest();\nwatch(e, () => {});\nwatch(info, () => {});\nwatch(() => userId, () => {});`,
         ),
       ).toStrictEqual([]);
     });

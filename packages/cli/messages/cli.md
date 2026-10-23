@@ -2,14 +2,14 @@
 
 ## VIBE8001: Not in a vibe.js project
 
-> No vibe.js project at or above `{cwd}`: no package.json depends on @vibejs-org/cli.
+> No vibe.js project at or above `{cwd}`: no package.json depends on @usevibejs/cli.
 
-Project commands such as `vibejs check` run from the project root: the nearest directory, at or above the current one, whose `package.json` lists `@vibejs-org/cli` in `dependencies` or `devDependencies`.
+Project commands such as `vibejs check` run from the project root: the nearest directory, at or above the current one, whose `package.json` lists `@usevibejs/cli` in `dependencies` or `devDependencies`.
 
 ### Fix
 
 - Run the command inside a vibe.js project.
-- Add `@vibejs-org/cli` to the `devDependencies` of the project's `package.json`.
+- Add `@usevibejs/cli` to the `devDependencies` of the project's `package.json`.
 
 ## VIBE8003: Missing required input
 
@@ -39,7 +39,7 @@ The first word after `vibejs` must be a command, and every option must belong to
 
 `vibejs check` runs the type checker, linter, formatter and test runner installed in the project, never global copies, so every result matches what the project's own scripts report. It needs TypeScript 7.1 or newer, which runs the content mapper for `.vibe` files.
 
-`vibejs components` reads `.vibe` files with the project's own `@vibejs-org/compiler`, so it needs that package installed.
+`vibejs components` reads `.vibe` files with the project's own `@usevibejs/compiler`, so it needs that package installed.
 
 ### Fix
 
@@ -194,7 +194,7 @@ The file differs from what oxfmt writes with the project's `.oxfmtrc.json`.
 
 > Could not load `server/src/app.module.ts`: {reason}.
 
-`vibejs di`, `vibejs routes` and `vibejs request` (when no dev server runs) load `server/src/app.module.ts` and the project's `@vibejs-org/server` in process. Importing the module, or creating the application for a request, threw an error that has no VIBE code of its own; an error with a code is reported as itself.
+`vibejs di`, `vibejs routes` and `vibejs request` (when no dev server runs) load `server/src/app.module.ts` and the project's `@usevibejs/server` in process. Importing the module, or creating the application for a request, threw an error that has no VIBE code of its own; an error with a code is reported as itself.
 
 ### Fix
 

@@ -11,9 +11,9 @@
     "test": "tsc -b && vitest run --coverage"
   },
   "dependencies": {
-    "@vibejs-org/contract": "workspace:*",
-    "@vibejs-org/server": "workspace:*",
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/contract": "workspace:*",
+    "@usevibejs/server": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "valibot": "catalog:"
   },
   "devDependencies": {

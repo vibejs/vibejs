@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref } from '@vibejs-org/ui'
+import { ref, type Ref } from '@usevibejs/ui'
 import Child from './Child.vibe'
 const n: Ref<number> = ref(0)
 </script>

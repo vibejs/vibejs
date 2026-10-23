@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Component } from '@vibejs-org/ui';
+import type { Component } from '@usevibejs/ui';
 
 defineProps<{ is: Component | null | undefined; label: string }>();
 </script>

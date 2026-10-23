@@ -1,5 +1,5 @@
 {
-  "name": "@vibejs-org/server",
+  "name": "@usevibejs/server",
   "version": "0.0.0",
   "description": "vibe.js server: modules, dependency injection, decorators and a fetch-based HTTP pipeline.",
   "keywords": [
@@ -53,8 +53,8 @@
   },
   "dependencies": {
     "@standard-schema/spec": "catalog:",
-    "@vibejs-org/contract": "workspace:*",
-    "@vibejs-org/errors": "workspace:*",
+    "@usevibejs/contract": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
     "srvx": "catalog:"
   },
   "devDependencies": {

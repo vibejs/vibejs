@@ -11,13 +11,13 @@ const G = '\u011F';
 const S = '\u015F';
 
 const DIRS: Record<string, string> = {
-  errors: '@vibejs-org/errors',
-  ui: '@vibejs-org/ui',
-  compiler: '@vibejs-org/compiler',
-  'language-tools': '@vibejs-org/language-tools',
-  contract: '@vibejs-org/contract',
-  server: '@vibejs-org/server',
-  cli: '@vibejs-org/cli',
+  errors: '@usevibejs/errors',
+  ui: '@usevibejs/ui',
+  compiler: '@usevibejs/compiler',
+  'language-tools': '@usevibejs/language-tools',
+  contract: '@usevibejs/contract',
+  server: '@usevibejs/server',
+  cli: '@usevibejs/cli',
   'create-vibejs': 'create-vibejs',
 };
 
@@ -57,7 +57,7 @@ const BASE: Record<string, string> = {
     ]),
   ),
   'packages/ui/package.json': manifest('ui', {
-    dependencies: { '@vibejs-org/errors': 'workspace:*' },
+    dependencies: { '@usevibejs/errors': 'workspace:*' },
   }),
   'packages/ui/tsconfig.json': '{ "references": [{ "path": "../errors" }] }',
   'packages/ui/src/dev.ts': [
@@ -331,7 +331,7 @@ describe('rule 5: references', () => {
     expect(
       lint({
         'packages/server/package.json': manifest('server', {
-          devDependencies: { '@vibejs-org/errors': 'workspace:*' },
+          devDependencies: { '@usevibejs/errors': 'workspace:*' },
         }),
         'packages/cli/tsconfig.json': '{ "references": [{ "path": "../ui" }] }',
       }),
@@ -358,7 +358,7 @@ describe('rule 5: references', () => {
         'examples/todo/package.json': JSON.stringify({
           name: 'todo',
           private: true,
-          dependencies: { '@vibejs-org/ui': 'workspace:*' },
+          dependencies: { '@usevibejs/ui': 'workspace:*' },
         }),
         'examples/todo/tsconfig.json': '{ "files": [], "references": [{ "path": "ui" }] }',
       }),
@@ -376,9 +376,7 @@ describe('rule 6: manifests', () => {
   });
 
   it('reports every missing field', () => {
-    expect(
-      lint({ 'packages/contract/package.json': '{ "name": "@vibejs-org/contract" }' }),
-    ).toEqual(
+    expect(lint({ 'packages/contract/package.json': '{ "name": "@usevibejs/contract" }' })).toEqual(
       [
         'type must be "module"',
         'sideEffects must be false',
@@ -408,7 +406,7 @@ describe('rule 6: manifests', () => {
     expect(lint()).toEqual([]);
     put({ 'packages/cli/package.json': manifest('cli', { private: true }) });
     expect(lint({ 'packages/extra/package.json': manifest('extra', { name: 'extra' }) })).toEqual([
-      'package.json:1:1 manifest C1 package @vibejs-org/cli has no public manifest',
+      'package.json:1:1 manifest C1 package @usevibejs/cli has no public manifest',
       'packages/extra/package.json:1:1 manifest extra is not a C1 package; set "private": true',
       'packages/extra/package.json:1:1 manifest packages/extra/LICENSE must be a byte-identical copy of the root LICENSE',
     ]);
@@ -510,7 +508,7 @@ describe('rule 7: notices', () => {
     const config = 'packages/ui/tsdown.config.ts';
     put({
       [config]:
-        "export default { deps: { alwaysBundle: ['@vibejs-org/errors', 'tiny', 'dep'] } };\n",
+        "export default { deps: { alwaysBundle: ['@usevibejs/errors', 'tiny', 'dep'] } };\n",
       [notices]: '## tiny\n',
     });
     expect(lint()).toEqual([`${config}:1:26 upstream dep is bundled but not named in ${notices}`]);
@@ -729,7 +727,7 @@ describe('rule 12: positioning', () => {
     const message = 'names another framework';
     expect(
       lint({
-        [file]: manifest('ui', { dependencies: { '@vibejs-org/errors': 'workspace:*' }, keywords }),
+        [file]: manifest('ui', { dependencies: { '@usevibejs/errors': 'workspace:*' }, keywords }),
       }),
     ).toEqual([
       `${file}:1:1 positioning keyword "${nest.toLowerCase()}" ${message}`,

@@ -1,4 +1,4 @@
-import { Controller, Handle, inject, type Ctx } from '@vibejs-org/server';
+import { Controller, Handle, inject, type Ctx } from '@usevibejs/server';
 import { projects, type Project } from '../../../contracts/src/projects.contract.ts';
 import { ProjectsService } from './projects.service.ts';
 

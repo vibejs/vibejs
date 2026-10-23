@@ -265,7 +265,7 @@ async function onStep(s: TutorialStep, out: StepOutput) {
 /** examples/todo: check, build, then add a todo in each browser on `vibejs dev`. */
 async function todo() {
   const app = join(ROOT, 'examples/todo');
-  const bin = join(app, 'node_modules/@vibejs-org/cli/dist/bin.js');
+  const bin = join(app, 'node_modules/@usevibejs/cli/dist/bin.js');
   const vibejs = (...args: string[]) => must(run(process.execPath, [bin, ...args], app));
   clean(vibejs('check', '--json'));
   vibejs('build', '--json');
@@ -318,7 +318,7 @@ try {
 
   step('tutorial with pnpm');
   const md = readFileSync(join(ROOT, 'docs/guides/tutorial.md'), 'utf8');
-  // Imported after the build: the docs helpers load @vibejs-org/errors from dist.
+  // Imported after the build: the docs helpers load @usevibejs/errors from dist.
   const { runTutorial } = await import('../docs/test/run-tutorial.ts');
   await runTutorial(md, { dir: temp('vibejs-e2e-'), tarballs }, onStep);
   // A reworded tutorial command must fail here, not silently skip its extra check.

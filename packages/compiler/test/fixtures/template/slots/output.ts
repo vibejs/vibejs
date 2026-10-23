@@ -1,5 +1,5 @@
-import { createComponent as _createComponent, createSlot as _createSlot, renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@vibejs-org/ui/internal'
-import { ref } from '@vibejs-org/ui'
+import { createComponent as _createComponent, createSlot as _createSlot, renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@usevibejs/ui/internal'
+import { ref } from '@usevibejs/ui'
 import Card from './Card.vibe'
 import List from './List.vibe'
 function _setup(__props: any, __ctx: any) {

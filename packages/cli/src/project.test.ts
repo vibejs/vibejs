@@ -25,14 +25,14 @@ function write(path: string, content: unknown): void {
 }
 
 describe('findRoot', () => {
-  it('finds the nearest package.json that depends on @vibejs-org/cli', () => {
-    write('app/package.json', { devDependencies: { '@vibejs-org/cli': '0.1.0' } });
+  it('finds the nearest package.json that depends on @usevibejs/cli', () => {
+    write('app/package.json', { devDependencies: { '@usevibejs/cli': '0.1.0' } });
     write('app/packages/lib/package.json', { dependencies: { other: '1.0.0' } });
     write('app/packages/broken/package.json', '{');
     mkdirSync(join(tmp, 'app/packages/broken/src'));
     expect(findRoot(join(tmp, 'app/packages/lib'))).toBe(join(tmp, 'app'));
     expect(findRoot(join(tmp, 'app/packages/broken/src'))).toBe(join(tmp, 'app'));
-    write('app/packages/web/package.json', { dependencies: { '@vibejs-org/cli': '0.1.0' } });
+    write('app/packages/web/package.json', { dependencies: { '@usevibejs/cli': '0.1.0' } });
     expect(findRoot(join(tmp, 'app/packages/web'))).toBe(join(tmp, 'app/packages/web'));
   });
 
@@ -112,7 +112,7 @@ describe('projectCompiler', () => {
     const e = await projectCompiler(tmp);
     expect(e).toMatchObject({ code: 'VIBE8005' });
     expect(e).toHaveProperty('fixes', [
-      'Run `pnpm add -D @vibejs-org/compiler` in the project root.',
+      'Run `pnpm add -D @usevibejs/compiler` in the project root.',
     ]);
   });
 });

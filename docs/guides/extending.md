@@ -14,7 +14,7 @@ Everything an application uses to extend vibe.js is public API, so a feature can
 A module that needs options exposes a static `forRoot(options)` that returns a `DynamicModule`: the module class plus extra providers and exports. The options become a provider, so the module's own classes inject them:
 
 ```ts
-import { inject, Module, token, type DynamicModule } from '@vibejs-org/server';
+import { inject, Module, token, type DynamicModule } from '@usevibejs/server';
 // ---cut---
 export interface MailOptions {
   readonly from: string;
@@ -50,7 +50,7 @@ An application imports `MailModule.forRoot({ ... })`. The providers, controllers
 A middleware is a function, so a package exports a factory that takes options and returns a `Middleware`:
 
 ```ts
-import { HttpError, type Middleware } from '@vibejs-org/server';
+import { HttpError, type Middleware } from '@usevibejs/server';
 // ---cut---
 export function requireHeader(name: string): Middleware {
   return (req, next) => {
@@ -71,7 +71,7 @@ Enhancers are classes without constructor parameters that `inject()` what they n
 `createMetadata<T>(name)` gives a package a typed decorator and the key to read it back in its guards and interceptors with `ctx.getMetadata(key)`:
 
 ```ts
-import { createMetadata, type Interceptor, type RequestContext } from '@vibejs-org/server';
+import { createMetadata, type Interceptor, type RequestContext } from '@usevibejs/server';
 // ---cut---
 export const CacheFor = createMetadata<number>('cacheFor');
 
@@ -101,7 +101,7 @@ The feature flags package of the example todo app exports a plugin factory: it t
 The application installs it next to the router:
 
 ```ts
-import { createApp, type Component, type Plugin } from '@vibejs-org/ui';
+import { createApp, type Component, type Plugin } from '@usevibejs/ui';
 declare const App: Component;
 declare function flagsPlugin(): Plugin;
 // ---cut---

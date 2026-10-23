@@ -1,4 +1,4 @@
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import { parseSync, visitorKeys } from 'oxc-parser';
 import { LineIndex, type Diagnostic } from '../diagnostics.ts';
 import { vibeError } from '../errors.gen.ts';
@@ -203,7 +203,7 @@ export function analyze(d: SFCDescriptor): InternalAnalysis {
           at(vibeError('VIBE3008', { macro: name }), range(specifier));
         }
         bind(local, 'import');
-        if (source === '@vibejs-org/ui' && BY_VALUE.has(name)) imported.add(local.name);
+        if (source === '@usevibejs/ui' && BY_VALUE.has(name)) imported.add(local.name);
       }
     } else if (type.startsWith('Export') || type === 'TSExportAssignment') {
       const decl = first(statement, 'declaration');

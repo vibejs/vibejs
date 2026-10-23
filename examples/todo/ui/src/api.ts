@@ -1,5 +1,5 @@
-import { createClient, type Client, type ClientOptions } from '@vibejs-org/contract';
-import type { InjectionKey } from '@vibejs-org/ui';
+import { createClient, type Client, type ClientOptions } from '@usevibejs/contract';
+import type { InjectionKey } from '@usevibejs/ui';
 import { health } from '../../contracts/src/health.contract.ts';
 import { todos } from '../../contracts/src/todos.contract.ts';
 

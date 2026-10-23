@@ -1,6 +1,6 @@
 // oxlint-disable typescript/no-unsafe-type-assertion -- fixtures typed as C4 components
 // Fixture components of the router tests, written as the compiler emits them.
-import type { App, Component } from '@vibejs-org/ui';
+import type { App, Component } from '@usevibejs/ui';
 import {
   child,
   createComponent,
@@ -9,8 +9,8 @@ import {
   setAttr,
   template,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
-import { RouterView } from '@vibejs-org/ui/router';
+} from '@usevibejs/ui/internal';
+import { RouterView } from '@usevibejs/ui/router';
 
 const t0 = template('<section><!----></section>');
 

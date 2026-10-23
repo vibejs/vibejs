@@ -1,5 +1,5 @@
 // The compiled twin of Refs.vibe, written as the compiler emits it (types added).
-import { ref, useTemplateRef, type SetupContext } from '@vibejs-org/ui';
+import { ref, useTemplateRef, type SetupContext } from '@usevibejs/ui';
 import {
   child,
   createComponent,
@@ -14,7 +14,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { Counter } from './Counter.ts';
 
 type State = {

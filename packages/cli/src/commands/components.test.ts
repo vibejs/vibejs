@@ -116,7 +116,7 @@ describe('the components command', () => {
     const r = await run(root);
     expect(r).toMatchObject({ ok: false, error: { code: 'VIBE8005' }, components: [] });
     expect(r.error!.fixes).toEqual([
-      'Run `npm install -D @vibejs-org/compiler` in the project root.',
+      'Run `npm install -D @usevibejs/compiler` in the project root.',
     ]);
     expect(exitCode(r)).toBe(2);
   });

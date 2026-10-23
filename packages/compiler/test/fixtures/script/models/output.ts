@@ -1,4 +1,4 @@
-import { applyTextModel as _applyTextModel, template as _template, useModel as _useModel } from '@vibejs-org/ui/internal'
+import { applyTextModel as _applyTextModel, template as _template, useModel as _useModel } from '@usevibejs/ui/internal'
 const _defaults = { open: () => false }
 function _setup(__props: any, __ctx: any) {
 

@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { PassThrough } from 'node:stream';
 import { fileURLToPath } from 'node:url';
-import { DOCS_BASE as ERRORS_DOCS_BASE } from '@vibejs-org/errors';
+import { DOCS_BASE as ERRORS_DOCS_BASE } from '@usevibejs/errors';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DOCS_BASE, EXEC, main, MESSAGES, nodeCtx } from './bin.js';
 
@@ -184,7 +184,7 @@ describe('agent mode', () => {
     }
     const manifest = JSON.parse(read('apps/web/package.json'));
     expect(manifest.name).toBe('web');
-    expect(manifest.dependencies['@vibejs-org/ui']).toBe('^1.2.3');
+    expect(manifest.dependencies['@usevibejs/ui']).toBe('^1.2.3');
     expect(read('apps/web/AGENTS.md')).toContain('Run `pnpm exec vibejs check --json`.');
     expect(read('apps/web/CLAUDE.md')).toBe('@AGENTS.md\n');
   });
@@ -227,7 +227,7 @@ describe('agent mode', () => {
   });
 });
 
-/** The `mcpServer(execPrefix(pm))` entries of @vibejs-org/cli. */
+/** The `mcpServer(execPrefix(pm))` entries of @usevibejs/cli. */
 const MCP = {
   pnpm: { command: 'pnpm', args: ['exec', 'vibejs', 'mcp'] },
   npm: { command: 'npx', args: ['--no', 'vibejs', 'mcp'] },
@@ -258,7 +258,7 @@ describe('package manager', () => {
     }
   });
 
-  it('runs the CLI with the execPrefix table of @vibejs-org/cli', () => {
+  it('runs the CLI with the execPrefix table of @usevibejs/cli', () => {
     // Keep in sync with execPrefix in packages/cli/src/agents.ts (its test pins the same values).
     expect(EXEC).toEqual({
       pnpm: 'pnpm exec vibejs',
@@ -298,7 +298,7 @@ describe('human mode', () => {
 });
 
 describe('catalog', () => {
-  it('uses the docs base of @vibejs-org/errors', () => {
+  it('uses the docs base of @usevibejs/errors', () => {
     expect(DOCS_BASE).toBe(ERRORS_DOCS_BASE);
   });
 

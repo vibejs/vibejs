@@ -1,5 +1,5 @@
 // The tool contract: the pinned real tools (tsc from catalog:ts-next with the built
-// @vibejs-org/language-tools mapper, the built compiler, oxlint, oxfmt, vitest with coverage-v8)
+// @usevibejs/language-tools mapper, the built compiler, oxlint, oxfmt, vitest with coverage-v8)
 // run through the built bin on copies of test/fixtures/broken and clean.
 import { spawnSync } from 'node:child_process';
 import {

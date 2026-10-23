@@ -11,13 +11,13 @@
           {
             "paths": [
               {
-                "name": "@vibejs-org/server",
+                "name": "@usevibejs/server",
                 "message": "UI code runs in the browser; share contracts instead."
               }
             ],
             "patterns": [
               {
-                "group": ["@vibejs-org/server/*", "todo-flags/server", "node:*"],
+                "group": ["@usevibejs/server/*", "todo-flags/server", "node:*"],
                 "message": "UI code runs in the browser; share contracts instead."
               },
               {

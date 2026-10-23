@@ -163,7 +163,7 @@ describe('main', () => {
         customConditions: [],
         experimentalDecorators: true,
       },
-      contentMappers: [{ package: '@vibejs-org/language-tools', extensions: ['.vibe'] }],
+      contentMappers: [{ package: '@usevibejs/language-tools', extensions: ['.vibe'] }],
       include: ['**/*.ts', '**/*.vibe'],
     });
     expect(out).toEqual(['check-snippets: 2 snippets type-check']);

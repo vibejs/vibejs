@@ -6,7 +6,7 @@ import {
   insert,
   template,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { Item } from './Item.ts';
 
 type Props = {

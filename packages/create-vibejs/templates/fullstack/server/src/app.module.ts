@@ -1,4 +1,4 @@
-import { Module, type AppOptions } from '@vibejs-org/server';
+import { Module, type AppOptions } from '@usevibejs/server';
 import { HealthModule } from './health/health.module.ts';
 
 @Module({ imports: [HealthModule] })

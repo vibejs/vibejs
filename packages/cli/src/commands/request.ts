@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { STATUS_CODES } from 'node:http';
 import { resolve } from 'node:path';
-import type { ErrorCode, VibeError } from '@vibejs-org/errors';
+import type { ErrorCode, VibeError } from '@usevibejs/errors';
 import type { CommandDef } from '../command.ts';
 import { loadAppModule, loadError, withServerRunner } from '../dev/app-module.ts';
 import { readLiveLock } from '../dev/lock.ts';

@@ -29,7 +29,7 @@ describe('bindings', () => {
     ],
     [
       'a const with a call',
-      `import { ref } from '@vibejs-org/ui'\nconst a = ref(1)\nconst b = useThing()\nconst c = x.y()`,
+      `import { ref } from '@usevibejs/ui'\nconst a = ref(1)\nconst b = useThing()\nconst c = x.y()`,
       { ref: 'import', a: 'maybe-ref', b: 'maybe-ref', c: 'maybe-ref' },
     ],
     [
@@ -209,7 +209,7 @@ describe('analyzeScript', () => {
 
   it('ignores a default import of the runtime', () => {
     expect(
-      analyzeCode(`import ui from '@vibejs-org/ui'
+      analyzeCode(`import ui from '@usevibejs/ui'
 ui(1)`).bindings.get('ui')!.kind,
     ).toBe('import');
   });

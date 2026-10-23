@@ -1,5 +1,5 @@
 import { globSync, readFileSync } from 'node:fs';
-import * as internal from '@vibejs-org/ui/internal';
+import * as internal from '@usevibejs/ui/internal';
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
 
@@ -37,7 +37,7 @@ const C3 = [
   'useModel',
   'setRef',
 ];
-const ABI = '@vibejs-org/ui/internal';
+const ABI = '@usevibejs/ui/internal';
 
 const root = new URL('../test/fixtures/', import.meta.url);
 const outputs = globSync('*/*/output{,.dev}.ts', { cwd: root }).map((file) => {
@@ -77,7 +77,7 @@ describe('the ABI imports of the output.ts fixtures', () => {
     expect(outputs.length).toBeGreaterThanOrEqual(10);
   });
 
-  it.each([...used].toSorted())('%s is a function export of @vibejs-org/ui/internal', (name) => {
+  it.each([...used].toSorted())('%s is a function export of @usevibejs/ui/internal', (name) => {
     const type = typeof Reflect.get(internal, name);
     expect(type).toBe('function');
   });

@@ -1,4 +1,4 @@
-import { createClient, type ClientOptions } from '@vibejs-org/contract';
+import { createClient, type ClientOptions } from '@usevibejs/contract';
 import {
   computed,
   inject,
@@ -7,7 +7,7 @@ import {
   type Plugin,
   type Ref,
   type ShallowRef,
-} from '@vibejs-org/ui';
+} from '@usevibejs/ui';
 import { flags } from '../contract/flags.contract.ts';
 
 // #region plugin

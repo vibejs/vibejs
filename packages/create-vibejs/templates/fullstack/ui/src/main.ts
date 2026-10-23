@@ -1,5 +1,5 @@
-import { createApp } from '@vibejs-org/ui';
-import { createRouter, createWebHistory } from '@vibejs-org/ui/router';
+import { createApp } from '@usevibejs/ui';
+import { createRouter, createWebHistory } from '@usevibejs/ui/router';
 import App from './App.vibe';
 import { API, createApi } from './api.ts';
 import { routes } from './routes.ts';
@@ -7,7 +7,7 @@ import { routes } from './routes.ts';
 const router = createRouter({ history: createWebHistory(), routes });
 
 // Types route names and params in every router API, RouterLink included.
-declare module '@vibejs-org/ui/router' {
+declare module '@usevibejs/ui/router' {
   interface Register {
     router: typeof router;
   }

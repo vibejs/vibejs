@@ -97,14 +97,14 @@ export function scaffold(app: string, pm: 'pnpm' | 'npm'): unknown {
   return JSON.parse(must(r));
 }
 
-/** Points the `@vibejs-org/*` packages of a pnpm app at the tarballs and installs it. */
+/** Points the `@usevibejs/*` packages of a pnpm app at the tarballs and installs it. */
 export function installPnpm(app: string, tarballs: Packs['tarballs']): void {
   const overrides = Object.entries(tarballs).map(([name, file]) => `  '${name}': file:${file}`);
   appendFileSync(join(app, 'pnpm-workspace.yaml'), `overrides:\n${overrides.join('\n')}\n`);
   must(run('pnpm', ['install'], app));
 }
 
-/** Points the `@vibejs-org/*` packages of an npm app at the tarballs and installs it. */
+/** Points the `@usevibejs/*` packages of an npm app at the tarballs and installs it. */
 export function installNpm(app: string, tarballs: Packs['tarballs']): void {
   const file = join(app, 'package.json');
   const pkg = JSON.parse(readFileSync(file, 'utf8'));

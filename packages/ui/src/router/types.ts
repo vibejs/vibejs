@@ -3,7 +3,7 @@ import type { App } from '../runtime/app.ts';
 
 /**
  * Types the router APIs from the app's routes. Augment it once per app:
- * `declare module '@vibejs-org/ui/router' { interface Register { router: typeof router } }`.
+ * `declare module '@usevibejs/ui/router' { interface Register { router: typeof router } }`.
  */
 // oxlint-disable-next-line typescript/no-empty-interface, typescript/no-empty-object-type -- augmentable
 export interface Register {}

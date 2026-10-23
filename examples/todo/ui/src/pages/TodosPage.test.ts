@@ -1,5 +1,5 @@
-import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import { API, createApi } from '../api.ts';
 import { routes } from '../routes.ts';

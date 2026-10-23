@@ -36,7 +36,7 @@
 // - `onCloseTag` resolves the inner end of every element with an `innerLoc` (the root tags), so a
 //   root tag closed at the end of the file covers its content;
 // - `cloneLoc` is deleted, `extend` is `Object.assign`, and imports use `.ts` extensions.
-import type { VibeError } from '@vibejs-org/errors'
+import type { VibeError } from '@usevibejs/errors'
 import { decodeHTML } from 'entities/decode'
 import type { Position } from '../diagnostics.ts'
 import { vibeError } from '../errors.gen.ts'

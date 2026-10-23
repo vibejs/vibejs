@@ -1,5 +1,5 @@
 // The compiled twin of Dynamic.vibe, written as the compiler emits it (types added).
-import { createDynamicComponent, type ComponentDef } from '@vibejs-org/ui/internal';
+import { createDynamicComponent, type ComponentDef } from '@usevibejs/ui/internal';
 
 type Props = {
   is: ComponentDef | null | undefined;

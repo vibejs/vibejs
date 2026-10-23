@@ -1,5 +1,5 @@
 {
-  "name": "@vibejs-org/cli",
+  "name": "@usevibejs/cli",
   "version": "0.0.0",
   "description": "The vibejs command line: dev server, checks, generators, JSON output and an MCP server for coding agents.",
   "keywords": [
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "catalog:",
-    "@vibejs-org/errors": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
     "oxc-parser": "catalog:",
     "srvx": "catalog:",
     "std-env": "catalog:",
@@ -44,11 +44,11 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "catalog:",
-    "@vibejs-org/compiler": "workspace:*",
-    "@vibejs-org/contract": "workspace:*",
-    "@vibejs-org/language-tools": "workspace:*",
-    "@vibejs-org/server": "workspace:*",
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/compiler": "workspace:*",
+    "@usevibejs/contract": "workspace:*",
+    "@usevibejs/language-tools": "workspace:*",
+    "@usevibejs/server": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
@@ -58,11 +58,11 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@vibejs-org/compiler": "workspace:*",
+    "@usevibejs/compiler": "workspace:*",
     "vite": "catalog:"
   },
   "peerDependenciesMeta": {
-    "@vibejs-org/compiler": {
+    "@usevibejs/compiler": {
       "optional": true
     }
   },

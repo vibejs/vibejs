@@ -1,4 +1,4 @@
-import { ref } from '@vibejs-org/ui'
+import { ref } from '@usevibejs/ui'
 defineProps<__VibeProps>()
 const model = defineModel<string>({ required: true })
 const count = defineModel<number>('count', { default: () => 0 })
@@ -26,5 +26,5 @@ type __VibeModels = {
   title?: (typeof title)['value']; 'onUpdate:title'?: (value: (typeof title)['value']) => void; titleModifiers?: (typeof title)[1]
 }
 export const Field = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
-import * as __vibe from '@vibejs-org/ui/tooling'
-import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@vibejs-org/ui/tooling'
+import * as __vibe from '@usevibejs/ui/tooling'
+import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@usevibejs/ui/tooling'

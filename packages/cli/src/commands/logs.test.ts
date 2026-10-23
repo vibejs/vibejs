@@ -10,7 +10,7 @@ import { logs, type LogsResult } from './logs.ts';
 let root: string;
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'vibejs-logs-'));
-  writeFileSync(join(root, 'package.json'), '{"devDependencies":{"@vibejs-org/cli":"0.0.0"}}');
+  writeFileSync(join(root, 'package.json'), '{"devDependencies":{"@usevibejs/cli":"0.0.0"}}');
 });
 afterEach(() => {
   rmSync(root, { recursive: true, force: true });

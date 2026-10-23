@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { describe, expect, it } from 'vitest';
 import { fixName, names, plan, type FileOp, type GeneratorKind } from './plan.ts';
 import { files } from './templates.ts';

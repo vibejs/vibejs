@@ -1,6 +1,6 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import { defineContract, get, post, raw } from '@vibejs-org/contract';
+import { defineContract, get, post, raw } from '@usevibejs/contract';
 import * as v from 'valibot';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { captureLog } from '../../test/log.ts';

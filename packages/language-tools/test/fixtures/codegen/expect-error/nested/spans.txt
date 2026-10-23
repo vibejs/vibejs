@@ -12,4 +12,4 @@
 #11 Verbatim EXPR o[202,210) "n.length" → v[335,343) "n.length"
 #12 Atom ANCHOR o[0,0) "" → v[450,558) "export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();"
 @vibe-expect-error o[75,102) → v[181,353) "\n    __vibe.el(__vibe.tags.ul)({ title: count });\n      for (const [n] of __vibe.vFor(count)) {\n        __vibe.el(__vibe.tags.li)({ key: n });\n          (n.length);\n      }"
-@vibe-expect-error o[133,160) → v[609,609) ""
+@vibe-expect-error o[133,160) → v[608,608) ""

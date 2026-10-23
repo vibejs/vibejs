@@ -5,7 +5,7 @@ description: Write a .vibe component, mount the app, handle errors and warnings,
 
 # UI essentials
 
-The UI of a vibe.js app is made of components written in `.vibe` files and the reactive state they read. Everything a component imports comes from `@vibejs-org/ui`; the compiler and the language tools type-check the script and the template together.
+The UI of a vibe.js app is made of components written in `.vibe` files and the reactive state they read. Everything a component imports comes from `@usevibejs/ui`; the compiler and the language tools type-check the script and the template together.
 
 ## A component
 
@@ -13,7 +13,7 @@ A `.vibe` file has up to three blocks: the setup script, the template and the sc
 
 ```vibe
 <script setup lang="ts">
-import { computed, ref } from '@vibejs-org/ui';
+import { computed, ref } from '@usevibejs/ui';
 
 const { label = 'Count' } = defineProps<{ label?: string }>();
 
@@ -43,7 +43,7 @@ button {
 `createApp()` takes the root component; `mount()` renders it into an element or the element a selector matches, replacing its content.
 
 ```ts
-import { createApp, type Component } from '@vibejs-org/ui';
+import { createApp, type Component } from '@usevibejs/ui';
 declare const App: Component;
 // ---cut---
 const app = createApp(App);

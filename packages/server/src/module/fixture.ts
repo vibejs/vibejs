@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
 // A decorated application that runs the module layer end to end. The Vitest suite runs it through
 // Oxc, and the integration suite runs the tsc emit of this file on Node; both logs must match.
-import { defineContract, get } from '@vibejs-org/contract';
+import { defineContract, get } from '@usevibejs/contract';
 import * as v from 'valibot';
 import { inject, instantiate, recordValue, type ProviderRecord } from '../di/injector.ts';
 import { token, tokenName } from '../di/token.ts';

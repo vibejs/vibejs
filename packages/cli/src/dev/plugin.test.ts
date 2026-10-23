@@ -1,4 +1,4 @@
-import { Logger as ServerLogger } from '@vibejs-org/server';
+import { Logger as ServerLogger } from '@usevibejs/server';
 import { createLogger } from 'vite';
 import { describe, expect, it, vi } from 'vitest';
 import type { DevLog, LogEntry } from './log.ts';

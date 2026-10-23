@@ -5,7 +5,7 @@ import { inject, onUnmounted, ref, type App, type Plugin } from '../index.ts';
 import * as testing from '../testing.ts';
 import { appendRenderedHtml, flushPromises, mount, mountComposable } from './mount.ts';
 
-describe('@vibejs-org/ui/testing', () => {
+describe('@usevibejs/ui/testing', () => {
   it('exports exactly mount, mountComposable and flushPromises', () => {
     expect(new Set(Object.keys(testing))).toEqual(
       new Set(['flushPromises', 'mount', 'mountComposable']),

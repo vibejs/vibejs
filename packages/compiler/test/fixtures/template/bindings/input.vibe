@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui'
+import { ref } from '@usevibejs/ui'
 const color = ref('red')
 const attrs = ref({ id: 'main' })
 const name = ref('title')

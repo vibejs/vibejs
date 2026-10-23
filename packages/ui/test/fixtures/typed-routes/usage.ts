@@ -1,12 +1,12 @@
-import type { ComponentProps } from '@vibejs-org/ui';
-import { RouterLink, useLink, useRoute, useRouter } from '@vibejs-org/ui/router';
+import type { ComponentProps } from '@usevibejs/ui';
+import { RouterLink, useLink, useRoute, useRouter } from '@usevibejs/ui/router';
 import type {
   NavigationGuard,
   RouteLocationOf,
   RouteLocationRaw,
   RouteParams,
   Router,
-} from '@vibejs-org/ui/router';
+} from '@usevibejs/ui/router';
 import { router } from './router.ts';
 import { routes300 } from './routes-300.ts';
 import { UserPage } from './user-page.ts';

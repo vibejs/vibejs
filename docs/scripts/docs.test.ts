@@ -11,7 +11,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compile } from '@vibejs-org/compiler';
+import { compile } from '@usevibejs/compiler';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import help from './fixtures/help.json' with { type: 'json' };
 import {
@@ -361,7 +361,7 @@ describe('toAgentMarkdown', () => {
     const site = toAgentMarkdown(start, 'site');
     expect(site).toMatchSnapshot();
     expect(site).not.toContain('---cut---');
-    expect(site).not.toContain("from '@vibejs-org/errors'");
+    expect(site).not.toContain("from '@usevibejs/errors'");
     expect(toAgentMarkdown(start, 'package')).toContain(
       '[the handlers](../server/handlers.md#ctx)',
     );
@@ -410,7 +410,7 @@ describe('cliPages', () => {
 
 describe('docsIndex', () => {
   const header =
-    '[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|';
+    '[vibe.js docs index]|root: ./node_modules/@usevibejs/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|';
 
   it('lists every page once on one line, dirs and files sorted, root pages under .', () => {
     const paths = ['ui/b', 'index', 'cli/index', 'ui/a', 'guides/deep/x', 'about'];

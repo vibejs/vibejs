@@ -1,5 +1,5 @@
-import { applyCheckboxModel as _applyCheckboxModel, applyRadioModel as _applyRadioModel, applySelectModel as _applySelectModel, applyTextModel as _applyTextModel, applyVShow as _applyVShow, child as _child, createFor as _createFor, insert as _insert, next as _next, on as _on, renderEffect as _renderEffect, setClass as _setClass, setHtml as _setHtml, setProp as _setProp, setRef as _setRef, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt, withKeys as _withKeys, withModifiers as _withModifiers } from '@vibejs-org/ui/internal'
-import { ref, useTemplateRef } from '@vibejs-org/ui'
+import { applyCheckboxModel as _applyCheckboxModel, applyRadioModel as _applyRadioModel, applySelectModel as _applySelectModel, applyTextModel as _applyTextModel, applyVShow as _applyVShow, child as _child, createFor as _createFor, insert as _insert, next as _next, on as _on, renderEffect as _renderEffect, setClass as _setClass, setHtml as _setHtml, setProp as _setProp, setRef as _setRef, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt, withKeys as _withKeys, withModifiers as _withModifiers } from '@usevibejs/ui/internal'
+import { ref, useTemplateRef } from '@usevibejs/ui'
 function _setup(__props: any, __ctx: any) {
 
 

@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { thrownCode, warnedCodes } from '../../test/codes.ts';
 import { mountForTest } from '../../test/abi/mount.ts';

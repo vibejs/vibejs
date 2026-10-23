@@ -2,7 +2,7 @@
 
 exports[`snapshots the files of component UserCard 1`] = `
 {
-  "ui/src/components/UserCard.test.ts": "import { mount } from '@vibejs-org/ui/testing';
+  "ui/src/components/UserCard.test.ts": "import { mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import UserCard from './UserCard.vibe';
 
@@ -24,8 +24,8 @@ defineProps<{ title: string }>();
 
 exports[`snapshots the files of page Users 1`] = `
 {
-  "ui/src/pages/UsersPage.test.ts": "import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { mount } from '@vibejs-org/ui/testing';
+  "ui/src/pages/UsersPage.test.ts": "import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import App from '../App.vibe';
 import { routes } from '../routes.ts';
@@ -46,7 +46,7 @@ it('shows the Users page at /users', async () => {
 
 exports[`snapshots the files of resource users 1`] = `
 {
-  "contracts/src/users.contract.ts": "import { defineContract, del, get, patch, post } from '@vibejs-org/contract';
+  "contracts/src/users.contract.ts": "import { defineContract, del, get, patch, post } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 export const User = v.object({ id: v.string(), name: v.string() });
@@ -72,9 +72,9 @@ export const users = defineContract('/users', {
   remove: del('/:id', { errors: { USER_NOT_FOUND: 404 } }),
 });
 ",
-  "server/src/users/users.controller.test.ts": "import { createClient } from '@vibejs-org/contract';
-import { JsonLogger } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+  "server/src/users/users.controller.test.ts": "import { createClient } from '@usevibejs/contract';
+import { JsonLogger } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 import { expect, it } from 'vitest';
 import { users } from '../../../contracts/src/users.contract.ts';
 import { AppModule, appOptions } from '../app.module.ts';
@@ -118,7 +118,7 @@ it('answers an unknown id with USER_NOT_FOUND', async () => {
   await app.close();
 });
 ",
-  "server/src/users/users.controller.ts": "import { Controller, Handle, inject, type Ctx } from '@vibejs-org/server';
+  "server/src/users/users.controller.ts": "import { Controller, Handle, inject, type Ctx } from '@usevibejs/server';
 import { users, type User } from '../../../contracts/src/users.contract.ts';
 import { UsersService } from './users.service.ts';
 
@@ -156,7 +156,7 @@ export class UsersController {
   }
 }
 ",
-  "server/src/users/users.module.ts": "import { Module } from '@vibejs-org/server';
+  "server/src/users/users.module.ts": "import { Module } from '@usevibejs/server';
 import { UsersController } from './users.controller.ts';
 import { UsersService } from './users.service.ts';
 

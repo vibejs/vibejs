@@ -57,7 +57,7 @@ A new app has an `AGENTS.md` with a block of vibe.js rules between two marker li
 
 - the exact commands to run, through the app's own CLI;
 - the rules that agents most often get wrong in a vibe.js app;
-- a one-line index of the docs in `node_modules/@vibejs-org/cli/dist/docs`, so the agent reads the docs of the installed version instead of what it remembers.
+- a one-line index of the docs in `node_modules/@usevibejs/cli/dist/docs`, so the agent reads the docs of the installed version instead of what it remembers.
 
 ```sh
 vibejs agents sync

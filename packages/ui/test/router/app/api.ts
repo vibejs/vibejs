@@ -1,6 +1,6 @@
 // A fake typed client, provided under `API`: each call takes `{ signal }`, never rejects, and
 // waits for the test to settle it.
-import type { InjectionKey } from '@vibejs-org/ui';
+import type { InjectionKey } from '@usevibejs/ui';
 
 interface User {
   id: number;

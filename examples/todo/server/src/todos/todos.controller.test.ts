@@ -1,6 +1,6 @@
-import { createClient, type Client } from '@vibejs-org/contract';
-import { JsonLogger } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+import { createClient, type Client } from '@usevibejs/contract';
+import { JsonLogger } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 import { afterEach, beforeEach, expect, expectTypeOf, it } from 'vitest';
 import { todos } from '../../../contracts/src/todos.contract.ts';
 import { appOptions } from '../app.module.ts';

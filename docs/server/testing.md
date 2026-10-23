@@ -5,12 +5,12 @@ description: Test modules in process with Test.createTestingModule, replace prov
 
 # Testing the server
 
-Server tests run in process: no port, no network. `Test.createTestingModule()` from `@vibejs-org/server/testing` builds the same `App` as production from the modules you list, and `app.fetch` serves the requests.
+Server tests run in process: no port, no network. `Test.createTestingModule()` from `@usevibejs/server/testing` builds the same `App` as production from the modules you list, and `app.fetch` serves the requests.
 
 ```ts
-import { createClient, defineContract, get } from '@vibejs-org/contract';
-import { Controller, Handle, JsonLogger, Module } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+import { createClient, defineContract, get } from '@usevibejs/contract';
+import { Controller, Handle, JsonLogger, Module } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 import * as v from 'valibot';
 declare function expect(value: unknown): { toEqual(expected: unknown): void };
 const todos = defineContract('/todos', { list: get('/', { response: v.array(v.string()) }) });
@@ -43,7 +43,7 @@ await app.close();
 Calling routes through `createClient` checks the contract too: a test fails to compile when a route, an input or a response type changes. Narrow the result as the UI does:
 
 ```ts
-import { createClient, defineContract, del } from '@vibejs-org/contract';
+import { createClient, defineContract, del } from '@usevibejs/contract';
 declare function expect(value: unknown): { toBe(expected: unknown): void };
 const todos = defineContract('/todos', {
   remove: del('/:id', { errors: { TODO_NOT_FOUND: 404 } }),
@@ -63,8 +63,8 @@ For requests outside a contract, such as a missing route or a malformed body, us
 `overrideProvider(token)` replaces a provider by its token in every module that provides it, before anything is created:
 
 ```ts
-import { JsonLogger, Module } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+import { JsonLogger, Module } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 class Mailer {
   send(to: string): string {
     return to;
@@ -96,7 +96,7 @@ Pass `logger: new JsonLogger({ level: 'silent' })` to keep test output clean, or
 `inspect(root, options)` lists the routes and modules without creating anything. A snapshot of it catches an unintended route, guard or module change:
 
 ```ts
-import { inspect, Module, type AppOptions } from '@vibejs-org/server';
+import { inspect, Module, type AppOptions } from '@usevibejs/server';
 declare function expect(value: unknown): { toMatchSnapshot(): void };
 @Module({})
 class AppModule {}

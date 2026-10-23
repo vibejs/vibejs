@@ -7,7 +7,7 @@ import { transform } from '../src/transform/index.ts';
 import type { ArgIR, BlockIR, HandlerIR, PropIR, RootIR, SpreadIR } from '../src/transform/ir.ts';
 
 /** The script of the transform tests: one binding of each kind. */
-const SCRIPT = `import { ref, useTemplateRef } from '@vibejs-org/ui'
+const SCRIPT = `import { ref, useTemplateRef } from '@usevibejs/ui'
 import Item from './Item.vibe'
 import * as Form from './form.ts'
 const { label, size: sz, Slot: Aliased } = defineProps<{ label: string; size: number; Slot: object; Other: object }>()

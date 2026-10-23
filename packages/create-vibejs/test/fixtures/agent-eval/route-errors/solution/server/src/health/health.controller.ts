@@ -1,4 +1,4 @@
-import { Controller, Handle, type Ctx } from '@vibejs-org/server';
+import { Controller, Handle, type Ctx } from '@usevibejs/server';
 import { health } from '../../../contracts/src/health.contract.ts';
 
 const SERVICES = ['api', 'db'];

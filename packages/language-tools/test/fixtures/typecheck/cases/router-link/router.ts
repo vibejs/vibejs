@@ -1,4 +1,4 @@
-import { createMemoryHistory, createRouter, defineRoutes } from '@vibejs-org/ui/router'
+import { createMemoryHistory, createRouter, defineRoutes } from '@usevibejs/ui/router'
 import HomePage from './HomePage.vibe'
 
 export const routes = defineRoutes([
@@ -8,7 +8,7 @@ export const routes = defineRoutes([
 
 export const router = createRouter({ history: createMemoryHistory(), routes })
 
-declare module '@vibejs-org/ui/router' {
+declare module '@usevibejs/ui/router' {
   interface Register {
     router: typeof router
   }

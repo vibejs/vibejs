@@ -1,4 +1,4 @@
-import type { Route } from '@vibejs-org/contract';
+import type { Route } from '@usevibejs/contract';
 import { providerRecord, type Provider, type ProviderRecord, type Scope } from '../di/injector.ts';
 import { tokenName, type Class, type Token } from '../di/token.ts';
 import { vibeError } from '../errors.gen.ts';

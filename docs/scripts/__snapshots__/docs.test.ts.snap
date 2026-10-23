@@ -112,9 +112,9 @@ Run \`vibejs <command> --help --json\` for the same reference as JSON.
 exports[`llms > writes llms.txt: title, disambiguation, every non-error page once, no error codes 1`] = `
 "# vibe.js
 
-> vibe.js: npm scope \`@vibejs-org\`, CLI \`vibejs\` (never \`vibe\`). Not monday.com Vibe (\`@vibe/*\`), not the npm packages \`vibejs\` or \`vibe.js\`.
+> vibe.js: npm scope \`@usevibejs\`, CLI \`vibejs\` (never \`vibe\`). Not monday.com Vibe (\`@vibe/*\`), not the \`@vibe.js/*\` packages (a different project), not the npm packages \`vibejs\` or \`vibe.js\`.
 
-Offline docs for the installed version: \`node_modules/@vibejs-org/cli/dist/docs/\`. Explain an error code with \`vibejs explain VIBE####\`.
+Offline docs for the installed version: \`node_modules/@usevibejs/cli/dist/docs/\`. Explain an error code with \`vibejs explain VIBE####\`.
 
 - [Fixture home](https://vibejs.org/v0/): The fixture landing page.
 

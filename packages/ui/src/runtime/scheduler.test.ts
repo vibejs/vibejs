@@ -11,7 +11,7 @@
 // active flush", "flushPostFlushCbs", "flushOnAppMount recovers from a throwing pre job" and "nested
 // flushPostFlushCbs". An error no longer stops the flush: the two error cases assert that the
 // remaining jobs run and that the error is reported as VIBE5102.
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 import {
   nextTick,

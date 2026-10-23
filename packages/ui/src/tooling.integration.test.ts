@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -33,12 +33,12 @@ const HELPERS = [
 ];
 
 it('throws VIBE5900 when dist/tooling.js is imported', async () => {
-  const error: unknown = await import('@vibejs-org/ui/tooling').then(
+  const error: unknown = await import('@usevibejs/ui/tooling').then(
     () => undefined,
     (e: unknown) => e,
   );
   expect(isVibeError(error, 'VIBE5900')).toBe(true);
-  expect(import.meta.resolve('@vibejs-org/ui/tooling')).toMatch(
+  expect(import.meta.resolve('@usevibejs/ui/tooling')).toMatch(
     /\/packages\/ui\/dist\/tooling\.js$/,
   );
 });
@@ -76,8 +76,8 @@ it('keeps the tooling code out of dist/index.js', () => {
 it('types a consumer against the dist with one ComponentSignature for both entries', () => {
   const consumer = mkdtempSync(join(tmpdir(), 'vibejs-tooling-'));
   try {
-    mkdirSync(join(consumer, 'node_modules/@vibejs-org'), { recursive: true });
-    symlinkSync(dir, join(consumer, 'node_modules/@vibejs-org/ui'), 'junction');
+    mkdirSync(join(consumer, 'node_modules/@usevibejs'), { recursive: true });
+    symlinkSync(dir, join(consumer, 'node_modules/@usevibejs/ui'), 'junction');
     writeFileSync(
       join(consumer, 'tsconfig.json'),
       JSON.stringify({
@@ -95,8 +95,8 @@ it('types a consumer against the dist with one ComponentSignature for both entri
     );
     writeFileSync(
       join(consumer, 'index.ts'),
-      `import type { ComponentProps, HTMLAttributes, ReservedProps } from '@vibejs-org/ui';
-import { defineComponent, el, tags } from '@vibejs-org/ui/tooling';
+      `import type { ComponentProps, HTMLAttributes, ReservedProps } from '@usevibejs/ui';
+import { defineComponent, el, tags } from '@usevibejs/ui/tooling';
 const C = defineComponent<{ a: string }, { go: [n: number] }, {}, {}, {}>();
 type Expected = { a: string } & { onGo?: (n: number) => void } & Omit<HTMLAttributes, 'a' | 'onGo'> & ReservedProps;
 type Props = ComponentProps<typeof C>;

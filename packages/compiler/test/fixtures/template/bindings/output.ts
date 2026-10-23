@@ -1,5 +1,5 @@
-import { child as _child, createKeyed as _createKeyed, insert as _insert, next as _next, renderEffect as _renderEffect, setAttr as _setAttr, setDynamicProps as _setDynamicProps, setStyle as _setStyle, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@vibejs-org/ui/internal'
-import { ref } from '@vibejs-org/ui'
+import { child as _child, createKeyed as _createKeyed, insert as _insert, next as _next, renderEffect as _renderEffect, setAttr as _setAttr, setDynamicProps as _setDynamicProps, setStyle as _setStyle, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@usevibejs/ui/internal'
+import { ref } from '@usevibejs/ui'
 function _setup(__props: any, __ctx: any) {
 
 

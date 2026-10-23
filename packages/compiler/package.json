@@ -1,5 +1,5 @@
 {
-  "name": "@vibejs-org/compiler",
+  "name": "@usevibejs/compiler",
   "version": "0.0.0",
   "description": "Compiler and Vite plugin for vibe.js .vibe single-file components.",
   "keywords": [
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "catalog:",
-    "@vibejs-org/errors": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
     "entities": "catalog:",
     "magic-string": "catalog:",
     "oxc-parser": "catalog:",
@@ -56,16 +56,16 @@
   },
   "devDependencies": {
     "@jridgewell/trace-mapping": "catalog:",
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "tsdown": "catalog:",
     "vite": "catalog:"
   },
   "peerDependencies": {
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "vite": "catalog:peers"
   },
   "peerDependenciesMeta": {
-    "@vibejs-org/ui": {
+    "@usevibejs/ui": {
       "optional": true
     },
     "vite": {

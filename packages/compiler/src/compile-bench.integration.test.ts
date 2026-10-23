@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { compile } from '@vibejs-org/compiler';
+import { compile } from '@usevibejs/compiler';
 import { expect, it } from 'vitest';
 import { fixtureFile, fixtures } from '../test/walk.ts';
 

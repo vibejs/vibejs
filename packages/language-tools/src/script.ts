@@ -1,4 +1,4 @@
-import type { SFCDescriptor, ScriptAnalysis } from '@vibejs-org/compiler';
+import type { SFCDescriptor, ScriptAnalysis } from '@usevibejs/compiler';
 import { Preset, type CodeBuilder } from './builder.ts';
 
 /**

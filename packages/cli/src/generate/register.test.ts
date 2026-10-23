@@ -35,7 +35,7 @@ const lines = (...list: string[]) => `${list.join('\n')}\n`;
 describe('the AppModule imports', () => {
   it('edits the template shape', () => {
     const text = lines(
-      "import { Module } from '@vibejs-org/server';",
+      "import { Module } from '@usevibejs/server';",
       "import { HealthModule } from './health/health.module.ts';",
       '',
       '@Module({ imports: [HealthModule] })',
@@ -43,7 +43,7 @@ describe('the AppModule imports', () => {
     );
     expect(register(text, moduleTarget)).toEqual({
       text: lines(
-        "import { Module } from '@vibejs-org/server';",
+        "import { Module } from '@usevibejs/server';",
         "import { HealthModule } from './health/health.module.ts';",
         "import { UsersModule } from './users/users.module.ts';",
         '',
@@ -57,7 +57,7 @@ describe('the AppModule imports', () => {
     for (const comma of [',', '']) {
       const text = lines(
         '// \u00dcn\u00efc\u00f8d\u00e9 \u{1F600} before the target',
-        "import { Module } from '@vibejs-org/server';",
+        "import { Module } from '@usevibejs/server';",
         '@Module({',
         '  imports: [',
         '    HealthModule,',
@@ -69,7 +69,7 @@ describe('the AppModule imports', () => {
       expect(register(text, moduleTarget)).toEqual({
         text: lines(
           '// \u00dcn\u00efc\u00f8d\u00e9 \u{1F600} before the target',
-          "import { Module } from '@vibejs-org/server';",
+          "import { Module } from '@usevibejs/server';",
           "import { UsersModule } from './users/users.module.ts';",
           '@Module({',
           '  imports: [',
@@ -109,14 +109,14 @@ describe('the AppModule imports', () => {
 
   it('adds the import after an import that follows the literal', () => {
     const text = lines(
-      "import { Module } from '@vibejs-org/server';",
+      "import { Module } from '@usevibejs/server';",
       '@Module({ imports: [HealthModule] })',
       'export class AppModule {}',
       "import { HealthModule } from './health/health.module.ts';",
     );
     expect(register(text, moduleTarget)).toEqual({
       text: lines(
-        "import { Module } from '@vibejs-org/server';",
+        "import { Module } from '@usevibejs/server';",
         '@Module({ imports: [HealthModule, UsersModule] })',
         'export class AppModule {}',
         "import { HealthModule } from './health/health.module.ts';",

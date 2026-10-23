@@ -1,4 +1,4 @@
-import { ref, useTemplateRef } from '@vibejs-org/ui'
+import { ref, useTemplateRef } from '@usevibejs/ui'
 import Item from './Item.vibe'
 function _setup(__props: any, __ctx: any) {
 

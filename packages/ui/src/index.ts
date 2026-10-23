@@ -1,4 +1,4 @@
-export { isVibeError, VibeError } from '@vibejs-org/errors';
+export { isVibeError, VibeError } from '@usevibejs/errors';
 export type {
   Component,
   ComponentEmits,
