@@ -1,6 +1,6 @@
 {
   "name": "@usevibejs/language-tools",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "TypeScript content mapper that type-checks vibe.js .vibe single-file components in tsc and the editor.",
   "keywords": [
     "content-mapper",

@@ -1,6 +1,6 @@
 {
   "name": "@usevibejs/server",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "vibe.js server: modules, dependency injection, decorators and a fetch-based HTTP pipeline.",
   "keywords": [
     "decorators",

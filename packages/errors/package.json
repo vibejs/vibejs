@@ -1,6 +1,6 @@
 {
   "name": "@usevibejs/errors",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Stable error codes, typed error factories and documentation links for vibe.js.",
   "keywords": [
     "error-codes",

@@ -1,6 +1,6 @@
 {
   "name": "@usevibejs/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Fine-grained reactive runtime, router and test utilities for vibe.js .vibe single-file components.",
   "keywords": [
     "components",
