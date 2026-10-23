@@ -160,6 +160,7 @@ describe('pnpm errors', () => {
     // create-vibejs has no @usevibejs/errors dependency, ui has no messages.
     expect(existsSync(join(root, 'packages/create-vibejs/src/errors.gen.ts'))).toBe(false);
     expect(existsSync(join(root, 'packages/ui/src/errors.gen.ts'))).toBe(false);
+    expect(get('errors.lock')).toBe('VIBE8101 create-vibejs\nVIBE9101 server\nVIBE9102 server\n');
     const catalog = get('packages/cli/src/catalog.gen.ts');
     expect(catalog).toContain('export const CATALOG: readonly CatalogEntry[] = [');
     const json = JSON.parse(catalog.slice(catalog.indexOf('= [') + 2, catalog.lastIndexOf(';')));
@@ -326,6 +327,16 @@ describe('pnpm errors --check', () => {
   ])('fails on a format error: %j', (entry, problem) => {
     put({ 'packages/server/messages/zz.md': `${entry}\n` });
     expect(check().join('\n')).toContain(problem);
+  });
+
+  it('fails on a stale errors.lock, and on a released code that left the catalogs', () => {
+    put({ 'errors.lock': 'VIBE8101 create-vibejs\nVIBE9100 server\nVIBE9101 server\n' });
+    expect(check()).toEqual([
+      'VIBE9100 server is in errors.lock but in no catalog; mark the code (retired) instead',
+      'errors.lock is stale; run pnpm errors',
+    ]);
+    expect(run()).toBe(1);
+    expect(get('errors.lock')).toContain('VIBE9100 server');
   });
 
   // Rule 2
