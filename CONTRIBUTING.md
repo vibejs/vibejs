@@ -70,7 +70,7 @@ One-time setup:
 
 1. Create the npm organization `@usevibejs`.
 2. Create a GitHub App with contents and pull-requests write access, install it on the repository, and add its client ID as the `RELEASE_APP_CLIENT_ID` repository variable and its private key as the `RELEASE_APP_PRIVATE_KEY` secret. The release PR is opened with the App's token, so that CI runs on it.
-3. Bootstrap: a trusted publisher can only be bound to a package that exists. Publish the real 0.1.0 builds of the 8 packages once with a short-lived npm token, bind each package's trusted publisher to `vibejs/vibejs` and `release.yml`, set each package to "require two-factor authentication and disallow tokens", and revoke the token.
+3. Bootstrap: a trusted publisher can only be bound to a package that exists. Publish the real 0.1.0 builds of the 8 packages once with a short-lived npm token and `--tag next` (v0.1 ships on `next` until TypeScript 7.1 is stable), check `npm dist-tag ls` for each package, bind each package's trusted publisher to `vibejs/vibejs` and `release.yml`, set each package to "require two-factor authentication and disallow tokens", and revoke the token.
 
 Every release after that:
 

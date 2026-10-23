@@ -3,6 +3,7 @@
 // --check writes no committed file: it rewrites only the gitignored CLI catalog and fails on
 // format, range, duplicate, stale-file and "thrown and tested" problems.
 // --docs <dir> also writes one Markdown page per code, retired codes included, and index.md.
+// errors.lock is append-only: a released code keeps its line forever; retire it instead.
 import {
   existsSync,
   globSync,
@@ -293,6 +294,13 @@ export function main(root: string, argv: string[]): number {
       problems.push(`${code} is defined in packages/${seen.get(code)} and packages/${pkg}`);
     seen.set(code, pkg);
   }
+  const lockFile = join(root, 'errors.lock');
+  const lock = new Set(all.map(({ code, package: pkg }) => `${code} ${pkg}`));
+  for (const line of read(lockFile)?.split('\n').filter(Boolean) ?? []) {
+    if (!lock.has(line)) {
+      problems.push(`${line} is in errors.lock but in no catalog; mark the code (retired) instead`);
+    }
+  }
   if (problems.length && !options.check) {
     for (const problem of problems) console.error(problem);
     return 1;
@@ -302,6 +310,7 @@ export function main(root: string, argv: string[]): number {
   const base = docsBase(manifest(join(packagesDir, 'errors')).version!);
   const committed = new Map<string, string | null>([
     [join(packagesDir, 'errors/src/docs-base.gen.ts'), docsBaseGen(base)],
+    [lockFile, [...lock].map((line) => `${line}\n`).join('')],
   ]);
   for (const pkg of dirs) {
     const entries = byPackage.get(pkg);
