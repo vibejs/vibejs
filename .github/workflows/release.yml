@@ -1,10 +1,9 @@
 name: Release
 
-# Dormant until the first release: it runs only when a maintainer dispatches it from main.
-# With pending changesets it opens or updates the "chore: release" PR; with none it publishes the
-# 8 npm packages through npm trusted publishing (OIDC) with provenance. It holds no npm token: the
-# one-time bootstrap publish that creates the packages is a manual step of the release runbook in
-# CONTRIBUTING.md, not this workflow.
+# Runs only when a maintainer dispatches it from main. With pending changesets it opens or updates
+# the "chore: release" PR; with none it publishes the 8 npm packages through npm trusted publishing
+# (OIDC) with provenance. It holds no npm token. It uses the workflow's own token, so CI does not
+# start on the release PR by itself: close and reopen the PR to run it (CONTRIBUTING.md).
 on:
   workflow_dispatch:
 
@@ -23,15 +22,7 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      # An App token, because a PR opened with GITHUB_TOKEN does not trigger CI.
-      - id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          token: ${{ steps.app-token.outputs.token }}
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           install: false
@@ -40,7 +31,7 @@ jobs:
       - run: node scripts/pack-check.ts
       - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          github-token: ${{ steps.app-token.outputs.token }}
+          github-token: ${{ github.token }}
           version-script: pnpm version-packages
           publish-script: pnpm changeset publish --tag next
           pr-title: 'chore: release'

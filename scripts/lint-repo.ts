@@ -487,7 +487,6 @@ export function main(root: string): number {
     for (const match of yaml.matchAll(
       /\bsecrets\b(?:\.(\w+))?|\b(?:NPM_TOKEN|NODE_AUTH_TOKEN)\b/g,
     )) {
-      if (match[1] === 'RELEASE_APP_PRIVATE_KEY') continue;
       report(
         file,
         yaml,
@@ -500,7 +499,7 @@ export function main(root: string): number {
       'id-token: write',
       'publish-script: pnpm changeset publish',
       'NPM_CONFIG_PROVENANCE: true',
-      'github-token: ${{ steps.app-token.outputs.token }}',
+      'github-token: ${{ github.token }}',
     ];
     for (const line of required.filter((r) => !yaml.includes(r))) {
       reportFile(file, 'workflow', `missing \`${line}\``);
