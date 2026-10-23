@@ -30,7 +30,7 @@ it('bundles createClient for the browser from dist without server, node modules 
   expect(
     // Vite replaces a Node builtin with the id __vite-browser-external in a browser build.
     ids.filter((id) =>
-      /@vibejs-org\/server|\/packages\/server\/|srvx|^node:|__vite-browser-external/.test(id),
+      /@usevibejs\/server|\/packages\/server\/|srvx|^node:|__vite-browser-external/.test(id),
     ),
   ).toEqual([]);
   const code = chunks.map((chunk) => chunk.code).join('\n');

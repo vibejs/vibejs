@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef, type Component, type TemplateRef } from '@vibejs-org/ui'
+import { useTemplateRef, type Component, type TemplateRef } from '@usevibejs/ui'
 import { expectType } from '../../expect.ts'
 import List from './List.vibe'
 import type { Item } from './types.ts'

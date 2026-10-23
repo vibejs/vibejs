@@ -1,4 +1,4 @@
-import { defineContract, get } from '@vibejs-org/contract';
+import { defineContract, get } from '@usevibejs/contract';
 import { expectTypeOf } from 'vitest';
 import { z } from 'zod';
 import { generateOpenApi, type OpenApiDocument } from './openapi.ts';

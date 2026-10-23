@@ -13,7 +13,7 @@ A template is HTML with expressions and directives. An expression reads the bind
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const user = ref({ name: 'Ada', unread: 3 });
 const html = '<em>Welcome back</em>';
@@ -33,7 +33,7 @@ const html = '<em>Welcome back</em>';
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const busy = ref(false);
 const link = { href: 'https://vibejs.org', target: '_blank', rel: 'noopener' };
@@ -53,7 +53,7 @@ The `.prop` modifier always sets a DOM property and `.attr` always an attribute;
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const active = ref(true);
 const size = ref(16);
@@ -72,7 +72,7 @@ const size = ref(16);
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const count = ref(0);
 const text = ref('');
@@ -107,7 +107,7 @@ function type(event: Event) {
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const status = ref<'loading' | 'error' | 'ready'>('loading');
 </script>
@@ -128,7 +128,7 @@ const status = ref<'loading' | 'error' | 'ready'>('loading');
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const todos = ref([
   { id: 1, title: 'Write docs', done: false },
@@ -163,7 +163,7 @@ When the list changes, items with the same key keep their elements and state, an
 
 ```vibe
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const name = ref('');
 const age = ref(0);
@@ -201,7 +201,7 @@ const color = ref('red');
 
 ```vibe
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from '@vibejs-org/ui';
+import { onMounted, useTemplateRef } from '@usevibejs/ui';
 
 const input = useTemplateRef<HTMLInputElement>('search');
 
@@ -221,7 +221,7 @@ A string ref without a matching `useTemplateRef()` is reported as [VIBE2701](/er
 
 ```vibe
 <script setup lang="ts">
-import { shallowRef, type Component } from '@vibejs-org/ui';
+import { shallowRef, type Component } from '@usevibejs/ui';
 
 const props = defineProps<{ views: Record<string, Component> }>();
 const current = shallowRef<Component | null>(null);

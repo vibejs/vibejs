@@ -52,7 +52,7 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 
 - `main` is protected, and PRs merge one at a time.
 - Before merging, rebase on `main`, then run `pnpm install && pnpm errors && pnpm build` and commit the regenerated files.
-- The `@vibejs-org/ui` export map is fixed. `CONTRACTS.md` changes only through a maintainer-approved PR, and a change to a binding decision adds a record in `docs/decisions/`.
+- The `@usevibejs/ui` export map is fixed. `CONTRACTS.md` changes only through a maintainer-approved PR, and a change to a binding decision adds a record in `docs/decisions/`.
 - Only maintainers publish packages or create remote resources (repositories, packages, extensions).
 
 ## Releases
@@ -68,7 +68,7 @@ For a bug, open an issue with a minimal reproduction. For a feature or a change 
 
 One-time setup:
 
-1. Create the npm organization `@vibejs-org`.
+1. Create the npm organization `@usevibejs`.
 2. Create a GitHub App with contents and pull-requests write access, install it on the repository, and add its client ID as the `RELEASE_APP_CLIENT_ID` repository variable and its private key as the `RELEASE_APP_PRIVATE_KEY` secret. The release PR is opened with the App's token, so that CI runs on it.
 3. Bootstrap: a trusted publisher can only be bound to a package that exists. Publish the real 0.1.0 builds of the 8 packages once with a short-lived npm token, bind each package's trusted publisher to `vibejs/vibejs` and `release.yml`, set each package to "require two-factor authentication and disallow tokens", and revoke the token.
 

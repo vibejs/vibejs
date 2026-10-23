@@ -1,5 +1,5 @@
 // The compiled twin of Consumer.vibe, written as the compiler emits it (types added).
-import { inject, useId, type Ref } from '@vibejs-org/ui';
+import { inject, useId, type Ref } from '@usevibejs/ui';
 import {
   renderEffect,
   setAttr,
@@ -8,7 +8,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { ThemeKey } from './keys.ts';
 
 type State = {

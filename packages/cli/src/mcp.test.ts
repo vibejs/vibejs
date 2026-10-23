@@ -22,8 +22,8 @@ declare global {
 }
 
 const ITEMS = `
-import { defineContract, get, post } from '@vibejs-org/contract';
-import { Controller, Handle, Module } from '@vibejs-org/server';
+import { defineContract, get, post } from '@usevibejs/contract';
+import { Controller, Handle, Module } from '@usevibejs/server';
 
 const any = { '~standard': { version: 1, vendor: 'fixture', validate: (value) => ({ value }) } };
 const items = defineContract('/items', {

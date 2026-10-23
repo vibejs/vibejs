@@ -9,16 +9,16 @@
     "start": "node server/dist/main.js"
   },
   "dependencies": {
-    "@vibejs-org/contract": "0.0.0-template",
-    "@vibejs-org/server": "0.0.0-template",
-    "@vibejs-org/ui": "0.0.0-template",
+    "@usevibejs/contract": "0.0.0-template",
+    "@usevibejs/server": "0.0.0-template",
+    "@usevibejs/ui": "0.0.0-template",
     "valibot": "1.5.0"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
-    "@vibejs-org/cli": "0.0.0-template",
-    "@vibejs-org/compiler": "0.0.0-template",
-    "@vibejs-org/language-tools": "0.0.0-template",
+    "@usevibejs/cli": "0.0.0-template",
+    "@usevibejs/compiler": "0.0.0-template",
+    "@usevibejs/language-tools": "0.0.0-template",
     "@vitest/coverage-v8": "5.0.5",
     "jsdom": "30.1.3",
     "oxfmt": "0.73.0",

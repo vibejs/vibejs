@@ -1,4 +1,4 @@
-import type { ErrorCode, VibeError } from '@vibejs-org/errors';
+import type { ErrorCode, VibeError } from '@usevibejs/errors';
 import type { CatalogEntry } from './catalog.gen.ts';
 
 // C9 types, verbatim. Key order is part of the contract: results are built in this order.

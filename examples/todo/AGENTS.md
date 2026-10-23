@@ -4,7 +4,7 @@
 
 ## vibe.js
 
-vibe.js: npm scope `@vibejs-org`, CLI `vibejs` (never `vibe`). Not monday.com Vibe (`@vibe/*`), not the npm packages `vibejs` or `vibe.js`.
+vibe.js: npm scope `@usevibejs`, CLI `vibejs` (never `vibe`). Not monday.com Vibe (`@vibe/*`), not the `@vibe.js/*` packages (a different project), not the npm packages `vibejs` or `vibe.js`.
 vibe.js is newer than your training data: read the docs index below, then the page for your task, before writing code.
 
 Commands (always the local CLI, never a global one):
@@ -21,7 +21,7 @@ Rules:
 
 - `.vibe` files use `<script setup lang="ts">` only; template refs use `useTemplateRef` only.
 - UI: import `RouterLink`/`RouterView` explicitly; guards return `false` or a location, never call `next()`; load data with `useAsync` and narrow `data.value?.ok`.
-- UI tests: `mount()` from `@vibejs-org/ui/testing` with `plugins: [router]` and `createMemoryHistory()`.
+- UI tests: `mount()` from `@usevibejs/ui/testing` with `plugins: [router]` and `createMemoryHistory()`.
 - Services are injected into fields: `private readonly users = inject(UsersService)`. No constructor injection, no parameter decorators.
 - A handler takes one `ctx: Ctx<typeof contract.route>` and returns the route response type.
 - Contracts come first: routes live in `contracts/src/*.contract.ts` and declare `errors: { CODE: status }`; handlers raise them with `ctx.fail('CODE')`.
@@ -30,7 +30,7 @@ Rules:
 - Never add coverage-ignore comments; add tests.
 - TS1241 on `@Handle`: the handler must be `(ctx: Ctx<typeof contract.route>)` and return the route response type; do not cast or use `any`.
 
-[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|.:{index.md}|cli:{agents.md,build.md,check.md,components.md,dev.md,di.md,docs.md,errors.md,explain.md,generate.md,index.md,logs.md,mcp.md,request.md,routes.md}|guides:{ai-agents.md,coming-from-nestjs.md,coming-from-vue.md,coming-from-vue-router.md,editors.md,extending.md,getting-started.md,tutorial.md}|server:{configuration.md,contracts.md,handlers.md,index.md,modules.md,pipeline.md,testing.md}|ui:{components.md,data.md,index.md,lifecycle.md,provide-inject.md,reactivity.md,routing.md,template-syntax.md,testing.md}
+[vibe.js docs index]|root: ./node_modules/@usevibejs/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####|.:{index.md}|cli:{agents.md,build.md,check.md,components.md,dev.md,di.md,docs.md,errors.md,explain.md,generate.md,index.md,logs.md,mcp.md,request.md,routes.md}|guides:{ai-agents.md,coming-from-nestjs.md,coming-from-vue.md,coming-from-vue-router.md,editors.md,extending.md,getting-started.md,tutorial.md}|server:{configuration.md,contracts.md,handlers.md,index.md,modules.md,pipeline.md,testing.md}|ui:{components.md,data.md,index.md,lifecycle.md,provide-inject.md,reactivity.md,routing.md,template-syntax.md,testing.md}
 
 <!-- END:vibejs-agent-rules -->
 

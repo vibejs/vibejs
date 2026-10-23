@@ -1,4 +1,4 @@
-import { vibe } from '@vibejs-org/compiler/vite';
+import { vibe } from '@usevibejs/compiler/vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

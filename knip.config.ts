@@ -10,11 +10,11 @@ export default {
       // Run, never imported, by the check tool-contract test from packages/cli/node_modules;
       // the contract package is imported only by the dev fixture app; the mapper is loaded
       // only by tsc on the .vibe fixtures, through the linked node_modules.
-      ignoreDependencies: ['oxlint', 'oxfmt', '@vibejs-org/contract', '@vibejs-org/language-tools'],
+      ignoreDependencies: ['oxlint', 'oxfmt', '@usevibejs/contract', '@usevibejs/language-tools'],
     },
     'packages/create-vibejs': {
       // Built first: its build script copies the CLI's agent files into the package.
-      ignoreDependencies: ['@vibejs-org/cli'],
+      ignoreDependencies: ['@usevibejs/cli'],
     },
     'packages/ui': {
       // An optional peer by design: only the `./testing` entry imports it, inside the user's tests.
@@ -22,7 +22,7 @@ export default {
     },
     'packages/language-tools': {
       // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.
-      ignoreDependencies: ['@vibejs-org/ui'],
+      ignoreDependencies: ['@usevibejs/ui'],
     },
     // The app entries (CONTRACTS C7) and the tests. The Vitest config imports the built vibe()
     // plugin, so knip reads it as a plain entry instead of loading it before the build.
@@ -45,11 +45,11 @@ export default {
       // Imported only by the snippets of the pages, which check-snippets type-checks with the
       // .vibe content mapper; the tutorial test imports the scaffold helpers of create-vibejs.
       ignoreDependencies: [
-        '@vibejs-org/compiler',
-        '@vibejs-org/contract',
-        '@vibejs-org/language-tools',
-        '@vibejs-org/server',
-        '@vibejs-org/ui',
+        '@usevibejs/compiler',
+        '@usevibejs/contract',
+        '@usevibejs/language-tools',
+        '@usevibejs/server',
+        '@usevibejs/ui',
         'create-vibejs',
         'valibot',
       ],

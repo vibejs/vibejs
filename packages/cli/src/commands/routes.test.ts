@@ -27,7 +27,7 @@ function app(files: { module?: string; routes?: string } = {}): string {
 
 // Constructing ThrowingService or initializing its module would throw.
 const MODULE = `
-import { Controller, Handle, Module, UseFilters, UseGuards, UseInterceptors } from '@vibejs-org/server';
+import { Controller, Handle, Module, UseFilters, UseGuards, UseInterceptors } from '@usevibejs/server';
 import { health } from '../../contracts/src/health.contract.ts';
 
 export class ThrowingService {
@@ -66,14 +66,14 @@ const API = [
   },
 ];
 
-const EMPTY = `import { Module } from '@vibejs-org/server';
+const EMPTY = `import { Module } from '@usevibejs/server';
 @Module({})
 export class AppModule {}
 export const appOptions = { basePath: '/api' };
 `;
 
 const NESTED = `
-import { defineRoutes } from '@vibejs-org/ui/router';
+import { defineRoutes } from '@usevibejs/ui/router';
 import HomePage from './pages/HomePage.vibe';
 import { Layout } from '../shared/Layout.vibe';
 import { other } from 'some-package';

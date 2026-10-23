@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { thrownCode } from '../../test/codes.ts';
 import { handlers, page } from '../../test/router/components.ts';

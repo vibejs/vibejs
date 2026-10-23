@@ -1,4 +1,4 @@
-import { mount } from '@vibejs-org/ui/testing';
+import { mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import RatingInput from './RatingInput.vibe';
 

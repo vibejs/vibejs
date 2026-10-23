@@ -1,4 +1,4 @@
-import { Module } from '@vibejs-org/server';
+import { Module } from '@usevibejs/server';
 import { HealthController } from './health.controller.ts';
 
 @Module({ controllers: [HealthController] })

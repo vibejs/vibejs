@@ -8,7 +8,7 @@
 // cases (not supported), the nested-app flush-order cases (no synchronous root render inside a
 // flush), and the useId cases for idPrefix, async components and SSR prefetch.
 // oxlint-disable typescript/no-extraneous-class, unicorn/consistent-function-scoping -- ported as upstream wrote it
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { thrownCode, warnedCodes } from '../../test/codes.ts';
 import type { ComponentDef } from '../internal.ts';

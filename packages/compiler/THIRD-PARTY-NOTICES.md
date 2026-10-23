@@ -1,13 +1,13 @@
-# Third-party notices for @vibejs-org/compiler
+# Third-party notices for @usevibejs/compiler
 
-`@vibejs-org/compiler` is MIT licensed. Code derived from other open-source projects is credited here with the upstream project, its license and its copyright notice. Each derived file starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header that lists the edits made to it.
+`@usevibejs/compiler` is MIT licensed. Code derived from other open-source projects is credited here with the upstream project, its license and its copyright notice. Each derived file starts with an `// Upstream: <repo>@<sha> <path> (<license>)` header that lists the edits made to it.
 
 ## vuejs/core
 
 - Repository: https://github.com/vuejs/core
 - Version: v3.5.44, commit `bf5f0dd877dd3c23ce85c2cbc1dd771567e84c8c`
 - License: MIT
-- Used in (shipped in the `@vibejs-org/compiler` dist):
+- Used in (shipped in the `@usevibejs/compiler` dist):
   - `packages/compiler/src/template/tokenizer.ts` from `packages/compiler-core/src/tokenizer.ts`
   - `packages/compiler/src/template/parser.ts` from `packages/compiler-core/src/parser.ts`, the parser options of `packages/compiler-dom/src/parserOptions.ts` and three helpers of `packages/compiler-core/src/utils.ts`
   - `packages/compiler/src/template/ast.ts` from the template nodes of `packages/compiler-core/src/ast.ts`

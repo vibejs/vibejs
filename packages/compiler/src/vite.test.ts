@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping';
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { parseSync } from 'oxc-parser';
 import {
   build,
@@ -251,11 +251,11 @@ describe('vibe() environments', () => {
     expect((await ssr.transformRequest('/src/main.ts'))!.code).toContain('createApp');
   });
 
-  it('refuses to start against another @vibejs-org/ui version with VIBE4902', async () => {
+  it('refuses to start against another @usevibejs/ui version with VIBE4902', async () => {
     const other = await mkdtemp(join(tmpdir(), 'vibejs-vite-'));
     const none = await mkdtemp(join(tmpdir(), 'vibejs-vite-'));
-    await mkdir(join(other, 'node_modules/@vibejs-org/ui'), { recursive: true });
-    await writeFile(join(other, 'node_modules/@vibejs-org/ui/package.json'), '{"version":"9.9.9"}');
+    await mkdir(join(other, 'node_modules/@usevibejs/ui'), { recursive: true });
+    await writeFile(join(other, 'node_modules/@usevibejs/ui/package.json'), '{"version":"9.9.9"}');
     try {
       for (const [root, ui] of [
         [other, '9.9.9'],

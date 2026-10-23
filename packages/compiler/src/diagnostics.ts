@@ -1,4 +1,4 @@
-import type { ErrorCode, VibeError } from '@vibejs-org/errors';
+import type { ErrorCode, VibeError } from '@usevibejs/errors';
 
 /** offset: 0-based UTF-16 index into the whole file; line and column: 1-based, column in UTF-16 units. */
 export interface Position {

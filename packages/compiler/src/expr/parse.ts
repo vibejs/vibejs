@@ -1,4 +1,4 @@
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import { parseSync, rawTransferSupported, visitorKeys, type ParserOptions } from 'oxc-parser';
 import { toDiagnostic, type Diagnostic, type LineIndex } from '../diagnostics.ts';
 import { children, FUNCTIONS, type Node } from './walk.ts';

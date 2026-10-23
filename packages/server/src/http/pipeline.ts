@@ -1,5 +1,5 @@
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import type { BuiltinErrorCode, RouteDef, ValidationIssue } from '@vibejs-org/contract';
+import type { BuiltinErrorCode, RouteDef, ValidationIssue } from '@usevibejs/contract';
 import { recordValue, type ProviderRecord } from '../di/injector.ts';
 import { vibeError } from '../errors.gen.ts';
 import type { RouteBinding } from '../module/graph.ts';

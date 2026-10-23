@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef, type Component } from '@vibejs-org/ui'
+import { useTemplateRef, type Component } from '@usevibejs/ui'
 import Row from './Row.vibe'
 defineProps<{ Item: Component }>()
 const Local = Row

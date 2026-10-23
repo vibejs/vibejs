@@ -1,4 +1,4 @@
-import { defineRoutes } from '@vibejs-org/ui/router';
+import { defineRoutes } from '@usevibejs/ui/router';
 
 // 300 routes (50 groups of 6) that mix every param syntax and nesting level. Odd groups have an
 // unnamed parent, a regex with a modifier and a splat.

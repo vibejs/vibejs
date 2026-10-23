@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util';
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import type { CommandDef, OptionDef } from './command.ts';
 import { agents } from './commands/agents.ts';
 import { build } from './commands/build.ts';

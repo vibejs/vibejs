@@ -1,5 +1,5 @@
-import { child as _child, createComponent as _createComponent, createFor as _createFor, createIf as _createIf, insert as _insert, on as _on, renderEffect as _renderEffect, setAttr as _setAttr, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@vibejs-org/ui/internal'
-import { ref } from '@vibejs-org/ui';
+import { child as _child, createComponent as _createComponent, createFor as _createFor, createIf as _createIf, insert as _insert, on as _on, renderEffect as _renderEffect, setAttr as _setAttr, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@usevibejs/ui/internal'
+import { ref } from '@usevibejs/ui';
 import TodoItem from './TodoItem.vibe';
 const _defaults = { items: () => ([]) }
 function _setup(__props: any, __ctx: any) {

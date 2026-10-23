@@ -3,7 +3,7 @@ import {
   identifiersOf,
   isAllowedGlobal,
   isSimpleHandler,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { Preset, type CodeBuilder } from './builder.ts';
 
 /** The names a template reads from outside, and the ones it used. */

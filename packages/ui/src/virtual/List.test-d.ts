@@ -1,4 +1,4 @@
-import { ref, shallowRef } from '@vibejs-org/ui'
+import { ref, shallowRef } from '@usevibejs/ui'
 import { Row } from './Row.test-d.ts'
 type Item = { id: string; label: string; count?: number }
 const { items, title = 'List' } = defineProps<__VibeProps>()
@@ -25,5 +25,5 @@ const __vibe_setup = { Row, items, title, emit, user, open, current, clicks, gre
 }
 type __VibeSlots = {}; type __VibeExposed = {}; type __VibeRefs = {}; type __VibeModels = {}
 export const List = __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>()
-import * as __vibe from '@vibejs-org/ui/tooling'
-import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@vibejs-org/ui/tooling'
+import * as __vibe from '@usevibejs/ui/tooling'
+import { defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions } from '@usevibejs/ui/tooling'

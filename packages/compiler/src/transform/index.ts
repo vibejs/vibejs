@@ -1,4 +1,4 @@
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import { LineIndex, type Diagnostic } from '../diagnostics.ts';
 import { vibeError } from '../errors.gen.ts';
 import { camelize, capitalize, hyphenate } from '../expr/index.ts';

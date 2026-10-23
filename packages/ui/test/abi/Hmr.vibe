@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 import Badge from './Badge.vibe';
 
 const count = ref(0);

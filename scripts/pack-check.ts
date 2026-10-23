@@ -40,7 +40,7 @@ const FORBIDDEN =
 const TEMPLATE = /^templates\//;
 const TEMPLATE_FORBIDDEN = /(?:^|\/)(?:node_modules|dist|\.vibejs)\//;
 /** The internal packages, which depend on each other at exact versions (ADR 0005). */
-const INTERNAL = /^(?:@vibejs-org\/|create-vibejs$)/;
+const INTERNAL = /^(?:@usevibejs\/|create-vibejs$)/;
 const EXACT = /^\d+\.\d+\.\d+(?:-[\w.]+)?$/;
 
 /** Collects the string leaves of an `exports` or `bin` value. */

@@ -7,7 +7,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
-import type { ErrorCode } from '@vibejs-org/errors';
+import type { ErrorCode } from '@usevibejs/errors';
 
 // C9 shape. Key order is part of the contract: producers build entries in this order.
 export interface LogEntry {

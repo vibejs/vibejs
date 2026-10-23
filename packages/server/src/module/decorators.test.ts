@@ -1,5 +1,5 @@
 // oxlint-disable typescript/no-extraneous-class -- modules, controllers and enhancers are plain classes
-import { defineContract, get, post, type Route } from '@vibejs-org/contract';
+import { defineContract, get, post, type Route } from '@usevibejs/contract';
 import { describe, expect, it } from 'vitest';
 import type { CanActivate, ExceptionFilter, Interceptor } from '../http/context.ts';
 import {

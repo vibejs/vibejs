@@ -25,10 +25,10 @@ const bodyOf = (code: string) => {
 describe('compileScript', () => {
   it('hoists imports and type exports above _setup, in source order', () => {
     const { code } = compileCode(
-      `const a = 1\nimport { ref } from '@vibejs-org/ui'\nexport type T = string\nexport interface I {}\nexport type { U } from './u'\nimport type { V } from './v'\nconst b = ref(a)`,
+      `const a = 1\nimport { ref } from '@usevibejs/ui'\nexport type T = string\nexport interface I {}\nexport type { U } from './u'\nimport type { V } from './v'\nconst b = ref(a)`,
     );
     expect(code).toBe(
-      `import { ref } from '@vibejs-org/ui'\nexport type T = string\nexport interface I {}\nexport type { U } from './u'\nimport type { V } from './v'\nfunction _setup(__props: any, __ctx: any) {\n\nconst a = 1\n\n\n\n\n\nconst b = ref(a)\n\nreturn { a, b }\n}\n`,
+      `import { ref } from '@usevibejs/ui'\nexport type T = string\nexport interface I {}\nexport type { U } from './u'\nimport type { V } from './v'\nfunction _setup(__props: any, __ctx: any) {\n\nconst a = 1\n\n\n\n\n\nconst b = ref(a)\n\nreturn { a, b }\n}\n`,
     );
   });
 
@@ -71,7 +71,7 @@ describe('compileScript', () => {
   });
 
   it('returns every setup binding except props, aliases and imports', () => {
-    const code = `import { ref } from '@vibejs-org/ui'\nconst { a, c: cc } = defineProps<{ a: string; b: string; c: string }>()\nconst x = ref(1)\nfunction f() {}\nclass K {}\nconst emit = defineEmits<{ e: [] }>()\nconst m = defineModel()\nlet l = 1`;
+    const code = `import { ref } from '@usevibejs/ui'\nconst { a, c: cc } = defineProps<{ a: string; b: string; c: string }>()\nconst x = ref(1)\nfunction f() {}\nclass K {}\nconst emit = defineEmits<{ e: [] }>()\nconst m = defineModel()\nlet l = 1`;
     expect(compileCode(code).code).toMatch(
       'return { x, f, K, emit, m, get l() { return l }, set l(v) { l = v } }',
     );
@@ -156,7 +156,7 @@ describe('compileScript', () => {
 
   it('maps hoisted, kept and rewritten identifiers back to the source', () => {
     const { s, code, source } = compileCode(
-      `const { a } = defineProps<{ a: number }>()\nconst count = ref(a)\nimport { ref } from '@vibejs-org/ui'`,
+      `const { a } = defineProps<{ a: number }>()\nconst count = ref(a)\nimport { ref } from '@usevibejs/ui'`,
     );
     const map = new TraceMap({
       ...s.generateDecodedMap({ hires: 'boundary', source: 'A.vibe' }),
@@ -171,7 +171,7 @@ describe('compileScript', () => {
       return lines[at.line! - 1].slice(at.column!, at.column! + name.length);
     };
     expect(traced('import { ref }', 'ref')).toBe('ref');
-    expect(traced("'@vibejs-org/ui'", '@vibejs-org/ui')).toBe('@vibejs-org/ui');
+    expect(traced("'@usevibejs/ui'", '@usevibejs/ui')).toBe('@usevibejs/ui');
     expect(traced('const count', 'count')).toBe('count');
     expect(traced('ref(__props', 'ref')).toBe('ref');
     expect(traced('__props.a', 'a')).toBe('a');

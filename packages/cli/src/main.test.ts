@@ -19,7 +19,7 @@ write('docs/guide/quokka.md', '# Quokka guide\n\nA quokka page.\n');
 write('docs/index.txt', '[vibe.js docs index]|guide:{quokka.md}\n');
 write('skills/vibejs-quokka/SKILL.md', 'A quokka skill.\n');
 // A project with stub tools for `vibejs check`; `exec` below answers like a clean run.
-write('app/package.json', JSON.stringify({ devDependencies: { '@vibejs-org/cli': '0.0.0' } }));
+write('app/package.json', JSON.stringify({ devDependencies: { '@usevibejs/cli': '0.0.0' } }));
 for (const [pkg, version, bin] of [
   ['typescript', '7.1.0', 'tsc'],
   ['oxlint', '1.0.0', 'oxlint'],

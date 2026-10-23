@@ -1,6 +1,6 @@
 # 0005. Package layout, naming and versioning
 
-- Status: Accepted
+- Status: Accepted; the npm scope was changed by [0008](0008-npm-scope-usevibejs.md)
 - Date: 2026-10-18
 
 ## Context
@@ -9,8 +9,8 @@ The obvious npm names for the project were taken by unrelated packages: the unsc
 
 ## Decision
 
-- **Packages.** Eight npm packages: `@vibejs-org/errors`, `@vibejs-org/ui`, `@vibejs-org/compiler`, `@vibejs-org/language-tools`, `@vibejs-org/contract`, `@vibejs-org/server`, `@vibejs-org/cli` and the unscoped scaffolder `create-vibejs`. A new package is added only when code needs it.
-- **Names.** The npm scope is `@vibejs-org`, the CLI binary is `vibejs` (never `vibe`), the scaffolder runs as `npm create vibejs@latest`, the repository is `github.com/vibejs/vibejs` and the docs live at `vibejs.org`. The README, the docs and the generated `AGENTS.md` state that vibe.js is not monday.com Vibe (`@vibe/*`) and not the npm packages `vibejs` or `vibe.js`.
+- **Packages.** Eight npm packages: `@usevibejs/errors`, `@usevibejs/ui`, `@usevibejs/compiler`, `@usevibejs/language-tools`, `@usevibejs/contract`, `@usevibejs/server`, `@usevibejs/cli` and the unscoped scaffolder `create-vibejs`. A new package is added only when code needs it.
+- **Names.** The npm scope is `@usevibejs`, the CLI binary is `vibejs` (never `vibe`), the scaffolder runs as `npm create vibejs@latest`, the repository is `github.com/vibejs/vibejs` and the docs live at `vibejs.org`. The README, the docs and the generated `AGENTS.md` state that vibe.js is not monday.com Vibe (`@vibe/*`), not the `@vibe.js/*` packages and not the npm packages `vibejs` or `vibe.js`.
 - **Versioning.** All npm packages are one Changesets `fixed` group and always share a version. Internal dependencies are published as exact versions. The VS Code extension is versioned on its own. `./internal` and `./tooling` subpaths carry no semver promise. Until v0.1.0 there are no per-change changesets; v0.1.0 ships with a single initial-release changeset.
 - **Format and runtime.** Packages are ESM only, with `sideEffects: false` and no top-level await, and support Node `^24.15.0 || >=26`. Node 22 reaches end of life before v0.1.0, and `require(esm)` is stable from Node 24.15, so CommonJS consumers can still load the packages.
 - **Repository.** A pnpm workspace; every dependency version lives in a pnpm catalog, and every published manifest is checked by `lint-repo` (license, engines, repository fields, a copy of the root LICENSE).
@@ -24,5 +24,5 @@ The obvious npm names for the project were taken by unrelated packages: the unsc
 ## Alternatives considered
 
 - **Independent versions per package.** Fewer empty releases, but users and tools would need a compatibility matrix; the compiler and runtime already require matching versions.
-- **Other scopes or a new brand name.** Several alternatives were available. `@vibejs-org` mirrors the docs domain vibejs.org and stays close to the `vibejs` GitHub organization.
+- **Other scopes or a new brand name.** Several alternatives were available; [0008](0008-npm-scope-usevibejs.md) records why the scope is `@usevibejs`.
 - **Dual ESM and CommonJS builds.** Wider compatibility with old toolchains, at the cost of two module graphs and dual-package hazards; the supported Node versions load ESM from CommonJS.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef, type ComponentExposed, type TemplateRef } from '@vibejs-org/ui'
+import { useTemplateRef, type ComponentExposed, type TemplateRef } from '@usevibejs/ui'
 import { expectType } from '../../expect.ts'
 import Row from './Row.vibe'
 const input = useTemplateRef('input')

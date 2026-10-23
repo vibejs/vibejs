@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, provide, type ComputedRef } from '@vibejs-org/ui';
-import { useRouter } from '@vibejs-org/ui/router';
+import { computed, inject, provide, type ComputedRef } from '@usevibejs/ui';
+import { useRouter } from '@usevibejs/ui/router';
 
 const router = useRouter();
 // The index in `matched` of this view, provided by the parent view.

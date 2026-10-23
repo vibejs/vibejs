@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import type { CommandDef } from '../command.ts';
 import { vibeError } from '../errors.gen.ts';
 import { fixName, KINDS, names, plan, type FileOp } from '../generate/plan.ts';

@@ -10,7 +10,7 @@ import {
   isSimpleHandler,
   NodeTypes,
   parse,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { parseSync } from 'oxc-parser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

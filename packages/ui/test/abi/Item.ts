@@ -7,7 +7,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 type Props = {
   index: number;

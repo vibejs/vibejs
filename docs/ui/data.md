@@ -5,7 +5,7 @@ description: Load data with useAsync, keep it in sync with the route, abort stal
 
 # Data loading
 
-`useAsync()` from `@vibejs-org/ui` loads data in a component and keeps it current. Together with the typed API client, every request is aborted when it is no longer needed, and every outcome, failures included, is a typed value.
+`useAsync()` from `@usevibejs/ui` loads data in a component and keeps it current. Together with the typed API client, every request is aborted when it is no longer needed, and every outcome, failures included, is a typed value.
 
 ## useAsync
 
@@ -26,7 +26,7 @@ The todo page of the example app loads one todo by the id in the URL:
 
 ```vibe
 <script setup lang="ts">
-import { useAsync } from '@vibejs-org/ui';
+import { useAsync } from '@usevibejs/ui';
 
 const { data, loading, refresh } = useAsync(async (signal) => {
   const res = await fetch('/api/health', { signal });
@@ -46,7 +46,7 @@ const { data, loading, refresh } = useAsync(async (signal) => {
 `fn` runs again when a reactive value that it read **before its first `await`** changes. Above, `route.params.id` is read synchronously, so moving from `/todos/1` to `/todos/2` loads the new todo while the page stays on screen. A value read after an `await` is not tracked: read every input first, then await.
 
 ```ts
-import { ref, useAsync } from '@vibejs-org/ui';
+import { ref, useAsync } from '@usevibejs/ui';
 declare function search(q: string, page: number, signal: AbortSignal): Promise<string[]>;
 // ---cut---
 const query = ref('');
@@ -72,7 +72,7 @@ The API client never rejects for an HTTP or network failure: each call resolves 
 Narrow on `ok` before reading the payload: in the template with `v-if="data?.ok"`, and in the script with `data.value?.ok`.
 
 ```ts
-import { computed, useAsync } from '@vibejs-org/ui';
+import { computed, useAsync } from '@usevibejs/ui';
 type Result = { ok: true; data: { status: 'ok' } } | { ok: false; error: { code: string } };
 declare function health(options: { signal: AbortSignal }): Promise<Result>;
 // ---cut---
@@ -90,7 +90,7 @@ const status = computed(() =>
 State that several components read, such as the signed-in user or a cart, lives in a module: create it once at module scope and expose it through a composable.
 
 ```ts
-import { computed, readonly, ref } from '@vibejs-org/ui';
+import { computed, readonly, ref } from '@usevibejs/ui';
 
 interface Item {
   id: number;

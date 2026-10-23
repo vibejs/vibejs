@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Template features the ABI suites leave out, run on output of the built vibe().
-import { mount } from '@vibejs-org/ui/testing';
+import { mount } from '@usevibejs/ui/testing';
 import { describe, expect, it } from 'vitest';
 import Chain from '../test/behavior/Chain.vibe';
 import Directives from '../test/behavior/Directives.vibe';

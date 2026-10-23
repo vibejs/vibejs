@@ -18,7 +18,7 @@ interface Entry {
 }
 
 const footer = (rerenderOnly: boolean): string => `
-import { hmr as _hmr } from '@vibejs-org/ui/internal'
+import { hmr as _hmr } from '@usevibejs/ui/internal'
 ${rerenderOnly ? '_sfc.__rerenderOnly = true\n' : ''}if (import.meta.hot) {
   _hmr.createRecord(_sfc.__hmrId, _sfc)
   import.meta.hot.accept((m) => { if (!m) return; const c = m.default
@@ -47,10 +47,10 @@ const sameBlock = (a: SFCBlock | null, b: SFCBlock | null): boolean =>
 const styleShape = (d: SFCDescriptor): string =>
   JSON.stringify(d.styles.map(({ lang, scoped }) => [lang, scoped]));
 
-/** The version in the nearest `node_modules/@vibejs-org/ui/package.json` at or above `root`. */
+/** The version in the nearest `node_modules/@usevibejs/ui/package.json` at or above `root`. */
 function uiVersion(root: string): string | undefined {
   for (let dir = root; ;) {
-    const file = join(dir, 'node_modules/@vibejs-org/ui/package.json');
+    const file = join(dir, 'node_modules/@usevibejs/ui/package.json');
     if (existsSync(file)) {
       const { version }: { version: string } = JSON.parse(readFileSync(file, 'utf8'));
       return version;
@@ -83,7 +83,7 @@ function fail(
   return ctx.error(error);
 }
 
-/** The vibe.js Vite plugin. Client environments only; throws VIBE4902 on a @vibejs-org/ui version mismatch. */
+/** The vibe.js Vite plugin. Client environments only; throws VIBE4902 on a @usevibejs/ui version mismatch. */
 export function vibe(): Plugin {
   const cache = new Map<string, Entry>();
   let root = '';
@@ -101,7 +101,7 @@ export function vibe(): Plugin {
     name: 'vibejs',
 
     config: () => ({
-      resolve: { dedupe: ['@vibejs-org/ui'] },
+      resolve: { dedupe: ['@usevibejs/ui'] },
       optimizeDeps: {
         extensions: ['.vibe'],
         rolldownOptions: {

@@ -9,7 +9,7 @@ A component's setup runs once, when the component is created. The lifecycle hook
 
 ```vibe
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef } from '@vibejs-org/ui';
+import { onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef } from '@usevibejs/ui';
 
 const box = useTemplateRef<HTMLDivElement>('box');
 const width = ref(0);
@@ -59,7 +59,7 @@ An error thrown in setup, in a template binding, in a watcher, in an event handl
 
 ```vibe
 <script setup lang="ts">
-import { onErrorCaptured, ref } from '@vibejs-org/ui';
+import { onErrorCaptured, ref } from '@usevibejs/ui';
 import Chart from './Chart.vibe';
 
 const failed = ref(false);

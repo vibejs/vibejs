@@ -1,5 +1,5 @@
 {
-  "name": "@vibejs-org/language-tools",
+  "name": "@usevibejs/language-tools",
   "version": "0.0.0",
   "description": "TypeScript content mapper that type-checks vibe.js .vibe single-file components in tsc and the editor.",
   "keywords": [
@@ -45,18 +45,18 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@vibejs-org/compiler": "workspace:*",
-    "@vibejs-org/errors": "workspace:*",
+    "@usevibejs/compiler": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
     "vscode-jsonrpc": "catalog:"
   },
   "devDependencies": {
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "oxc-parser": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:ts-next"
   },
   "peerDependencies": {
-    "@vibejs-org/ui": "workspace:*"
+    "@usevibejs/ui": "workspace:*"
   },
   "typescript": {
     "contentMapper": {

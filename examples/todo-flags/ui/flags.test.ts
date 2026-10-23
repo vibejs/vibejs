@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { createApp, nextTick } from '@vibejs-org/ui';
-import { flushPromises } from '@vibejs-org/ui/testing';
+import { createApp, nextTick } from '@usevibejs/ui';
+import { flushPromises } from '@usevibejs/ui/testing';
 import { expect, it, vi } from 'vitest';
 import { flagsPlugin, useFlag } from './flags.ts';
 

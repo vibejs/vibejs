@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { expect, it } from 'vitest';
 import * as suites from '../../test/router/components.suite.ts';
 import { handlers, ViewWithSlot } from '../../test/router/components.ts';

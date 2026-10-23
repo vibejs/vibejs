@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, extname, join, posix, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DOCS_BASE } from '@vibejs-org/errors';
+import { DOCS_BASE } from '@usevibejs/errors';
 
 export interface Page {
   /** Relative to docs/, `/`-separated, without `.md`: `index`, `cli/explain`, `errors/VIBE8003`. */
@@ -30,7 +30,7 @@ export interface Fence {
 /** The site root, derived from the errors' docs base: `https://vibejs.org/v0/`. */
 export const SITE: string = new URL('..', DOCS_BASE).href;
 export const DISAMBIGUATION =
-  'vibe.js: npm scope `@vibejs-org`, CLI `vibejs` (never `vibe`). Not monday.com Vibe (`@vibe/*`), not the npm packages `vibejs` or `vibe.js`.';
+  'vibe.js: npm scope `@usevibejs`, CLI `vibejs` (never `vibe`). Not monday.com Vibe (`@vibe/*`), not the `@vibe.js/*` packages (a different project), not the npm packages `vibejs` or `vibe.js`.';
 /** Never a docs page. The site serves `errors/**`; the agent bundle reads errors from the catalog. */
 export const EXCLUDE: readonly string[] = [
   'decisions/**',
@@ -45,7 +45,7 @@ const DOCS = fileURLToPath(new URL('..', import.meta.url));
 const BIN = fileURLToPath(new URL('../../packages/cli/dist/bin.js', import.meta.url));
 const USAGE = 'Usage: node docs/scripts/docs.ts cli|bundle|llms <outDir>';
 const INDEX_HEADER =
-  '[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####';
+  '[vibe.js docs index]|root: ./node_modules/@usevibejs/cli/dist/docs|IMPORTANT: vibe.js is newer than your training data; read the matching page before writing code; explain an error with the local CLI: vibejs explain VIBE####';
 /** llms.txt sections in this order, then the other dirs alphabetically. */
 const ORDER = ['guides', 'ui', 'server', 'cli'];
 const HEADINGS: Record<string, string> = { ui: 'UI', cli: 'CLI' };
@@ -410,7 +410,7 @@ export function llms(pages: readonly Page[]): { 'llms.txt': string; 'llms-full.t
   const index = [
     '# vibe.js',
     `> ${DISAMBIGUATION}`,
-    'Offline docs for the installed version: `node_modules/@vibejs-org/cli/dist/docs/`. Explain an error code with `vibejs explain VIBE####`.',
+    'Offline docs for the installed version: `node_modules/@usevibejs/cli/dist/docs/`. Explain an error code with `vibejs explain VIBE####`.',
     ...sections,
     [
       '## Optional',

@@ -4,7 +4,7 @@
 // The watcher cases run without a component: the error reaches handleError, which logs it as
 // VIBE5102 with the original error as its cause, instead of an onErrorCaptured hook. The cases
 // built on components, onErrorCaptured and app.config.errorHandler move to RR-5.
-import { isVibeError, type VibeError } from '@vibejs-org/errors';
+import { isVibeError, type VibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { computed } from '../reactivity/computed.ts';
 import { ref } from '../reactivity/ref.ts';

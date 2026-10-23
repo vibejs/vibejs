@@ -1,5 +1,5 @@
 import { describe } from 'vitest';
-import type { ComponentDef } from '@vibejs-org/ui/internal';
+import type { ComponentDef } from '@usevibejs/ui/internal';
 
 /**
  * Tests of one component's behavior, run on its hand-written twin (`<Name>.ts`) here and on the

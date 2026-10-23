@@ -47,7 +47,7 @@ export function compile(source: string, options: CompileOptions): CompileResult 
   const abi = [...new Set([...ir.abi, ...script.abiImports])].toSorted();
   if (abi.length > 0) {
     const names = abi.map((name) => `${name} as _${name}`).join(', ');
-    script.s.prepend(`import { ${names} } from '@vibejs-org/ui/internal'\n`);
+    script.s.prepend(`import { ${names} } from '@usevibejs/ui/internal'\n`);
   }
   const head = script.s.toString();
   const scriptMap = script.s.generateDecodedMap({

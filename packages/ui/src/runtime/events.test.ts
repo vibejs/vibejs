@@ -2,7 +2,7 @@
 //
 // The vOn cases attach with `on` instead of patchEvent. Wrappers are not cached per handler (each
 // `on` call site wraps once), and a null handler is a type error rather than passed through.
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 import { on, withKeys, withModifiers } from './events.ts';
 

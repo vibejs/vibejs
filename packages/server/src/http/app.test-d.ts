@@ -1,5 +1,5 @@
 // oxlint-disable typescript/no-extraneous-class -- type fixtures
-import { defineContract, get } from '@vibejs-org/contract';
+import { defineContract, get } from '@usevibejs/contract';
 import * as v from 'valibot';
 import { expectTypeOf } from 'vitest';
 import type { RequestState } from '../index.ts';

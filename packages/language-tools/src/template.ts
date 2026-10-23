@@ -9,7 +9,7 @@ import {
   type InterpolationNode,
   type SimpleExpressionNode,
   type TemplateChildNode,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { Preset, type CodeBuilder } from './builder.ts';
 import {
   aliasNames,

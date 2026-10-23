@@ -35,7 +35,7 @@ const BASE = fileURLToPath(new URL('../../tsconfig.base.json', import.meta.url))
  * a titled sibling fence is checked as real code.
  */
 const VIBE_MODULE = `declare module '*.vibe' {
-  import type { Component, Handle } from '@vibejs-org/ui';
+  import type { Component, Handle } from '@usevibejs/ui';
   const component: Component<(props: any) => Handle<any, any, any>>;
   export default component;
 }
@@ -135,7 +135,7 @@ export function main(docsDir: string, tsc = TSC): number {
       // The server pages use the server decorators, as a server tsconfig does.
       experimentalDecorators: true,
     },
-    contentMappers: [{ package: '@vibejs-org/language-tools', extensions: ['.vibe'] }],
+    contentMappers: [{ package: '@usevibejs/language-tools', extensions: ['.vibe'] }],
     include: ['**/*.ts', '**/*.vibe'],
   };
   writeFileSync(join(dir, 'tsconfig.json'), `${JSON.stringify(tsconfig, null, 2)}\n`);

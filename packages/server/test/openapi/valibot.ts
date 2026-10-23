@@ -1,4 +1,4 @@
-import { defineContract, del, get, post, raw } from '@vibejs-org/contract';
+import { defineContract, del, get, post, raw } from '@usevibejs/contract';
 import { toStandardJsonSchema } from '@valibot/to-json-schema';
 import * as v from 'valibot';
 

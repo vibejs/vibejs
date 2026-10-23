@@ -78,7 +78,7 @@ defineOptions({ name: 'Box', inheritAttrs: false })
     const { code, map } = compile('<template><p>Hi</p></template>', options);
     expect(code).toBe(
       [
-        "import { template as _template } from '@vibejs-org/ui/internal'",
+        "import { template as _template } from '@usevibejs/ui/internal'",
         'const _t0 = _template("<p>Hi</p>")',
         'function _render($setup: any, $props: any, $ctx: any) {',
         '  const _n0 = _t0()',

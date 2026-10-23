@@ -1,4 +1,4 @@
-// The runtime ABI between compiled .vibe modules and @vibejs-org/ui (CONTRACTS C3), v1. A change
+// The runtime ABI between compiled .vibe modules and @usevibejs/ui (CONTRACTS C3), v1. A change
 // lands in the compiler and the runtime together, with the compiled twins in test/abi. It carries
 // no semver promise. The JSDoc of each helper states what codegen emits for it.
 import type { SetupContext } from './component.ts';

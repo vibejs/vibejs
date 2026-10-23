@@ -1,4 +1,4 @@
-import type { ComponentSlots } from '@vibejs-org/ui';
+import type { ComponentSlots } from '@usevibejs/ui';
 import { expectType } from '../../expect.ts';
 import Card from './Card.vibe';
 

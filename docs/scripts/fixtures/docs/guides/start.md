@@ -19,7 +19,7 @@ const one: number = 1;
 :::
 
 ```ts {2}
-import { DOCS_BASE } from '@vibejs-org/errors';
+import { DOCS_BASE } from '@usevibejs/errors';
 // ---cut---
 export const base: string = DOCS_BASE;
 ```

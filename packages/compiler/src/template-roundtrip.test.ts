@@ -26,7 +26,7 @@ it.each(files)('%s: each template re-serializes identically with one root', (fil
   const templates = [...readFileSync(root + file, 'utf8').matchAll(call)];
   for (const [i, [, json, ns]] of templates.entries()) {
     const html: string = JSON.parse(json);
-    // Parsed as template() in @vibejs-org/ui does.
+    // Parsed as template() in @usevibejs/ui does.
     const t = document.createElement('template');
     t.innerHTML = ns ? `<${ns}>${html}</${ns}>` : html;
     const wrapper = ns ? t.content.firstElementChild! : t;

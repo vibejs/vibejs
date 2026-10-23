@@ -1,6 +1,6 @@
-import { createClient } from '@vibejs-org/contract';
-import { JsonLogger } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+import { createClient } from '@usevibejs/contract';
+import { JsonLogger } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 import { expect, it } from 'vitest';
 import { health } from '../../../contracts/src/health.contract.ts';
 import { AppModule, appOptions } from '../app.module.ts';

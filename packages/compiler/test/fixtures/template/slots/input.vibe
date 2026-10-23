@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui'
+import { ref } from '@usevibejs/ui'
 import Card from './Card.vibe'
 import List from './List.vibe'
 const open = ref(false)

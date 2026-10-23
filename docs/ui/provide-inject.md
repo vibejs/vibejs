@@ -12,7 +12,7 @@ description: Pass values to every descendant of a component or to the whole app 
 An `InjectionKey<T>` is a symbol that carries the type of its value, so `provide()` checks the value and `inject()` returns `T`. Export the key from a `.ts` module that both sides import:
 
 ```ts [theme.ts]
-import { inject, type InjectionKey, type Ref } from '@vibejs-org/ui';
+import { inject, type InjectionKey, type Ref } from '@usevibejs/ui';
 
 export interface Theme {
   mode: Ref<'light' | 'dark'>;
@@ -29,7 +29,7 @@ The provider creates the value in its setup:
 
 ```vibe
 <script setup lang="ts">
-import { provide, ref } from '@vibejs-org/ui';
+import { provide, ref } from '@usevibejs/ui';
 import Toolbar from './Toolbar.vibe';
 import { ThemeKey } from './theme.ts';
 
@@ -68,7 +68,7 @@ Provide a ref or a reactive object, as `mode` above, when descendants should see
 Without a provider, `inject(key)` returns `undefined` and warns VIBE5206 in development. A default makes the value required:
 
 ```ts
-import { inject, ref, type InjectionKey, type Ref } from '@vibejs-org/ui';
+import { inject, ref, type InjectionKey, type Ref } from '@usevibejs/ui';
 
 const LocaleKey: InjectionKey<Ref<string>> = Symbol('locale');
 // ---cut---
@@ -87,7 +87,7 @@ The third argument, `true`, tells `inject()` to call the default instead of retu
 `app.provide(key, value)` provides a value to every component of the app. A component's `provide()` of the same key takes precedence for its descendants.
 
 ```ts
-import { createApp, ref, type Component, type InjectionKey, type Ref } from '@vibejs-org/ui';
+import { createApp, ref, type Component, type InjectionKey, type Ref } from '@usevibejs/ui';
 
 declare const App: Component;
 const LocaleKey: InjectionKey<Ref<string>> = Symbol('locale');
@@ -110,7 +110,7 @@ import {
   type Component,
   type InjectionKey,
   type Ref,
-} from '@vibejs-org/ui';
+} from '@usevibejs/ui';
 
 declare const App: Component;
 const LocaleKey: InjectionKey<Ref<string>> = Symbol('locale');
@@ -126,4 +126,4 @@ console.log(locale?.value); // 'de'
 
 ## UI and server
 
-`inject(key)` in a component reads values provided in the component tree. It is unrelated to the server's field `inject(Token)` of `@vibejs-org/server`, which resolves providers from the dependency injection container of a module. The two never share values.
+`inject(key)` in a component reads values provided in the component tree. It is unrelated to the server's field `inject(Token)` of `@usevibejs/server`, which resolves providers from the dependency injection container of a module. The two never share values.

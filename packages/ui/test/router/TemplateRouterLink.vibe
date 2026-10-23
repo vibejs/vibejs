@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLink, type RouteLocationRaw } from '@vibejs-org/ui/router';
+import { useLink, type RouteLocationRaw } from '@usevibejs/ui/router';
 
 const props = defineProps<{
   to: RouteLocationRaw;

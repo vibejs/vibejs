@@ -1,5 +1,5 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
-import { defineContract, get } from '@vibejs-org/contract';
+import { defineContract, get } from '@usevibejs/contract';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { captureLog } from '../../test/log.ts';
 import { Controller, Handle, Module } from '../module/decorators.ts';

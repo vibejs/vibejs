@@ -1,6 +1,6 @@
 error[VIBE3008]: `defineProps` is a compiler macro and cannot be imported or declared.
   --> script/errors/input.vibe:6:10
-6 | import { defineProps as props, watch } from '@vibejs-org/ui';
+6 | import { defineProps as props, watch } from '@usevibejs/ui';
   |          ^^^^^^^^^^^^^^^^^^^^
 fix: Remove the import or the declaration of `defineProps` and call the macro directly.
 docs: https://vibejs.org/v0/errors/VIBE3008

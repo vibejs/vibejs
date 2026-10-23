@@ -1,17 +1,17 @@
 {
-  "name": "@vibejs-org/docs",
+  "name": "@usevibejs/docs",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node ../scripts/errors.ts --docs errors && node scripts/docs.ts cli cli && node scripts/check-snippets.ts . && vitepress build && node scripts/docs.ts llms .vitepress/dist"
   },
   "devDependencies": {
-    "@vibejs-org/compiler": "workspace:*",
-    "@vibejs-org/contract": "workspace:*",
-    "@vibejs-org/errors": "workspace:*",
-    "@vibejs-org/language-tools": "workspace:*",
-    "@vibejs-org/server": "workspace:*",
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/compiler": "workspace:*",
+    "@usevibejs/contract": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
+    "@usevibejs/language-tools": "workspace:*",
+    "@usevibejs/server": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "create-vibejs": "workspace:*",
     "typescript": "catalog:ts-next",
     "valibot": "catalog:",

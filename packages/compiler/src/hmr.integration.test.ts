@@ -1,7 +1,7 @@
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { vibe } from '@vibejs-org/compiler/vite';
+import { vibe } from '@usevibejs/compiler/vite';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 import { expect, it, onTestFinished } from 'vitest';

@@ -2,13 +2,13 @@
 
 A full-stack TypeScript framework where the UI, the server and the contract between them are type-checked end to end, and every tool speaks to coding agents as well as to people.
 
-Status: pre-alpha. The design is fixed and the packages are being built; only `@vibejs-org/errors` has an implementation so far. Nothing is published.
+Status: pre-alpha. The design is fixed and the packages are being built; only `@usevibejs/errors` has an implementation so far. Nothing is published.
 
-vibe.js is not monday.com Vibe (`@vibe/*`), and not the npm packages `vibejs` or `vibe.js`. Its packages live under `@vibejs-org/*`, its CLI is `vibejs` (never `vibe`) and its scaffolder is `create-vibejs`.
+vibe.js is not monday.com Vibe (`@vibe/*`), not the `@vibe.js/*` packages (a different project), and not the npm packages `vibejs` or `vibe.js`. Its packages live under `@usevibejs/*`, its CLI is `vibejs` (never `vibe`) and its scaffolder is `create-vibejs`.
 
 ## Design
 
-This is the planned design for v0.1. Today only the error code runtime in `@vibejs-org/errors` exists.
+This is the planned design for v0.1. Today only the error code runtime in `@usevibejs/errors` exists.
 
 - **UI.** Components are `.vibe` single-file components: a `<script setup lang="ts">` block, a `<template>` and an optional `<style scoped>`. The compiler turns templates into direct DOM operations driven by a fine-grained reactive runtime: no virtual DOM, and only the nodes that depend on a changed value are updated.
 - **Server.** Applications are built from modules, providers and controllers, wired by dependency injection (`inject()` in field initializers) and declared with a small set of decorators. Each request handler receives one typed context.

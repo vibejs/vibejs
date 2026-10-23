@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-empty-object-type, typescript/no-unsafe-type-assertion -- fixtures typed as C4 components
 // Fixture components of the test utils, written as the compiler emits them and typed with a signature.
-import { inject, reactive, ref } from '@vibejs-org/ui';
-import type { Component, EmitsToProps, Handle, SetupContext, Slot } from '@vibejs-org/ui';
+import { inject, reactive, ref } from '@usevibejs/ui';
+import type { Component, EmitsToProps, Handle, SetupContext, Slot } from '@usevibejs/ui';
 import {
   applyCheckboxModel,
   applyRadioModel,
@@ -20,7 +20,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 type GreetingEmits = { pick: [id: string]; 'pick-item': [id: string, index: number] };
 type GreetingSlots = { default?: Slot<{ count: number }>; footer?: Slot<{}> };

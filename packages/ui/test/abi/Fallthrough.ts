@@ -1,5 +1,5 @@
 // The compiled twin of Fallthrough.vibe, written as the compiler emits it (types added).
-import { createComponent, type ComponentDef } from '@vibejs-org/ui/internal';
+import { createComponent, type ComponentDef } from '@usevibejs/ui/internal';
 import { Badge } from './Badge.ts';
 
 type Props = {

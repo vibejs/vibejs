@@ -1,4 +1,4 @@
-import type { VibeError } from '@vibejs-org/errors';
+import type { VibeError } from '@usevibejs/errors';
 import type { AppConfig } from './runtime/app.ts';
 import type { ComponentInstance } from './runtime/instance.ts';
 

@@ -9,6 +9,6 @@
     "verbatimModuleSyntax": true,
     "noEmit": true
   },
-  "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }],
+  "contentMappers": [{ "package": "@usevibejs/language-tools", "extensions": [".vibe"] }],
   "include": ["src"]
 }

@@ -5,14 +5,14 @@ description: Reactive state with ref, shallowRef, reactive, readonly and compute
 
 # Reactivity
 
-Reactive values record who reads them. When a value changes, the computed values, watchers and template bindings that read it run again, and nothing else does. All of these functions are imported from `@vibejs-org/ui`.
+Reactive values record who reads them. When a value changes, the computed values, watchers and template bindings that read it run again, and nothing else does. All of these functions are imported from `@usevibejs/ui`.
 
 ## ref
 
 `ref()` holds one value in `.value`. An object value is made deeply reactive, so changes to its nested properties are tracked too.
 
 ```ts
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const count = ref(0);
 count.value++;
@@ -28,7 +28,7 @@ user.value.tags.push('editor'); // tracked
 `shallowRef()` tracks only the assignment of `.value`. Use it for large values that are replaced rather than changed in place, and for objects that must stay plain, such as class instances of a library.
 
 ```ts
-import { shallowRef, triggerRef } from '@vibejs-org/ui';
+import { shallowRef, triggerRef } from '@usevibejs/ui';
 
 const rows = shallowRef<number[]>([]);
 rows.value = [...rows.value, 1]; // tracked
@@ -44,7 +44,7 @@ triggerRef(rows); // runs what reads rows now
 `reactive()` returns a deeply reactive proxy of an object, an array, a `Map` or a `Set`. Nested refs are unwrapped when read.
 
 ```ts
-import { reactive, readonly, ref } from '@vibejs-org/ui';
+import { reactive, readonly, ref } from '@usevibejs/ui';
 
 const state = reactive({ count: ref(0), items: new Map<string, number>() });
 state.count++; // no .value: the nested ref is unwrapped
@@ -64,7 +64,7 @@ const view = readonly(state);
 `computed()` derives a value from other reactive values. It runs only when read after one of its sources changed, and its result is cached until then.
 
 ```ts
-import { computed, ref } from '@vibejs-org/ui';
+import { computed, ref } from '@usevibejs/ui';
 
 const first = ref('Ada');
 const last = ref('Lovelace');
@@ -87,7 +87,7 @@ A computed with only a getter is readonly. The getter receives the previous valu
 `watch(source, callback, options?)` calls `callback(value, oldValue, onCleanup)` when the source changes. A source is a ref, a computed, a getter, a reactive object or an array of these.
 
 ```ts
-import { reactive, ref, watch } from '@vibejs-org/ui';
+import { reactive, ref, watch } from '@usevibejs/ui';
 
 const query = ref('');
 const filters = reactive({ done: false });
@@ -123,7 +123,7 @@ The returned handle stops the watcher when called, and has `stop()`, `pause()` a
 `watchEffect(effect)` runs `effect` now and again whenever something it read changes. `watchPostEffect()` and `watchSyncEffect()` are the `'post'` and `'sync'` flush forms.
 
 ```ts
-import { onWatcherCleanup, ref, watchEffect } from '@vibejs-org/ui';
+import { onWatcherCleanup, ref, watchEffect } from '@usevibejs/ui';
 
 const id = ref(1);
 
@@ -142,7 +142,7 @@ watchEffect(() => {
 Watchers and computed values created during `scope.run()` belong to the scope, and `scope.stop()` stops them all. A component's setup runs in its own scope, so most code never creates one. Use `effectScope()` for state that lives outside a component.
 
 ```ts
-import { effectScope, onScopeDispose, ref, watch } from '@vibejs-org/ui';
+import { effectScope, onScopeDispose, ref, watch } from '@usevibejs/ui';
 
 const scope = effectScope();
 
@@ -164,7 +164,7 @@ scope.stop(); // stops the watcher and removes the listener
 State changes update the DOM in a batch, before the browser paints. `await nextTick()` waits until the pending updates are applied.
 
 ```ts
-import { nextTick, ref } from '@vibejs-org/ui';
+import { nextTick, ref } from '@usevibejs/ui';
 
 const open = ref(false);
 
@@ -180,7 +180,7 @@ async function show(): Promise<void> {
 These convert between refs, getters and plain values:
 
 ```ts
-import { computed, reactive, toRef, toRefs, toValue, type MaybeRefOrGetter } from '@vibejs-org/ui';
+import { computed, reactive, toRef, toRefs, toValue, type MaybeRefOrGetter } from '@usevibejs/ui';
 
 const state = reactive({ x: 0, y: 0 });
 
@@ -204,7 +204,7 @@ console.log(useDouble(x).value, useDouble(() => state.y).value, useDouble(2).val
 A composable is a function that creates and returns reactive state. State created at module scope, outside any function, is shared by every component that imports it:
 
 ```ts
-import { computed, ref } from '@vibejs-org/ui';
+import { computed, ref } from '@usevibejs/ui';
 
 interface Item {
   id: number;

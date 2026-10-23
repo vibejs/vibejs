@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, posix } from 'node:path';
-import type { VibeError } from '@vibejs-org/errors';
-import type { AppInspection } from '@vibejs-org/server';
+import type { VibeError } from '@usevibejs/errors';
+import type { AppInspection } from '@usevibejs/server';
 import { parseSync, type ArrayExpression, type Expression, type Program } from 'oxc-parser';
 import type { CommandDef } from '../command.ts';
 import { loadAppModule, loadError, withServerRunner } from '../dev/app-module.ts';

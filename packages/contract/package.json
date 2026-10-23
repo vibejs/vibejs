@@ -1,5 +1,5 @@
 {
-  "name": "@vibejs-org/contract",
+  "name": "@usevibejs/contract",
   "version": "0.0.0",
   "description": "Typed client and server contracts for vibe.js, validated with Standard Schema.",
   "keywords": [
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@standard-schema/spec": "catalog:",
-    "@vibejs-org/errors": "workspace:*"
+    "@usevibejs/errors": "workspace:*"
   },
   "devDependencies": {
     "arktype": "catalog:",

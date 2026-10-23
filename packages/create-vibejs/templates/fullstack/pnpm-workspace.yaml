@@ -1,3 +1,3 @@
 minimumReleaseAgeExclude:
-  - '@vibejs-org/*'
+  - '@usevibejs/*'
   - create-vibejs

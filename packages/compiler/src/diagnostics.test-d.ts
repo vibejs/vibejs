@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@vibejs-org/errors';
+import type { ErrorCode } from '@usevibejs/errors';
 import { expectTypeOf } from 'vitest';
 import type { Diagnostic, Position } from './index.ts';
 

@@ -1,15 +1,15 @@
 // The RouterView and RouterLink scenarios, run on the hand-written components and on their
 // compiled template twins (`TemplateRouterView.vibe`, `TemplateRouterLink.vibe`).
-import { isVibeError } from '@vibejs-org/errors';
-import type { Component } from '@vibejs-org/ui';
-import type { ComponentDef } from '@vibejs-org/ui/internal';
+import { isVibeError } from '@usevibejs/errors';
+import type { Component } from '@usevibejs/ui';
+import type { ComponentDef } from '@usevibejs/ui/internal';
 import {
   createMemoryHistory,
   createRouter,
   RouterView,
   type RouteRecordRaw,
-} from '@vibejs-org/ui/router';
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+} from '@usevibejs/ui/router';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { afterEach, expect, test, vi } from 'vitest';
 import { defineAbiSuite, type AbiSuite } from '../abi/suite.ts';
 import { handlers, links, page } from './components.ts';

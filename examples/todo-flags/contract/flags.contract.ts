@@ -1,4 +1,4 @@
-import { defineContract, get } from '@vibejs-org/contract';
+import { defineContract, get } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 export const flags = defineContract('/flags', {

@@ -1,4 +1,4 @@
-import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@vibejs-org/compiler';
+import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@usevibejs/compiler';
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
 import { primeWalks, UNKNOWN, type Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
@@ -138,12 +138,12 @@ export function generate(fileName: string, text: string): GeneratedFile {
     0,
     Preset.ANCHOR,
   );
-  b.add("\nimport * as __vibe from '@vibejs-org/ui/tooling';\n");
+  b.add("\nimport * as __vibe from '@usevibejs/ui/tooling';\n");
   if (w.ownUsed) b.add(`import __vibe_self from ${JSON.stringify(`./${file}`)};\n`);
   const content = descriptor.scriptSetup?.content ?? '';
   const macros = new Set([...content.matchAll(MACROS)].map((m) => m[1]).filter(Boolean));
   if (macros.size > 0)
-    b.add(`import { ${[...macros].join(', ')} } from '@vibejs-org/ui/tooling';\n`);
+    b.add(`import { ${[...macros].join(', ')} } from '@usevibejs/ui/tooling';\n`);
 
   // A directive without a walked target gets an empty range at the end: tsc reports it unused.
   const end = b.text.length;

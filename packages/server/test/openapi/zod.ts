@@ -1,4 +1,4 @@
-import { defineContract, del, get, post, raw } from '@vibejs-org/contract';
+import { defineContract, del, get, post, raw } from '@usevibejs/contract';
 import { z } from 'zod';
 
 const User = z.object({ id: z.string(), email: z.email(), name: z.string() }).meta({ id: 'User' });

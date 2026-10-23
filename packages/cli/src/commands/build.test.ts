@@ -16,7 +16,7 @@ afterEach(() => {
  */
 function app(prepare?: (root: string) => void): string {
   const root = copyApp(['vite']);
-  for (const pkg of ['@vibejs-org/server', '@vibejs-org/contract']) {
+  for (const pkg of ['@usevibejs/server', '@usevibejs/contract']) {
     const dir = join(root, 'node_modules', pkg);
     mkdirSync(dir, { recursive: true });
     writeFileSync(

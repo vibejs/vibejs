@@ -4,8 +4,8 @@ import type { ServerResponse } from 'node:http';
 import { join, relative } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { stripVTControlCharacters } from 'node:util';
-import { isVibeError, type ErrorCode, type VibeError } from '@vibejs-org/errors';
-import type * as Server from '@vibejs-org/server';
+import { isVibeError, type ErrorCode, type VibeError } from '@usevibejs/errors';
+import type * as Server from '@usevibejs/server';
 import type { NodeHttp1Handler } from 'srvx';
 import { toNodeHandler } from 'srvx/node';
 import {
@@ -61,7 +61,7 @@ export function viteLogger(root: string, log: DevLog, base: Logger): Logger {
   };
 }
 
-/** A logger of the project's `@vibejs-org/server` that writes `source: 'server'` entries. */
+/** A logger of the project's `@usevibejs/server` that writes `source: 'server'` entries. */
 export function serverLogger(
   Base: typeof Server.Logger,
   log: Pick<DevLog, 'write'>,

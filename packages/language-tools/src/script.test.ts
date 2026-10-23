@@ -1,4 +1,4 @@
-import { analyzeScript, parse } from '@vibejs-org/compiler';
+import { analyzeScript, parse } from '@usevibejs/compiler';
 import { expect, it } from 'vitest';
 import { CodeBuilder, Preset, SpanKind } from './builder.ts';
 import { script, setupBindings } from './script.ts';
@@ -48,7 +48,7 @@ it('declares empty types without macros or without a script', () => {
 
 it('shadows script bindings and destructured props, not props declared only by the type', () => {
   const { analysis } = run(`<script setup lang="ts">
-import { ref } from '@vibejs-org/ui'
+import { ref } from '@usevibejs/ui'
 const { a, b: c } = defineProps<{ a: string; b: string; d: string }>()
 let e = ref(0)
 </script>`);

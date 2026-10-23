@@ -25,7 +25,7 @@ function app(source?: string): string {
 
 // Constructing ThrowingService or initializing its module would throw.
 const GRAPH = `
-import { Logger, Module } from '@vibejs-org/server';
+import { Logger, Module } from '@usevibejs/server';
 
 export class ThrowingService {
   constructor() { throw new Error('constructed'); }
@@ -117,7 +117,7 @@ describe('failures', () => {
     ['wrong exports', 'export const x = 1;', 'VIBE8202', 1],
     [
       'a scan error',
-      "import { Module } from '@vibejs-org/server';\nclass Plain {}\n@Module({ imports: [Plain] })\nexport class AppModule {}\nexport const appOptions = { basePath: '/api' };",
+      "import { Module } from '@usevibejs/server';\nclass Plain {}\n@Module({ imports: [Plain] })\nexport class AppModule {}\nexport const appOptions = { basePath: '/api' };",
       'VIBE9201',
       1,
     ],

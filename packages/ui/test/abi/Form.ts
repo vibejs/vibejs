@@ -1,5 +1,5 @@
 // The compiled twin of Form.vibe, written as the compiler emits it (types added).
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 import {
   applyCheckboxModel,
   applyRadioModel,
@@ -10,7 +10,7 @@ import {
   next,
   template,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 type State = {
   name: string;

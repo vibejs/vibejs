@@ -1,4 +1,4 @@
-import * as compiler from '@vibejs-org/compiler';
+import * as compiler from '@usevibejs/compiler';
 import {
   analyzeScript,
   ElementTypes,
@@ -11,7 +11,7 @@ import {
   type SimpleExpressionNode,
   type SourceLocation,
   type TemplateChildNode,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { describe, expect, it } from 'vitest';
 import { fixtures, objects } from '../test/walk.ts';
 import { formatDiagnostic } from './diagnostics.ts';
@@ -25,7 +25,7 @@ type TemplateNode =
   | DirectiveNode
   | SimpleExpressionNode;
 
-describe('@vibejs-org/compiler', () => {
+describe('@usevibejs/compiler', () => {
   it('exports compile, formatDiagnostic, compileStyle, parse, analyzeScript, the AST enums, the expression helpers and resolveComponentTag at runtime', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
@@ -149,7 +149,7 @@ describe('@vibejs-org/compiler', () => {
       ['input', "'input'", "('"],
     ]);
     expect(a.importRanges.map(at)).toStrictEqual([
-      "import { computed, ref, useTemplateRef } from '@vibejs-org/ui';",
+      "import { computed, ref, useTemplateRef } from '@usevibejs/ui';",
       "import type { Item } from './types';",
       "import Child from './Child.vibe';",
     ]);

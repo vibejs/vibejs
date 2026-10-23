@@ -7,13 +7,13 @@ The executable source of truth is the JSDoc and exported types in `packages/ui/s
 ## C1 Packages and versions
 | Package | Exports |
 |---|---|
-| @vibejs-org/errors | `.` |
-| @vibejs-org/ui | `.` `./internal` `./tooling` `./router` `./testing` |
-| @vibejs-org/compiler | `.` `./vite` (named `vibe`) |
-| @vibejs-org/language-tools | `.` + package.json `typescript.contentMapper` |
-| @vibejs-org/contract | `.` |
-| @vibejs-org/server | `.` `./testing` `./openapi` |
-| @vibejs-org/cli · create-vibejs | bins (`vibejs`, `create-vibejs`) |
+| @usevibejs/errors | `.` |
+| @usevibejs/ui | `.` `./internal` `./tooling` `./router` `./testing` |
+| @usevibejs/compiler | `.` `./vite` (named `vibe`) |
+| @usevibejs/language-tools | `.` + package.json `typescript.contentMapper` |
+| @usevibejs/contract | `.` |
+| @usevibejs/server | `.` `./testing` `./openapi` |
+| @usevibejs/cli · create-vibejs | bins (`vibejs`, `create-vibejs`) |
 
 Package rules:
 - ESM only; `sideEffects: false`; `engines.node: ^24.15.0 || >=26`.
@@ -21,7 +21,7 @@ Package rules:
 - One changesets `fixed` group for every npm package; the VS Code extension is versioned independently.
 - Internal deps are published as exact versions.
 - `./internal` and `./tooling` carry no semver promise.
-- `vibe()` throws VIBE4902 if the `@vibejs-org/ui` version differs from the compiler's.
+- `vibe()` throws VIBE4902 if the `@usevibejs/ui` version differs from the compiler's.
 
 ## C2 Errors
 | Range | Package |
@@ -37,7 +37,7 @@ Package rules:
 | 9000–9999 | contract 90xx (client 909x), server 91xx–98xx |
 
 ```ts
-// @vibejs-org/errors
+// @usevibejs/errors
 type ErrorCode = `VIBE${number}`
 class VibeError extends Error { code: ErrorCode; fixes: readonly string[]; docs: string; args: Readonly<Record<string, string | number>> }
 defineErrors<T>(load: () => T | undefined): VibeErrorFactory<T>   // typed codes + placeholder args
@@ -55,7 +55,7 @@ interface Diagnostic { code: ErrorCode; message: string; fixes: readonly string[
 ```
 - **Vite errors:** `this.error({ message: formatDiagnostic(d, src), id, loc, frame, code, plugin: 'vibejs', diagnostics })`.
 
-## C3 Runtime ABI v1 (`@vibejs-org/ui/internal`)
+## C3 Runtime ABI v1 (`@usevibejs/ui/internal`)
 ```ts
 type Block = Node | Fragment | ComponentInstance | Block[]
 type RawProps = Record<string, () => unknown> & { $?: (() => Record<string, unknown>)[] }   // $ = v-bind spreads, last wins
@@ -114,7 +114,7 @@ Runtime guarantees:
 
 ## C4 Type contract
 ```ts
-// @vibejs-org/ui (public; the runtime implements what the language tools specify)
+// @usevibejs/ui (public; the runtime implements what the language tools specify)
 declare const ComponentSignature: unique symbol
 interface Handle<S = {}, X = {}, E = {}> { readonly slots: S; readonly exposed: X; readonly emits: E }
 type Component<Sig extends (props: any) => Handle<any, any, any> = (props: {}) => Handle> =
@@ -128,7 +128,7 @@ The public surface also includes:
 - `useTemplateRef<T = unknown, K extends string = string>`.
 - HTMLAttributes, IntrinsicElementAttributes, ReservedProps, ClassValue and StyleValue (DOM attribute typings derived from `packages/runtime-dom/src/jsx.ts` of vuejs/core under the MIT license, without its JSX namespace, plus csstype; credited in `THIRD-PARTY-NOTICES.md`).
 
-`@vibejs-org/ui/tooling` is defined by the language tools. Executing its JS throws VIBE5900. It declares:
+`@usevibejs/ui/tooling` is defined by the language tools. Executing its JS throws VIBE5900. It declares:
 - the macros: defineProps, defineEmits, defineSlots, defineModel, defineExpose, defineOptions;
 - the helpers: `tags`, `el`, `customElement`, `component`, `dynamicComponent`, `unrefs`, `writable`, `ctx`, `vFor`, `slotParams`, `slot`, `templateRef`, `defineComponent`, with the signatures declared in `packages/ui/src/tooling.ts`.
 
@@ -165,7 +165,7 @@ isAllowedGlobal(name); isSimpleHandler(expr); resolveComponentTag(tag, analysis,
 // ui/tsconfig.json (templates, examples)
 { "extends": "../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2024", "dom"], "types": ["vite/client"], "verbatimModuleSyntax": true, "noEmit": true },
-  "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }],
+  "contentMappers": [{ "package": "@usevibejs/language-tools", "extensions": [".vibe"] }],
   "include": ["src"], "references": [{ "path": "../contracts" }] }
 ```
 - `.vibe` imports keep their extension. Never write `declare module '*.vibe'`.
@@ -175,7 +175,7 @@ isAllowedGlobal(name); isSimpleHandler(expr); resolveComponentTag(tag, analysis,
 - **Diagnostic forwarding.** tsc treats content-mapper diagnostics as syntax errors and then skips semantic checking for the whole program. The mapper therefore forwards only compiler diagnostics that make type checking meaningless (parse errors and an unusable SFC structure). Every other compiler diagnostic is reported by the compiler itself: by the Vite plugin during dev and build, and by a separate compile step in `vibejs check`.
 - **Editors.** The language server enables mappers through `initializationOptions.runExternalCode`; `tsc --lsp` has no `--runExternalCode` flag.
 - **Caching.** The mapper keeps `dynamicConfig: false`; its package `version` is the cache identity. Language-tools tests in this repository run `tsc --force` (or without buildinfo) so a changed mapper is never served from cache.
-- **Resolution.** `contentMappers` entries inherited through `extends` resolve from each leaf tsconfig's directory, so `@vibejs-org/language-tools` must be a direct dependency of the app.
+- **Resolution.** `contentMappers` entries inherited through `extends` resolve from each leaf tsconfig's directory, so `@usevibejs/language-tools` must be a direct dependency of the app.
 
 ## C7 Backend ↔ CLI, templates, UI
 - **App entry.** `server/src/app.module.ts` exports `AppModule` and `appOptions: AppOptions` (`basePath: '/api'`). `server/src/main.ts` runs `VibeFactory.create(AppModule, appOptions)`, then `enableShutdownHooks()`, then `listen(Number(process.env.PORT ?? 3000))`.
@@ -184,15 +184,15 @@ isAllowedGlobal(name); isSimpleHandler(expr); resolveComponentTag(tag, analysis,
   - `close` must be idempotent.
 - **Problem responses** are `application/problem+json`: `{ type, title, status, code, detail?, errors?, requestId }`.
 - **Contract isomorphism.**
-  - `@vibejs-org/contract` imports nothing from `node:*`, srvx or the server, and is built against lib es2022+dom.
+  - `@usevibejs/contract` imports nothing from `node:*`, srvx or the server, and is built against lib es2022+dom.
   - `*.contract.ts` files import only the contract package and a schema library.
-  - An oxlint override forbids importing `@vibejs-org/server` under `ui/**`.
+  - An oxlint override forbids importing `@usevibejs/server` under `ui/**`.
 - **Contracts** declare errors as `errors: { CODE: status }`; handlers raise them with `ctx.fail('CODE', detail?)`.
 - **Client.** `createClient(contracts, { baseUrl, fetch?, headers? })`. A call has the shape `(input?, { signal?, headers? }) => Promise<ApiResult<R>>` and never throws for HTTP or network failures.
 
 ## C8 Router and testing ↔ runtime
 - **App API.** `App.onUnmount(cb)` is new. The router also uses `app.runWithContext`, `provide`/`inject`, `createDynamicComponent` (RouterView) and the element ABI (RouterLink).
-- **Routes file.** `routes.ts` is `export const routes = defineRoutes([...])` with a static array literal. Typing is enabled with `declare module '@vibejs-org/ui/router' { interface Register { router: typeof router } }`.
+- **Routes file.** `routes.ts` is `export const routes = defineRoutes([...])` with a static array literal. Typing is enabled with `declare module '@usevibejs/ui/router' { interface Register { router: typeof router } }`.
 - **`mount`** is `createApp(host)`, where `host.render` calls `createComponent(C, getters over a shallowReactive bag, slots)`. `emitted()` injects `on*` recorders built from `__emits`.
 - **`useAsync`** is `useAsync(fn: (signal) => Promise<T>) → { data, error, loading, refresh }`. With the typed client, `T` is `ApiResult<R>`, so callers narrow on `.ok`.
 
@@ -212,7 +212,7 @@ interface CheckDiagnostic { source: 'tsc' | 'oxlint' | 'oxfmt' | 'vitest' | 'cov
 - **MCP (`vibejs mcp`, stdio, `@modelcontextprotocol/server` v2):** discovers the running dev server via `.vibejs/dev.lock`. Tools, in this deterministic order, each wrapping the matching `--json` command: `get_errors`, `get_logs`, `get_routes`, `get_di_graph`, `get_component_tree`, `check`, `request`, `explain`; plus docs search over the bundled docs. `--read-only` registers only non-mutating tools.
 - **AGENTS.md managed block** (written by `create-vibejs`, refreshed by `vibejs agents sync`; markers `<!-- BEGIN:vibejs-agent-rules -->` / `<!-- END:vibejs-agent-rules -->`):
   - at most 30 lines of rules: exact commands, the disambiguation line, framework rules that commonly trip up coding agents, the TS1241 line;
-  - plus one pipe-delimited compressed docs index line (at most 8 KB) pointing into `node_modules/@vibejs-org/cli/dist/docs/`, generated from the docs at build time;
+  - plus one pipe-delimited compressed docs index line (at most 8 KB) pointing into `node_modules/@usevibejs/cli/dist/docs/`, generated from the docs at build time;
   - `CLAUDE.md` contains `@AGENTS.md`;
   - test: every `vibejs <cmd>` named in the block answers `<cmd> --help --json` with `ok`, and every VIBE code in the block exists in the catalog.
   - The final block text is added to this section before the v0.1.0 API freeze.

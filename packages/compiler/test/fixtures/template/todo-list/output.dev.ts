@@ -1,5 +1,5 @@
-import { applyTextModel as _applyTextModel, child as _child, createComponent as _createComponent, createFor as _createFor, createIf as _createIf, insert as _insert, next as _next, nthChild as _nthChild, renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@vibejs-org/ui/internal'
-import { ref, computed } from '@vibejs-org/ui'
+import { applyTextModel as _applyTextModel, child as _child, createComponent as _createComponent, createFor as _createFor, createIf as _createIf, insert as _insert, next as _next, nthChild as _nthChild, renderEffect as _renderEffect, setText as _setText, template as _template, toDisplayString as _toDisplayString, txt as _txt } from '@usevibejs/ui/internal'
+import { ref, computed } from '@usevibejs/ui'
 import TodoItem from './TodoItem.vibe'
 import type { Todo } from './types'
 const _defaults = { title: () => 'Todos' }

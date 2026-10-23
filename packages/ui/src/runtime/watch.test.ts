@@ -23,7 +23,7 @@
 // `immediate`/`deep` passed to watchEffect(), whose options type has only `flush`. Warning texts
 // are VIBE-code assertions.
 // oxlint-disable eslint/no-shadow, typescript/no-explicit-any, typescript/no-unnecessary-boolean-literal-compare, typescript/no-unnecessary-condition, typescript/no-unsafe-type-assertion, unicorn/consistent-function-scoping, vitest/require-mock-type-parameters -- ported as upstream wrote it
-import { isVibeError, type VibeError } from '@vibejs-org/errors';
+import { isVibeError, type VibeError } from '@usevibejs/errors';
 import { afterEach, beforeEach, describe, expect, it, test, vi, type MockInstance } from 'vitest';
 import { vibeError } from '../errors.gen.ts';
 import { computed } from '../reactivity/computed.ts';

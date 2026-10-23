@@ -1,5 +1,5 @@
 // oxlint-disable typescript/no-extraneous-class -- modules and providers are plain classes
-import { defineContract, get as route } from '@vibejs-org/contract';
+import { defineContract, get as route } from '@usevibejs/contract';
 import { describe, expect, it } from 'vitest';
 import { get, inject, instantiate, type Scope } from '../di/injector.ts';
 import { token } from '../di/token.ts';

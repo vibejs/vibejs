@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, useAsync } from '@vibejs-org/ui';
+import { computed, inject, useAsync } from '@usevibejs/ui';
 import { API } from '../api.ts';
 
 const api = inject(API)!;

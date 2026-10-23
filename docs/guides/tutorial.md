@@ -53,8 +53,8 @@ The server handles each route of the contract with a typed handler ([Controllers
 Make the page load the users from the API and show one `UserCard` per user, numbered. First, the test of the page: it mounts the app at `/users` with an API client whose `fetch` answers with one user.
 
 ```ts [ui/src/pages/UsersPage.test.ts]
-import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import App from '../App.vibe';
 import { API, createApi } from '../api.ts';
@@ -75,7 +75,7 @@ Then the page. `useAsync` loads the list when the page mounts, and the client's 
 
 ```vibe [ui/src/pages/UsersPage.vibe]
 <script setup lang="ts">
-import { computed, inject, useAsync } from '@vibejs-org/ui';
+import { computed, inject, useAsync } from '@usevibejs/ui';
 import { API } from '../api.ts';
 import UserCard from '../components/UserCard.vibe';
 
@@ -108,7 +108,7 @@ ui/src/pages/UsersPage.test.ts:8:1  error  test-failed  AssertionError: expected
 
 ```vibe [ui/src/pages/UsersPage.vibe]
 <script setup lang="ts">
-import { computed, inject, useAsync } from '@vibejs-org/ui';
+import { computed, inject, useAsync } from '@usevibejs/ui';
 import { API } from '../api.ts';
 import UserCard from '../components/UserCard.vibe';
 

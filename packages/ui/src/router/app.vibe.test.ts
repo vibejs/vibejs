@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 // A small app of compiled `.vibe` files with the router, a guard, a lazy page and useAsync.
-import { compile } from '@vibejs-org/compiler';
-import { createMemoryHistory, createRouter, defineRoutes } from '@vibejs-org/ui/router';
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+import { compile } from '@usevibejs/compiler';
+import { createMemoryHistory, createRouter, defineRoutes } from '@usevibejs/ui/router';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { API, api, calls } from '../../test/router/app/api.ts';
 import App from '../../test/router/app/App.vibe';
@@ -103,7 +103,7 @@ const codes = (template: string, script = '') =>
     id: '00000000',
     dev: false,
   }).diagnostics;
-const imported = `<script setup lang="ts">import { RouterLink } from '@vibejs-org/ui/router';</script>`;
+const imported = `<script setup lang="ts">import { RouterLink } from '@usevibejs/ui/router';</script>`;
 
 describe('router idioms that do not compile', () => {
   it('rejects a kebab-case <router-link> with VIBE2002', () => {

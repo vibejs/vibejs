@@ -22,7 +22,7 @@ A request passes through these steps:
 A middleware wraps the whole request at the Fetch level. It runs before routing, so it sees every request, including those that match no route:
 
 ```ts
-import type { Middleware } from '@vibejs-org/server';
+import type { Middleware } from '@usevibejs/server';
 // ---cut---
 export const timing: Middleware = async (req, next) => {
   const started = performance.now();
@@ -41,8 +41,8 @@ export const timing: Middleware = async (req, next) => {
 A guard decides whether a request may reach its handler:
 
 ```ts
-import type { CanActivate, RequestContext } from '@vibejs-org/server';
-declare module '@vibejs-org/server' {
+import type { CanActivate, RequestContext } from '@usevibejs/server';
+declare module '@usevibejs/server' {
   interface RequestState {
     user?: { readonly id: string };
   }
@@ -62,7 +62,7 @@ Apply it with `@UseGuards(SessionGuard)` on a controller or a handler, or global
 `ctx.state` carries values from guards and interceptors to handlers. Type its fields by augmenting `RequestState`:
 
 ```ts
-declare module '@vibejs-org/server' {
+declare module '@usevibejs/server' {
   interface RequestState {
     user?: { readonly id: string };
   }
@@ -74,7 +74,7 @@ declare module '@vibejs-org/server' {
 An interceptor wraps the handler. `next()` runs the rest of the chain and resolves to the handler's result, so an interceptor can measure, retry or replace it:
 
 ```ts
-import type { Interceptor, RequestContext } from '@vibejs-org/server';
+import type { Interceptor, RequestContext } from '@usevibejs/server';
 // ---cut---
 export class LogDuration implements Interceptor {
   async intercept(ctx: RequestContext, next: () => Promise<unknown>): Promise<unknown> {
@@ -93,7 +93,7 @@ export class LogDuration implements Interceptor {
 A filter turns an error into a response. It returns a `Response`, an `HttpError` to send as a problem, or `undefined` to pass the error to the next filter. Errors that no filter handles are answered as described in [Handlers](./handlers.md#errors).
 
 ```ts
-import { HttpError, type ExceptionFilter } from '@vibejs-org/server';
+import { HttpError, type ExceptionFilter } from '@usevibejs/server';
 class NotFoundInDb extends Error {}
 // ---cut---
 export class DbErrors implements ExceptionFilter {
@@ -118,10 +118,10 @@ import {
   UseGuards,
   type CanActivate,
   type RequestContext,
-} from '@vibejs-org/server';
-import { defineContract, get } from '@vibejs-org/contract';
+} from '@usevibejs/server';
+import { defineContract, get } from '@usevibejs/contract';
 const admin = defineContract('/admin', { stats: get('/stats') });
-declare module '@vibejs-org/server' {
+declare module '@usevibejs/server' {
   interface RequestState {
     roles?: readonly string[];
   }
@@ -159,7 +159,7 @@ import {
   type CanActivate,
   type ExceptionFilter,
   type Interceptor,
-} from '@vibejs-org/server';
+} from '@usevibejs/server';
 declare class SessionGuard implements CanActivate {
   canActivate(): boolean;
 }

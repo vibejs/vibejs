@@ -6,7 +6,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { main } from './check-snippets.ts';
 
 // The real ts-next tsc on the fixture pages. guides/start.md imports the built
-// @vibejs-org/errors above `// ---cut---`; errors/VIBE0001.md holds a broken example.
+// @usevibejs/errors above `// ---cut---`; errors/VIBE0001.md holds a broken example.
 const FIXTURE = fileURLToPath(new URL('fixtures/docs', import.meta.url));
 const NODE_MODULES = fileURLToPath(new URL('../node_modules', import.meta.url));
 

@@ -22,7 +22,7 @@ import {
 } from './test/scaffold.ts';
 
 const vibejs = (app: string, ...args: string[]) =>
-  run(process.execPath, [join(app, 'node_modules/@vibejs-org/cli/dist/bin.js'), ...args], app);
+  run(process.execPath, [join(app, 'node_modules/@usevibejs/cli/dist/bin.js'), ...args], app);
 
 afterAll(cleanup, INSTALL);
 

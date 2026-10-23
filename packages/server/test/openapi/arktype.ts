@@ -1,4 +1,4 @@
-import { defineContract, del, get, post, raw } from '@vibejs-org/contract';
+import { defineContract, del, get, post, raw } from '@usevibejs/contract';
 import { type } from 'arktype';
 
 const User = type({ id: 'string', email: 'string.email', name: 'string' });

@@ -7,7 +7,7 @@ import {
   token,
   type DynamicModule,
   type Token,
-} from '@vibejs-org/server';
+} from '@usevibejs/server';
 import { flags } from '../contract/flags.contract.ts';
 
 export interface FlagsOptions {

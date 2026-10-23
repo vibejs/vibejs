@@ -15,13 +15,13 @@ const REPO_URL = 'git+https://github.com/vibejs/vibejs.git';
 const NODE_RANGE = '^24.15.0 || >=26';
 /** The 8 npm packages of CONTRACTS C1: exactly these manifests are not private. */
 const PUBLISHED = [
-  '@vibejs-org/cli',
-  '@vibejs-org/compiler',
-  '@vibejs-org/contract',
-  '@vibejs-org/errors',
-  '@vibejs-org/language-tools',
-  '@vibejs-org/server',
-  '@vibejs-org/ui',
+  '@usevibejs/cli',
+  '@usevibejs/compiler',
+  '@usevibejs/contract',
+  '@usevibejs/errors',
+  '@usevibejs/language-tools',
+  '@usevibejs/server',
+  '@usevibejs/ui',
   'create-vibejs',
 ];
 /** Turkish-specific letters (rule 9), escaped so that this file stays ASCII. */
@@ -438,7 +438,7 @@ export function main(root: string): number {
     const list = /\balwaysBundle:\s*\[([^\]]*)\]/.exec(text);
     for (const match of list?.[1].matchAll(/['"]([^'"]+)['"]/g) ?? []) {
       const name = match[1];
-      if (name.startsWith('@vibejs-org/') || credits(credited, name)) continue;
+      if (name.startsWith('@usevibejs/') || credits(credited, name)) continue;
       report(file, text, list!.index, 'upstream', `${name} is bundled but not named in ${notices}`);
     }
   }

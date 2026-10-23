@@ -20,8 +20,8 @@ afterEach(() => {
 
 // Every route answers JSON, except where the test says otherwise.
 const ITEMS = `
-import { defineContract, get, post } from '@vibejs-org/contract';
-import { Controller, Handle, inject, Logger, Module } from '@vibejs-org/server';
+import { defineContract, get, post } from '@usevibejs/contract';
+import { Controller, Handle, inject, Logger, Module } from '@usevibejs/server';
 
 const any = { '~standard': { version: 1, vendor: 'fixture', validate: (value) => ({ value }) } };
 const items = defineContract('/items', {
@@ -182,7 +182,7 @@ describe('in process', () => {
     ['wrong exports', 'export const x = 1;', 'VIBE8202'],
     [
       'a provider that fails',
-      "import { Module } from '@vibejs-org/server';\nclass Bad { constructor() { throw new Error('no'); } }\n@Module({ providers: [Bad] })\nexport class AppModule {}\nexport const appOptions = { basePath: '/api' };",
+      "import { Module } from '@usevibejs/server';\nclass Bad { constructor() { throw new Error('no'); } }\n@Module({ providers: [Bad] })\nexport class AppModule {}\nexport const appOptions = { basePath: '/api' };",
       'VIBE9105',
     ],
   ])('reports %s as its code', async (_, source, code) => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
 
 const name = ref('');
 const city = ref('');

@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-extraneous-class -- type fixtures
 // A typed @Handle rejects a mismatched handler with TS1241 at the decorator. The positive cases
 // fail too if Handle loses its generic signature, which turns the directives below into TS2578.
-import { defineContract, get, post } from '@vibejs-org/contract';
+import { defineContract, get, post } from '@usevibejs/contract';
 import * as v from 'valibot';
 import { expectTypeOf } from 'vitest';
 import type { CanActivate, Ctx, RequestContext } from '../http/context.ts';

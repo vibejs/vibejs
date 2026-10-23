@@ -1,4 +1,4 @@
-import type { Route, RouteReply } from '@vibejs-org/contract';
+import type { Route, RouteReply } from '@usevibejs/contract';
 import type { Class } from '../di/token.ts';
 import { vibeError } from '../errors.gen.ts';
 import type { CanActivate, Ctx, ExceptionFilter, Interceptor } from '../http/context.ts';

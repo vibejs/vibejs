@@ -1,5 +1,5 @@
 import { dirname } from 'node:path';
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { projectAgentFiles, syncAgentFiles, type AgentOp } from '../agents.ts';
 import type { CommandDef } from '../command.ts';
 import { vibeError } from '../errors.gen.ts';

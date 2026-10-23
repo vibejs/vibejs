@@ -1,5 +1,5 @@
 
-import { useTemplateRef } from '@vibejs-org/ui'
+import { useTemplateRef } from '@usevibejs/ui'
 import Comp from './Comp.vibe'
 const input = useTemplateRef<__VibeRefs["input"]>('input')
 const typed = useTemplateRef<HTMLElement>('input')
@@ -28,4 +28,4 @@ type __VibeExposed = {};
 type __VibeRefs = { input: HTMLElementTagNameMap extends Record<'input', infer E> ? E : Element; comp: ReturnType<typeof __vibe.unrefs<{ c: typeof Comp }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown; rows: (ReturnType<typeof __vibe.unrefs<{ c: typeof Comp }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown)[]; circle: SVGElementTagNameMap extends Record<'circle', infer E> ? E : Element; widget: HTMLElementTagNameMap extends Record<'x-widget', infer E> ? E : Element; slotted: HTMLElementTagNameMap extends Record<'p', infer E> ? E : Element };
 type __VibeModels = {};
 export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();
-import * as __vibe from '@vibejs-org/ui/tooling';
+import * as __vibe from '@usevibejs/ui/tooling';

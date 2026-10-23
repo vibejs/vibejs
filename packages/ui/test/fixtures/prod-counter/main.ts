@@ -1,5 +1,5 @@
 // A counter as a prod build compiles it (no `name`, `__file` or `__hmrId`), mounted on `#app`.
-import { createApp, ref } from '@vibejs-org/ui';
+import { createApp, ref } from '@usevibejs/ui';
 import {
   on,
   renderEffect,
@@ -8,7 +8,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 const t0 = template('<button type="button"> </button>');
 

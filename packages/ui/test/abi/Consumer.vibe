@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, useId } from '@vibejs-org/ui';
+import { inject, useId } from '@usevibejs/ui';
 import { ThemeKey } from './keys.ts';
 
 const theme = inject(ThemeKey)!;

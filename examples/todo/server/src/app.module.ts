@@ -1,5 +1,5 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
-import { Module, type AppOptions } from '@vibejs-org/server';
+import { Module, type AppOptions } from '@usevibejs/server';
 import { FlagsModule } from 'todo-flags/server';
 import { HealthModule } from './health/health.module.ts';
 import { TodosModule } from './todos/todos.module.ts';

@@ -1,4 +1,4 @@
-import { defineErrors, DOCS_BASE } from '@vibejs-org/errors';
+import { defineErrors, DOCS_BASE } from '@usevibejs/errors';
 import { describe, expect, it } from 'vitest';
 import { codeFrame, formatDiagnostic, LineIndex, toDiagnostic } from './diagnostics.ts';
 

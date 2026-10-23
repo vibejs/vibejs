@@ -1,5 +1,5 @@
 // The compiled twin of List.vibe, written as the compiler emits it (types added).
-import { computed, ref } from '@vibejs-org/ui';
+import { computed, ref } from '@usevibejs/ui';
 import {
   applyTextModel,
   child,
@@ -14,7 +14,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { Item } from './Item.ts';
 
 type Entry = {

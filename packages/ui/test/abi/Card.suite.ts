@@ -1,5 +1,5 @@
-import { nextTick, ref } from '@vibejs-org/ui';
-import { renderEffect, setText, type RawSlots, type Slot } from '@vibejs-org/ui/internal';
+import { nextTick, ref } from '@usevibejs/ui';
+import { renderEffect, setText, type RawSlots, type Slot } from '@usevibejs/ui/internal';
 import { expect, test } from 'vitest';
 import { mountForTest } from './mount.ts';
 import { defineAbiSuite, type AbiSuite } from './suite.ts';

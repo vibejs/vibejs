@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject, useAsync } from '@vibejs-org/ui';
-import { useRoute } from '@vibejs-org/ui/router';
+import { inject, useAsync } from '@usevibejs/ui';
+import { useRoute } from '@usevibejs/ui/router';
 import { API } from '../api.ts';
 
 const api = inject(API)!;

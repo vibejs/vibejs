@@ -1,5 +1,5 @@
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import { isRoute, type Route, type RouteDef } from '@vibejs-org/contract';
+import { isRoute, type Route, type RouteDef } from '@usevibejs/contract';
 import { vibeError } from './errors.gen.ts';
 
 export interface OpenApiOptions {

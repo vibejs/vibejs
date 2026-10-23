@@ -1,7 +1,7 @@
 // Pure parsers of the tool outputs `vibejs check` reads. Each returns null for output it cannot
 // read (VIBE8301). Paths become root-relative POSIX paths.
 import { relative, resolve } from 'node:path';
-import type { Diagnostic } from '@vibejs-org/compiler';
+import type { Diagnostic } from '@usevibejs/compiler';
 import type { ExecResult } from '../ctx.ts';
 import { vibeError } from '../errors.gen.ts';
 import { envelopeError, type CheckDiagnostic } from '../output.ts';

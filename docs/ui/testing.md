@@ -5,14 +5,14 @@ description: Test .vibe components and composables in Vitest with mount, wrapper
 
 # Testing components
 
-Component tests run in Vitest with jsdom. `@vibejs-org/ui/testing` mounts a component in a real app, returns a wrapper to query and drive the rendered DOM, and cleans up after each test.
+Component tests run in Vitest with jsdom. `@usevibejs/ui/testing` mounts a component in a real app, returns a wrapper to query and drive the rendered DOM, and cleans up after each test.
 
 ## Setup
 
 The `vibe()` plugin compiles `.vibe` files for the tests as it does for the app:
 
 ```ts
-import { vibe } from '@vibejs-org/compiler/vite';
+import { vibe } from '@usevibejs/compiler/vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -29,7 +29,7 @@ The app template already has this config. Tests sit next to the component: `Coun
 ## Mounting
 
 ```ts
-import { mount } from '@vibejs-org/ui/testing';
+import { mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import Counter from './Counter.vibe';
 
@@ -63,7 +63,7 @@ Wrappers query the rendered DOM with CSS selectors:
 A wrapper reads its element with `text()`, `html()`, `attributes(name?)`, `classes(name?)`, `isVisible()` and `exists()`, and `element` is the DOM element itself. Select by what the user sees and by stable hooks: element names, roles and labels as attributes, classes, or `data-test` attributes.
 
 ```ts
-import { mount } from '@vibejs-org/ui/testing';
+import { mount } from '@usevibejs/ui/testing';
 import { expect } from 'vitest';
 import TodoList from './TodoList.vibe';
 // ---cut---
@@ -81,7 +81,7 @@ expect(wrapper.find('.empty').exists()).toBe(false);
 `trigger(event, init?)` dispatches a bubbling, cancelable event of the right class, and `setValue(value)` sets an input, a textarea, a checkbox, a radio button or a select, then fires the events that `v-model` listens to. Both wait for the DOM update.
 
 ```ts
-import { mount } from '@vibejs-org/ui/testing';
+import { mount } from '@usevibejs/ui/testing';
 import { expect } from 'vitest';
 import TodoList from './TodoList.vibe';
 // ---cut---
@@ -98,7 +98,7 @@ A key or a modifier goes in the event init, never in the event name: `trigger('k
 `setProps(props)` assigns props and waits for the update. `emitted()` returns the arguments of every event the component emitted, by event name, typed by `defineEmits`.
 
 ```ts
-import { mount } from '@vibejs-org/ui/testing';
+import { mount } from '@usevibejs/ui/testing';
 import { expect } from 'vitest';
 import Picker from './Picker.vibe';
 // ---cut---
@@ -113,7 +113,7 @@ expect(wrapper.emitted('pick')).toEqual([['c']]);
 `flushPromises()` resolves after the pending promise callbacks ran, and with them the DOM updates they caused. Await it after anything that loads data. It also works with `vi.useFakeTimers()`.
 
 ```ts
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { expect } from 'vitest';
 import UserCard from './UserCard.vibe';
 // ---cut---
@@ -127,8 +127,8 @@ expect(wrapper.get('h2').text()).toBe('Ada');
 `mountComposable(fn, options?)` runs `fn` as the setup of a component, so it can use `inject()`, lifecycle hooks and watchers, and returns its `result`. It takes `provide` and `plugins` and unmounts like `mount()`.
 
 ```ts
-import { nextTick, ref, watch } from '@vibejs-org/ui';
-import { mountComposable } from '@vibejs-org/ui/testing';
+import { nextTick, ref, watch } from '@usevibejs/ui';
+import { mountComposable } from '@usevibejs/ui/testing';
 import { expect } from 'vitest';
 
 function useHistory<T>(initial: T) {
@@ -149,11 +149,11 @@ expect(result.past).toEqual([1]);
 Install a router with a memory history through `plugins`, then wait for the first navigation with `router.isReady()`. Use the app's own routes, imported from `routes.ts`, so that the test covers the real records:
 
 ```ts
-import type { RouteRecordRaw } from '@vibejs-org/ui/router';
+import type { RouteRecordRaw } from '@usevibejs/ui/router';
 declare const routes: RouteRecordRaw[];
 // ---cut---
-import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { flushPromises, mount } from '@vibejs-org/ui/testing';
+import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { flushPromises, mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import App from '../App.vibe';
 

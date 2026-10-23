@@ -6,7 +6,7 @@ import type {
   RouteHeaders,
   RouteParams,
   RouteQuery,
-} from '@vibejs-org/contract';
+} from '@usevibejs/contract';
 import type { Logger } from '../logger.ts';
 import type { MetadataKey } from '../module/decorators.ts';
 import type { RouteBinding } from '../module/graph.ts';
@@ -15,7 +15,7 @@ import { HttpError } from './errors.ts';
 
 /**
  * Per-request values that guards and interceptors share with handlers. Add fields by augmentation:
- * `declare module '@vibejs-org/server' { interface RequestState { user?: User } }`.
+ * `declare module '@usevibejs/server' { interface RequestState { user?: User } }`.
  */
 // oxlint-disable-next-line typescript/no-empty-interface, typescript/no-empty-object-type -- filled by declaration merging
 export interface RequestState {}

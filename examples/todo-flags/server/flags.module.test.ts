@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-extraneous-class -- modules are plain classes
-import { createClient } from '@vibejs-org/contract';
-import { JsonLogger, Module } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+import { createClient } from '@usevibejs/contract';
+import { JsonLogger, Module } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 import { expect, it } from 'vitest';
 import { flags } from '../contract/flags.contract.ts';
 import { FLAGS_OPTIONS, FlagsModule } from './flags.module.ts';

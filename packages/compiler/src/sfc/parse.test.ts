@@ -167,7 +167,7 @@ describe('compiler:sfc', () => {
 
     // # 6676
     test('should throw error if no <template> or <script> is present', () => {
-      expect(parse(`import { ref } from '@vibejs-org/ui'`).errors).toStrictEqual([
+      expect(parse(`import { ref } from '@usevibejs/ui'`).errors).toStrictEqual([
         'VIBE1001',
         'VIBE1012',
       ]);

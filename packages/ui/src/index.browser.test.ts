@@ -1,4 +1,4 @@
-import * as errors from '@vibejs-org/errors';
+import * as errors from '@usevibejs/errors';
 import { expect, it } from 'vitest';
 import { isVibeError, VibeError } from './index.ts';
 

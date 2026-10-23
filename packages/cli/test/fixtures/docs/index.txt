@@ -1,1 +1,1 @@
-[vibe.js docs index]|root: ./node_modules/@vibejs-org/cli/dist/docs|.:{index.md}
+[vibe.js docs index]|root: ./node_modules/@usevibejs/cli/dist/docs|.:{index.md}

@@ -11,7 +11,7 @@ import { agents, type AgentsResult } from './agents.ts';
 let root: string;
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'vibejs-agents-'));
-  writeFileSync(join(root, 'package.json'), '{"devDependencies":{"@vibejs-org/cli":"0.0.0"}}');
+  writeFileSync(join(root, 'package.json'), '{"devDependencies":{"@usevibejs/cli":"0.0.0"}}');
 });
 afterEach(() => {
   rmSync(root, { recursive: true, force: true });

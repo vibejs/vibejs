@@ -6,7 +6,7 @@ import {
   parse,
   type SimpleExpressionNode,
   type TemplateChildNode,
-} from '@vibejs-org/compiler';
+} from '@usevibejs/compiler';
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
 import { codegen, compiler, typecheck } from '../test/fixtures.ts';

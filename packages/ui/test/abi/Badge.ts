@@ -1,5 +1,5 @@
 // The compiled twin of Badge.vibe, written as the compiler emits it (types added).
-import { createIf, template, type ComponentDef } from '@vibejs-org/ui/internal';
+import { createIf, template, type ComponentDef } from '@usevibejs/ui/internal';
 
 type Props = {
   wide?: boolean;

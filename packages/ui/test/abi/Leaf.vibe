@@ -6,7 +6,7 @@ import {
   onMounted,
   onUnmounted,
   onUpdated,
-} from '@vibejs-org/ui';
+} from '@usevibejs/ui';
 
 const { log } = defineProps<{ log: string[]; count: number }>();
 

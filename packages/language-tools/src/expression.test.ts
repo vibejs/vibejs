@@ -1,4 +1,4 @@
-import { forEachIdentifier, isSimpleHandler } from '@vibejs-org/compiler';
+import { forEachIdentifier, isSimpleHandler } from '@usevibejs/compiler';
 import { expect, it } from 'vitest';
 import { CodeBuilder, Preset, SpanKind } from './builder.ts';
 import {

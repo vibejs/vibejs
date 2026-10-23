@@ -6,7 +6,7 @@ import {
   onMounted,
   onUnmounted,
   onUpdated,
-} from '@vibejs-org/ui';
+} from '@usevibejs/ui';
 import {
   on,
   renderEffect,
@@ -15,7 +15,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 type Props = {
   log: string[];

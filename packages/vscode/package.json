@@ -34,7 +34,7 @@
     "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@vibejs-org/errors": "workspace:*",
+    "@usevibejs/errors": "workspace:*",
     "@vscode/vsce": "catalog:",
     "ovsx": "catalog:",
     "tsdown": "catalog:",

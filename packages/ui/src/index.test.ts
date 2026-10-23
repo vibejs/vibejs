@@ -1,10 +1,10 @@
-import * as errors from '@vibejs-org/errors';
+import * as errors from '@usevibejs/errors';
 import { describe, expect, it, vi } from 'vitest';
 import * as ui from './index.ts';
 import { isVibeError, VibeError } from './index.ts';
 
-describe('@vibejs-org/ui', () => {
-  it('re-exports VibeError and isVibeError from @vibejs-org/errors', () => {
+describe('@usevibejs/ui', () => {
+  it('re-exports VibeError and isVibeError from @usevibejs/errors', () => {
     expect(VibeError).toBe(errors.VibeError);
     expect(isVibeError).toBe(errors.isVibeError);
   });

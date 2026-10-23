@@ -1,6 +1,6 @@
 // The compiled twin of Counter.vibe, written as the compiler emits it (types added).
-import { ref } from '@vibejs-org/ui';
-import type { SetupContext } from '@vibejs-org/ui';
+import { ref } from '@usevibejs/ui';
+import type { SetupContext } from '@usevibejs/ui';
 import {
   on,
   renderEffect,
@@ -10,7 +10,7 @@ import {
   txt,
   withModifiers,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 type Props = {
   start?: number;

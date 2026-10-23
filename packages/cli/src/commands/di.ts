@@ -1,4 +1,4 @@
-import type { AppInspection } from '@vibejs-org/server';
+import type { AppInspection } from '@usevibejs/server';
 import type { CommandDef } from '../command.ts';
 import { loadAppModule, loadError, withServerRunner } from '../dev/app-module.ts';
 import { envelopeError, type JsonEnvelope } from '../output.ts';

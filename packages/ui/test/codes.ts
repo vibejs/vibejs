@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 
 /** The VIBE codes of the warnings that a `console.warn` or `warnHandler` spy received, in order. */
 export const warnedCodes = (spy: { mock: { calls: unknown[][] } }): string[] =>

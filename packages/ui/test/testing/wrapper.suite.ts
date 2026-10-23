@@ -1,6 +1,6 @@
 // The wrapper tests, run in jsdom by wrapper.test.ts and in Chromium by wrapper.browser.test.ts.
-import { isVibeError } from '@vibejs-org/ui';
-import { flushPromises, mount, type DOMWrapper } from '@vibejs-org/ui/testing';
+import { isVibeError } from '@usevibejs/ui';
+import { flushPromises, mount, type DOMWrapper } from '@usevibejs/ui/testing';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { thrownCode } from '../codes.ts';
 import { Controls, Fragment, Greeting, Nested } from './components.ts';

@@ -6,7 +6,7 @@ packages:
 catalogMode: strict
 minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
-  - '@vibejs-org/*'
+  - '@usevibejs/*'
   - create-vibejs
 trustPolicy: no-downgrade
 allowBuilds:

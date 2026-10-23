@@ -1,4 +1,4 @@
-import { isVibeError } from '@vibejs-org/errors';
+import { isVibeError } from '@usevibejs/errors';
 import { describe, expect, it, vi } from 'vitest';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { createClient, type ClientOptions } from './client.ts';

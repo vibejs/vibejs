@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from '@vibejs-org/ui'
+import { ref } from '@usevibejs/ui'
 import Field from './Field.vibe'
 const text = ref('')
 const amount = ref(0)

@@ -11,7 +11,7 @@ it('exports generate, formatSpans and the span constants', () => {
 it('keeps the content mapper manifest', () => {
   const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   expect(manifest).toMatchObject({
-    name: '@vibejs-org/language-tools',
+    name: '@usevibejs/language-tools',
     version: expect.any(String),
   });
   expect(manifest.typescript.contentMapper).toEqual({

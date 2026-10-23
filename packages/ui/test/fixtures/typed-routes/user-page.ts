@@ -1,4 +1,4 @@
-import type { RouteParams } from '@vibejs-org/ui/router';
+import type { RouteParams } from '@usevibejs/ui/router';
 
 // The page is imported lazily by routes.ts, and its props are typed from those routes.
 export const UserPage = {

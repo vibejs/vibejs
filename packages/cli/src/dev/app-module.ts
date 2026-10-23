@@ -1,17 +1,17 @@
 import { join } from 'node:path';
-import { isVibeError, type VibeError } from '@vibejs-org/errors';
-import type * as Server from '@vibejs-org/server';
+import { isVibeError, type VibeError } from '@usevibejs/errors';
+import type * as Server from '@usevibejs/server';
 import type { ModuleRunner } from 'vite/module-runner';
 import { vibeError } from '../errors.gen.ts';
 
 export const APP_MODULE = 'server/src/app.module.ts';
 
 /**
- * The runner's SSR options: `@vibejs-org/server` keeps the decorator metadata in module state,
+ * The runner's SSR options: `@usevibejs/server` keeps the decorator metadata in module state,
  * so the app and `loadAppModule()` must share one instance. Vite externalizes an installed (not
  * linked) package for the app's imports only, which would load a second one.
  */
-export const SSR_OPTIONS: { noExternal: string[] } = { noExternal: ['@vibejs-org/server'] };
+export const SSR_OPTIONS: { noExternal: string[] } = { noExternal: ['@usevibejs/server'] };
 
 export interface LoadedApp {
   server: typeof Server;
@@ -21,7 +21,7 @@ export interface LoadedApp {
 }
 
 /**
- * Imports `server/src/app.module.ts` and the project's `@vibejs-org/server` through `runner`;
+ * Imports `server/src/app.module.ts` and the project's `@usevibejs/server` through `runner`;
  * checks the exports (VIBE8202) and the base path (VIBE8205).
  */
 export async function loadAppModule(runner: ModuleRunner, root: string): Promise<LoadedApp> {
@@ -36,7 +36,7 @@ export async function loadAppModule(runner: ModuleRunner, root: string): Promise
   const { basePath } = options;
   // The UI is served at the root, so a root-mounted backend would shadow it.
   if (!basePath) throw vibeError('VIBE8205');
-  const server: typeof Server = await runner.import('@vibejs-org/server');
+  const server: typeof Server = await runner.import('@usevibejs/server');
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the server rejects a class that is not a module
   const module = AppModule as Server.ModuleImport;
   return { server, AppModule: module, appOptions: { ...options, basePath } };

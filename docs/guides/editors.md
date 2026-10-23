@@ -6,7 +6,7 @@ order: 3
 
 # Editor setup
 
-`.vibe` files are type-checked by the TypeScript 7 language server (`tsc --lsp`). The server loads the project's `@vibejs-org/language-tools`, a content mapper that turns each `.vibe` file into TypeScript, and maps every answer back to the exact position in the `.vibe` file. Hover, go to definition, find references, rename, completion and diagnostics work in the `<script setup>` block and in template expressions.
+`.vibe` files are type-checked by the TypeScript 7 language server (`tsc --lsp`). The server loads the project's `@usevibejs/language-tools`, a content mapper that turns each `.vibe` file into TypeScript, and maps every answer back to the exact position in the `.vibe` file. Hover, go to definition, find references, rename, completion and diagnostics work in the `<script setup>` block and in template expressions.
 
 Every editor needs the same three things:
 
@@ -14,14 +14,14 @@ Every editor needs the same three things:
 
   ```json
   {
-    "contentMappers": [{ "package": "@vibejs-org/language-tools", "extensions": [".vibe"] }]
+    "contentMappers": [{ "package": "@usevibejs/language-tools", "extensions": [".vibe"] }]
   }
   ```
 
 - `node` on the editor's `PATH`, because the server starts the content mapper with it;
 - permission to run project code. The content mapper is project code, so the server runs it only when the editor passes `runExternalCode: true` in its initialization options. Enable it only for projects you trust.
 
-Open the app root, the folder that contains `node_modules`, so that the server finds `@vibejs-org/language-tools`.
+Open the app root, the folder that contains `node_modules`, so that the server finds `@usevibejs/language-tools`.
 
 ## VS Code
 
@@ -73,9 +73,9 @@ These come from the TypeScript language server and are tracked upstream.
 | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [VIBE6101](/errors/VIBE6101): the TypeScript 7 extension is missing.                     | Install `TypeScriptTeam.native-preview` and reload the window.                                                                                                              |
 | [VIBE6102](/errors/VIBE6102): the workspace is not trusted.                              | Trust the folder. In Restricted Mode the TypeScript 7 extension is off, so `.vibe` files are highlighted only.                                                              |
-| [VIBE6002](/errors/VIBE6002): the TypeScript host does not offer UTF-16 positions.       | Update `typescript` to the version that `@vibejs-org/language-tools` supports.                                                                                              |
+| [VIBE6002](/errors/VIBE6002): the TypeScript host does not offer UTF-16 positions.       | Update `typescript` to the version that `@usevibejs/language-tools` supports.                                                                                               |
 | [VIBE6010](/errors/VIBE6010): an `<!-- @vibe-expect-error -->` suppresses no type error. | Remove the comment, or move it right before the element or interpolation whose error it expects.                                                                            |
 | TS18068: content mappers require `--runExternalCode`.                                    | Run `tsc -b --runExternalCode` (`vibejs check` passes it). In an editor, pass `runExternalCode: true` in the initialization options.                                        |
-| TS18099: the content mapper did not start.                                               | Run `pnpm install` so that `@vibejs-org/language-tools` and its build are in `node_modules`, and make sure the editor finds `node` on its `PATH`.                           |
+| TS18099: the content mapper did not start.                                               | Run `pnpm install` so that `@usevibejs/language-tools` and its build are in `node_modules`, and make sure the editor finds `node` on its `PATH`.                            |
 | TS18080: a problem in the code that the content mapper produced.                         | The `.vibe` file maps to invalid TypeScript, which is a vibe.js bug. Report it with the file at [github.com/vibejs/vibejs/issues](https://github.com/vibejs/vibejs/issues). |
-| Diagnostics do not change after linking a local build of `@vibejs-org/language-tools`.   | TypeScript caches the content mapper's output by package version. Run `tsc -b --force` once, and restart the language server.                                               |
+| Diagnostics do not change after linking a local build of `@usevibejs/language-tools`.    | TypeScript caches the content mapper's output by package version. Run `tsc -b --force` once, and restart the language server.                                               |

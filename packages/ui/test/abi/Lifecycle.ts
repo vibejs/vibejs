@@ -8,7 +8,7 @@ import {
   onUnmounted,
   onUpdated,
   ref,
-} from '@vibejs-org/ui';
+} from '@usevibejs/ui';
 import {
   child,
   createComponent,
@@ -21,7 +21,7 @@ import {
   toDisplayString,
   txt,
   type ComponentDef,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 import { Leaf } from './Leaf.ts';
 
 type Props = {

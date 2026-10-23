@@ -1,4 +1,4 @@
-import { VibeFactory } from '@vibejs-org/server';
+import { VibeFactory } from '@usevibejs/server';
 import { AppModule, appOptions } from './app.module.ts';
 
 const app = await VibeFactory.create(AppModule, appOptions);

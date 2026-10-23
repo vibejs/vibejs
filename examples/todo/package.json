@@ -9,17 +9,17 @@
     "test": "vibejs check --json && vibejs build"
   },
   "dependencies": {
-    "@vibejs-org/contract": "workspace:*",
-    "@vibejs-org/server": "workspace:*",
-    "@vibejs-org/ui": "workspace:*",
+    "@usevibejs/contract": "workspace:*",
+    "@usevibejs/server": "workspace:*",
+    "@usevibejs/ui": "workspace:*",
     "todo-flags": "workspace:*",
     "valibot": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@vibejs-org/cli": "workspace:*",
-    "@vibejs-org/compiler": "workspace:*",
-    "@vibejs-org/language-tools": "workspace:*",
+    "@usevibejs/cli": "workspace:*",
+    "@usevibejs/compiler": "workspace:*",
+    "@usevibejs/language-tools": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
     "oxfmt": "catalog:",

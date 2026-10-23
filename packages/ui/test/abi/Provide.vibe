@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, ref } from '@vibejs-org/ui';
+import { provide, ref } from '@usevibejs/ui';
 import Consumer from './Consumer.vibe';
 import { ThemeKey } from './keys.ts';
 

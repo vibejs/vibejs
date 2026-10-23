@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@vibejs-org/cli": "0.0.0"
+    "@usevibejs/cli": "0.0.0"
   }
 }

@@ -1,5 +1,5 @@
 
-import { useTemplateRef, type Component } from '@vibejs-org/ui'
+import { useTemplateRef, type Component } from '@usevibejs/ui'
 import Row from './Row.vibe'
 defineProps<__VibeProps>()
 const Local = Row
@@ -28,5 +28,5 @@ type __VibeExposed = {};
 type __VibeRefs = { local: ReturnType<typeof __vibe.unrefs<{ c: typeof Local }>>['c'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown; item: ReturnType<typeof __vibe.ctx<__VibeProps & __VibeModels, __VibeEmits, __VibeSlots>>['Item'] extends infer __VibeC extends Parameters<typeof __vibe.component>[0] ? ReturnType<ReturnType<typeof __vibe.component<__VibeC>>>['exposed'] : unknown; looped: (typeof __vibe_c2.exposed)[]; 'a\u0027b': HTMLElementTagNameMap extends Record<'p', infer E> ? E : Element };
 type __VibeModels = {};
 export default __vibe.defineComponent<__VibeProps, __VibeEmits, __VibeSlots, __VibeExposed, __VibeModels>();
-import * as __vibe from '@vibejs-org/ui/tooling';
-import { defineProps } from '@vibejs-org/ui/tooling';
+import * as __vibe from '@usevibejs/ui/tooling';
+import { defineProps } from '@usevibejs/ui/tooling';

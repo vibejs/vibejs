@@ -17,7 +17,7 @@ import { afterAll, expect } from 'vitest';
 
 /** The app's own directory. */
 export const APP = fileURLToPath(new URL('..', import.meta.url));
-const BIN = join(APP, 'node_modules/@vibejs-org/cli/dist/bin.js');
+const BIN = join(APP, 'node_modules/@usevibejs/cli/dist/bin.js');
 const SKIP = new Set(['node_modules', '.tsbuild', '.vibejs', 'dist', 'coverage']);
 
 // The children must not see the Vitest worker that runs the test, nor its NODE_ENV=test.

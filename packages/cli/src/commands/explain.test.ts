@@ -1,4 +1,4 @@
-import { DOCS_BASE } from '@vibejs-org/errors';
+import { DOCS_BASE } from '@usevibejs/errors';
 import { expect, it, vi } from 'vitest';
 import { CATALOG, type CatalogEntry } from '../catalog.gen.ts';
 import type { Ctx } from '../ctx.ts';

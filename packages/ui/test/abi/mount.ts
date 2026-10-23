@@ -1,11 +1,11 @@
-import { createApp, shallowReactive, type App } from '@vibejs-org/ui';
+import { createApp, shallowReactive, type App } from '@usevibejs/ui';
 import {
   createComponent,
   setRef,
   type ComponentDef,
   type RawProps,
   type RawSlots,
-} from '@vibejs-org/ui/internal';
+} from '@usevibejs/ui/internal';
 
 export interface Mounted {
   /** The host element the component renders into. */

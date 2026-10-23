@@ -1,4 +1,4 @@
-import { defineRoutes } from '@vibejs-org/ui/router';
+import { defineRoutes } from '@usevibejs/ui/router';
 
 const Home = {};
 

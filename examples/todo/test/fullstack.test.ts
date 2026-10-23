@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-import { JsonLogger, type App as Server } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
-import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { flushPromises, mount, type DOMWrapper } from '@vibejs-org/ui/testing';
+import { JsonLogger, type App as Server } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
+import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { flushPromises, mount, type DOMWrapper } from '@usevibejs/ui/testing';
 import { flagsPlugin } from 'todo-flags/ui';
 import { afterEach, expect, it } from 'vitest';
 import { AppModule, appOptions } from '../server/src/app.module.ts';

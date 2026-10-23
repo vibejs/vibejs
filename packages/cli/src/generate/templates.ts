@@ -12,7 +12,7 @@ function resource({ name, singular }: Names): Record<string, string> {
   const contract = `../../../contracts/src/${name}.contract.ts`;
   const notFound = `ctx.fail('${code}', \`No ${singular} \${ctx.params.id}\`)`;
   return {
-    [`contracts/src/${name}.contract.ts`]: `import { defineContract, del, get, patch, post } from '@vibejs-org/contract';
+    [`contracts/src/${name}.contract.ts`]: `import { defineContract, del, get, patch, post } from '@usevibejs/contract';
 import * as v from 'valibot';
 
 export const ${One} = v.object({ id: v.string(), name: v.string() });
@@ -71,7 +71,7 @@ export class ${Plural}Service {
   }
 }
 `,
-    [`server/src/${name}/${name}.controller.ts`]: `import { Controller, Handle, inject, type Ctx } from '@vibejs-org/server';
+    [`server/src/${name}/${name}.controller.ts`]: `import { Controller, Handle, inject, type Ctx } from '@usevibejs/server';
 import { ${name}, type ${One} } from '${contract}';
 import { ${Plural}Service } from './${name}.service.ts';
 
@@ -109,16 +109,16 @@ export class ${Plural}Controller {
   }
 }
 `,
-    [`server/src/${name}/${name}.module.ts`]: `import { Module } from '@vibejs-org/server';
+    [`server/src/${name}/${name}.module.ts`]: `import { Module } from '@usevibejs/server';
 import { ${Plural}Controller } from './${name}.controller.ts';
 import { ${Plural}Service } from './${name}.service.ts';
 
 @Module({ providers: [${Plural}Service], controllers: [${Plural}Controller] })
 export class ${Plural}Module {}
 `,
-    [`server/src/${name}/${name}.controller.test.ts`]: `import { createClient } from '@vibejs-org/contract';
-import { JsonLogger } from '@vibejs-org/server';
-import { Test } from '@vibejs-org/server/testing';
+    [`server/src/${name}/${name}.controller.test.ts`]: `import { createClient } from '@usevibejs/contract';
+import { JsonLogger } from '@usevibejs/server';
+import { Test } from '@usevibejs/server/testing';
 import { expect, it } from 'vitest';
 import { ${name} } from '${contract}';
 import { AppModule, appOptions } from '../app.module.ts';
@@ -176,7 +176,7 @@ defineProps<{ title: string }>();
   <div class="${css}">{{ title }}</div>
 </template>
 `,
-    [`ui/src/components/${name}.test.ts`]: `import { mount } from '@vibejs-org/ui/testing';
+    [`ui/src/components/${name}.test.ts`]: `import { mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import ${name} from './${name}.vibe';
 
@@ -201,8 +201,8 @@ function page({ name }: Names): Record<string, string> {
   <h1>${title}</h1>
 </template>
 `,
-    [`ui/src/pages/${name}.test.ts`]: `import { createMemoryHistory, createRouter } from '@vibejs-org/ui/router';
-import { mount } from '@vibejs-org/ui/testing';
+    [`ui/src/pages/${name}.test.ts`]: `import { createMemoryHistory, createRouter } from '@usevibejs/ui/router';
+import { mount } from '@usevibejs/ui/testing';
 import { expect, it } from 'vitest';
 import App from '../App.vibe';
 import { routes } from '../routes.ts';
