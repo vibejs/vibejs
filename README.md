@@ -2,13 +2,21 @@
 
 A full-stack TypeScript framework where the UI, the server and the contract between them are type-checked end to end, and every tool speaks to coding agents as well as to people.
 
-Status: pre-alpha. The design is fixed and the packages are being built; only `@usevibejs/errors` has an implementation so far. Nothing is published.
+Status: pre-alpha. v0.1.0 is published on npm; APIs may still change before v1. Docs and the tutorial live at [vibejs.org](https://vibejs.org).
 
 vibe.js is not monday.com Vibe (`@vibe/*`), not the `@vibe.js/*` packages (a different project), and not the npm packages `vibejs` or `vibe.js`. Its packages live under `@usevibejs/*`, its CLI is `vibejs` (never `vibe`) and its scaffolder is `create-vibejs`.
 
-## Design
+## Quick start
 
-This is the planned design for v0.1. Today only the error code runtime in `@usevibejs/errors` exists.
+```sh
+pnpm create vibejs my-app
+cd my-app
+pnpm dev
+```
+
+See [Getting started](docs/guides/getting-started.md) for the project layout, checks and editor setup.
+
+## Design
 
 - **UI.** Components are `.vibe` single-file components: a `<script setup lang="ts">` block, a `<template>` and an optional `<style scoped>`. The compiler turns templates into direct DOM operations driven by a fine-grained reactive runtime: no virtual DOM, and only the nodes that depend on a changed value are updated.
 - **Server.** Applications are built from modules, providers and controllers, wired by dependency injection (`inject()` in field initializers) and declared with a small set of decorators. Each request handler receives one typed context.
@@ -30,6 +38,18 @@ This is the planned design for v0.1. Today only the error code runtime in `@usev
 | `docs/`                   | Docs site, its generators and the snippet checker           |
 | `scripts/`                | Repository tooling: error generation, repo lint, CI helpers |
 | `docs/decisions/`         | Architecture decision records                               |
+
+## The vibe.js family
+
+| Package                                                   | Description                                       |
+| --------------------------------------------------------- | ------------------------------------------------- |
+| [@usevibejs/auth](https://github.com/vibejs/vibeauth)     | Authentication with Better Auth                   |
+| [@usevibejs/form](https://github.com/vibejs/vibeform)     | Type-safe forms with TanStack Form                |
+| [@usevibejs/motion](https://github.com/vibejs/vibemotion) | Animations, gestures and layout with Motion       |
+| [@usevibejs/query](https://github.com/vibejs/vibequery)   | Async state and data fetching with TanStack Query |
+| [@usevibejs/table](https://github.com/vibejs/vibetable)   | Headless tables with TanStack Table               |
+| [@usevibejs/use](https://github.com/vibejs/vibeuse)       | Essential composables                             |
+| [vibecn](https://github.com/vibejs/vibecn)                | shadcn/ui components as .vibe source              |
 
 ## Development
 
