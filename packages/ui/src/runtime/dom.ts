@@ -11,6 +11,7 @@
 import { isRef, toRaw } from '../reactivity/dep.ts';
 import { hyphenate, isFunction, isObject, toText } from '../shared.ts';
 import { on } from './events.ts';
+import { claimHydrationNode, isHydrating, noteHydrationMismatch } from './hydrateState.ts';
 
 /**
  * Returns a factory of the node that `html` parses to. `html` has exactly one root and parses
@@ -27,7 +28,9 @@ export function template(html: string, ns?: 'svg' | 'math'): () => Node {
       node = t.content.firstChild!;
       if (ns) node = node.firstChild!;
     }
-    return document.importNode(node, true);
+    const clone = document.importNode(node, true);
+    if (!isHydrating()) return clone;
+    return claimHydrationNode(clone.nodeName) ?? clone;
   };
 }
 
@@ -57,7 +60,12 @@ export function txt(el: Node): Text {
 
 /** Sets the text of a text node (or of an element, for `v-text`); an equal text is not written. */
 export function setText(n: Node, text: string): void {
-  if (n.textContent !== text) n.textContent = text;
+  if (n.textContent === text) return;
+  if (isHydrating()) {
+    noteHydrationMismatch();
+    return;
+  }
+  n.textContent = text;
 }
 
 const xlinkNS = 'http://www.w3.org/1999/xlink';

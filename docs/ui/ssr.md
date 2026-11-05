@@ -20,6 +20,17 @@ const html = renderToString(createApp(App).use(createHead()));
 
 `renderToString()` mounts the app once, reads the document, and unmounts it. The same app cannot be mounted again. A second call throws [VIBE5306](/errors/VIBE5306). Create a new app for each render.
 
+`hydrate()` attaches a new app to the nodes that string already contains. The same nodes stay when the client render matches. A different tag or text throws [VIBE5307](/errors/VIBE5307) and the container is left as it was. `mount()` still replaces its container.
+
+```ts
+import { createApp, hydrate, type Component } from '@usevibejs/ui';
+
+declare const App: Component;
+declare const root: HTMLElement;
+
+hydrate(createApp(App), root);
+```
+
 ```vibe
 <script setup lang="ts">
 import { useHead } from '@usevibejs/ui';

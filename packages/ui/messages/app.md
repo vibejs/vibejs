@@ -56,6 +56,28 @@ A plugin is a function or an object with an `install` function, and `app.use()` 
 - Call `renderToString()` with a new app from `createApp()`.
 - Do not call `mount()` on an app that `renderToString()` will render.
 
+## VIBE5307: Hydration mismatch
+
+> The HTML already in the container does not match what the client rendered.
+
+`hydrate()` reuses the nodes a server render put in the container. When a tag or a text is different, the client does not rebuild the tree. The container is left as it was, and this error is thrown in every build.
+
+### Fix
+
+- Render the same app with `renderToString()` and hydrate that HTML.
+- Pass the element that contains the server markup, not an empty element.
+
+## VIBE5308: Hydrate of a mounted app
+
+> hydrate() received an app that is already mounted.
+
+An app attaches to a container once. `hydrate()` does not attach an app that `mount()` or `hydrate()` already attached.
+
+### Fix
+
+- Call `hydrate()` with a new app from `createApp()`.
+- Do not call `mount()` before `hydrate()`.
+
 ## VIBE5305: Unmount before mount
 
 > app.unmount() was called on an app that is not mounted.

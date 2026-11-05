@@ -38,6 +38,7 @@ describe('@usevibejs/ui', () => {
         'unref',
         'createApp',
         'createHead',
+        'hydrate',
         'useId',
         'useHead',
         'useAsync',
