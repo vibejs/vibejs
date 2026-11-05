@@ -13,6 +13,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { CODEGEN, codegen, compiler } from '../test/fixtures.ts';
 import { formatSpans } from './dump.ts';
 import { UNKNOWN } from './expression.ts';
+import { vibeError } from './errors.gen.ts';
 import { generate } from './generate.ts';
 
 vi.mock('@usevibejs/compiler', async (original) => {
@@ -211,6 +212,7 @@ const n = 'a'
       expect(refused.diagnostics).toMatchObject([
         { code: 6003, start: 0, length: 0, message: expect.stringContaining(hidden) },
       ]);
+      expect(vibeError('VIBE6003', { file: hidden }).code).toBe('VIBE6003');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
