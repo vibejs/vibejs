@@ -38,7 +38,10 @@ declare const process: { env: Record<string, string | undefined> };
 class AppModule {}
 const appOptions: AppOptions = { basePath: '/api' };
 // ---cut---
-const app = await VibeFactory.create(AppModule, appOptions);
+const app = await VibeFactory.create(AppModule, {
+  ...appOptions,
+  static: { root: 'ui/dist', spa: true },
+});
 app.enableShutdownHooks();
 await app.listen(Number(process.env.PORT ?? 3000));
 ```
@@ -73,12 +76,13 @@ console.log(modules.map((m) => m.path));
 
 ## Deploying
 
-`vibejs build` writes two deployables:
+`vibejs build` writes the UI to `ui/dist` and the server to `server/dist/main.js`. With `static` set, as in the production entry above, one process serves both. `node server/dist/main.js` reads `PORT`, answers the API under `basePath`, and serves GET requests outside that prefix from `static.root`. A relative root, such as `ui/dist`, is resolved from the process directory. `spa: true` responds with `index.html` when the path misses a file, so a client route such as `/users` loads the app.
 
-- `ui/dist`: the static UI, served by any static file host or CDN.
-- `server/dist/main.js`: the server, run with `node server/dist/main.js`. It reads `PORT` and answers under `/api`.
+`static.root` must exist ([VIBE9406](/errors/VIBE9406)) and be a directory ([VIBE9407](/errors/VIBE9407)). A path that leaves the directory, including through a symbolic link, is rejected ([VIBE9408](/errors/VIBE9408)). `app.fetch` serves the files, so `listen()` and a Worker that exports `fetch` do the same thing.
 
-Route `/api` to the server and everything else to the static files. During development, `vibejs dev` serves both on one port.
+`vibejs dev` does not read `static`. It serves the UI itself and mounts the API at `basePath`.
+
+The same `ui/dist` can still be deployed to a separate file host. Leave `static` unset in that case and route `/api` to the server.
 
 ## Next
 

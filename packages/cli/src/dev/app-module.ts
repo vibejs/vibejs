@@ -43,6 +43,15 @@ export async function loadAppModule(runner: ModuleRunner, root: string): Promise
 }
 
 /**
+ * `appOptions` without `static`. `vibejs dev` and `vibejs request` serve the UI with Vite, so they
+ * do not read the production file root.
+ */
+export function withoutStatic(options: Server.AppOptions): Server.AppOptions {
+  const { static: _static, ...rest } = options;
+  return rest;
+}
+
+/**
  * A Vite SSR module runner over `<root>/server`, without a config file, watcher or output;
  * closed after `fn`.
  */

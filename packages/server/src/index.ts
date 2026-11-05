@@ -6,6 +6,7 @@ export { token } from './di/token.ts';
 export type { Class, InjectionToken, Token } from './di/token.ts';
 export { inspect, VibeFactory } from './http/app.ts';
 export type { App, AppInspection, AppOptions, Middleware } from './http/app.ts';
+export type { StaticOptions } from './http/static.ts';
 export type {
   CanActivate,
   Ctx,

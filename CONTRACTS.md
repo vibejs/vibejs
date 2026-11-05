@@ -178,8 +178,9 @@ isAllowedGlobal(name); isSimpleHandler(expr); resolveComponentTag(tag, analysis,
 - **Resolution.** `contentMappers` entries inherited through `extends` resolve from each leaf tsconfig's directory, so `@usevibejs/language-tools` must be a direct dependency of the app.
 
 ## C7 Backend ↔ CLI, templates, UI
-- **App entry.** `server/src/app.module.ts` exports `AppModule` and `appOptions: AppOptions` (`basePath: '/api'`). `server/src/main.ts` runs `VibeFactory.create(AppModule, appOptions)`, then `enableShutdownHooks()`, then `listen(Number(process.env.PORT ?? 3000))`.
-- **Dev server.** It runs app.module.ts through Vite's SSR module runner with `create(AppModule, { ...appOptions, logger })` and mounts `app.fetch` at basePath via srvx `toNodeHandler`. A restart is `await app.close()` followed by `create` again.
+- **App entry.** `server/src/app.module.ts` exports `AppModule` and `appOptions: AppOptions` (`basePath: '/api'`). `server/src/main.ts` runs `VibeFactory.create(AppModule, appOptions)`, then `enableShutdownHooks()`, then `listen(Number(process.env.PORT ?? 3000))`. The template's `main.ts` adds `static: { root: 'ui/dist', spa: true }` so production serves the built UI. Tests and `vibejs dev` import `appOptions`, which does not set `static`.
+- **Static files.** `AppOptions.static` is `{ root, spa? }`. GET requests outside `basePath` are files from `root` (a relative root resolves from the process directory). `spa: true` falls back to `index.html`. Missing root is VIBE9406, a non-directory root is VIBE9407, and a path that leaves the root is VIBE9408. `app.fetch` and `listen` share this behavior.
+- **Dev server.** It runs app.module.ts through Vite's SSR module runner with `create(AppModule, { ...appOptions, logger })` and mounts `app.fetch` at basePath via srvx `toNodeHandler`. It omits `static`; Vite serves the UI. A restart is `await app.close()` followed by `create` again.
   - `create` must have no side effects.
   - `close` must be idempotent.
 - **Problem responses** are `application/problem+json`: `{ type, title, status, code, detail?, errors?, requestId }`.

@@ -23,6 +23,7 @@ import {
 import { HttpError, problem, renderError } from './errors.ts';
 import { createPipeline } from './pipeline.ts';
 import { createRouter, handlerName } from './router.ts';
+import { isStaticPath, openStatic, serveStatic, type StaticOptions } from './static.ts';
 
 export interface AppOptions {
   /** The path prefix of every route, such as `/api`; default `''`. */
@@ -43,6 +44,11 @@ export interface AppOptions {
   readonly shutdownTimeout?: number;
   /** Validates handler results against the route's response schema; default `true`. */
   readonly validateResponses?: boolean;
+  /**
+   * Serves files for GET requests outside `basePath`. `vibejs dev` serves the UI itself and ignores
+   * this option.
+   */
+  readonly static?: StaticOptions;
 }
 
 /** Wraps request handling; `next(req?)` continues, optionally with a replacement request. */
@@ -182,9 +188,11 @@ export async function createApp(
     bodyLimit = 1_048_576,
     shutdownTimeout = 10_000,
     validateResponses = true,
+    static: staticFiles,
   } = options;
   // Scanned before any provider runs, so a bad option or graph leaves nothing to shut down.
   const scanned = scanApp(root, { ...options, logger }, overrides);
+  const files = staticFiles ? await openStatic(staticFiles) : undefined;
   const { graph, router } = scanned;
   const scope = graph.root.scope;
   const records = (classes: readonly (new () => object)[]) =>
@@ -214,10 +222,14 @@ export async function createApp(
   async function dispatch(req: Request, requestId: string, headers: Headers): Promise<Response> {
     const log = logger.child({ requestId });
     try {
+      const url = new URL(req.url);
+      if (files && req.method === 'GET' && isStaticPath(url.pathname, basePath)) {
+        const served = await serveStatic(files, url.pathname);
+        if (served) return served;
+      }
       if (Number(req.headers.get('content-length')) > bodyLimit) {
         throw new HttpError(413, 'BODY_TOO_LARGE');
       }
-      const url = new URL(req.url);
       const found = router.match(req.method, url.pathname);
       if ('allow' in found) return new Response(null, { status: 204, headers: found });
       const { binding, params } = found;

@@ -137,7 +137,7 @@ pnpm vibejs build
 pnpm start
 ```
 
-`vibejs build` writes the UI to `ui/dist` and the server to `server/dist/main.js`. `pnpm start` runs the built server on port 3000, or on the port in `PORT`: `/api/health` answers `{"status":"ok"}` and `/api/users` answers the list of users, empty for now. Stop it with Ctrl+C. The two outputs are deployed separately: the UI as static files, the server as a Node.js process ([Deploying](../server/index.md#deploying)).
+`vibejs build` writes the UI to `ui/dist` and the server to `server/dist/main.js`. `pnpm start` runs that server on port 3000, or on the port in `PORT`. It answers the API and serves the built UI: `/api/health` answers `{"status":"ok"}`, `/api/users` answers the list of users, empty for now, and `/` is the app. A GET that misses a file falls back to `index.html`. Stop it with Ctrl+C. During development, `pnpm dev` still serves the UI with its dev server ([Deploying](../server/index.md#deploying)).
 
 ## 7. Develop
 

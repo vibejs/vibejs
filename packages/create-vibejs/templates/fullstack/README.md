@@ -13,7 +13,7 @@ Run them with your package manager, such as `npm run dev` or `pnpm dev`.
 | `dev`   | Serves the UI and the API (under `/api`) on one port, with reload on change. |
 | `check` | Type-checks, lints, format-checks and tests the app with coverage.           |
 | `build` | Builds the UI into `ui/dist` and the server into `server/dist/main.js`.      |
-| `start` | Runs the built server.                                                       |
+| `start` | Runs the built server: the API under `/api`, and the UI from `ui/dist`.      |
 
 ## Coding agents
 

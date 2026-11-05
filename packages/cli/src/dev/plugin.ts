@@ -18,7 +18,7 @@ import {
 } from 'vite';
 import { vibeError } from '../errors.gen.ts';
 import { envelopeError } from '../output.ts';
-import { APP_MODULE, loadAppModule } from './app-module.ts';
+import { APP_MODULE, loadAppModule, withoutStatic } from './app-module.ts';
 import type { DevHealth } from './lock.ts';
 import type { DevLog, LogEntry } from './log.ts';
 
@@ -134,7 +134,7 @@ export function vibejsDev(o: {
       runner.clearCache();
       const { server, AppModule, appOptions } = await loadAppModule(runner, o.root);
       const logger = serverLogger(server.Logger, o.log);
-      app = await server.VibeFactory.create(AppModule, { ...appOptions, logger });
+      app = await server.VibeFactory.create(AppModule, { ...withoutStatic(appOptions), logger });
       ({ basePath } = appOptions);
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Vite middlewares receive HTTP/1 requests
       handler = toNodeHandler(app.fetch) as NodeHttp1Handler;
