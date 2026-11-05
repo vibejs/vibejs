@@ -60,8 +60,10 @@ describe('renderToString', () => {
   });
 
   test('restores the caller document when setup throws', () => {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an async setup from untyped code
+    const asyncSetup = (async () => {}) as unknown as ComponentDef['setup'];
     const def: ComponentDef = {
-      setup: () => Promise.resolve({}),
+      setup: asyncSetup,
       render: () => document.createTextNode(''),
     };
     const marker = document.createElement('b');

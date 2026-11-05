@@ -37,8 +37,10 @@ describe('renderToString without a document', () => {
   });
 
   test('removes the document when setup throws', () => {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an async setup from untyped code
+    const asyncSetup = (async () => {}) as unknown as ComponentDef['setup'];
     const def: ComponentDef = {
-      setup: () => Promise.resolve({}),
+      setup: asyncSetup,
       render: () => document.createTextNode(''),
     };
     expect(thrownCode(() => renderToString(createApp(def)))).toBe('VIBE5204');

@@ -35,13 +35,13 @@ function escapeHtml(value: string): string {
 
 /** One head tag, with attributes in name order so the string does not depend on the DOM. */
 function elementHtml(el: Element): string {
-  const attrs = [...el.attributes]
-    .toSorted((a, b) => (a.name < b.name ? -1 : 1))
-    .map((attr) => ` ${attr.name}="${escapeHtml(attr.value)}"`)
-    .join('');
+  const attrs = [...el.attributes];
+  // oxlint-disable-next-line unicorn/no-array-sort -- sorts a fresh copy; toSorted() is ES2023
+  attrs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  const rendered = attrs.map((attr) => ` ${attr.name}="${escapeHtml(attr.value)}"`).join('');
   const tag = el.tagName.toLowerCase();
-  if (tag === 'title') return `<title${attrs}>${escapeHtml(el.textContent)}</title>`;
-  return `<${tag}${attrs}>`;
+  if (tag === 'title') return `<title${rendered}>${escapeHtml(el.textContent)}</title>`;
+  return `<${tag}${rendered}>`;
 }
 
 /** The head tags `useHead()` wrote, then the body, as one document. */
