@@ -39,6 +39,8 @@ describe('@usevibejs/ui', () => {
         'createApp',
         'createHead',
         'hydrate',
+        'hydrateAsync',
+        'readServerState',
         'useId',
         'useHead',
         'useAsync',

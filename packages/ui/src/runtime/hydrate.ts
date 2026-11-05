@@ -1,5 +1,6 @@
 // Attaches an app to the DOM a server render already produced.
 import { vibeError } from '../errors.gen.ts';
+import { waitForInstalledRouter } from '../router/router.ts';
 import { isAppMounted, type App } from './app.ts';
 import { hydrationFailed, startHydration, stopHydration } from './hydrateState.ts';
 
@@ -23,4 +24,14 @@ export function hydrate(app: App, container: Element): Record<string, unknown> {
   } finally {
     stopHydration();
   }
+}
+
+/**
+ * Waits until the installed router's first navigation has settled, then {@link hydrate}s.
+ * An app with no router hydrates on the next turn. A mounted app is VIBE5308, before the wait.
+ */
+export async function hydrateAsync(app: App, container: Element): Promise<Record<string, unknown>> {
+  if (isAppMounted(app)) throw vibeError('VIBE5308');
+  await waitForInstalledRouter(app);
+  return hydrate(app, container);
 }
