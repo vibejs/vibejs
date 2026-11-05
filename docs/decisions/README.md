@@ -12,6 +12,7 @@ This folder records the decisions that shape vibe.js: what was decided, why, and
 | [0006](0006-quality-gates.md)                 | Quality gates: coverage and stable error codes                     | Accepted |
 | [0007](0007-ai-agent-developer-experience.md) | AI-agent developer experience                                      | Accepted |
 | [0008](0008-npm-scope-usevibejs.md)           | npm scope `@usevibejs`                                             | Accepted |
+| [0009](0009-server-rendering.md)              | Server rendering: one compiler output, hydration, full HTML first  | Accepted |
 
 ## Proposing a decision
 
