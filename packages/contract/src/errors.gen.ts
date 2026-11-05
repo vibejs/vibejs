@@ -6,7 +6,9 @@ const MESSAGES = {
   VIBE9002: ["The path \"{path}\" declares the param \":{param}\" more than once.","Rename one of the \":{param}\" params so that every param name in the prefix and the route path is unique."],
   VIBE9003: ["The contract entry \"{key}\" is not a route built with get, post, put, patch or del.","Build \"{key}\" with `get`, `post`, `put`, `patch` or `del`, for example `{key}: get('/')`.","Pass the route builders' results to `defineContract`, not the routes of another contract."],
   VIBE9004: ["The GET route \"{path}\" declares a body.","Move the inputs of \"{path}\" into `query`, or declare the route with `post` if it needs a body."],
+  VIBE9005: ["files() was called with {reason}.","Pass a positive integer for `maxBytes` and for `maxFiles`, and a non-empty `types` list."],
   VIBE9091: ["The call to \"{path}\" is missing the path param \"{param}\".","Pass `params.{param}` in the call input.","Check that the route path \"{path}\" is the one you meant to call."],
+  VIBE9092: ["The call to \"{path}\" needs a FormData body.","Pass a `FormData` value as `body`, with one entry per file."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => (process.env.NODE_ENV !== 'production' ? MESSAGES : undefined));

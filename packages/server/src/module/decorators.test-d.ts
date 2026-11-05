@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-extraneous-class -- type fixtures
 // A typed @Handle rejects a mismatched handler with TS1241 at the decorator. The positive cases
 // fail too if Handle loses its generic signature, which turns the directives below into TS2578.
-import { defineContract, get, post } from '@usevibejs/contract';
+import { defineContract, files, get, post, type UploadedFile } from '@usevibejs/contract';
 import * as v from 'valibot';
 import { expectTypeOf } from 'vitest';
 import type { CanActivate, Ctx, RequestContext } from '../http/context.ts';
@@ -90,6 +90,13 @@ expectTypeOf(search.headers).toEqualTypeOf<{ 'x-tenant': string }>();
 expectTypeOf(search.body);
 declare const create: Ctx<typeof users.create>;
 expectTypeOf(create.body).toEqualTypeOf<{ name: string }>();
+const uploads = defineContract('/uploads', {
+  create: post('/', { body: files({ maxBytes: 10, maxFiles: 1, types: ['image/png'] }) }),
+});
+declare const uploaded: Ctx<typeof uploads.create>;
+expectTypeOf(uploaded.files).toEqualTypeOf<readonly UploadedFile[]>();
+// @ts-expect-error a files() route has no JSON body
+expectTypeOf(uploaded.body);
 // @ts-expect-error the route declares no query
 expectTypeOf(create.query);
 // @ts-expect-error the route declares no headers

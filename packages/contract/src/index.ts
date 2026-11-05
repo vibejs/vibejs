@@ -10,6 +10,8 @@ export type {
   ClientOptions,
 } from './client.ts';
 export { defineContract, isRoute } from './contract.ts';
+export { files, isFilesBody } from './files.ts';
+export type { FilesBody, UploadedFile } from './files.ts';
 export type { Contract, Route } from './contract.ts';
 export { del, get, patch, post, put, raw } from './route.ts';
 export type { HttpMethod, ParamKeys, RawBody, RouteDef, RouteSpec } from './route.ts';
@@ -20,6 +22,7 @@ export type {
   RouteBody,
   RouteData,
   RouteErrorCode,
+  RouteFiles,
   RouteHeaders,
   RouteParams,
   RouteQuery,

@@ -1,6 +1,6 @@
 import { validate } from '@scalar/openapi-parser';
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import { defineContract, del, get, post, put, raw } from '@usevibejs/contract';
+import { defineContract, del, files, get, post, put, raw } from '@usevibejs/contract';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import * as arktype from '../test/openapi/arktype.ts';
@@ -515,5 +515,32 @@ describe('generateOpenApi: recipe', () => {
     const user = await app.fetch(new Request('http://localhost/api/users/7'));
     expect(await user.json()).toEqual({ id: '7' });
     await app.close();
+  });
+
+  it('describes a files() body as multipart and lists its failure codes', () => {
+    const uploads = defineContract('/uploads', {
+      create: post('/', {
+        body: files({ maxBytes: 1000, maxFiles: 4, types: ['image/png'] }),
+      }),
+    });
+    expect(op(generateOpenApi(uploads, { info }), '/uploads', 'post')).toMatchObject({
+      requestBody: {
+        required: true,
+        content: {
+          'multipart/form-data': {
+            schema: {
+              type: 'object',
+              required: ['file'],
+              properties: { file: { type: 'array', maxItems: 4, items: { format: 'binary' } } },
+            },
+          },
+        },
+      },
+      responses: {
+        400: { description: expect.stringContaining('VIBE9507') },
+        413: { description: 'VIBE9506' },
+        415: { description: 'VIBE9508' },
+      },
+    });
   });
 });

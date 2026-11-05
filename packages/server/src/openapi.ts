@@ -1,5 +1,5 @@
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import { isRoute, type Route, type RouteDef } from '@usevibejs/contract';
+import { isFilesBody, isRoute, type Route, type RouteDef } from '@usevibejs/contract';
 import { vibeError } from './errors.gen.ts';
 
 export interface OpenApiOptions {
@@ -176,7 +176,11 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
           schema: value,
         });
     }
-    const body = def.body && convert(def.body, 'input', label, 'body');
+    const upload = isFilesBody(def.body) ? def.body : undefined;
+    const body =
+      def.body !== undefined && !isFilesBody(def.body)
+        ? convert(def.body, 'input', label, 'body')
+        : undefined;
 
     const responses: Json = {};
     // Without a response the server answers `def.status ?? 204` with no body.
@@ -191,8 +195,12 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
       ...(content && { content }),
     };
 
-    const hasInput = Boolean(def.params ?? def.query ?? def.headers ?? def.body);
-    const errors = { ...(hasInput && { VALIDATION_FAILED: 400 }), ...def.errors };
+    const hasSchema = Boolean(def.params ?? def.query ?? def.headers ?? (def.body && !upload));
+    const errors = {
+      ...(hasSchema && { VALIDATION_FAILED: 400 }),
+      ...(upload && { VIBE9506: 413, VIBE9507: 400, VIBE9508: 415 }),
+      ...def.errors,
+    };
     const groups: Record<number, string[]> = {};
     for (const [code, at] of Object.entries(errors)) {
       // The success status is 2xx; an error status outside 4xx/5xx would replace it or be invalid.
@@ -214,6 +222,26 @@ export function generateOpenApi(contracts: object, options: OpenApiOptions): Ope
       ...(parameters.length > 0 && { parameters }),
       ...(body && {
         requestBody: { required: true, content: { 'application/json': { schema: body } } },
+      }),
+      ...(upload && {
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file'],
+                properties: {
+                  file: {
+                    type: 'array',
+                    maxItems: upload.maxFiles,
+                    items: { type: 'string', format: 'binary' },
+                  },
+                },
+              },
+            },
+          },
+        },
       }),
       responses,
     };

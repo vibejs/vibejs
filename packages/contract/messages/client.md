@@ -10,3 +10,13 @@ A client call fills each `:param` of the route's full path from `input.params`. 
 
 - Pass `params.{param}` in the call input.
 - Check that the route path "{path}" is the one you meant to call.
+
+## VIBE9092: Upload is not FormData
+
+> The call to "{path}" needs a FormData body.
+
+A route declared with `files()` sends its body as `multipart/form-data`. The call rejects before any request is sent when `body` is missing or is not a `FormData` value.
+
+### Fix
+
+- Pass a `FormData` value as `body`, with one entry per file.

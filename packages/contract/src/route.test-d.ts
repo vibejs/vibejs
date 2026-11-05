@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { expectTypeOf } from 'vitest';
+import { files } from './files.ts';
 import { del, get, post, raw, type ParamKeys, type RawBody, type RouteSpec } from './route.ts';
 
 declare function schema<I, O = I>(): StandardSchemaV1<I, O>;
@@ -11,6 +12,11 @@ expectTypeOf<ParamKeys<'/orgs/:orgId/users/:id'>>().toEqualTypeOf<'orgId' | 'id'
 expectTypeOf<ParamKeys<'/:a/:b/c'>>().toEqualTypeOf<'a' | 'b'>();
 
 expectTypeOf(raw()).toEqualTypeOf<RawBody>();
+expectTypeOf(
+  files({ maxBytes: 1, maxFiles: 1, types: ['image/png'] }).kind,
+).toEqualTypeOf<'files'>();
+// @ts-expect-error a GET route takes no files() body
+get('/search', { body: files({ maxBytes: 1, maxFiles: 1, types: ['image/png'] }) });
 expectTypeOf(get('/users')).toEqualTypeOf<RouteSpec<'GET', '/users', {}>>();
 expectTypeOf(del('/users/:id').method).toEqualTypeOf<'DELETE'>();
 const summary = post('/users', { summary: 'Create', status: 201 });

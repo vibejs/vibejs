@@ -31,16 +31,16 @@ Contract files (`*.contract.ts`) import only `@usevibejs/contract` and a schema 
 
 The route helpers are `get`, `post`, `put`, `patch` and `del`. Each takes a path and an optional definition:
 
-| Field                    | Meaning                                                                                      |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `params`                 | A schema for the path params; without one they are strings.                                  |
-| `query`                  | A schema for the query string. A key repeated in the URL, or typed as an array, is an array. |
-| `headers`                | A schema for the request headers, with lowercase names.                                      |
-| `body`                   | A schema for the JSON request body; not allowed on `get` ([VIBE9004](/errors/VIBE9004)).     |
-| `response`               | A schema for the JSON success body, or `raw()`. Without one the route answers 204.           |
-| `status`                 | The success status: 200 (default), 201 or 202.                                               |
-| `errors`                 | The error codes the route raises, each with its HTTP status.                                 |
-| `summary`, `description` | Text for the OpenAPI document.                                                               |
+| Field                    | Meaning                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `params`                 | A schema for the path params; without one they are strings.                                            |
+| `query`                  | A schema for the query string. A key repeated in the URL, or typed as an array, is an array.           |
+| `headers`                | A schema for the request headers, with lowercase names.                                                |
+| `body`                   | A schema for the JSON request body, or `files()`; not allowed on `get` ([VIBE9004](/errors/VIBE9004)). |
+| `response`               | A schema for the JSON success body, or `raw()`. Without one the route answers 204.                     |
+| `status`                 | The success status: 200 (default), 201 or 202.                                                         |
+| `errors`                 | The error codes the route raises, each with its HTTP status.                                           |
+| `summary`, `description` | Text for the OpenAPI document.                                                                         |
 
 Paths are `/` or segments such as `/users/:id/posts`; params start with `:` ([VIBE9001](/errors/VIBE9001)). The full path of a route is the contract prefix followed by the route path, and the application's `basePath` is prepended when it is served.
 
@@ -53,6 +53,25 @@ export const reports = defineContract('/reports', {
   csv: get('/:year', { response: raw('text/csv') }),
 });
 ```
+
+`files({ maxBytes, maxFiles, types })` declares a `multipart/form-data` upload. The handler reads `ctx.files`, an array of `{ name, filename, type, bytes }`. The client sends a `FormData` body. `types` lists media types, and a type ending in `/*` matches every subtype. `maxBytes` is the largest total of file bytes the route keeps; `maxFiles` is the largest number of file parts.
+
+```ts
+import { defineContract, files, post } from '@usevibejs/contract';
+import type { Ctx } from '@usevibejs/server';
+// ---cut---
+export const uploads = defineContract('/uploads', {
+  create: post('/', {
+    body: files({ maxBytes: 1_000_000, maxFiles: 4, types: ['image/png', 'image/*'] }),
+  }),
+});
+
+export function names(ctx: Ctx<typeof uploads.create>): string[] {
+  return ctx.files.map((file) => file.filename);
+}
+```
+
+An upload past `maxBytes` is 413 [VIBE9506](/errors/VIBE9506). More than `maxFiles` files is 400 [VIBE9507](/errors/VIBE9507). A file of another type is 415 [VIBE9508](/errors/VIBE9508). Each is an `application/problem+json` body. Invalid `files()` options throw [VIBE9005](/errors/VIBE9005). A call whose body is not `FormData` throws [VIBE9092](/errors/VIBE9092) before the request is sent.
 
 ## Errors
 

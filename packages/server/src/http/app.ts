@@ -227,7 +227,9 @@ export async function createApp(
         const served = await serveStatic(files, url.pathname);
         if (served) return served;
       }
-      if (Number(req.headers.get('content-length')) > bodyLimit) {
+      // A files() upload is capped by its own maxBytes, not by bodyLimit.
+      const multipart = /^multipart\/form-data\b/i.test(req.headers.get('content-type') ?? '');
+      if (!multipart && Number(req.headers.get('content-length')) > bodyLimit) {
         throw new HttpError(413, 'BODY_TOO_LARGE');
       }
       const found = router.match(req.method, url.pathname);

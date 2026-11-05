@@ -217,7 +217,9 @@ VIBE9001 contract
 VIBE9002 contract
 VIBE9003 contract
 VIBE9004 contract
+VIBE9005 contract
 VIBE9091 contract
+VIBE9092 contract
 VIBE9101 server
 VIBE9102 server
 VIBE9103 server
@@ -249,6 +251,9 @@ VIBE9502 server
 VIBE9503 server
 VIBE9504 server
 VIBE9505 server
+VIBE9506 server
+VIBE9507 server
+VIBE9508 server
 VIBE9601 server
 VIBE9602 server
 VIBE9701 server

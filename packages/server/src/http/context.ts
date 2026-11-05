@@ -3,6 +3,7 @@ import type {
   RouteBody,
   RouteDef,
   RouteErrorCode,
+  RouteFiles,
   RouteHeaders,
   RouteParams,
   RouteQuery,
@@ -48,7 +49,8 @@ export type Ctx<R extends Route> = RequestContext & {
   fail(code: RouteErrorCode<R>, detail?: string): never;
 } & IfDeclared<'query', RouteQuery<R>> &
   IfDeclared<'headers', RouteHeaders<R>> &
-  IfDeclared<'body', RouteBody<R>>;
+  IfDeclared<'body', RouteBody<R>> &
+  IfDeclared<'files', RouteFiles<R>>;
 
 /** Decides whether a request may reach its handler. */
 export interface CanActivate {
