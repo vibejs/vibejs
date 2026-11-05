@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const label = 'from the package';
+</script>
+
+<template>
+  <p>{{ label }}</p>
+</template>

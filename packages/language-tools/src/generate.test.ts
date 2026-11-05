@@ -1,3 +1,7 @@
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   analyzeScript,
   compile,
@@ -186,5 +190,29 @@ const n = 'a'
       new Set(['VIBE1013', ...[1, 2, 3, 4, 5, 6, 7].map((i) => `VIBE260${i}`)]),
     );
     expect(generate('A.vibe', source).diagnostics.map((d) => d.code)).toEqual([1013]);
+  });
+
+  it('type-checks an opted-in package component and refuses the rest of node_modules', () => {
+    const root = mkdtempSync(join(tmpdir(), 'vibe-sfc-'));
+    const sfcLib = fileURLToPath(new URL('../../compiler/test/fixtures/sfc-lib', import.meta.url));
+    const plainLib = fileURLToPath(
+      new URL('../../compiler/test/fixtures/plain-lib', import.meta.url),
+    );
+    cpSync(sfcLib, join(root, 'node_modules/@fixture/sfc-lib'), { recursive: true });
+    cpSync(plainLib, join(root, 'node_modules/plain-lib'), { recursive: true });
+    try {
+      const button = join(root, 'node_modules/@fixture/sfc-lib/Button.vibe');
+      const hidden = join(root, 'node_modules/plain-lib/Hidden.vibe');
+      const ok = generate(button, readFileSync(button, 'utf8'));
+      expect(ok.diagnostics).toEqual([]);
+      expect(ok.text).toContain('from the package');
+      const refused = generate(hidden, readFileSync(hidden, 'utf8'));
+      expect(refused.text).toBe('export {}\n');
+      expect(refused.diagnostics).toMatchObject([
+        { code: 6003, start: 0, length: 0, message: expect.stringContaining(hidden) },
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

@@ -130,6 +130,7 @@ const MESSAGES = {
   VIBE4005: ["{escape} needs exactly one selector as its argument.","Wrap exactly one selector, such as `:deep(.child)` or `:global(.theme-dark)`.","Split a list into one escape per selector, such as `:deep(.a), :deep(.b)`."],
   VIBE4901: ["`{file}` is imported by server code, but `.vibe` components run only in the browser.","Import `.vibe` files only from client code.","Run component tests in a DOM environment such as jsdom, happy-dom or browser mode."],
   VIBE4902: ["`@usevibejs/ui` is at version {ui}, but `@usevibejs/compiler` is at version {compiler}.","Install the same version of every `@usevibejs/*` package."],
+  VIBE4903: ["`{file}` is in node_modules, and its package does not set `vibejs.sfc` to true.","Set `vibejs.sfc` to true in the package.json of the package that ships {file}.","Copy the component into the application when the package is yours to own."],
 } as const;
 
 export const vibeError: VibeErrorFactory<typeof MESSAGES> = defineErrors(() => MESSAGES);

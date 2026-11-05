@@ -1,3 +1,4 @@
+export { allowsPackageSfc } from './packageSfc.ts';
 export { compile } from './compile.ts';
 export type { CompileOptions, CompileResult } from './compile.ts';
 export { formatDiagnostic } from './diagnostics.ts';

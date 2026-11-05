@@ -123,4 +123,5 @@ A page then calls `useFlag('removeDone')` in its setup and uses the ref in its t
 ### Limits
 
 - There are no global components, custom directives, mixins or global properties: `app.component()`, `app.directive()` and `app.mixin()` throw [VIBE5301](/errors/VIBE5301). Export components for import, element behavior as composables that take a template ref, and shared values through `app.provide()`.
-- Packages that ship `.vibe` components are planned for v0.2. Until then, a package exports plugins, composables, injection keys and types.
+- A dependency may ship `.vibe` components when its `package.json` contains `"vibejs": { "sfc": true }`. The bundler compiles those files and the language tools type-check imports of them. A `.vibe` file from any other package in `node_modules` is not compiled ([VIBE4903](/errors/VIBE4903), [VIBE6003](/errors/VIBE6003)).
+- Blocks that an application copies in and owns, such as the vibecn registry, stay ordinary application files. They do not use this flag.
