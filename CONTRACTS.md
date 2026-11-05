@@ -8,7 +8,7 @@ The executable source of truth is the JSDoc and exported types in `packages/ui/s
 | Package | Exports |
 |---|---|
 | @usevibejs/errors | `.` |
-| @usevibejs/ui | `.` `./internal` `./tooling` `./router` `./testing` |
+| @usevibejs/ui | `.` `./internal` `./tooling` `./router` `./testing` `./server` |
 | @usevibejs/compiler | `.` `./vite` (named `vibe`) |
 | @usevibejs/language-tools | `.` + package.json `typescript.contentMapper` |
 | @usevibejs/contract | `.` |
