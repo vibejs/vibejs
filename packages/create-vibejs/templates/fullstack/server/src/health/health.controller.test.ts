@@ -6,10 +6,9 @@ import { health } from '../../../contracts/src/health.contract.ts';
 import { AppModule, appOptions } from '../app.module.ts';
 
 it('answers GET /api/health with ok', async () => {
-  // `static` reads `ui/dist`, which exists after `vibejs build`, not while the tests run.
   const app = await Test.createTestingModule({
     imports: [AppModule],
-    basePath: appOptions.basePath,
+    ...appOptions,
     logger: new JsonLogger({ level: 'silent' }),
   }).compile();
   const api = createClient({ health }, { baseUrl: '/api', fetch: app.fetch });

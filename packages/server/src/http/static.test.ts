@@ -12,6 +12,7 @@ import type { OnModuleInit } from '../module/lifecycle.ts';
 import { inspect, VibeFactory } from './app.ts';
 import {
   errnoCode,
+  isMissingPath,
   isStaticPath,
   mediaType,
   openStatic,
@@ -69,6 +70,10 @@ describe('path checks', () => {
     expect(errnoCode({})).toBeUndefined();
     expect(errnoCode({ code: 1 })).toBeUndefined();
     expect(errnoCode({ code: 'ENOENT' })).toBe('ENOENT');
+    const coded = (code: string) => Object.assign(new Error(code), { code });
+    expect(isMissingPath(coded('ENOENT'))).toBe(true);
+    expect(isMissingPath(coded('ENOTDIR'))).toBe(true);
+    expect(isMissingPath(coded('ELOOP'))).toBe(false);
   });
 
   it('serves only paths outside a non-empty base path', () => {
@@ -135,9 +140,9 @@ describe('openStatic', () => {
 
   it('rethrows a filesystem error that is not a missing path', async () => {
     const dir = await temp();
-    const root = join(dir, 'file.txt', 'nested');
-    await writeFile(join(dir, 'file.txt'), 'x');
-    await expect(openStatic({ root })).rejects.toMatchObject({ code: 'ENOTDIR' });
+    const root = join(dir, 'loop');
+    await symlink(root, root);
+    await expect(openStatic({ root })).rejects.toMatchObject({ code: 'ELOOP' });
   });
 });
 

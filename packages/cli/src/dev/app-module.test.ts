@@ -32,10 +32,7 @@ const load = (root: string) => withServerRunner(root, (runner) => loadAppModule(
 it('loads AppModule, appOptions and the project server package', async () => {
   const root = app();
   const { server, AppModule, appOptions } = await load(root);
-  expect(appOptions).toEqual({
-    basePath: '/api',
-    static: { root: 'ui/dist', spa: true },
-  });
+  expect(appOptions).toEqual({ basePath: '/api' });
   expect(server.inspect(AppModule, appOptions).routes).toMatchObject([
     { method: 'GET', path: '/api/health', handler: 'HealthController.get' },
   ]);
