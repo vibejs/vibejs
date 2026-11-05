@@ -103,12 +103,13 @@ A cookie name must be an RFC 9110 token ([VIBE9504](/errors/VIBE9504)).
 
 ## Limits and shutdown
 
-| Option              | Default   | Meaning                                                                       |
-| ------------------- | --------- | ----------------------------------------------------------------------------- |
-| `basePath`          | `''`      | Prefix of every route, such as `/api` ([VIBE9405](/errors/VIBE9405)).         |
-| `bodyLimit`         | 1 MiB     | The largest request body in bytes; larger bodies get 413.                     |
-| `shutdownTimeout`   | 10 000 ms | How long `close()` waits for running requests ([VIBE9402](/errors/VIBE9402)). |
-| `validateResponses` | `true`    | Validates handler results; see [Handlers](./handlers.md#validation).          |
+| Option              | Default   | Meaning                                                                                    |
+| ------------------- | --------- | ------------------------------------------------------------------------------------------ |
+| `basePath`          | `''`      | Prefix of every route, such as `/api` ([VIBE9405](/errors/VIBE9405)).                      |
+| `bodyLimit`         | 1 MiB     | The largest request body in bytes; larger bodies get 413.                                  |
+| `static`            | unset     | Serves GET requests outside `basePath` from `root`. See [Deploying](./index.md#deploying). |
+| `shutdownTimeout`   | 10 000 ms | How long `close()` waits for running requests ([VIBE9402](/errors/VIBE9402)).              |
+| `validateResponses` | `true`    | Validates handler results; see [Handlers](./handlers.md#validation).                       |
 
 ## TypeScript setup
 

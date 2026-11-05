@@ -4,7 +4,13 @@ import type { ModuleRunner } from 'vite/module-runner';
 import { afterEach, expect, it, vi } from 'vitest';
 import { copyApp, edit } from '../../test/app.ts';
 import { vibeError } from '../errors.gen.ts';
-import { APP_MODULE, loadAppModule, loadError, withServerRunner } from './app-module.ts';
+import {
+  APP_MODULE,
+  loadAppModule,
+  loadError,
+  withServerRunner,
+  withoutStatic,
+} from './app-module.ts';
 
 vi.mock('vite', async (original) => (await import('../../test/app.ts')).sourceVite(original));
 vi.setConfig({ testTimeout: 30_000 });
@@ -26,7 +32,10 @@ const load = (root: string) => withServerRunner(root, (runner) => loadAppModule(
 it('loads AppModule, appOptions and the project server package', async () => {
   const root = app();
   const { server, AppModule, appOptions } = await load(root);
-  expect(appOptions).toEqual({ basePath: '/api' });
+  expect(appOptions).toEqual({
+    basePath: '/api',
+    static: { root: 'ui/dist', spa: true },
+  });
   expect(server.inspect(AppModule, appOptions).routes).toMatchObject([
     { method: 'GET', path: '/api/health', handler: 'HealthController.get' },
   ]);
@@ -62,6 +71,13 @@ it('closes the runner when the callback throws', async () => {
     }),
   ).rejects.toBe(failure);
   expect(used?.isClosed()).toBe(true);
+});
+
+it('drops static so dev and request do not read the built UI', () => {
+  expect(withoutStatic({ basePath: '/api', static: { root: 'ui/dist', spa: true } })).toEqual({
+    basePath: '/api',
+  });
+  expect(withoutStatic({ basePath: '/api' })).toEqual({ basePath: '/api' });
 });
 
 it('keeps a VibeError and wraps any other error as VIBE8501', () => {

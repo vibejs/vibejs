@@ -3,7 +3,7 @@ import { STATUS_CODES } from 'node:http';
 import { resolve } from 'node:path';
 import type { ErrorCode, VibeError } from '@usevibejs/errors';
 import type { CommandDef } from '../command.ts';
-import { loadAppModule, loadError, withServerRunner } from '../dev/app-module.ts';
+import { loadAppModule, loadError, withServerRunner, withoutStatic } from '../dev/app-module.ts';
 import { readLiveLock } from '../dev/lock.ts';
 import type { DevLog, LogEntry } from '../dev/log.ts';
 import { vibeError } from '../errors.gen.ts';
@@ -167,7 +167,10 @@ export const request: CommandDef<RequestResult> = {
           const { server, AppModule, appOptions } = await loadAppModule(runner, root);
           const { serverLogger } = await import('../dev/plugin.ts');
           const logger = serverLogger(server.Logger, log);
-          const app = await server.VibeFactory.create(AppModule, { ...appOptions, logger });
+          const app = await server.VibeFactory.create(AppModule, {
+            ...withoutStatic(appOptions),
+            logger,
+          });
           try {
             return await read(await app.request(url, init), max);
           } finally {

@@ -51,3 +51,34 @@ A response that allows credentials must name the requesting origin; browsers ign
 ### Fix
 
 - Pass `''` for no prefix, or a path such as `/api` without a trailing slash.
+
+## VIBE9406: Static root not found
+
+> The static root {root} does not exist.
+
+`VibeFactory.create()` serves files from `static.root` for GET requests outside `basePath`. A relative root is resolved from the process directory. The application is not created when that directory is missing.
+
+### Fix
+
+- Build the UI before starting the server, so {root} exists.
+- Pass the directory `vibejs build` wrote, such as `ui/dist`.
+
+## VIBE9407: Static root is not a directory
+
+> The static root {root} is not a directory.
+
+`static.root` is the directory of the built files. A file cannot be served as a root.
+
+### Fix
+
+- Pass the directory of the built UI, such as `ui/dist`, not a file inside it.
+
+## VIBE9408: Static path escapes the root
+
+> The path {path} escapes the static root.
+
+A static file is read only from inside `static.root`. A request whose path leaves that directory, including through a symbolic link, is rejected. The client receives 500 INTERNAL_ERROR and the escape is logged.
+
+### Fix
+
+- Request a path inside the site, such as `/` or `/assets/index.js`.

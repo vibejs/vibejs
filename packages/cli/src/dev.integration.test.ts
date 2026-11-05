@@ -174,6 +174,10 @@ it('builds a UI and a server that runs under plain node', async () => {
       const res = await fetch(`http://localhost:${port}/api/health`);
       expect(res.status).toBe(200);
       expect(await res.text()).toBe('ok');
+      const page = await fetch(`http://localhost:${port}/`);
+      expect(page.status).toBe(200);
+      expect(page.headers.get('content-type')).toContain('text/html');
+      expect(await page.text()).toContain('id="app"');
     },
     { timeout: 10_000, interval: 100 },
   );

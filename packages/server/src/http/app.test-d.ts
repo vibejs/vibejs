@@ -51,6 +51,7 @@ export const handler: { fetch: (req: Request) => Promise<Response> } = { fetch: 
 
 expectTypeOf<AppOptions['validateResponses']>().toEqualTypeOf<boolean | undefined>();
 export const unchecked: AppOptions = { validateResponses: false };
+export const withStatic: AppOptions = { static: { root: 'ui/dist', spa: true } };
 
 const search = defineContract('/search', {
   list: get('/', { query: v.object({ tags: v.array(v.string()), page: v.optional(v.string()) }) }),
