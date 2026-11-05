@@ -70,10 +70,11 @@ describe('path checks', () => {
     expect(errnoCode({})).toBeUndefined();
     expect(errnoCode({ code: 1 })).toBeUndefined();
     expect(errnoCode({ code: 'ENOENT' })).toBe('ENOENT');
-    const coded = (code: string) => Object.assign(new Error(code), { code });
-    expect(isMissingPath(coded('ENOENT'))).toBe(true);
-    expect(isMissingPath(coded('ENOTDIR'))).toBe(true);
-    expect(isMissingPath(coded('ELOOP'))).toBe(false);
+    expect(isMissingPath(Object.assign(new Error('missing'), { code: 'ENOENT' }))).toBe(true);
+    expect(isMissingPath(Object.assign(new Error('through a file'), { code: 'ENOTDIR' }))).toBe(
+      true,
+    );
+    expect(isMissingPath(Object.assign(new Error('loop'), { code: 'ELOOP' }))).toBe(false);
   });
 
   it('serves only paths outside a non-empty base path', () => {
