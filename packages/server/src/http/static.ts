@@ -43,6 +43,12 @@ export function errnoCode(error: unknown): string | undefined {
   return typeof error.code === 'string' ? error.code : undefined;
 }
 
+/** True for a path that is not there, including a path through a file. */
+export function isMissingPath(error: unknown): boolean {
+  const code = errnoCode(error);
+  return code === 'ENOENT' || code === 'ENOTDIR';
+}
+
 /** True when `pathname` is outside the API prefix. An empty prefix owns every path. */
 export function isStaticPath(pathname: string, basePath: string): boolean {
   if (basePath === '') return false;
@@ -111,8 +117,7 @@ async function locate(root: string, candidate: string, depth: number): Promise<s
   try {
     real = await realpath(candidate);
   } catch (error) {
-    const code = errnoCode(error);
-    if (code === 'ENOENT' || code === 'ENOTDIR') return undefined;
+    if (isMissingPath(error)) return undefined;
     throw error;
   }
   if (!staysInside(relative(root, real))) throw vibeError('VIBE9408', { path: candidate });
