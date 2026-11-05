@@ -19,6 +19,12 @@ export default {
     'packages/ui': {
       // An optional peer by design: only the `./testing` entry imports it, inside the user's tests.
       ignoreDependencies: ['vitest'],
+      // The root Vitest config names these as `*.node-test.ts` inside a project include. Knip's
+      // Vitest plugin keeps its default test entries and does not read that include, so the
+      // defaults are repeated here and the node-test pattern is added.
+      vitest: {
+        entry: ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', '**/*.node-test.ts'],
+      },
     },
     'packages/language-tools': {
       // Imported only by the virtual code the mapper generates, which the typecheck corpus runs.
