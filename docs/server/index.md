@@ -26,10 +26,7 @@ import { Module, type AppOptions } from '@usevibejs/server';
 @Module({ imports: [] })
 export class AppModule {}
 
-export const appOptions: AppOptions = {
-  basePath: '/api',
-  static: { root: 'ui/dist', spa: true },
-};
+export const appOptions: AppOptions = { basePath: '/api' };
 ```
 
 `server/src/main.ts` is the production entry. It creates the application, closes it on `SIGTERM` and `SIGINT`, and listens:
@@ -39,12 +36,12 @@ import { Module, VibeFactory, type AppOptions } from '@usevibejs/server';
 declare const process: { env: Record<string, string | undefined> };
 @Module({})
 class AppModule {}
-const appOptions: AppOptions = {
-  basePath: '/api',
-  static: { root: 'ui/dist', spa: true },
-};
+const appOptions: AppOptions = { basePath: '/api' };
 // ---cut---
-const app = await VibeFactory.create(AppModule, appOptions);
+const app = await VibeFactory.create(AppModule, {
+  ...appOptions,
+  static: { root: 'ui/dist', spa: true },
+});
 app.enableShutdownHooks();
 await app.listen(Number(process.env.PORT ?? 3000));
 ```
