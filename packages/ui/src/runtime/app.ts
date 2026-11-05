@@ -8,6 +8,7 @@ import { isFunction } from '../shared.ts';
 import { warn } from '../warn.ts';
 import { insert, removeNodes } from './block.ts';
 import { createRootComponent } from './component.ts';
+import { isHydrating } from './hydrateState.ts';
 import type { InjectionKey } from './inject.ts';
 import {
   type AppContext,
@@ -136,7 +137,7 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
         return exposed;
       }
       const el = typeof container === 'string' ? query(container) : container;
-      el.textContent = '';
+      if (!isHydrating()) el.textContent = '';
       const props: RawProps = {};
       for (const key in rootProps) props[key] = () => rootProps[key];
       let rootScope: EffectScopeImpl;
