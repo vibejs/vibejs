@@ -55,7 +55,8 @@ export type {
 } from './reactivity/ref.ts';
 export { createApp, useId } from './runtime/app.ts';
 export { createHead, useHead } from './runtime/head.ts';
-export { hydrate } from './runtime/hydrate.ts';
+export { hydrate, hydrateAsync } from './runtime/hydrate.ts';
+export { readServerState } from './runtime/serverState.ts';
 export type { Head, HeadInput, HeadTag } from './runtime/head.ts';
 export { useAsync } from './runtime/async.ts';
 export type { App, AppConfig, ComponentHandle, Plugin } from './runtime/app.ts';

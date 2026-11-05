@@ -1,10 +1,15 @@
+import { isVibeError } from '@usevibejs/errors';
 import { describe, expect, test } from 'vitest';
 import { thrownCode } from '../../test/codes.ts';
 import type { ComponentDef } from '../internal.ts';
 import { ref } from '../reactivity/ref.ts';
 import { createApp } from './app.ts';
 import { setText, template, txt } from './dom.ts';
-import { hydrate } from './hydrate.ts';
+import { renderToStringAsync } from '../server.ts';
+import { hydrate, hydrateAsync } from './hydrate.ts';
+import { RouterView } from '../router/components.ts';
+import { createMemoryHistory } from '../router/history.ts';
+import { createRouter } from '../router/router.ts';
 import { claimHydrationNode, hydrationFailed, stopHydration } from './hydrateState.ts';
 import { renderEffect } from './renderEffect.ts';
 import { nextTick } from './scheduler.ts';
@@ -19,6 +24,28 @@ function paragraph(read: () => string): ComponentDef {
       return el;
     },
   };
+}
+
+/** An app whose router shows the `home` paragraph. */
+function homeApp(): ReturnType<typeof createApp> {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/', component: paragraph(() => 'home') }],
+  });
+  return createApp(RouterView).use(router);
+}
+
+/** The VIBE code of a rejected `hydrateAsync`, if it rejects with one. */
+async function rejectedHydrate(
+  app: ReturnType<typeof createApp>,
+  host: Element,
+): Promise<string | undefined> {
+  try {
+    await hydrateAsync(app, host);
+  } catch (error) {
+    if (isVibeError(error)) return error.code;
+  }
+  return undefined;
 }
 
 describe('hydrate', () => {
@@ -70,6 +97,50 @@ describe('hydrate', () => {
     createApp(paragraph(() => 'Hi')).mount(host);
     expect(host.innerHTML).toBe('<p>Hi</p>');
     expect(host.firstChild).toBeInstanceOf(HTMLParagraphElement);
+  });
+
+  test('hydrateAsync reuses the route the server rendered', async () => {
+    const html = await renderToStringAsync(homeApp());
+    const body = html.slice(html.indexOf('<body>') + 6, html.indexOf('</body>'));
+    const host = document.createElement('div');
+    host.innerHTML = body;
+    const node = host.querySelector('p');
+    await hydrateAsync(homeApp(), host);
+    expect(host.querySelector('p')).toBe(node);
+    expect(host.textContent).toBe('home');
+  });
+
+  test('hydrateAsync throws VIBE5307 and keeps the server text', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: paragraph(() => 'home') }],
+    });
+    const host = document.createElement('div');
+    host.innerHTML = '<p>other</p>';
+    expect(await rejectedHydrate(createApp(RouterView).use(router), host)).toBe('VIBE5307');
+    expect(host.innerHTML).toBe('<p>other</p>');
+  });
+
+  test('hydrateAsync throws VIBE5308 before a navigation that never settles', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: paragraph(() => 'home') }],
+    });
+    let release: (() => void) | undefined;
+    router.beforeEach(
+      () =>
+        new Promise<void>((done) => {
+          release = done;
+        }),
+    );
+    const host = document.createElement('div');
+    host.innerHTML = '<p>home</p>';
+    const app = createApp(RouterView).use(router);
+    app.mount(document.createElement('div'));
+    expect(await rejectedHydrate(app, host)).toBe('VIBE5308');
+    expect(host.innerHTML).toBe('<p>home</p>');
+    release?.();
+    app.unmount();
   });
 
   test('claimHydrationNode misses when hydration has not started', () => {

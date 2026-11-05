@@ -49,7 +49,7 @@ A plugin is a function or an object with an `install` function, and `app.use()` 
 
 > renderToString() received an app that is already mounted.
 
-`renderToString()` mounts the app into its own document and reads the HTML back. An app can mount only once, so a second render, or a render after `mount()`, has nothing new to draw.
+`renderToString()` and `renderToStringAsync()` mount the app into their own document and read the HTML back. An app can mount only once, so a second render, or a render after `mount()`, has nothing new to draw.
 
 ### Fix
 
@@ -71,12 +71,34 @@ A plugin is a function or an object with an `install` function, and `app.use()` 
 
 > hydrate() received an app that is already mounted.
 
-An app attaches to a container once. `hydrate()` does not attach an app that `mount()` or `hydrate()` already attached.
+An app attaches to a container once. `hydrate()` and `hydrateAsync()` do not attach an app that `mount()` or `hydrate()` already attached.
 
 ### Fix
 
 - Call `hydrate()` with a new app from `createApp()`.
 - Do not call `mount()` before `hydrate()`.
+
+## VIBE5309: Server state is not JSON
+
+> The state passed to renderToStringAsync() cannot be written as JSON.
+
+`renderToStringAsync()` writes `state` into the document as JSON. A cycle, a function, or `undefined` has no JSON text, so this error is thrown in every build.
+
+### Fix
+
+- Pass a JSON value: plain objects, arrays, strings, numbers, booleans, or `null`.
+- Omit `state` when the page has nothing to embed.
+
+## VIBE5310: Invalid server state
+
+> The server state in the document is not valid JSON.
+
+`readServerState()` reads the `#vibe-state` script that `renderToStringAsync()` wrote. The script is empty or its JSON is damaged, so this error is thrown in every build.
+
+### Fix
+
+- Embed state with `renderToStringAsync()`.
+- Leave the `#vibe-state` script as that render wrote it.
 
 ## VIBE5305: Unmount before mount
 

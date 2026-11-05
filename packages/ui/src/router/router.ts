@@ -24,6 +24,18 @@ import type {
 /** The key of the installed router: `useRouter()` injects it. */
 export const routerKey: InjectionKey<AnyRouter> = Symbol('router');
 
+/** Waits for the navigation an installed router already started. Absent when `app` has no router. */
+const routerWaits = new WeakMap<App, () => Promise<void>>();
+
+/**
+ * Resolves when every navigation of the router installed on `app` has settled. Rejects with the
+ * error of a navigation that threw. An app without a router resolves immediately.
+ */
+export function waitForInstalledRouter(app: App): Promise<void> {
+  const wait = routerWaits.get(app);
+  return wait ? wait() : Promise.resolve();
+}
+
 export const START_LOCATION: AnyLocation = {
   path: '/',
   fullPath: '/',
@@ -156,6 +168,33 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
   });
   // isReady() may never be called, and a first navigation that throws still rejects it.
   ready.catch(() => {});
+  /** Set when a navigation throws, so a later wait reports that error after the router is idle. */
+  let failed: unknown;
+  /** Navigations that have started and not yet settled. */
+  let pendingCount = 0;
+  /** Resolvers waiting until `pendingCount` is back to zero. */
+  let idleResolvers: (() => void)[] = [];
+
+  function finishNavigation(): void {
+    pendingCount -= 1;
+    if (pendingCount !== 0) return;
+    const waiting = idleResolvers;
+    idleResolvers = [];
+    for (const settle of waiting) settle();
+  }
+
+  function whenIdle(): Promise<void> {
+    if (pendingCount === 0) return Promise.resolve();
+    return new Promise((settle) => {
+      idleResolvers.push(settle);
+    });
+  }
+
+  async function waitForRouter(): Promise<void> {
+    await whenIdle();
+    if (failed !== undefined) throw failed;
+  }
+
   /** Counts navigations: a navigation is cancelled once a newer one starts. */
   let navigations = 0;
   /** The latest navigation that settled: a navigation is in flight while it trails `navigations`. */
@@ -214,6 +253,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
     replace: boolean,
     pop = false,
   ): Promise<Failure | undefined> {
+    pendingCount += 1;
     const from = currentRoute.value;
     let to: AnyLocation | undefined;
     let id = navigations;
@@ -261,11 +301,13 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
         if (errorHandlers.size) for (const handler of errorHandlers) handler(error, to, from);
         else logError(error);
       }
+      failed = error;
       rejectReady(error);
       throw error;
     } finally {
       if (id === navigations) settled = id;
       if (!installed) listen();
+      finishNavigation();
     }
   }
 
@@ -320,6 +362,7 @@ export function createRouter<const R extends readonly RouteRecordRaw[]>(
       // A router of literal routes is any router once built (see types.test-d.ts).
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- R is generic here
       target.provide(routerKey, router as AnyRouter);
+      routerWaits.set(target, waitForRouter);
       apps.push(target);
       installed = true;
       target.onUnmount(() => {

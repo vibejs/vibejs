@@ -5,6 +5,8 @@
 import { parseHTML } from 'linkedom';
 import { vibeError } from './errors.gen.ts';
 import { isAppMounted, type App } from './runtime/app.ts';
+import { waitForInstalledRouter } from './router/router.ts';
+import { SERVER_STATE_ID } from './runtime/serverState.ts';
 
 const SHELL = '<!DOCTYPE html><html><head></head><body></body></html>';
 const HEAD_ATTR = 'data-vibe-head';
@@ -91,20 +93,69 @@ function openLinkedom(): Session {
   };
 }
 
-/**
- * Mounts `app` and returns one HTML document. `useHead()` records are written into the head.
- * The app is unmounted before this returns, and it cannot be mounted again (VIBE5306).
- * Streaming HTML is a later release. The router is not part of this render.
- */
-export function renderToString(app: App): string {
+/** Options for {@link renderToStringAsync}. */
+export interface ServerRenderOptions {
+  /**
+   * A JSON value written into `#vibe-state` in the document head. `readServerState()` returns it.
+   * Pass the object from `@usevibejs/query`'s `dehydrate()`. A value JSON cannot write is VIBE5309.
+   */
+  state?: unknown;
+}
+
+/** JSON for the head script, with `<` escaped so the value cannot close the script element. */
+function stateJson(state: unknown): string {
+  let json: string | undefined;
+  try {
+    json = JSON.stringify(state);
+  } catch {
+    throw vibeError('VIBE5309');
+  }
+  if (typeof json !== 'string') throw vibeError('VIBE5309');
+  return json.replaceAll('<', '\\u003c');
+}
+
+/** Inserts the state script when `state` was passed. */
+function withState(html: string, state: unknown): string {
+  if (state === undefined) return html;
+  const tag = `<script type="application/json" id="${SERVER_STATE_ID}">${stateJson(state)}</script>`;
+  return html.replace('<head>', `<head>${tag}`);
+}
+
+/** Mounts `app` and returns the document. The caller has already waited for the router. */
+function renderDocument(app: App, state?: unknown): string {
   if (isAppMounted(app)) throw vibeError('VIBE5306');
   const session = typeof document === 'undefined' ? openLinkedom() : openHere();
   try {
     app.mount(session.root);
-    const html = serialize(session.root);
+    const html = withState(serialize(session.root), state);
     app.unmount();
     return html;
   } finally {
     session.close();
   }
+}
+
+/**
+ * Mounts `app` and returns one HTML document. `useHead()` records are written into the head.
+ * The app is unmounted before this returns, and it cannot be mounted again (VIBE5306).
+ * Streaming HTML is a later release. This render does not wait for the router: a route's first
+ * navigation is still running, so use {@link renderToStringAsync} for a routed app.
+ */
+export function renderToString(app: App): string {
+  return renderDocument(app);
+}
+
+/**
+ * Mounts `app` after its router finishes the first navigation, then returns one HTML document.
+ * An app with no router renders the same tree as `renderToString()`. `options.state` is embedded
+ * as JSON for `readServerState()`. There is no streamed HTML. The app cannot be mounted again
+ * (VIBE5306).
+ */
+export async function renderToStringAsync(
+  app: App,
+  options?: ServerRenderOptions,
+): Promise<string> {
+  if (isAppMounted(app)) throw vibeError('VIBE5306');
+  await waitForInstalledRouter(app);
+  return renderDocument(app, options?.state);
 }

@@ -4,7 +4,9 @@ import type { ComponentDef } from './internal.ts';
 import { createApp } from './runtime/app.ts';
 import { setText, template, txt } from './runtime/dom.ts';
 import { createHead, useHead } from './runtime/head.ts';
-import { renderToString } from './server.ts';
+import { createMemoryHistory } from './router/history.ts';
+import { createRouter } from './router/router.ts';
+import { renderToString, renderToStringAsync } from './server.ts';
 
 vi.hoisted(() => {
   globalThis.__DEV__ = true;
@@ -46,5 +48,28 @@ describe('renderToString without a document', () => {
     expect(thrownCode(() => renderToString(createApp(def)))).toBe('VIBE5204');
     expect(typeof document).toBe('undefined');
     expect('Element' in globalThis).toBe(false);
+  });
+});
+
+describe('renderToStringAsync without a document', () => {
+  test('installs a document, writes the state, and removes the document', async () => {
+    const html = await renderToStringAsync(createApp(page()).use(createHead()), {
+      state: { query: { ok: true } },
+    });
+    expect(html).toContain('<title data-vibe-head="">Hello</title>');
+    expect(html).toContain(
+      '<script type="application/json" id="vibe-state">{"query":{"ok":true}}</script>',
+    );
+    expect(typeof document).toBe('undefined');
+  });
+
+  test('removes the document when the first navigation throws', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/' }] });
+    router.beforeEach(() => {
+      throw new Error('stop');
+    });
+    router.onError(() => {});
+    await expect(renderToStringAsync(createApp(page()).use(router))).rejects.toThrow('stop');
+    expect(typeof document).toBe('undefined');
   });
 });
