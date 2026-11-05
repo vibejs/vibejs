@@ -52,3 +52,36 @@ A raw route sends its result unparsed, with the declared content type. The resul
 ### Fix
 
 - Return a `Response`, or a `string`, `Blob`, `ArrayBuffer`, typed array, `ReadableStream`, `URLSearchParams` or `FormData` from the handler.
+
+## VIBE9506: Upload is too large
+
+> The upload is larger than {maxBytes} bytes.
+
+A `files()` route reads at most `maxBytes` bytes of file content. A larger upload is rejected with 413 and this code. The bytes past the limit are not kept.
+
+### Fix
+
+- Send fewer or smaller files.
+- Raise `maxBytes` on `files()` when the route should accept the upload.
+
+## VIBE9507: Too many files
+
+> The upload has more than {maxFiles} files.
+
+A `files()` route accepts at most `maxFiles` file parts. One more is rejected with 400 and this code.
+
+### Fix
+
+- Send at most {maxFiles} files.
+- Raise `maxFiles` on `files()`.
+
+## VIBE9508: File type is not allowed
+
+> The file {filename} has type {type}, which this route does not allow.
+
+Each file part must match a type in `files()`. A type ending in `/*` matches that type's subtypes. Anything else is rejected with 415 and this code.
+
+### Fix
+
+- Send a file of an allowed type.
+- Add the type to `types`, such as `image/png` or `image/*`.

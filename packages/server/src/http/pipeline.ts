@@ -1,9 +1,15 @@
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
-import type { BuiltinErrorCode, RouteDef, ValidationIssue } from '@usevibejs/contract';
+import {
+  isFilesBody,
+  type BuiltinErrorCode,
+  type RouteDef,
+  type ValidationIssue,
+} from '@usevibejs/contract';
 import { recordValue, type ProviderRecord } from '../di/injector.ts';
 import { vibeError } from '../errors.gen.ts';
 import type { RouteBinding } from '../module/graph.ts';
 import { readJson } from './body.ts';
+import { readFiles } from './files.ts';
 import type { CanActivate, ExceptionFilter, Interceptor, RequestContext } from './context.ts';
 import { HttpError, isClientVisible, renderError } from './errors.ts';
 
@@ -36,6 +42,9 @@ const BUILTIN = new Set<string>([
   'INTERNAL_ERROR',
   'SERVICE_UNAVAILABLE',
 ] satisfies BuiltinErrorCode[]);
+
+/** Built-in problem codes plus the files() failures, which need no `errors` entry. */
+const EXPECTED = new Set<string>([...BUILTIN, 'VIBE9506', 'VIBE9507', 'VIBE9508']);
 
 /** The RFC 6901 pointer of an issue path; no path is the root `''`. */
 const pointer = (path: StandardSchemaV1.Issue['path'] = []): string =>
@@ -105,15 +114,17 @@ export function createPipeline(
   /** Reads and validates the inputs into `ctx`; runs once per request. */
   async function validate(ctx: RequestContext): Promise<void> {
     const { req, url } = ctx;
+    if (isFilesBody(def.body)) Object.assign(ctx, { files: await readFiles(req, def.body) });
     const inputs = {
       params: ctx.params,
       query: def.query && parseQuery(url),
       headers: def.headers && Object.fromEntries(req.headers),
-      body: def.body && (await readJson(req, options.bodyLimit)),
+      body: def.body && !isFilesBody(def.body) ? await readJson(req, options.bodyLimit) : undefined,
     };
     const parts = (['params', 'query', 'headers', 'body'] as const).flatMap((part) => {
       const schema = def[part];
-      return schema ? [{ part, schema }] : [];
+      if (!schema || isFilesBody(schema)) return [];
+      return [{ part, schema }];
     });
     const results = await Promise.all(
       parts.map(async ({ part, schema }) => schema['~standard'].validate(inputs[part])),
@@ -176,7 +187,7 @@ export function createPipeline(
     }
     if (
       isClientVisible(final) &&
-      !BUILTIN.has(final.code) &&
+      !EXPECTED.has(final.code) &&
       !Object.hasOwn(def.errors ?? {}, final.code)
     ) {
       const { message, code } = vibeError('VIBE9502', { code: final.code, route });

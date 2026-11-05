@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { Route } from './contract.ts';
+import type { FilesBody, UploadedFile } from './files.ts';
 import type { ParamKeys, RawBody } from './route.ts';
 
 // The value type of a def key, `undefined` when the def lacks it. A key can also be optional (an
@@ -21,8 +22,12 @@ export type RouteParams<R extends Route> = Flat<
 export type RouteQuery<R extends Route> = Out<Declared<R, 'query'>>;
 /** The headers schema's output; `never` when the route declares none. */
 export type RouteHeaders<R extends Route> = Out<Declared<R, 'headers'>>;
-/** The body schema's output; `never` when the route declares none. */
-export type RouteBody<R extends Route> = Out<Declared<R, 'body'>>;
+/** The body schema's output; `never` when the route declares none or declares `files()`. */
+export type RouteBody<R extends Route> =
+  Declared<R, 'body'> extends FilesBody ? never : Out<Declared<R, 'body'>>;
+/** The files of a `files()` route; `never` otherwise. */
+export type RouteFiles<R extends Route> =
+  Declared<R, 'body'> extends FilesBody ? readonly UploadedFile[] : never;
 /** The declared error codes; `never` when the route declares none. */
 export type RouteErrorCode<R extends Route> = Codes<Declared<R, 'errors'>>;
 type Codes<E> = E extends object ? keyof E & string : never;

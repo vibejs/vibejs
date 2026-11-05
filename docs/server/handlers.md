@@ -91,7 +91,7 @@ export function requireUser(id: string | undefined): string {
 
 ## Validation
 
-Before the handler runs, the application validates `params`, `query`, `headers` and `body` against the route's schemas and puts the schema output on `ctx`. When any part fails, the client receives 400 `VALIDATION_FAILED` with every issue in `errors`, and the handler does not run. A body that is not JSON is 400 `INVALID_JSON`; a body over `bodyLimit` is 413 `BODY_TOO_LARGE`.
+Before the handler runs, the application validates `params`, `query`, `headers` and `body` against the route's schemas and puts the schema output on `ctx`. When any part fails, the client receives 400 `VALIDATION_FAILED` with every issue in `errors`, and the handler does not run. A body that is not JSON is 400 `INVALID_JSON`; a JSON body over `bodyLimit` is 413 `BODY_TOO_LARGE`. A `files()` body is read into `ctx.files` instead, and its own limits apply ([`files()`](./contracts.md#routes)).
 
 With `validateResponses` (on by default), the handler's result is validated against the response schema and the schema output is sent. A mismatch is a server bug: it is logged as [VIBE9501](/errors/VIBE9501) and answered with 500.
 

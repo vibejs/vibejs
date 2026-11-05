@@ -1,6 +1,7 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { isRoute, type Route } from './contract.ts';
 import { vibeError } from './errors.gen.ts';
+import { isFilesBody, type FilesBody } from './files.ts';
 import type { ParamKeys, RouteDef } from './route.ts';
 import type { BuiltinErrorCode, Declared, Problem, RouteData, RouteErrorCode } from './types.ts';
 
@@ -23,11 +24,17 @@ export interface CallOptions {
 
 type Errors<R extends Route> = NonNullable<Declared<R, 'errors'>>;
 
-/** A declared error with its status literal, or a builtin or client error. */
+type FilesProblem<R extends Route> =
+  Declared<R, 'body'> extends FilesBody
+    ? Problem<'VIBE9506', 413> | Problem<'VIBE9507', 400> | Problem<'VIBE9508', 415>
+    : never;
+
+/** A declared error with its status literal, a files() failure, or a builtin or client error. */
 export type ApiError<R extends Route> =
   | {
       [C in RouteErrorCode<R>]: Problem<C, Extract<Errors<R>[C & keyof Errors<R>], number>>;
     }[RouteErrorCode<R>]
+  | FilesProblem<R>
   | Problem<BuiltinErrorCode | ClientErrorCode>;
 
 /** What a call resolves to; it never rejects for HTTP or network failures. */
@@ -37,6 +44,8 @@ export type ApiResult<R extends Route> =
 
 type Flat<T> = { [K in keyof T]: T[K] };
 type In<S> = S extends StandardSchemaV1 ? StandardSchemaV1.InferInput<S> : never;
+type BodyIn<R extends Route> =
+  Declared<R, 'body'> extends FilesBody ? FormData : In<Declared<R, 'body'>>;
 // An absent part is `?: never`, so an unknown key is still an excess property.
 type Part<K extends string, T, Optional = {} extends T ? true : false> = [T] extends [never]
   ? { readonly [P in K]?: never }
@@ -52,7 +61,7 @@ export type CallInput<R extends Route> = Flat<
   > &
     Part<'query', In<Declared<R, 'query'>>> &
     Part<'headers', In<Declared<R, 'headers'>>> &
-    Part<'body', In<Declared<R, 'body'>>, false>
+    Part<'body', BodyIn<R>, false>
 >;
 
 /** A route's call; `input` is optional when nothing in it is required. */
@@ -124,8 +133,15 @@ function callFn(route: Route, options: ClientOptions) {
         url.searchParams.append(key, item instanceof Date ? item.toISOString() : String(item));
       }
     }
-    const body = input.body === undefined ? undefined : JSON.stringify(input.body);
-    const headers = new Headers(body === undefined ? {} : { 'content-type': 'application/json' });
+    let body: BodyInit | undefined;
+    const headers = new Headers();
+    if (isFilesBody(def.body)) {
+      if (!(input.body instanceof FormData)) throw vibeError('VIBE9092', { path: route.path });
+      body = input.body;
+    } else if (input.body !== undefined) {
+      body = JSON.stringify(input.body);
+      headers.set('content-type', 'application/json');
+    }
     const base = typeof options.headers === 'function' ? await options.headers() : options.headers;
     for (const init of [base, input.headers, call.headers]) {
       new Headers(init).forEach((value, name) => headers.set(name, value));

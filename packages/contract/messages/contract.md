@@ -41,3 +41,13 @@ A GET request cannot carry a body: `fetch` rejects it and many servers and proxi
 ### Fix
 
 - Move the inputs of "{path}" into `query`, or declare the route with `post` if it needs a body.
+
+## VIBE9005: Invalid files limit
+
+> files() was called with {reason}.
+
+`files()` declares a multipart upload. `maxBytes` and `maxFiles` are positive integers, and `types` lists at least one media type such as `image/png` or `image/*`.
+
+### Fix
+
+- Pass a positive integer for `maxBytes` and for `maxFiles`, and a non-empty `types` list.

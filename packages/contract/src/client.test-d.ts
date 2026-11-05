@@ -8,6 +8,7 @@ import {
   type ClientOptions,
 } from './client.ts';
 import { defineContract } from './contract.ts';
+import { files } from './files.ts';
 import { del, get, post, raw } from './route.ts';
 import type { BuiltinErrorCode } from './types.ts';
 
@@ -102,6 +103,25 @@ void api.users.one({ params: { orgId: 'o', id: 1 }, body: {} });
 void flat.ping({ verbose: true });
 // @ts-expect-error a missing required header
 void api.users.list({ params: { orgId: 'o' } });
+
+const uploads = defineContract('/uploads', {
+  create: post('/', { body: files({ maxBytes: 1000, maxFiles: 2, types: ['image/png'] }) }),
+});
+const uploadApi = createClient(uploads, { baseUrl: '/api' });
+declare const form: FormData;
+void uploadApi.create({ body: form });
+// @ts-expect-error a files() route takes FormData, not a JSON object
+void uploadApi.create({ body: { name: 'a' } });
+declare const uploaded: ApiResult<typeof uploads.create>;
+if (!uploaded.ok && uploaded.error.code === 'VIBE9506') {
+  expectTypeOf(uploaded.error.status).toEqualTypeOf<413>();
+}
+if (!uploaded.ok && uploaded.error.code === 'VIBE9507') {
+  expectTypeOf(uploaded.error.status).toEqualTypeOf<400>();
+}
+if (!uploaded.ok && uploaded.error.code === 'VIBE9508') {
+  expectTypeOf(uploaded.error.status).toEqualTypeOf<415>();
+}
 
 // @ts-expect-error `baseUrl` is required
 createClient(health, {});

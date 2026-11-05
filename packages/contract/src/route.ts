@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { vibeError } from './errors.gen.ts';
+import type { FilesBody } from './files.ts';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -30,8 +31,8 @@ export interface RouteDef<P extends string = string> {
   readonly query?: StandardSchemaV1;
   /** Header names are lowercase. */
   readonly headers?: StandardSchemaV1;
-  /** An `application/json` request body. */
-  readonly body?: StandardSchemaV1;
+  /** An `application/json` body, or a `files()` upload. */
+  readonly body?: StandardSchemaV1 | FilesBody;
   /** The success body; without one the route answers 204. */
   readonly response?: StandardSchemaV1 | RawBody;
   readonly status?: 200 | 201 | 202;

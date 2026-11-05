@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { createClient, type ClientOptions } from './client.ts';
 import { defineContract } from './contract.ts';
+import { files } from './files.ts';
 import { del, get, post, raw } from './route.ts';
 
 // The client never validates, so a schema only has to exist.
@@ -305,5 +306,51 @@ describe('createClient: results', () => {
         response: undefined,
       });
     }
+  });
+});
+
+describe('createClient: files', () => {
+  const uploads = defineContract('/uploads', {
+    create: post('/', { body: files({ maxBytes: 1000, maxFiles: 2, types: ['image/png'] }) }),
+  });
+
+  it('sends FormData and does not force a JSON content type', async () => {
+    const { requests, fetch } = stub();
+    const api = createClient(uploads, { baseUrl: '/api', fetch });
+    const body = new FormData();
+    body.set('doc', new File(['png'], 'a.png', { type: 'image/png' }));
+    await api.create({ body });
+    const request = requests[0];
+    expect(request).toBeInstanceOf(Request);
+    expect(request.body).toBeInstanceOf(ReadableStream);
+    expect(request.headers.get('content-type')).toMatch(/^multipart\/form-data; boundary=/);
+    expect(await request.text()).toContain('filename="a.png"');
+  });
+
+  it('throws VIBE9092 when the body is not FormData', async () => {
+    const { fetch } = stub();
+    const api = createClient(uploads, { baseUrl: '/api', fetch });
+    // @ts-expect-error the body must be FormData
+    const sent = api.create({ body: { name: 'a' } });
+    await expect(sent).rejects.toMatchObject({
+      code: 'VIBE9092',
+      args: { path: '/uploads' },
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('returns a files() problem without throwing', async () => {
+    const { fetch } = stub(() =>
+      problem(
+        { type: 'about:blank', title: 'Content Too Large', status: 413, code: 'VIBE9506' },
+        413,
+      ),
+    );
+    const api = createClient(uploads, { baseUrl: '/api', fetch });
+    const body = new FormData();
+    await expect(api.create({ body })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'VIBE9506', status: 413 },
+    });
   });
 });
