@@ -45,6 +45,17 @@ A plugin is a function or an object with an `install` function, and `app.use()` 
 - Pass the plugin function or the object with `install` to `app.use()`, not the result of calling it.
 - Call `app.use()` once per plugin.
 
+## VIBE5306: Server render of a mounted app
+
+> renderToString() received an app that is already mounted.
+
+`renderToString()` mounts the app into its own document and reads the HTML back. An app can mount only once, so a second render, or a render after `mount()`, has nothing new to draw.
+
+### Fix
+
+- Call `renderToString()` with a new app from `createApp()`.
+- Do not call `mount()` on an app that `renderToString()` will render.
+
 ## VIBE5305: Unmount before mount
 
 > app.unmount() was called on an app that is not mounted.

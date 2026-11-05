@@ -19,5 +19,13 @@ export default defineConfig({
   platform: 'browser',
   plugins: [devFlag],
   define: { 'process.env.NODE_ENV': 'process.env.NODE_ENV' },
-  entry: ['src/index.ts', 'src/internal.ts', 'src/tooling.ts', 'src/router.ts', 'src/testing.ts'],
+  entry: [
+    'src/index.ts',
+    'src/internal.ts',
+    'src/tooling.ts',
+    'src/router.ts',
+    'src/testing.ts',
+    'src/server.ts',
+  ],
+  deps: { neverBundle: ['linkedom'] },
 });

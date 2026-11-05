@@ -84,6 +84,14 @@ function query(selector: string): Element {
 /** The number of apps created; the components outside an app use id 0. */
 let appUid = 0;
 
+/** Apps whose `mount()` finished. `renderToString()` refuses them: an app mounts once. */
+const mountedApps = new WeakSet<App>();
+
+/** Whether `app.mount()` has completed. */
+export function isAppMounted(app: App): boolean {
+  return mountedApps.has(app);
+}
+
 /** Creates an app that renders `root` with `rootProps`. */
 export function createApp(root: Component, rootProps: Record<string, unknown> | null = null): App {
   const context: AppContext = {
@@ -150,6 +158,7 @@ export function createApp(root: Component, rootProps: Record<string, unknown> | 
           }
         : undefined;
       exposed = proxyRefs(instance.exposed ?? {});
+      mountedApps.add(app);
       return exposed;
     },
     unmount() {

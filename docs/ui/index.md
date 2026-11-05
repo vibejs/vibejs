@@ -78,4 +78,5 @@ In development, saving a `.vibe` file updates the running page without a reload:
 - [Components](./components.md): props, events, slots, models, attributes and exposed values.
 - [Lifecycle](./lifecycle.md): the lifecycle hooks, their order and error handling.
 - [Provide and inject](./provide-inject.md): passing values down the component tree.
+- [Server rendering](./ssr.md): `renderToString()` and the head records it writes.
 - [Extending vibe.js](../guides/extending.md): plugins and composables.

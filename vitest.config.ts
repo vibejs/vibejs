@@ -23,11 +23,12 @@ export default defineConfig({
           environment: 'node',
           include: [
             'packages/*/src/**/*.test.ts',
+            'packages/ui/src/**/*.node-test.ts',
             'packages/create-vibejs/*.test.ts',
             'scripts/**/*.test.ts',
             'docs/scripts/**/*.test.ts',
           ],
-          exclude: [...configDefaults.exclude, 'packages/ui/**', ...special],
+          exclude: [...configDefaults.exclude, 'packages/ui/**/*.test.ts', ...special],
         },
       },
       {
@@ -109,6 +110,7 @@ export default defineConfig({
       ],
       exclude: [
         '**/*.test.ts',
+        '**/*.node-test.ts',
         '**/*.test-d.ts',
         '**/*.d.ts',
         'scripts/e2e.ts',

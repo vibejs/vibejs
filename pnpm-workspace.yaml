@@ -37,6 +37,7 @@ catalog:
   '@jridgewell/trace-mapping': 0.3.31
   csstype: ^3.2.3
   knip: 6.41.0
+  linkedom: 0.18.12
   '@standard-schema/spec': ^1.1.0
   srvx: ^1.0.5
   zod: 4.6.7
