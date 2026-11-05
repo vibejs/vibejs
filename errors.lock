@@ -126,6 +126,7 @@ VIBE4004 compiler
 VIBE4005 compiler
 VIBE4901 compiler
 VIBE4902 compiler
+VIBE4903 compiler
 VIBE5001 ui
 VIBE5002 ui
 VIBE5003 ui
@@ -154,6 +155,7 @@ VIBE5501 ui
 VIBE5900 ui
 VIBE6001 language-tools
 VIBE6002 language-tools
+VIBE6003 language-tools
 VIBE6010 language-tools
 VIBE6090 language-tools
 VIBE6101 vscode

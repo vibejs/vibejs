@@ -431,6 +431,48 @@ describe('vibe() build', () => {
       expect(js).not.toContain(dev);
   });
 
+  it('compiles a dependency that opts in and refuses other node_modules files', async () => {
+    const root = await copyApp();
+    const sfcLib = fileURLToPath(new URL('../test/fixtures/sfc-lib', import.meta.url));
+    const plainLib = fileURLToPath(new URL('../test/fixtures/plain-lib', import.meta.url));
+    await cp(sfcLib, join(root, 'node_modules/@fixture/sfc-lib'), { recursive: true });
+    await cp(plainLib, join(root, 'node_modules/plain-lib'), { recursive: true });
+    const dev = await createServer(config(root));
+    try {
+      const button = join(root, 'node_modules/@fixture/sfc-lib/Button.vibe');
+      const hidden = join(root, 'node_modules/plain-lib/Hidden.vibe');
+      const ok = await dev.environments.client.transformRequest(button);
+      expect(ok?.code).toContain('from the package');
+      await expect(dev.environments.client.transformRequest(hidden)).rejects.toMatchObject({
+        code: 'VIBE4903',
+        plugin: 'vibejs',
+      });
+      const plugin = vibe();
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the test calls the scan hook this plugin returns
+      const hook = plugin.config as unknown as () => {
+        optimizeDeps: {
+          rolldownOptions: {
+            plugins: { load: { handler: (id: string) => Promise<{ code: string } | null> } }[];
+          };
+        };
+      };
+      const read = hook().optimizeDeps.rolldownOptions.plugins[0].load.handler;
+      expect((await read(button))?.code).toContain('label');
+      expect(await read(hidden)).toBeNull();
+      expect(await read(`${root}/src/App.vibe`)).toEqual(
+        expect.objectContaining({ moduleType: 'ts' }),
+      );
+      const bare = join(root, 'src/Bare.vibe');
+      await writeFile(bare, '<template><p>x</p></template>\n');
+      expect(await read(bare)).toEqual({ code: '', moduleType: 'ts' });
+      expect(
+        await dev.environments.client.pluginContainer.load(`${hidden}?vibe&type=style&index=0`),
+      ).toBeNull();
+    } finally {
+      await dev.close();
+    }
+  });
+
   it('gives production ids that change with the source', async () => {
     const root = await copyApp();
     const id = async () => /data-vb-([0-9a-f]{8})/.exec((await buildApp(root)).css)![1];

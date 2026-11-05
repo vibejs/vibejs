@@ -30,6 +30,7 @@ describe('@usevibejs/compiler', () => {
     expect(Object.keys(compiler).toSorted()).toStrictEqual([
       'ElementTypes',
       'NodeTypes',
+      'allowsPackageSfc',
       'analyzeScript',
       'camelize',
       'capitalize',

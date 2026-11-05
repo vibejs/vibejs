@@ -1,4 +1,11 @@
-import { analyzeScript, parse, resolveComponentTag, type Diagnostic } from '@usevibejs/compiler';
+import {
+  allowsPackageSfc,
+  analyzeScript,
+  parse,
+  resolveComponentTag,
+  type Diagnostic,
+} from '@usevibejs/compiler';
+import { vibeError } from './errors.gen.ts';
 import { CodeBuilder, Preset, type SpanMapping } from './builder.ts';
 import { primeWalks, UNKNOWN, type Names } from './expression.ts';
 import { script, setupBindings } from './script.ts';
@@ -38,7 +45,20 @@ const TYPES = '__VibeProps, __VibeEmits, __VibeSlots';
  * The virtual TypeScript of a `.vibe` file and its spans into `text` (UTF-16 offsets). Never throws
  * on user input; `text` is not changed (CRLF passes through).
  */
+/** A `.vibe` import from a dependency that did not opt in to compilation. */
+function refused(fileName: string): GeneratedFile {
+  const error = vibeError('VIBE6003', { file: fileName });
+  const message = error.message.split('\n')[0].replace('[VIBE6003] ', '');
+  return {
+    text: 'export {}\n',
+    spans: [],
+    directives: [],
+    diagnostics: [{ code: 6003, message, start: 0, length: 0 }],
+  };
+}
+
 export function generate(fileName: string, text: string): GeneratedFile {
+  if (!allowsPackageSfc(fileName)) return refused(fileName);
   const { descriptor, diagnostics } = parse(text, { filename: fileName });
   const analysis = analyzeScript(descriptor);
   const b = new CodeBuilder(text);

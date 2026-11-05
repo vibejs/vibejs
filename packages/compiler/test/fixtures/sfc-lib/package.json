@@ -1,0 +1,8 @@
+{
+  "name": "@fixture/sfc-lib",
+  "type": "module",
+  "vibejs": { "sfc": true },
+  "exports": {
+    "./Button.vibe": "./Button.vibe"
+  }
+}

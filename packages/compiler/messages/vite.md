@@ -22,3 +22,14 @@ Compiled components call the runtime of `@usevibejs/ui` through an interface tha
 ### Fix
 
 - Install the same version of every `@usevibejs/*` package.
+
+## VIBE4903: Dependency component is not opted in
+
+> `{file}` is in node_modules, and its package does not set `vibejs.sfc` to true.
+
+The bundler compiles `.vibe` files that belong to the application. It also compiles a `.vibe` file shipped by a dependency when that package's `package.json` contains `"vibejs": { "sfc": true }`. Every other `.vibe` file in `node_modules` is left uncompiled, so an import of one cannot load.
+
+### Fix
+
+- Set `vibejs.sfc` to true in the package.json of the package that ships {file}.
+- Copy the component into the application when the package is yours to own.

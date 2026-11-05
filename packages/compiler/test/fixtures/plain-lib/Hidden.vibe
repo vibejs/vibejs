@@ -1,0 +1,7 @@
+<script setup lang="ts">
+const hidden = true;
+</script>
+
+<template>
+  <p>{{ hidden }}</p>
+</template>

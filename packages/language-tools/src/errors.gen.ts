@@ -4,6 +4,7 @@ import { defineErrors, type VibeErrorFactory } from '@usevibejs/errors';
 const MESSAGES = {
   VIBE6001: ["The `@usevibejs/language-tools` content mapper takes no options, but the `contentMappers` entry sets `{option}`.","Remove `{option}` from the `options` of the `@usevibejs/language-tools` entry in `contentMappers`."],
   VIBE6002: ["The TypeScript host does not offer UTF-16 positions, which the content mapper needs.","Update `typescript` to the version that `@usevibejs/language-tools` supports."],
+  VIBE6003: ["`{file}` is in node_modules, and its package does not set `vibejs.sfc` to true.","Set `vibejs.sfc` to true in the package.json of the package that ships {file}.","Copy the component into the application when the package is yours to own."],
   VIBE6010: ["This `<!-- @vibe-expect-error -->` suppresses no type error.","Remove the comment when the error below it is fixed.","Move the comment right before the element or interpolation whose error it expects."],
   VIBE6090: ["The content mapper failed on this file: {reason}","Report the bug with this file at https://github.com/vibejs/vibejs/issues."],
 } as const;

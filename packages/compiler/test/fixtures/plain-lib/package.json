@@ -1,0 +1,7 @@
+{
+  "name": "@fixture/plain-lib",
+  "type": "module",
+  "exports": {
+    "./Hidden.vibe": "./Hidden.vibe"
+  }
+}

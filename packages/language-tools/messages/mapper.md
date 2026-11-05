@@ -20,6 +20,17 @@ The content mapper reports every position as a UTF-16 offset, the unit of JavaSc
 
 - Update `typescript` to the version that `@usevibejs/language-tools` supports.
 
+## VIBE6003: Dependency component is not opted in
+
+> `{file}` is in node_modules, and its package does not set `vibejs.sfc` to true.
+
+The content mapper type-checks a `.vibe` import from a dependency only when that package's `package.json` contains `"vibejs": { "sfc": true }`. Other `.vibe` files in `node_modules` are not compiled, so this import has no component type.
+
+### Fix
+
+- Set `vibejs.sfc` to true in the package.json of the package that ships {file}.
+- Copy the component into the application when the package is yours to own.
+
 ## VIBE6010: Unused @vibe-expect-error directive
 
 > This `<!-- @vibe-expect-error -->` suppresses no type error.

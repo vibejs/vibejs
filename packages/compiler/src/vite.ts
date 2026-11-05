@@ -5,6 +5,7 @@ import { dirname, join, relative } from 'node:path';
 import { normalizePath, transformWithOxc, type Plugin, type Rollup } from 'vite';
 import manifest from '../package.json' with { type: 'json' };
 import { compile } from './compile.ts';
+import { allowsPackageSfc } from './packageSfc.ts';
 import { codeFrame, formatDiagnostic, toDiagnostic, type Diagnostic } from './diagnostics.ts';
 import { vibeError } from './errors.gen.ts';
 import { parse, type SFCBlock, type SFCDescriptor } from './sfc/parse.ts';
@@ -112,6 +113,7 @@ export function vibe(): Plugin {
               load: {
                 filter: { id: /\.vibe$/ },
                 async handler(id) {
+                  if (!allowsPackageSfc(id)) return null;
                   const { descriptor } = parse(await readFile(id, 'utf8'), { filename: id });
                   return { code: descriptor.scriptSetup?.content ?? '', moduleType: 'ts' };
                 },
@@ -134,7 +136,7 @@ export function vibe(): Plugin {
 
     async load(id) {
       const m = match(id);
-      if (m?.index === undefined) return null;
+      if (!m || m.index === undefined || !allowsPackageSfc(m.file)) return null;
       let entry = cache.get(m.file);
       if (!entry) {
         // After a restart, a style module can load before its main module.
@@ -151,6 +153,11 @@ export function vibe(): Plugin {
       const m = match(id);
       if (!m) return null;
       const { file } = m;
+      if (!allowsPackageSfc(file)) {
+        const start = { offset: 0, line: 1, column: 1 };
+        const error = vibeError('VIBE4903', { file: rel(file) });
+        fail(this, [toDiagnostic(error, rel(file), start, start)], code, file, id);
+      }
       if (this.environment.config.consumer === 'server') {
         const start = { offset: 0, line: 1, column: 1 };
         const error = vibeError('VIBE4901', { file: rel(file) });
